@@ -1355,7 +1355,7 @@ class Sources:
 			log_utils.log('base32 hash: %s' % hash, __name__, log_utils.LOGDEBUG)
 			if py_tools.isPY3:
 				hex = b32decode(hash).hex()
-			else
+			else:
 				hex = b32decode(hash).encode('hex') 
 			log_utils.log('base32_to_hex: %s' % hex, __name__, log_utils.LOGDEBUG)
 			return hex
@@ -1386,7 +1386,7 @@ class Sources:
 		try:
 			dbcon = database.connect(self.sourceFile)
 			dbcur = dbcon.cursor()
-			dbcur.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='rel_src';''') # table exists so both all will
+			dbcur.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='rel_src';''') # table exists so both will
 			if dbcur.fetchone()[0] == 1:
 				dbcur.execute('''DELETE FROM rel_src WHERE imdb_id=?''', (imdb,)) # DEL the "rel_src" list of cached links
 				if not tvshowtitle:
