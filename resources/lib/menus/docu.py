@@ -106,7 +106,7 @@ class documentary:
 				control.notification(message='Unknown Host - Report To Developer: ' + str(url))
 			control.execute('PlayMedia(%s)' % url)
 
-			# item = xbmcgui.ListItem(str(docu_title), iconImage='DefaultVideo.png', thumbnailImage='DefaultVideo.png')
+			# item = xbmcgui.ListItem(str(docu_title), iconImage='DefaultVideo.png', thumbnailImage='DefaultVideo.png') # iconImage and thumbnailImage removed in Kodi Matrix
 			# item.setInfo(type='video', infoLabels={'Title': str(docu_title), 'Plot': str(docu_title)})
 			# item.setProperty('IsPlayable','true')
 			# item.setPath(url)

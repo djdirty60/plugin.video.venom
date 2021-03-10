@@ -47,19 +47,15 @@ class movies:
 		try:
 			for i in re.findall(r'date\[(\d+)\]', url):
 				url = url.replace('date[%s]' % i, (self.date_time - timedelta(days=int(i))).strftime('%Y-%m-%d'))
-
 			def imdb_watchlist_id(url):
 				return client.parseDOM(client.request(url), 'meta', ret='content', attrs = {'property': 'pageId'})[0]
 				# return client.parseDOM(client.request(url).decode('iso-8859-1').encode('utf-8'), 'meta', ret='content', attrs = {'property': 'pageId'})[0]
-
 			if url == self.imdbwatchlist_link:
 				url = cache.get(imdb_watchlist_id, 8640, url)
 				url = self.imdblist_link % url
-
 			result = client.request(url)
 			result = result.replace('\n', ' ')
 			# result = result.decode('iso-8859-1').encode('utf-8')
-
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except:
@@ -112,8 +108,7 @@ class movies:
 				imdb = client.parseDOM(item, 'a', ret='href')[0]
 				imdb = re.findall(r'(tt\d*)', imdb)[0]
 
-				# parseDOM cannot handle elements without a closing tag.
-				try:
+				try: # parseDOM cannot handle elements without a closing tag.
 					from bs4 import BeautifulSoup
 					html = BeautifulSoup(item, "html.parser")
 					poster = html.find_all('img')[0]['loadlate']
@@ -154,8 +149,7 @@ class movies:
 				except: director = '0'
 				director = client.parseDOM(director, 'a')
 				director = ' / '.join(director)
-				director = client.replaceHTMLCodes(director)
-				# director = director.encode('utf-8')
+				director = client.replaceHTMLCodes(director) # check if this needs ensure_str()
 
 				plot = '0'
 				try: plot = client.parseDOM(item, 'p', attrs = {'class': 'text-muted'})[0]
@@ -213,16 +207,13 @@ class movies:
 			try:
 				name = client.parseDOM(item, 'img', ret='alt')[0]
 				# name = name.encode('utf-8')
-
 				url = client.parseDOM(item, 'a', ret='href')[0]
 				url = re.findall(r'(nm\d*)', url, re.I)[0]
 				url = self.person_link % url
 				url = client.replaceHTMLCodes(url)
-
 				image = client.parseDOM(item, 'img', ret='src')[0]
 				image = re.sub(r'(?:_SX|_SY|_UX|_UY|_CR|_AL)(?:\d+|_).+?\.', '_SX500.', image)
 				image = client.replaceHTMLCodes(image)
-
 				list.append({'name': name, 'url': url, 'image': image})
 			except:
 				log_utils.error()
@@ -243,14 +234,12 @@ class movies:
 				name = client.parseDOM(item, 'a')[0]
 				name = client.replaceHTMLCodes(name)
 				# name = name.encode('utf-8')
-
 				url = client.parseDOM(item, 'a', ret='href')[0]
 				url = url.split('/list/', 1)[-1].strip('/')
 				# url = url.split('/list/', 1)[-1].replace('/', '')
 				url = self.imdblist_link % url
 				url = client.replaceHTMLCodes(url)
 				# url = url.encode('utf-8')
-
 				list.append({'name': name, 'url': url, 'context': url})
 			except:
 				pass
@@ -287,7 +276,7 @@ class movies:
 			title = py_tools.ensure_str(item.get('title'))
 			originaltitle = title
 
-#add these
+#add these so sources module may not have to make a trakt api request
 			# aliases = item.get('alternative_titles').get('titles')
 			# log_utils.log('aliases = %s' % str(aliases), __name__, log_utils.LOGDEBUG)
 
@@ -355,7 +344,7 @@ class movies:
 
 			for person in item['credits']['cast']:
 				try:
-					try:
+					# try:
 						# castandart.append({'name': person['name'].encode('utf-8'), 'role': person['character'].encode('utf-8'), 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})
 					# except:
 						# castandart.append({'name': person['name'], 'role': person['character'], 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})

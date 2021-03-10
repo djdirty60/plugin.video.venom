@@ -533,26 +533,16 @@ class TVshows:
 			if not contains:
 				self.list.append(userlists[i])
 
-		# TMDb Favorites
-		if self.tmdb_session_id != '':
+		if self.tmdb_session_id != '': # TMDb Favorites
 			self.list.insert(0, {'name': control.lang(32026), 'url': self.tmdb_favorites_link, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
-
-		# TMDb Watchlist
-		if self.tmdb_session_id != '':
+		if self.tmdb_session_id != '': # TMDb Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.tmdb_watchlist_link, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
-
-		# imdb Watchlist
-		if self.imdb_user != '':
+		if self.imdb_user != '': # imdb Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.imdbwatchlist_link, 'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
-
-		# imdb My Ratings
-		if self.imdb_user != '':
+		if self.imdb_user != '': # imdb My Ratings
 			self.list.insert(0, {'name': control.lang(32025), 'url': self.imdbratings_link, 'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
-
-		# Trakt Watchlist
-		if self.traktCredentials:
+		if self.traktCredentials: # Trakt Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
-
 		self.addDirectory(self.list)
 		return self.list
 
@@ -585,13 +575,11 @@ class TVshows:
 
 		try:
 			q = dict(parse_qsl(urlsplit(url).query))
-			if int(q['limit']) != len(items):
-				raise Exception()
+			if int(q['limit']) != len(items): raise Exception()
 			q.update({'page': str(int(q['page']) + 1)})
 			q = (urlencode(q)).replace('%2C', ',')
 			next = url.replace('?' + urlparse(url).query, '') + '?' + q
-		except:
-			next = ''
+		except: next = ''
 
 		for item in items:
 			try:
@@ -713,8 +701,7 @@ class TVshows:
 				if imdb in dupes: raise Exception()
 				dupes.append(imdb)
 
-				# parseDOM cannot handle elements without a closing tag.
-				try:
+				try: # parseDOM cannot handle elements without a closing tag.
 					from bs4 import BeautifulSoup
 					html = BeautifulSoup(item, "html.parser")
 					poster = html.find_all('img')[0]['loadlate']

@@ -1,13 +1,14 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="4.4.2">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="4.4.3">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
 		<import addon="script.module.fenomscrapers" />
 		<import addon="script.module.requests" />
 		<import addon="script.module.beautifulsoup4" />
-		<import addon="script.module.metahandler" />
-		<import addon="plugin.video.youtube" />
-		<import addon="script.module.addon.signals" />
+		<import addon="script.module.metahandler" optional="true" />
+		<import addon="plugin.video.youtube" optional="true" />
+		<import addon="script.module.addon.signals" optional="true" />
 	</requires>
 	<extension library="venom.py" point="xbmc.python.pluginsource">
 		<provides>video</provides>
@@ -32,12 +33,9 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v4.4.2 - March 06, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed version dependecy issue.[/I]
-[COLOR yellow]--[/COLOR][I] Matrix(py3) compatibility update.[/I]
-[COLOR yellow]--[/COLOR][I] Added copy to clipboard feature.  This is accessible from the
-    context menu in source select list.  Now you can copy to
-    clipboar d url's, file names, and magnet hashes.[/I]
+[B][COLOR red]Update - v4.4.3 - March 10, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed Downloader module, missed py3 cases for Kodi Matrix.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Library Integration, missed py3 cases for Kodi Matrix.[/I]
 		</news>
 	</extension>
 </addon>

@@ -34,7 +34,6 @@ class Trailer:
 			title = control.infoLabel('ListItem.Title')
 			if not title: title = control.infoLabel('ListItem.Label')
 			icon = control.infoLabel('ListItem.Icon')
-			# item = control.item(label=title, iconImage=icon, thumbnailImage=icon, path=url)
 			item = control.item(label=title)
 			item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'thumb': icon,})
@@ -92,8 +91,7 @@ class Trailer:
 		try:
 			trailer_id = ''
 			from resources.lib.modules import trakt
-			#check if this needs .replace(' ', '-') between title spaces
-			id = (name.lower() + '-' + year) if imdb == '0' else imdb
+			id = (name.lower() + '-' + year) if imdb == '0' else imdb #check if this needs .replace(' ', '-') between title spaces
 			if type == 'movie': item = trakt.getMovieSummary(id)
 			else: item = trakt.getTVShowSummary(id)
 			trailer_id = item.get('trailer').split('v=')

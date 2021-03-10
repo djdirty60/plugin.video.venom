@@ -453,8 +453,6 @@ class Navigator:
 		sysaddon = sys.argv[0]
 		syshandle = int(sys.argv[1])
 		try:
-			# if type(name) is str or type(name) is unicode: name = str(name)
-			# if type(name) is int: name = control.lang(name)
 			if isinstance(name, int): name = control.lang(name)
 		except:
 			log_utils.error()

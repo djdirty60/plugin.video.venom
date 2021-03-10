@@ -158,15 +158,12 @@ class Sources:
 
 	def addItem(self, title):
 		control.hide()
-
 		def sourcesDirMeta(metadata):
 			if not metadata: return metadata
 			allowed = ['poster', 'season_poster', 'fanart', 'thumb', 'title', 'year', 'tvshowtitle', 'season', 'episode']
-			#return {k: v for k, v in metadata.iteritems() if k in allowed}
-			try: return {k: v for k, v in metadata.iteritems() if k in allowed}
-			except: return {k: v for k, v in metadata.items() if k in allowed}
+			return {k: v for k, v in control.iteritems(metadata) if k in allowed}
 
-		control.playlist.clear()
+		control.playlist.clear() # check this doesn't muck with UpNext fetching
 		items = control.homeWindow.getProperty(self.itemProperty)
 		items = jsloads(items)
 
@@ -196,7 +193,6 @@ class Sources:
 
 		resquality_icons = control.setting('enable.resquality.icons') == 'true'
 		artPath = control.artPath()
-		# sysimage = quote_plus(poster.encode('utf-8'))
 		sysimage = quote_plus(poster)
 		downloadMenu = control.lang(32403)
 
@@ -480,9 +476,7 @@ class Sources:
 					current_time = time.time()
 					current_progress = current_time - start_time
 					percent = int((current_progress / float(timeout)) * 100)
-					# if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1, line2, line3)
 					if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1 + '[CR]' + line2 + '[CR]' + line3)
-
 					else: progressDialog.update(max(1, percent), line1 + '  ' + string3 % str(len(info)))
 					# if len(info) == 0: break
 					if end_time < current_time: break
@@ -745,9 +739,7 @@ class Sources:
 			try:
 				cached = None
 				if deepcopy_sources: cached = function(deepcopy_sources)
-				# if cached: self.filter += [dict(i.items() + [('debrid', debrid_name)]) for i in cached if 'magnet:' in i['url']]
 				if cached: self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in cached if 'magnet:' in i['url']]
-				# self.filter += [dict(i.items() + [('debrid', debrid_name)]) for i in self.sources if i['source'] in valid_hoster and 'magnet:' not in i['url']]
 				self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in self.sources if i['source'] in valid_hoster and 'magnet:' not in i['url']]
 			except:
 				log_utils.error()
@@ -822,19 +814,14 @@ class Sources:
 
 		for i in range(len(self.sources)):
 			t = ''
-			if line2_type == 'link title' and 'name' in self.sources[i]:
-				t = self.sources[i]['name']
+			if line2_type == 'link title' and 'name' in self.sources[i]: t = self.sources[i]['name']
 			else:
 				try: f = (' / '.join(['%s ' % info.strip() for info in self.sources[i]['info'].split('|')]))
 				except: f = ''
-				if 'name_info' in self.sources[i]:
-					t = source_utils.getFileType(name_info=self.sources[i]['name_info'])
-				else:
-					t = source_utils.getFileType(url=self.sources[i]['url'])
+				if 'name_info' in self.sources[i]: t = source_utils.getFileType(name_info=self.sources[i]['name_info'])
+				else: t = source_utils.getFileType(url=self.sources[i]['url'])
 				t = '%s / %s' % (f, t) if (f != '' and f != '0 ' and f != ' ') else t
-			if t == '':
-				t = source_utils.getFileType(url=self.sources[i]['url'])
-
+			if t == '': t = source_utils.getFileType(url=self.sources[i]['url'])
 			try:
 				size = self.sources[i]['info'].split('|', 1)[0]
 				if any(value in size for value in ['HEVC', '3D']): size = ''
@@ -893,13 +880,11 @@ class Sources:
 					if 'magnet:' in a:
 						if i['hash'].lower() in b:
 							filter.remove(sublist)
-							if log_dupes:
-								log_utils.log('Removing %s - %s (DUPLICATE TORRENT) ALREADY IN :: %s' % (sublist['provider'], b, i['provider']), level=log_utils.LOGDEBUG)
+							if log_dupes: log_utils.log('Removing %s - %s (DUPLICATE TORRENT) ALREADY IN :: %s' % (sublist['provider'], b, i['provider']), level=log_utils.LOGDEBUG)
 							break
 					elif a == b:
 						filter.remove(sublist)
-						if log_dupes:
-							log_utils.log('Removing %s - %s (DUPLICATE LINK) ALREADY IN :: %s' % (sublist['source'], i['url'], i['provider']), level=log_utils.LOGDEBUG)
+						if log_dupes: log_utils.log('Removing %s - %s (DUPLICATE LINK) ALREADY IN :: %s' % (sublist['source'], i['url'], i['provider']), level=log_utils.LOGDEBUG)
 						break
 				except:
 					log_utils.error()
@@ -1143,13 +1128,10 @@ class Sources:
 			source = jsloads(info)[0]
 			try: f = ' / '.join(['%s' % info.strip() for info in source.get('info').split('|')])
 			except: f = ''
-			if 'name_info' in source:
-				t = source_utils.getFileType(name_info=source.get('name_info'))
-			else:
-				t = source_utils.getFileType(url=source.get('url'))
+			if 'name_info' in source: t = source_utils.getFileType(name_info=source.get('name_info'))
+			else: t = source_utils.getFileType(url=source.get('url'))
 			t = '%s /%s' % (f, t) if (f != '' and f != '0 ' and f != ' ') else t
-			if t == '':
-				t = source_utils.getFileType(url=source.get('url'))
+			if t == '': t = source_utils.getFileType(url=source.get('url'))
 			list = [('[COLOR %s]url:[/COLOR]  %s' % (self.highlight_color, source.get('url')), source.get('url'))]
 			# "&" in magnets causes copy2clip to fail
 			if 'magnet:' not in source.get('url') and not source.get('direct'):
@@ -1237,8 +1219,7 @@ class Sources:
 				counts = meta.get('counts', None)
 		except:
 			log_utils.error()
-		# check metacache, 2nd fallback
-		if not seasoncount or not counts:
+		if not seasoncount or not counts: # check metacache, 2nd fallback
 			try:
 				imdb_user = control.setting('imdb.user').replace('ur', '')
 				tvdb_key = control.setting('tvdb.api.key')
@@ -1260,8 +1241,7 @@ class Sources:
 				if not counts: counts = meta2.get('counts', None)
 			except:
 				log_utils.error()
-		# make request, 3rd fallback
-		if not seasoncount or not counts:
+		if not seasoncount or not counts: # make request, 3rd fallback
 			try:
 				if meta: season = meta.get('season')
 				else: season = control.homeWindow.getProperty(self.seasonProperty)
@@ -1386,7 +1366,7 @@ class Sources:
 		try:
 			dbcon = database.connect(self.sourceFile)
 			dbcur = dbcon.cursor()
-			dbcur.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='rel_src';''') # table exists so both will
+			dbcur.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='rel_src';''') # table exists so both all will
 			if dbcur.fetchone()[0] == 1:
 				dbcur.execute('''DELETE FROM rel_src WHERE imdb_id=?''', (imdb,)) # DEL the "rel_src" list of cached links
 				if not tvshowtitle:
@@ -1424,8 +1404,7 @@ class Sources:
 			total_seasons = meta.get('total_seasons', None)
 			is_airing = meta.get('is_airing', None)
 		except: pass
-		# check metacache, 2nd fallback
-		if not total_seasons or not is_airing:
+		if not total_seasons or not is_airing: # check metacache, 2nd fallback
 			try:
 				imdb_user = control.setting('imdb.user').replace('ur', '')
 				tvdb_key = control.setting('tvdb.api.key')
@@ -1439,15 +1418,14 @@ class Sources:
 					is_airing = meta2.get('is_airing', None)
 			except:
 				log_utils.error()
-		# make request, 3rd fallback
-		if not total_seasons:
+		if not total_seasons: # make request, 3rd fallback
 			try:
 				total_seasons = trakt.getSeasons(imdb, full=False)
 				if total_seasons:
 					total_seasons = [i['number'] for i in total_seasons]
 					season_special = True if 0 in total_seasons else False
 					total_seasons = len(total_seasons)
-					if season_special:
+					if season_special: 
 						total_seasons = total_seasons - 1
 			except:
 				log_utils.error()

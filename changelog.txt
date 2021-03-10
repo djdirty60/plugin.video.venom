@@ -1,3 +1,7 @@
+[B][COLOR red]Update - v4.4.3 - March 10, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed Downloader module, missed py3 cases for Kodi Matrix.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Library Integration, missed py3 cases for Kodi Matrix.[/I]
+
 [B][COLOR red]Update - v4.4.2 - March 06, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed version dependecy issue.[/I]
 

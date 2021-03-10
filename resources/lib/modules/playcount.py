@@ -10,6 +10,10 @@ from resources.lib.modules import trakt
 
 traktIndicators = trakt.getTraktIndicatorsInfo()
 
+tmdb_api_key = '3320855e65a9758297fec4f7c9717698'
+omdb_api_key = 'd4daa2b'
+tvdb_api_key = '7M8LCM0IEF8DOKNW'
+
 
 def getMovieIndicators(refresh=False):
 	try:
@@ -21,7 +25,8 @@ def getMovieIndicators(refresh=False):
 			return indicators
 		else:
 			from metahandler import metahandlers
-			indicators = metahandlers.MetaData()
+			# indicators = metahandlers.MetaData()
+			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
 	except:
 		log_utils.error()
@@ -37,7 +42,8 @@ def getTVShowIndicators(refresh=False):
 			return indicators
 		else:
 			from metahandler import metahandlers
-			indicators = metahandlers.MetaData()
+			# indicators = metahandlers.MetaData()
+			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
 	except:
 		log_utils.error()
@@ -53,7 +59,8 @@ def getSeasonIndicators(imdb, refresh=False):
 			return indicators
 		else:
 			from metahandler import metahandlers
-			indicators = metahandlers.MetaData()
+			# indicators = metahandlers.MetaData()
+			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
 	except:
 		log_utils.error()
@@ -122,7 +129,6 @@ def getEpisodeOverlay(indicators, imdb, tvdb, season, episode):
 
 
 # def getShowCount(indicators, imdb, tvdb, limit=False):
-	# log_utils.log('indicators = %s' % indicators, __name__, log_utils.LOGDEBUG)
 	# if not imdb.startswith('tt'):
 		# return None
 	# try:
@@ -160,7 +166,8 @@ def getShowCount(indicators, imdb, tvdb):
 				result = trakt.showCount(imdb)
 				return result
 		else:
-			if not indicators: return None
+			return None
+			if not indicators: return None # this code for metahandler does not aply here nor does the addon offer a means to return such counts
 			for indicator in indicators:
 				if indicator[0] == tvdb:
 					total = indicator[1]
@@ -200,7 +207,8 @@ def markMovieDuringPlayback(imdb, watched):
 				# trakt.markMovieAsNotWatched(imdb)
 		else:
 			from metahandler import metahandlers
-			metaget = metahandlers.MetaData()
+			# metaget = metahandlers.MetaData()
+			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('movie', name='', imdb_id=imdb)
 			metaget.change_watched('movie', name='', imdb_id=imdb, watched=int(watched))
 	except:
@@ -217,7 +225,8 @@ def markEpisodeDuringPlayback(imdb, tvdb, season, episode, watched):
 				# trakt.markEpisodeAsNotWatched(imdb, tvdb, season, episode)
 		else:
 			from metahandler import metahandlers
-			metaget = metahandlers.MetaData()
+			# metaget = metahandlers.MetaData()
+			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('tvshow', name='', imdb_id=imdb)
 			metaget.get_episode_meta('', imdb_id=imdb, season=season, episode=episode)
 			metaget.change_watched('episode', '', imdb_id=imdb, season=season, episode=episode, watched=int(watched))
@@ -232,7 +241,8 @@ def movies(name, imdb, watched):
 			else: trakt.unwatch(name=name, imdb=imdb, refresh=True)
 		else:
 			from metahandler import metahandlers
-			metaget = metahandlers.MetaData()
+			# metaget = metahandlers.MetaData()
+			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('movie', name=name, imdb_id=imdb)
 			metaget.change_watched('movie', name=name, imdb_id=imdb, watched=int(watched))
 			control.refresh()
@@ -247,9 +257,11 @@ def episodes(name, imdb, tvdb, season, episode, watched):
 			else: trakt.unwatch(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=True)
 		else:
 			from metahandler import metahandlers
-			metaget = metahandlers.MetaData()
+			# metaget = metahandlers.MetaData()
+			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('tvshow', name=name, imdb_id=imdb)
-			metaget.get_episode_meta('', imdb_id=imdb, season=season, episode=episode)
+			# metaget.get_episode_meta('', imdb_id=imdb, season=season, episode=episode)
+			metaget.get_episode_meta(name, imdb_id=imdb, season=season, episode=episode)
 			metaget.change_watched('episode', '', imdb_id=imdb, season=season, episode=episode, watched=int(watched))
 			tvshowsUpdate(imdb=imdb, tvdb=tvdb) # control.refresh() done in this function
 	except:
@@ -275,7 +287,8 @@ def tvshows(tvshowtitle, imdb, tvdb, season, watched):
 			dialog.create(str(name), str(tvshowtitle))
 			dialog.update(0, str(name), str(tvshowtitle))
 
-			metaget = metahandlers.MetaData()
+			# metaget = metahandlers.MetaData()
+			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('tvshow', name='', imdb_id=imdb)
 
 			items = episodes.Episodes().get(tvshowtitle, '0', imdb, tvdb, idx = False)
@@ -294,7 +307,7 @@ def tvshows(tvshowtitle, imdb, tvdb, season, watched):
 				season, episode = items[i]['season'], items[i]['episode']
 				metaget.get_episode_meta('', imdb_id = imdb, season = season, episode = episode)
 				metaget.change_watched('episode', '', imdb_id = imdb, season = season, episode = episode, watched = watched)
-			tvshowsUpdate(imdb = imdb, tvdb = tvdb)
+			tvshowsUpdate(imdb=imdb, tvdb=tvdb)
 
 			try: dialog.close()
 			except: pass
@@ -309,10 +322,12 @@ def tvshowsUpdate(imdb, tvdb):
 		from resources.lib.menus import episodes
 
 		name = control.addonInfo('name')
-		metaget = metahandlers.MetaData()
+		# metaget = metahandlers.MetaData()
+		metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 		metaget.get_meta('tvshow', name='', imdb_id=imdb)
 
-		items = episodes.Episodes().get('', '0', imdb, tvdb, idx=False)
+		items = episodes.Episodes().get('', '0', imdb, '0', tvdb, idx=False)
+
 		for i in range(len(items)):
 			items[i]['season'] = int(items[i]['season'])
 			items[i]['episode'] = int(items[i]['episode'])
@@ -326,7 +341,6 @@ def tvshowsUpdate(imdb, tvdb):
 		countSeason = 0
 		metaget.get_seasons('', imdb, seasons.keys()) # Must be called to initialize the database.
 
-		# for key, value in seasons.iteritems():
 		for key, value in control.iteritems(seasons):
 			countEpisode = 0
 			for i in value:

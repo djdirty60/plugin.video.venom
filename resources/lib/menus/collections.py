@@ -886,7 +886,7 @@ class Collections:
 			title = py_tools.ensure_str(title)
 			originaltitle = title
 
-#add these
+#add these so sources module may not have to make a trakt api request
 			# aliases = item.get('alternative_titles').get('titles')
 			# log_utils.log('aliases = %s' % str(aliases), __name__, log_utils.LOGDEBUG)
 
@@ -1045,19 +1045,15 @@ class Collections:
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', '0'), i.get('tmdb', '0'), i['title'], i.get('year', '0')
-				trailer = i.get('trailer')
-				runtime = i.get('duration')
-				# try: title = i['originaltitle']
-				# except: title = i['title']
+				trailer, runtime = i.get('trailer'), i.get('duration')
+				# title = i['originaltitle'] or i['title']
 				label = '%s (%s)' % (title, year)
 				try:
 					if int(re.sub(r'[^0-9]', '', str(i['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
 						label = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, label)
 				except: pass
 
-				sysname = quote_plus(label)
-				systitle = quote_plus(title)
-
+				sysname, systitle = quote_plus(label), quote_plus(title)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v and v != '0')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
 				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
@@ -1077,12 +1073,9 @@ class Collections:
 				thumb = meta.get('thumb') or poster or landscape
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
-				clearlogo = meta.get('clearlogo')
-				clearart = meta.get('clearart')
-				discart = meta.get('discart')
 				art = {}
 				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart,
-								'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape, 'discart': discart})
+								'clearlogo': meta.get('clearlogo'), 'clearart': meta.get('clearart'), 'landscape': landscape, 'discart': meta.get('discart')})
 				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
 				for k in remove_keys: meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
@@ -1104,9 +1097,7 @@ class Collections:
 						meta.update({'playcount': 0, 'overlay': 6})
 				except: pass
 
-				sysmeta = quote_plus(jsdumps(meta))
-				sysart = quote_plus(jsdumps(art))
-
+				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				url = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
 				sysurl = quote_plus(url)
 
@@ -1137,9 +1128,8 @@ class Collections:
 				resumetime = Bookmarks().get(name=label, imdb=imdb, tmdb=tmdb, year=str(year), runtime=runtime, ck=True)
 				# item.setProperty('totaltime', str(meta['duration'])) # Adding this property causes the Kodi bookmark CM items to be added
 				item.setProperty('resumetime', str(resumetime))
-				item.setProperty('venom_resumetime', str(resumetime))
 				try:
-					watched_percent = int(float(resumetime) / float(meta['duration']) * 100)
+					watched_percent = round(float(resumetime) / float(runtime) * 100, 1) # resumetime and runtime are both in minutes
 					item.setProperty('percentplayed', str(watched_percent))
 				except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
@@ -1178,8 +1168,6 @@ class Collections:
 
 	def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True):
 		try:
-			# if type(name) is str or type(name) is unicode: name = str(name)
-			# if type(name) is int: name = control.lang(name)
 			if isinstance(name, int): name = control.lang(name)
 		except:
 			log_utils.error()

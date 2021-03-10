@@ -82,7 +82,7 @@ def error(message=None, exception=True):
 			caller = [filename, name, linenumber]
 		else:
 			caller = None
-		log(msg=message, caller=caller, level=LOGERROR)
 		del(type, value, traceback) # So we don't leave our local labels/objects dangling
+		log(msg=message, caller=caller, level=LOGERROR)
 	except Exception as e:
 		xbmc.log('[ plugin.video.venom ] log_utils.error() Logging Failure: %s' % (e), LOGERROR)

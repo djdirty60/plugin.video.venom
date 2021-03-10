@@ -282,8 +282,7 @@ class Episodes:
 			if not contains:
 				self.list.append(userlists[i])
 		for i in range(0, len(self.list)): self.list[i].update({'image': 'trakt.png', 'action': 'calendar'})
-		# Trakt Watchlist
-		if self.traktCredentials:
+		if self.traktCredentials: # Trakt Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
 		self.addDirectory(self.list, queue=True)
 		return self.list
@@ -485,15 +484,10 @@ class Episodes:
 				votes = client.parseDOM(item2, 'RatingCount')[0]
 				mpaa = client.parseDOM(item2, 'ContentRating')[0]
 
-				director = client.parseDOM(item, 'Director')[0]
-				director = [x for x in director.split('|') if x != '']
-				director = ' / '.join(director)
-				director = client.replaceHTMLCodes(director)
-
-				writer = client.parseDOM(item, 'Writer')[0]
-				writer = [x for x in writer.split('|') if x != '']
-				writer = ' / '.join(writer)
-				writer = client.replaceHTMLCodes(writer)
+				director = client.replaceHTMLCodes(client.parseDOM(item, 'Director')[0])
+				director = ' / '.join([x for x in director.split('|') if x != '']) # check if this needs ensure_str()
+				writer = client.replaceHTMLCodes(client.parseDOM(item, 'Writer')[0]) 
+				writer = ' / '.join([x for x in writer.split('|') if x != '']) # check if this needs ensure_str()
 
 				castandart = tvdb_v1.parseActors(actors) or []
 
@@ -750,9 +744,9 @@ class Episodes:
 				mpaa = i['mpaa'] or client.parseDOM(item2, 'ContentRating')[0]
 
 				director = client.replaceHTMLCodes(client.parseDOM(item, 'Director')[0])
-				director = ' / '.join([x for x in director.split('|') if x != ''])
+				director = ' / '.join([x for x in director.split('|') if x != '']) # check if this needs ensure_str()
 				writer = client.replaceHTMLCodes(client.parseDOM(item, 'Writer')[0])
-				writer = ' / '.join([x for x in writer.split('|') if x != ''])
+				writer = ' / '.join([x for x in writer.split('|') if x != '']) # check if this needs ensure_str()
 
 				castandart = tvdb_v1.parseActors(actors) or []
 
@@ -865,9 +859,8 @@ class Episodes:
 				studio = studio.get('name') or None
 
 				genre = []
-				for i in item['show']['genres']:
-					genre.append(i.title())
-				if genre == []: genre = 'NA'
+				for i in item['show']['genres']: genre.append(i.title())
+				# if genre == []: genre = 'NA'
 
 				duration = str(item.get('show', {}).get('runtime', '0'))
 				rating = str(item.get('show', {}).get('rating', {}).get('average', '0'))
@@ -991,9 +984,9 @@ class Episodes:
 					premiered = premiered or client.parseDOM(item, 'FirstAired')[0] or '0'
 
 					director = client.replaceHTMLCodes(client.parseDOM(item, 'Director')[0])
-					director = ' / '.join([x for x in director.split('|') if x != ''])
+					director = ' / '.join([x for x in director.split('|') if x != '']) # check if this needs ensure_str()
 					writer = client.replaceHTMLCodes(client.parseDOM(item, 'Writer')[0])
-					writer = ' / '.join([x for x in writer.split('|') if x != ''])
+					writer = ' / '.join([x for x in writer.split('|') if x != '']) # check if this needs ensure_str()
 
 					rating = rating or client.parseDOM(item, 'Rating')[0]
 
@@ -1055,8 +1048,8 @@ class Episodes:
 		except:
 			log_utils.error()
 
-		sysaddon = sys.argv[0]
-		syshandle = int(sys.argv[1])
+		sysaddon, syshandle = sys.argv[0], int(sys.argv[1])
+
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		if not is_widget: control.playlist.clear()
 
@@ -1126,9 +1119,7 @@ class Episodes:
 			try:
 				tvshowtitle, title, imdb, tmdb, tvdb = i.get('tvshowtitle'), i.get('title'), i.get('imdb', '0'), i.get('tmdb', '0'), i.get('tvdb', '0')
 				year, season, episode, premiered = i['year'], i['season'], i['episode'], i['premiered']
-				trailer = i.get('trailer')
-				runtime = i.get('duration')
-				tvshowyear = i.get('tvshowyear')
+				trailer, runtime, tvshowyear = i.get('trailer'), i.get('duration'), i.get('tvshowyear')
 
 				if 'label' not in i: i['label'] = title
 				if i['label'] == '0': label = '%sx%02d . %s %s' % (season, int(episode), 'Episode', episode)
@@ -1137,18 +1128,10 @@ class Episodes:
 				if multi: label = '%s - %s' % (tvshowtitle, label)
 				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
 				except: labelProgress = label
-
 				try:
 					if i['unaired'] == 'true': labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
-
-				systitle = quote_plus(title)
-				systvshowtitle = quote_plus(tvshowtitle)
-				syspremiered = quote_plus(premiered)
-
-				try: seasoncount = i['seasoncount']
-				except: seasoncount = None
-
+				systitle, systvshowtitle, syspremiered = quote_plus(title), quote_plus(tvshowtitle), quote_plus(premiered)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v and v != '0')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'episode', 'tag': [imdb, tvdb]})
 				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
@@ -1202,7 +1185,6 @@ class Episodes:
 
 				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
 				season_poster = meta.get('season_poster') or poster
-
 				fanart = ''
 				if settingFanart:
 					fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or addonFanart
@@ -1210,11 +1192,9 @@ class Episodes:
 				thumb = meta.get('thumb') or poster or landscape
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
-				clearlogo = meta.get('clearlogo')
-				clearart = meta.get('clearart')
 				art = {}
 				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon,
-									'thumb': thumb, 'banner': banner, 'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape})
+									'thumb': thumb, 'banner': banner, 'clearlogo': meta.get('clearlogo'), 'clearart': meta.get('clearart'), 'landscape': landscape})
 
 				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
 				for k in remove_keys:
@@ -1234,41 +1214,28 @@ class Episodes:
 					# except: pass
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 7})
-						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=6)' % (
-												sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
+						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=6)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
 					else:
 						meta.update({'playcount': 0, 'overlay': 6})
-						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=7)' % (
-												sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
+						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=7)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
 				except: pass
 
-				sysmeta = quote_plus(jsdumps(meta))
-				sysart = quote_plus(jsdumps(art))
-				syslabelProgress = quote_plus(labelProgress)
-
+				sysmeta, sysart, syslabelProgress = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art)), quote_plus(labelProgress)
 				url = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s' % (
 										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)
 				sysurl = quote_plus(url)
 
-				Folderurl = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s' % (
-										sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, season, episode)
+				Folderurl = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, season, episode)
 				if isFolder:
 					if traktProgress:
-						if control.setting('hosts.mode') == '1' and control.setting('enable.upnext') != 'true':
-							cm.append((progressMenu, 'RunPlugin(%s)' % url))
-						elif control.setting('hosts.mode') != '1' or control.setting('enable.upnext') == 'true':
-							cm.append((progressMenu, 'PlayMedia(%s)' % url))
-					url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s' % (
-										sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, season, episode)
+						if control.setting('hosts.mode') == '1' and control.setting('enable.upnext') != 'true': cm.append((progressMenu, 'RunPlugin(%s)' % url))
+						elif control.setting('hosts.mode') != '1' or control.setting('enable.upnext') == 'true': cm.append((progressMenu, 'PlayMedia(%s)' % url))
+					url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, season, episode)
 
-				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (
-									sysaddon, syslabelProgress, sysurl, sysmeta, sysart)))
+				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, syslabelProgress, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, syslabelProgress)))
-
 				if multi:
-					cm.append((tvshowBrowserMenu, 'Container.Update(%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tvdb=%s,return)' % (
-									sysaddon, systvshowtitle, year, imdb, tvdb)))
-
+					cm.append((tvshowBrowserMenu, 'Container.Update(%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tvdb=%s,return)' % (sysaddon, systvshowtitle, year, imdb, tvdb)))
 				if not isFolder:
 					if traktProgress:
 						cm.append((progressMenu, 'Container.Update(%s)' % Folderurl))
@@ -1311,11 +1278,10 @@ class Episodes:
 				from resources.lib.modules.player import Bookmarks
 				blabel = tvshowtitle + ' S%02dE%02d' % (int(season), int(episode))
 				resumetime = Bookmarks().get(name=blabel, imdb=imdb, tmdb=tmdb, tvdb=tvdb, season=season, episode=episode, year=str(year), runtime=runtime, ck=True)
-				# item.setProperty('totaltime', str(meta.get('duration'))) # Adding this property causes the Kodi bookmark CM items to be added
-				item.setProperty('resumetime', str(resumetime))
-				item.setProperty('venom_resumetime', str(resumetime))
+				# item.setProperty('TotalTime', str(meta.get('duration'))) # Adding this property causes the Kodi bookmark CM items to be added
+				item.setProperty('ResumeTime', str(resumetime))
 				try:
-					watched_percent = int(float(resumetime) / float(meta.get('duration', '0')) * 100)
+					watched_percent = round(float(resumetime) / float(runtime) * 100, 1) # resumetime and runtime are both in minutes
 					item.setProperty('percentplayed', str(watched_percent))
 				except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
@@ -1323,7 +1289,6 @@ class Episodes:
 				item.addStreamInfo('video', video_streaminfo)
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
-
 				if playlistcreate:
 					control.playlist.add(url=url, listitem=item)
 			except:

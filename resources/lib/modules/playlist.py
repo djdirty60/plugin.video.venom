@@ -7,6 +7,7 @@ from json import loads as jsloads
 import xbmc
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
+from resources.lib.modules import py_tools
 
 Id = xbmc.PLAYLIST_VIDEO
 videoplaylist = 10028
@@ -67,11 +68,9 @@ def playListItems():
 	result = control.jsonrpc(rpc)
 	limits =jsloads(result)['result']['limits']
 	total = limits['total']
-	if int(total) <= 0:
-		return []
-	result = unicode(result, 'utf-8', errors = 'ignore')
+	if int(total) <= 0: return []
+	result = py_tools.ensure_text(result, errors='ignore')
 	result = jsloads(result)['result']['items']
-	# try: return [i['label'].encode('utf-8') for i in result]
 	try: return [i['label'] for i in result]
 	except: return []
 
@@ -80,13 +79,14 @@ def position(label):
 	except: return -1
 
 def playlistAdd(name, url, meta, art):
-	# if not name is None: name.encode('utf-8')
 	labelPosition = position(label=name)
 	if labelPosition >= 0:
 		return control.notification(title=35522, message=32120)
-	if isinstance(meta, basestring):
+	# if isinstance(meta, basestring):
+	if isinstance(meta, py_tools.string_types):
 		meta = jsloads(meta)
-	if isinstance(art, basestring):
+	# if isinstance(art, basestring):
+	if isinstance(art, py_tools.string_types):
 		art = jsloads(art)
 	item = control.item(label=name)
 	item.setArt(art)
@@ -105,9 +105,7 @@ def playlistRemove(name):
 	if labelPosition >= 0:
 		rpc = '{"jsonrpc": "2.0", "method": "Playlist.Remove", "params": {"playlistid": %s, "position": %s}, "id": 1 }' % (Id, labelPosition)
 		control.jsonrpc(rpc)
-		if notification:
-			control.notification(title=35522, message=control.lang(32122) % str(name))
+		if notification: control.notification(title=35522, message=control.lang(32122) % str(name))
 	if labelPosition == -1:
-		if notification:
-			control.notification(title=35522, message=32123)
+		if notification: control.notification(title=35522, message=32123)
 	# control.refresh()

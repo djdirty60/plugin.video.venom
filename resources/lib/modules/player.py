@@ -21,6 +21,7 @@ from resources.lib.modules import cleantitle
 from resources.lib.modules import log_utils
 from resources.lib.modules import metacache
 from resources.lib.modules import playcount
+from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 
 
@@ -148,9 +149,8 @@ class Player(xbmc.Player):
 		try:
 			if self.media_type != 'movie': raise Exception()
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
-			meta = unicode(meta, 'utf-8', errors = 'ignore')
+			meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['movies']
-
 			t = cleantitle.get(self.title)
 			meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))][0]
 			if 'mediatype' not in meta:
@@ -160,11 +160,9 @@ class Player(xbmc.Player):
 
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
-					# try: meta[k] = str(' / '.join([i.encode('utf-8') for i in v]))
 					try: meta[k] = str(' / '.join([i for i in v]))
 					except: meta[k] = ''
 				else:
-					# try: meta[k] = str(v.encode('utf-8'))
 					try: meta[k] = str(v)
 					except: meta[k] = str(v)
 
@@ -178,16 +176,15 @@ class Player(xbmc.Player):
 		try:
 			if self.media_type != 'episode': raise Exception()
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "year", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
-			meta = unicode(meta, 'utf-8', errors = 'ignore')
+			meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['tvshows']
-
 			t = cleantitle.get(self.title)
 			meta = [i for i in meta if self.year == str(i['year']) and t == cleantitle.get(i['title'])][0]
 			tvshowid = meta['tvshowid']
 			poster = meta['thumbnail']
 
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
-			meta = unicode(meta, 'utf-8', errors = 'ignore')
+			meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['episodes'][0]
 			if 'mediatype' not in meta:
 				meta.update({'mediatype': 'episode'})
@@ -196,11 +193,9 @@ class Player(xbmc.Player):
 
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
-					# try: meta[k] = str(' / '.join([i.encode('utf-8') for i in v]))
 					try: meta[k] = str(' / '.join([i for i in v]))
 					except: meta[k] = ''
 				else:
-					# try: meta[k] = str(v.encode('utf-8'))
 					try: meta[k] = str(v)
 					except: meta[k] = str(v)
 
@@ -450,9 +445,9 @@ class Player(xbmc.Player):
 		current_position = control.playlist.getposition()
 		next_url = control.playlist[current_position + 1].getPath()
 
-		try:
+		try: # Py2
 			from urlparse import parse_qsl
-		except:
+		except ImportError: # Py3
 			from urllib.parse import parse_qsl
 		params = dict(parse_qsl(next_url.replace('?', '')))
 		next_info = jsloads(params.get('meta'))

@@ -207,30 +207,6 @@ def lang(language_id):
 	return str(text)
 
 
-def display_string(object):
-	try:
-		if type(object) is str or type(object) is unicode:
-			return deaccentString(object)
-	except NameError:
-		if type(object) is str:
-			return deaccentString(object)
-	if type(object) is int:
-		return '%s' % object
-	if type(object) is bytes:
-		object = ''.join(chr(x) for x in object)
-		return object
-
-
-def deaccentString(text):
-	try:
-		if isinstance(text, bytes):
-			text = text.decode('utf-8')
-	except UnicodeDecodeError:
-		text = u'%s' % text
-	text = ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
-	return text
-
-
 def strip_non_ascii_and_unprintable(text):
 	try:
 		result = ''.join(char for char in text if char in printable)
@@ -395,22 +371,16 @@ def selectDialog(list, heading=addonInfo('name')):
 	return dialog.select(heading, list)
 
 def okDialog(title=None, message=None):
-	if title == 'default' or title is None:
-		title = addonName()
-	if isinstance(title, int):
-		heading = lang(title)
-	else:
-		heading = str(title)
-	if isinstance(message, int):
-		body = lang(message)
-	else:
-		body = str(message)
+	if title == 'default' or title is None: title = addonName()
+	if isinstance(title, int): heading = lang(title)
+	else: heading = str(title)
+	if isinstance(message, int): body = lang(message)
+	else: body = str(message)
 	return dialog.ok(heading, body)
 
 def context(items=None, labels=None):
 	if items:
 		labels = [i[0] for i in items]
-		# choice = xbmcgui.Dialog().contextmenu(labels)
 		choice = dialog.contextmenu(labels)
 		if choice >= 0: return items[choice][1]()
 		else: return False

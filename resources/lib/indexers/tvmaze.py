@@ -293,12 +293,9 @@ class tvshows:
 				tvmaze = i
 				url = self.tvmaze_info_link % i
 				item = get_request(url) 
-
 				content = item.get('type', '0').lower()
-
-				# try: title = (item.get('name')).encode('utf-8')
-				# except: title = item.get('name')
 				title = item.get('name')
+				title = py_tools.ensure_str(title)
 				tvshowtitle = title
 
 				premiered = item.get('premiered', '0')
@@ -314,20 +311,13 @@ class tvshows:
 
 				studio = item.get('network', {}) or item.get('webChannel', {})
 				studio = studio.get('name', '0')
-
 				genre = []
-				for i in item['genres']:
-					genre.append(i.title())
+				for i in item['genres']: genre.append(i.title())
 				if genre == []: genre = 'NA'
-
 				duration = str(item.get('runtime', '0'))
-
 				rating = str(item.get('rating').get('average', '0'))
-
-				plot = item.get('summary', '0')
-				try: plot = client.cleanHTML(plot)
-				except: pass
-
+				plot = client.cleanHTML(item.get('summary', '0'))
+				plot = py_tools.ensure_str(plot)
 				status = item.get('status', '0')
 
 				castandart = []
@@ -363,21 +353,17 @@ class tvshows:
 							tmdb = str(trakt_ids.get('tmdb', '0'))
 							if not tmdb or tmdb == 'None': tmdb = '0'
 
-###--Check TVDb by IMDB_ID for missing tvdb_id
-				if tvdb == '0' and imdb != '0':
+				if tvdb == '0' and imdb != '0': # Check TVDb by IMDB_ID for missing tvdb_id
 					try: tvdb = cache.get(tvdb_v1.getSeries_ByIMDB, 96, tvshowtitle, year, imdb)
 					except: tvdb = '0'
-##########################
 
-###--Check TVDb by seriesname for missing tvdb_id
-				if tvdb == '0':
+				if tvdb == '0': # Check TVDb by seriesname for missing tvdb_id
 					try:
 						ids = cache.get(tvdb_v1.getSeries_ByName, 96, tvshowtitle, year)
 						if ids: tvdb = ids.get(tvdb, '0') or '0'
 					except:
 						tvdb = '0'
 						log_utils.error()
-##########################
 
 				if tvdb == '0': raise Exception()
 				try:
@@ -419,8 +405,7 @@ class tvshows:
 					if not plot:
 						plot = client.parseDOM(item3, 'Overview')[0] or '0'
 						plot = client.replaceHTMLCodes(plot)
-						# try: plot = plot.encode('utf-8')
-						# except: pass
+
 
 					airday = client.parseDOM(item3, 'Airs_DayOfWeek')[0] or '0'
 					airtime = client.parseDOM(item3, 'Airs_Time')[0] or '0'

@@ -70,8 +70,7 @@ class Seasons:
 		tvshows.worker()
 		self.list = tvshows.list
 
-		# Remove duplicate season entries.
-		try:
+		try: # Remove duplicate season entries.
 			result = []
 			for i in self.list:
 				found = False
@@ -122,13 +121,9 @@ class Seasons:
 					contains = True
 					break
 			if not contains: self.list.append(userlists[i])
-
 		for i in range(0, len(self.list)): self.list[i].update({'image': 'traktlists.png', 'action': 'seasonsList'})
-
-		# Watchlist
-		if self.traktCredentials:
+		if self.traktCredentials: # Trakt Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'traktwatch.png', 'action': 'seasons'})
-
 		episodes.addDirectory(self.list, queue = True)
 		return self.list
 
@@ -165,19 +160,16 @@ class Seasons:
 			except:
 				log_utils.error()
 
-###--Check TVDb by IMDB_ID for missing tvdb_id
-		if tvdb == '0' and imdb != '0':
+		if tvdb == '0' and imdb != '0': # Check TVDb by IMDB_ID for missing tvdb_id
 			try: tvdb = cache.get(tvdb_v1.getSeries_ByIMDB, 96, tvshowtitle, year, imdb)
 			except: tvdb = '0'
-###--Check TVDb by seriesname for missing tvdb_id
-		if tvdb == '0':
+		if tvdb == '0': # Check TVDb by seriesname for missing tvdb_id
 			try:
 				ids = cache.get(tvdb_v1.getSeries_ByName, 96, tvshowtitle, year)
 				if ids: tvdb = ids.get(tvdb, '0') or '0'
 			except:
 				tvdb = '0'
 				log_utils.error()
-##########################
 
 		if tvdb == '0': return None
 		try:
@@ -336,9 +328,9 @@ class Seasons:
 
 				rating = client.replaceHTMLCodes(client.parseDOM(item, 'Rating')[0])
 				director = client.replaceHTMLCodes(client.parseDOM(item, 'Director')[0])
-				director = ' / '.join([x for x in director.split('|') if x != ''])
-				writer = client.replaceHTMLCodes(client.parseDOM(item, 'Writer')[0])
-				writer = ' / '.join([x for x in writer.split('|') if x != ''])
+				director = ' / '.join([x for x in director.split('|') if x != '']) # check if this needs ensure_str()
+				writer = client.replaceHTMLCodes(client.parseDOM(item, 'Writer')[0]) 
+				writer = ' / '.join([x for x in writer.split('|') if x != '']) # check if this needs ensure_str()
 				label = client.replaceHTMLCodes(client.parseDOM(item, 'EpisodeName')[0])
 
 				episodeplot = client.replaceHTMLCodes(client.parseDOM(item, 'Overview')[0]) or plot
@@ -413,21 +405,16 @@ class Seasons:
 				log_utils.error()
 				imdb = '0'
 
-###--Check TVDb by IMDB_ID for missing
-		if tvdb == '0' and imdb != '0':
+		if tvdb == '0' and imdb != '0': # Check TVDb by IMDB_ID for missing
 			try: tvdb = tvdb_v1.getSeries_ByIMDB(tvshowtitle, year, imdb) or '0'
 			except: tvdb = '0'
-##########################
-
-###--Check TVDb by seriesname
-		if tvdb == '0':
+		if tvdb == '0': # Check TVDb by seriesname
 			try:
 				ids = tvdb_v1.getSeries_ByName(tvshowtitle, year)
 				if ids: tvdb = ids.get(tvdb, '0') or '0'
 			except:
 				tvdb = '0'
 				log_utils.error()
-##########################
 
 		if tvdb == '0': return None
 		try:

@@ -11,38 +11,38 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import parse_qsl, urlparse
 	from urllib.request import urlopen, Request
-
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 
 
 def download(name, image, url, meta_name=None):
-	# log_utils.log('name = %s' % str(name), level=log_utils.LOGDEBUG)
-	file_format = control.setting('downloads.file.format')
+	if not url:
+		control.hide()
+		return
 	try:
-		if not url:
-			control.hide()
-			return
+		file_format = control.setting('downloads.file.format')
+
 		try: headers = dict(parse_qsl(url.rsplit('|', 1)[1]))
 		except: headers = dict('')
 
 		url = url.split('|')[0]
 
-		transname = name.translate(None, '\/:*?"<>|').strip('.')
-		ext_list = ['.mp4', '.mkv', '.flv', '.avi', '.mpg']
-		for i in ext_list:
-			transname = transname.rstrip(i)
+		try: transname = name.translate(None, '\/:*?"<>|').strip('.')
+		except: transname = name.translate(name.maketrans('', '', '\/:*?"<>|')).strip('.')  # maketrans() is in string module for py2
 
+		ext_list = ['.mp4', '.mkv', '.flv', '.avi', '.mpg']
+		for i in ext_list: transname = transname.rstrip(i)
 		if meta_name:
 			try: content = re.search(r'(.+?)\sS(\d*)E\d*$', meta_name).groups()
 			except: content = ()
 			if file_format == '0':
-				transname = meta_name.translate(None, '\/:*?"<>|').strip('.')
+				try: transname = meta_name.translate(None, '\/:*?"<>|').strip('.')
+				except: transname = meta_name.translate(meta_name.maketrans('', '', '\/:*?"<>|')).strip('.')
 		else:
 			try: content = re.search(r'(.+?)(?:|\.| - |-|.-.|\s)(?:S|s|\s|\.)(\d{1,2})(?!\d)(?:|\.| - |-|.-.|x|\s)(?:E|e|\s|.)([0-2]{1}[0-9]{1})(?!\w)', name.replace('\'', '')).groups()
 			except: content = ()
 
- 		levels =['../../../..', '../../..', '../..', '..']
+		levels =['../../../..', '../../..', '../..', '..']
 		if len(content) == 0:
 			dest = control.setting('movie.download.path')
 			dest = control.transPath(dest)
@@ -51,7 +51,8 @@ def download(name, image, url, meta_name=None):
 				except: pass
 			control.makeFile(dest)
 			if meta_name:
-				dest = os.path.join(dest, meta_name.translate(None, '\/:*?"<>|').strip('.'))
+				try: dest = os.path.join(dest, meta_name.translate(None, '\/:*?"<>|').strip('.'))
+				except: dest = os.path.join(dest, meta_name.translate(meta_name.maketrans('', '', '\/:*?"<>|')).strip('.'))
 			else:
 				try: movie_info = re.search(r'(.+?)(?:\.{0,1}-{0,1}\.{0,1}|\s*)(?:|\(|\[|\.)((?:19|20)(?:[0-9]{2}))', name.replace('\'', '')).groups()
 				except: movie_info = ()
@@ -70,7 +71,8 @@ def download(name, image, url, meta_name=None):
 				try: control.makeFile(os.path.abspath(os.path.join(dest, level)))
 				except: pass
 			control.makeFile(dest)
-			transtvshowtitle = content[0].translate(None, '\/:*?"<>|').strip('.').replace('.', ' ')
+			try: transtvshowtitle = content[0].translate(None, '\/:*?"<>|').strip('.').replace('.', ' ')
+			except: transtvshowtitle = content[0].translate(content[0].maketrans('', '', '\/:*?"<>|')).strip('.').replace('.', ' ')
 			if not meta_name:
 				transtvshowtitle = titlecase(re.sub(r'[^A-Za-z0-9\s-]+', ' ', transtvshowtitle))
 			dest = os.path.join(dest, transtvshowtitle)
@@ -105,8 +107,7 @@ def done(title, dest, downloaded):
 	try:
 		playing = control.player.isPlaying()
 		text = control.homeWindow.getProperty('GEN-DOWNLOADED')
-		if len(text) > 0:
-			text += '[CR]'
+		if len(text) > 0: text += '[CR]'
 		if downloaded:
 			text += '%s : %s' % (dest.rsplit(os.sep)[-1], '[COLOR forestgreen]Download succeeded[/COLOR]')
 		else:
@@ -147,21 +148,23 @@ def doDownload(url, dest, title, image, headers):
 	resume = 0
 	sleep = 0
 	control.hide()
-	if control.yesnoDialog('Name to save: %s' % file, 'File Size: %sGB' % gb, 'Continue with download?', 'Confirm Download', 'Confirm',  'Cancel') == 1:
+	# if control.yesnoDialog('Name to save:[CR]%s[CR]File Size: %sGB[CR]Continue with download?' % (file, gb), '', '', 'Confirm Download', 'Confirm',  'Cancel') == 1:
+	if control.yesnoDialog('File Size: %sGB[CR]Path: %s[CR]Continue with download?' % (gb, dest), '', '', 'Confirm Download', 'Confirm',  'Cancel') == 1:
 		return
 
-	#f = open(dest, mode='wb')
 	f = control.openFile(dest, 'w')
 	chunk  = None
 	chunks = []
 
+	import xbmcgui
 	while True:
 		downloaded = total
 		for c in chunks:
 			downloaded += len(c)
 		percent = min(100 * downloaded / content, 100)
 		if percent >= notify:
-			control.notification(title=title + ' - Download Progress - ' + str(percent)+'%', message=dest, icon=image, time=10000)
+			# control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message=dest, icon=image, time=10000)
+			control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message='', icon=image, time=3000) #xbmcgui.Dialog().notification() auto scroll time to complete supercedes allowed "time=" to run, removed dest
 			notify += 10
 		chunk = None
 		error = False
@@ -176,9 +179,10 @@ def doDownload(url, dest, title, image, headers):
 						f.write(c)
 						del c
 					f.close()
+					log_utils.log('Download Complete: %s' % (dest))
 					return done(title, dest, True)
-		except Exception as e:
-			log_utils.log('DOWNNLOADER EXCEPTION | %s' % str(e), __name__, log_utils.LOGDEBUG)
+		except:
+			log_utils.error('DOWNNLOADER EXCEPTION: ', __name__, log_utils.LOGERROR)
 			error = True
 			sleep = 10
 			errno = 0
@@ -210,6 +214,7 @@ def doDownload(url, dest, title, image, headers):
 		if (resumable and errors > 0) or errors >= 10:
 			if (not resumable and resume >= 50) or resume >= 500:
 				#Give up!
+				log_utils.log('Download Canceled: %s - too many errors whilst downloading' % (dest), level=LOGDEBUG)
 				return done(title, dest, False)
 			resume += 1
 			errors  = 0

@@ -171,8 +171,6 @@ class Furk:
 
 	def addDirectoryItem(self, name, query, thumb, icon, isAction=True):
 		try:
-			# if type(name) is str or type(name) is unicode: 	name = str(name)
-			# if type(name) is int: name = control.lang(name)
 			if isinstance(name, int): name = control.lang(name)
 		except:
 			log_utils.error()

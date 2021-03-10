@@ -144,29 +144,21 @@ class Movies:
 					self.sort(type='movies.watchlist')
 				else: self.sort()
 				if idx: self.worker()
-
 			elif u in self.trakt_link and self.search_link in url:
 				self.list = cache.get(self.trakt_list, 6, url, self.trakt_user)
 				if idx: self.worker(level=0)
-
 			elif u in self.trakt_link:
 				self.list = cache.get(self.trakt_list, 24, url, self.trakt_user)
 				if idx: self.worker()
-
 			elif u in self.imdb_link and ('/user/' in url or '/list/' in url):
 				isRatinglink = True if self.imdbratings_link in url else False
 				self.list = cache.get(self.imdb_list, 0, url, isRatinglink)
 				if idx: self.worker()
-
 			elif u in self.imdb_link:
 				self.list = cache.get(self.imdb_list, 96, url)
 				if idx: self.worker()
-
-			if self.list is None:
-				self.list = []
-
-			if idx:
-				self.movieDirectory(self.list)
+			if self.list is None: self.list = []
+			if idx: self.movieDirectory(self.list)
 			return self.list
 		except:
 			log_utils.error()
@@ -188,18 +180,14 @@ class Movies:
 				from resources.lib.indexers import tmdb
 				self.list = cache.get(tmdb.Movies().tmdb_collections_list, 0, url)
 				self.sort()
-
 			elif u in self.tmdb_link and not '/list/' in url:
 				from resources.lib.indexers import tmdb
 				duration = 168 if cached else 0
 				self.list = cache.get(tmdb.Movies().tmdb_list, duration, url)
-
 			if self.list is None: 
 				self.list = []
 				raise Exception()
-
-			if idx:
-				self.movieDirectory(self.list)
+			if idx: self.movieDirectory(self.list)
 			return self.list
 		except:
 			log_utils.error()
@@ -222,8 +210,7 @@ class Movies:
 					self.list = cache.get(self.trakt_list, 720, self.traktunfinished_link , self.trakt_user)
 				except:
 					self.list = cache.get(self.trakt_list, 0, self.traktunfinished_link , self.trakt_user)
-				if idx:
-					self.worker()
+				if idx: self.worker()
 			if idx:
 				self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
 				self.movieDirectory(self.list, unfinished=True, next=False)
@@ -519,26 +506,16 @@ class Movies:
 			if not contains:
 				self.list.append(userlists[i])
 
-		# TMDb Favorites
-		if self.tmdb_session_id != '':
+		if self.tmdb_session_id != '': # TMDb Favorites
 			self.list.insert(0, {'name': control.lang(32026), 'url': self.tmdb_favorites_link, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbmovies'})
-
-		# TMDb Watchlist
-		if self.tmdb_session_id != '':
+		if self.tmdb_session_id != '': # TMDb Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.tmdb_watchlist_link, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbmovies'})
-
-		# imdb Watchlist
-		if self.imdb_user != '':
+		if self.imdb_user != '': # imdb Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.imdbwatchlist_link, 'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'movies'})
-
-		# imdb My Ratings
-		if self.imdb_user != '':
+		if self.imdb_user != '': # imdb My Ratings
 			self.list.insert(0, {'name': control.lang(32025), 'url': self.imdbratings_link, 'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'movies'})
-
-		# Trakt Watchlist
-		if self.traktCredentials:
+		if self.traktCredentials: # Trakt Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'movies'})
-
 		self.addDirectory(self.list, queue=True)
 		return self.list
 
@@ -581,8 +558,7 @@ class Movies:
 			q.update({'page': str(int(q['page']) + 1)})
 			q = (urlencode(q)).replace('%2C', ',')
 			next = url.replace('?' + urlparse(url).query, '') + '?' + q
-		except:
-			next = ''
+		except: next = ''
 
 		for item in items:
 			try:
@@ -611,8 +587,7 @@ class Movies:
 				if not tmdb or tmdb == 'None': tmdb = '0'
 
 				genre = []
-				for x in item['genres']:
-					genre.append(x.title())
+				for x in item['genres']: genre.append(x.title())
 				if genre == []: genre = 'NA'
 
 				duration = str(item.get('runtime', '0'))
@@ -769,7 +744,7 @@ class Movies:
 				except: director = '0'
 				director = client.parseDOM(director, 'a')
 				director = ' / '.join(director)
-				director = client.replaceHTMLCodes(director)
+				director = client.replaceHTMLCodes(director) # check if this needs ensure_str()
 
 				plot = '0'
 				try: plot = client.parseDOM(item, 'p', attrs = {'class': 'text-muted'})[0]
@@ -799,18 +774,15 @@ class Movies:
 			try:
 				name = client.parseDOM(item, 'img', ret='alt')[0]
 				# name = name.encode('utf-8')
-
 				url = client.parseDOM(item, 'a', ret='href')[0]
 				url = re.findall(r'(nm\d*)', url, re.I)[0]
 				url = self.person_link % url
 				url = client.replaceHTMLCodes(url)
 				# url = url.encode('utf-8')
-
 				image = client.parseDOM(item, 'img', ret='src')[0]
 				image = re.sub(r'(?:_SX|_SY|_UX|_UY|_CR|_AL)(?:\d+|_).+?\.', '_SX500.', image)
 				image = client.replaceHTMLCodes(image)
 				# image = image.encode('utf-8')
-
 				self.list.append({'name': name, 'url': url, 'image': image})
 			except:
 				log_utils.error()
@@ -831,17 +803,14 @@ class Movies:
 				name = client.parseDOM(item, 'a')[0]
 				name = client.replaceHTMLCodes(name)
 				# name = name.encode('utf-8')
-
 				url = client.parseDOM(item, 'a', ret='href')[0]
 				url = url.split('/list/', 1)[-1].strip('/')
 				# url = url.split('/list/', 1)[-1].replace('/', '')
 				url = self.imdblist_link % url
 				url = client.replaceHTMLCodes(url)
 				# url = url.encode('utf-8')
-
 				list.append({'name': name, 'url': url, 'context': url})
 			except: pass
-
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
 
@@ -897,8 +866,8 @@ class Movies:
 			else: title = self.list[i]['title'] or '0'
 			originaltitle = title
 
-#add these
-			# aliases = item.get('alternative_titles').get('titles')
+#add these so sources module may not have to make a trakt api request
+			# aliases = item.get('alternative_titles', {}).get('titles', '0')
 			# log_utils.log('aliases = %s' % str(aliases), __name__, log_utils.LOGDEBUG)
 
 			if imdb == '0' or imdb is None:
@@ -1057,10 +1026,8 @@ class Movies:
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', '0'), i.get('tmdb', '0'), i['title'], i.get('year', '0')
-				trailer = i.get('trailer')
-				runtime = i.get('duration')
-				# try: title = i['originaltitle']
-				# except: title = i['title']
+				trailer, runtime = i.get('trailer'), i.get('duration')
+				# title = i['originaltitle'] or i['title']
 				label = '%s (%s)' % (title, year)
 				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
 				except: labelProgress = label
@@ -1069,9 +1036,7 @@ class Movies:
 						labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
 
-				sysname = quote_plus(label)
-				systitle = quote_plus(title)
-
+				sysname, systitle = quote_plus(label), quote_plus(title)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v and v != '0')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
 				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
@@ -1121,9 +1086,7 @@ class Movies:
 						meta.update({'playcount': 0, 'overlay': 6})
 				except: pass
 
-				sysmeta = quote_plus(jsdumps(meta))
-				sysart = quote_plus(jsdumps(art))
-
+				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				url = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
 				sysurl = quote_plus(url)
 
@@ -1152,12 +1115,11 @@ class Movies:
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				from resources.lib.modules.player import Bookmarks
 				resumetime = Bookmarks().get(name=label, imdb=imdb, tmdb=tmdb, year=str(year), runtime=runtime, ck=True)
-				# item.setProperty('totaltime', str(meta['duration'])) # Adding this property causes the Kodi bookmark CM items to be added
-				item.setProperty('resumetime', str(resumetime))
-				item.setProperty('venom_resumetime', str(resumetime))
+				# item.setProperty('TotalTime', str(meta['duration'])) # Adding this property causes the Kodi bookmark CM items to be added
+				item.setProperty('ResumeTime', str(resumetime))
 				try:
-					watched_percent = int(float(resumetime) / float(meta['duration']) * 100)
-					item.setProperty('percentplayed', str(watched_percent))
+					watched_percent = round(float(resumetime) / float(runtime) * 100, 1) # resumetime and runtime are both in minutes
+					item.setProperty('PercentPlayed', str(watched_percent))
 				except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				video_streaminfo = {'codec': 'h264'}

@@ -54,8 +54,7 @@ def userlists(url):
 	except:
 		return
 
-# This is actual wrong but may not be used so look into 
-	try:
+	try: # This is actual wrong but may not be used so look into 
 		page = int(result['page'])
 		total = int(result['total_pages'])
 		if page >= total: raise Exception()
@@ -183,6 +182,7 @@ class Movies:
 					if person['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']:
 						# writer = ', '.join([writer['name'].encode('utf-8') for writer in credits['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
 						writer = ', '.join([writer['name'] for writer in credits['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
+
 				castandart = []
 				for person in item['credits']['cast']:
 					try:
@@ -515,6 +515,7 @@ class TVshows:
 					if person['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']:
 						# writer = ', '.join([writer['name'].encode('utf-8') for writer in credits['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
 						writer = ', '.join([writer['name'] for writer in credits['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
+
 				castandart = []
 				for person in item['credits']['cast']:
 					try:
@@ -647,6 +648,7 @@ class TVshows:
 					if person['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']:
 						# writer = ', '.join([writer['name'].encode('utf-8') for writer in credits['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
 						writer = ', '.join([writer['name'] for writer in credits['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
+
 				castandart = []
 				for person in item['credits']['cast']:
 					try:
