@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="4.4.4">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="4.4.5">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -32,13 +32,16 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
+[B][COLOR red]Update - v4.4.5 - March 11, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed ampersand sign in news to be encoded.  Sorry about that
+    folks, simply forgot.[/I]
 [B][COLOR red]Update - v4.4.4 - March 11, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Note TMDBHelper player files have been updated.  Be sure
     to update via the TMDBHelper settings.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed TMDBHelper playback of library files(.strm) when
     TMDBHelper is set to "Automatically play local files".[/I]
 [COLOR yellow]--[/COLOR][I] Few tweaks to some annoying folder and file names used for
-    library integration. Ex. "&" was replaced with an underscore,
+    library integration. Ex. "&amp;" was replaced with an underscore,
     now replaced with the word "and".  Apostrophes in names
     were being replaces with a "."(dot), now just removed.[/I]
 		</news>
