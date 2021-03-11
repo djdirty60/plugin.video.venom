@@ -30,15 +30,13 @@ tmdb_session_id = control.setting('tmdb.session_id')
 
 
 class lib_tools:
-
 	@staticmethod
 	def create_folder(folder):
 		try:
 			folder = control.legalFilename(folder)
 			control.makeFile(folder)
 			try:
-				if 'ftp://' not in folder:
-					raise Exception()
+				if 'ftp://' not in folder: raise Exception()
 				from ftplib import FTP
 				ftparg = re.compile(r'ftp://(.+?):(.+?)@(.+?):?(\d+)?/(.+/?)').findall(folder)
 				ftp = FTP(ftparg[0][2], ftparg[0][0], ftparg[0][1])
@@ -55,9 +53,7 @@ class lib_tools:
 	def write_file(path, content):
 		try:
 			path = control.legalFilename(path)
-			# if not isinstance(content, basestring):
 			if not isinstance(content, py_tools.string_types):
-				# content = str(content)
 				content = py_tools.ensure_str(content)
 			file = control.openFile(path, 'w')
 			file.write(str(content))
@@ -71,14 +67,10 @@ class lib_tools:
 		tvdb_url = 'https://thetvdb.com/?tab=series&id=%s'
 		imdb_url = 'https://www.imdb.com/title/%s/'
 		tmdb_url = 'https://www.themoviedb.org/%s/%s'
-		if 'tvdb' in ids:
-			return tvdb_url % (str(ids['tvdb']))
-		elif 'imdb' in ids:
-			return imdb_url % (str(ids['imdb']))
-		elif 'tmdb' in ids:
-			return tmdb_url % (media_string, str(ids['tmdb']))
-		else:
-			return ''
+		if 'tvdb' in ids: return tvdb_url % (str(ids['tvdb']))
+		elif 'imdb' in ids: return imdb_url % (str(ids['imdb']))
+		elif 'tmdb' in ids: return tmdb_url % (media_string, str(ids['tmdb']))
+		else: return ''
 
 
 	@staticmethod
@@ -94,7 +86,7 @@ class lib_tools:
 	@staticmethod
 	def legal_filename(filename):
 		try:
-			filename = filename.strip()
+			filename = filename.strip().replace("'", '').replace('&', 'and')
 			filename = re.sub(r'(?!%s)[^\w\-_\.]', '.', filename)
 			filename = re.sub(r'\.+', '.', filename)
 			filename = re.sub(re.compile(r'(CON|PRN|AUX|NUL|COM\d|LPT\d)\.', re.I), '\\1_', filename)
@@ -108,12 +100,15 @@ class lib_tools:
 
 	@staticmethod
 	def make_path(base_path, title, year = '', season = ''):
-		show_folder = re.sub(r'[^\w\-_\. ]', '_', title)
-		show_folder = '%s (%s)' % (show_folder, year) if year else show_folder
-		path = control.joinPath(base_path, show_folder)
-		if season:
-			path = control.joinPath(path, 'Season %s' % season)
-		return path
+		try:
+			foldername = title.strip().replace("'", '').replace('&', 'and')
+			foldername = re.sub(r'[^\w\-_\. ]', '_', foldername)
+			foldername = '%s (%s)' % (foldername, year) if year else foldername
+			path = control.joinPath(base_path, foldername)
+			if season: path = control.joinPath(path, 'Season %s' % season)
+			return path
+		except:
+			log_utils.error()
 
 
 	@staticmethod
@@ -482,11 +477,9 @@ class libmovies:
 		try:
 			title, year, imdb, tmdb = i['title'], i['year'], i['imdb'], i['tmdb']
 			systitle = quote_plus(title)
-
 			try: transtitle = title.translate(None, '\/:*?"<>|')
 			except: transtitle = title.translate(title.maketrans('', '', '\/:*?"<>|'))
 			transtitle = cleantitle.normalize(transtitle)
-
 			content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s' % (sys.argv[0], systitle, year, imdb, tmdb)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			lib_tools.create_folder(folder)
@@ -771,11 +764,9 @@ class libtvshows:
 			title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered = i['title'], i['year'], i['imdb'], i['tmdb'], i['tvdb'], i['season'], i['episode'], i['tvshowtitle'], i['premiered']
 			episodetitle = quote_plus(title)
 			systitle, syspremiered = quote_plus(tvshowtitle), quote_plus(premiered)
-
 			try: transtitle = tvshowtitle.translate(None, '\/:*?"<>|')
 			except: transtitle = tvshowtitle.translate(tvshowtitle.maketrans('', '', '\/:*?"<>|'))
 			transtitle = cleantitle.normalize(transtitle)
-
 			content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
 							sys.argv[0], episodetitle, year, imdb, tmdb, tvdb, season, episode, systitle, syspremiered)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)

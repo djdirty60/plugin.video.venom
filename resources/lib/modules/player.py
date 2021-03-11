@@ -267,7 +267,7 @@ class Player(xbmc.Player):
 						if watcher and property != '7':
 							control.homeWindow.setProperty(pname, '7')
 							playcount.markMovieDuringPlayback(self.imdb, '7')
-						# elif watcher is False and property != '6':
+						# elif watcher is False and property != '6': # removes any previousely watched indicator, NO
 							# control.homeWindow.setProperty(pname, '6')
 							# playcount.markMovieDuringPlayback(self.imdb, '6')
 					except: continue
@@ -278,7 +278,7 @@ class Player(xbmc.Player):
 						if watcher and property != '7':
 							control.homeWindow.setProperty(pname, '7')
 							playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '7')
-						# elif watcher is False and property != '6':
+						# elif watcher is False and property != '6':# removes any previousely watched indicator, NO
 							# control.homeWindow.setProperty(pname, '6')
 							# playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '6')
 					except: continue

@@ -166,8 +166,8 @@ def getShowCount(indicators, imdb, tvdb):
 				result = trakt.showCount(imdb)
 				return result
 		else:
-			return None
-			if not indicators: return None # this code for metahandler does not aply here nor does the addon offer a means to return such counts
+			return None # this code below for metahandler does not aply here nor does the addon offer a means to return such counts
+			if not indicators: return None
 			for indicator in indicators:
 				if indicator[0] == tvdb:
 					total = indicator[1]

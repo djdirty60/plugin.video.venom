@@ -1,15 +1,25 @@
+[B][COLOR red]Update - v4.4.4 - March 11, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Note TMDBHelper player files have been updated.  Be sure
+    to update via the TMDBHelper settings.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed TMDBHelper playback of library files(.strm) when
+    TMDBHelper is set to "Automatically play local files".[/I]
+[COLOR yellow]--[/COLOR][I] Few tweaks to some annoying folder and file names used for
+    library integration. Ex. "&" was replaced with an underscore,
+    now replaced with the word "and".  Apostrophes in names
+    were being replaces with a "."(dot), now just removed.[/I]
+
 [B][COLOR red]Update - v4.4.3 - March 10, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Downloader module, missed py3 cases for Kodi Matrix.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Library Integration, missed py3 cases for Kodi Matrix.[/I]
 
 [B][COLOR red]Update - v4.4.2 - March 06, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed version dependecy issue.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed version dependency issue.[/I]
 
 [B][COLOR red]Update - v4.4.1 - March 06, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Matrix(py3) compatibility update.[/I]
 [COLOR yellow]--[/COLOR][I] Added copy to clipboard feature.  This is accessible from the
     context menu in source select list.  Now you can copy to
-    clipboar d url's, file names, and magnet hashes.[/I]
+    clipboard url's, file names, and magnet hashes.[/I]
 
 [B][COLOR red]Update - v4.4.0 - Feb. 18, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed renumbering of source select list for direct links when
@@ -85,7 +95,7 @@
 [COLOR yellow]--[/COLOR][I] Reworked file size sorting. Provider sorting has been removed.
     Now sorting is base on group sort option and
     (quality/size) priority sorting.[/I]
-[COLOR yellow]--[/COLOR][I] See "Source Options"-"Soures Select" for above changes.[/I]
+[COLOR yellow]--[/COLOR][I] See "Source Options"-"Source Select" for above changes.[/I]
 
 [B][COLOR red]Update - v4.3.2 - Dec. 30, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Library Update failure issue due to closed database.[/I]

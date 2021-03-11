@@ -127,7 +127,8 @@ class Sources:
 				control.condVisibility("Window.IsActive(script.extendedinfo-DialogVideoInfo-Aura.xml)") or \
 				control.condVisibility("Window.IsActive(script.extendedinfo-DialogVideoInfo-Estuary.xml)") or \
 				control.condVisibility("Window.IsActive(script.extendedinfo-DialogVideoInfo-Netflix.xml)") or \
-				control.condVisibility("Window.IsActive(DialogVideoInfo.xml)"):
+				control.condVisibility("Window.IsActive(DialogVideoInfo.xml)") or \
+				control.infoLabel('Container.PluginName') == 'plugin.video.themoviedb.helper':
 					select = '0'
 
 			title = tvshowtitle if tvshowtitle is not None else title
@@ -245,7 +246,7 @@ class Sources:
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				control.addItem(handle=syshandle, url=sysurl, listitem=item, isFolder=False)
 			except:
-				log_utils.error()
+				log_utils.error('Error addItem: ')
 		control.content(syshandle, 'files')
 		control.directory(syshandle, cacheToDisc=True)
 
@@ -355,7 +356,7 @@ class Sources:
 
 			self.errorForSources()
 		except:
-			log_utils.error()
+			log_utils.error('Error playItem: ')
 
 
 	def getSources(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, quality='HD', timeout=30):
@@ -887,7 +888,7 @@ class Sources:
 						if log_dupes: log_utils.log('Removing %s - %s (DUPLICATE LINK) ALREADY IN :: %s' % (sublist['source'], i['url'], i['provider']), level=log_utils.LOGDEBUG)
 						break
 				except:
-					log_utils.error()
+					log_utils.error('Error filter_dupes: ')
 			filter.append(i)
 		header = control.homeWindow.getProperty(self.labelProperty)
 		control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
@@ -1028,11 +1029,12 @@ class Sources:
 			except: pass
 			del progressDialog
 
-		except Exception as e:
+		except:
+			log_utils.error('Error sourcesDialog: ')
 			try: progressDialog.close()
 			except: pass
 			del progressDialog
-			log_utils.log('Error %s' % str(e), __name__, log_utils.LOGDEBUG)
+
 
 
 	def sourcesAutoPlay(self, items):
@@ -1116,9 +1118,9 @@ class Sources:
 				return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta, select='1')
 			else:
 				return player.Player().play(self.url)
-		except Exception as e:
+		except:
+			log_utils.error('Error debridPackDialog: ')
 			control.hide()
-			log_utils.log('Error debridPackDialog %s' % str(e), __name__, log_utils.LOGDEBUG)
 
 
 	def sourceInfo(self, info):
@@ -1148,7 +1150,7 @@ class Sources:
 				control.copy2clip(list[select - 1][1])
 			return
 		except:
-			log_utils.error()
+			log_utils.error('Error sourceInfo: ' )
 
 
 	def errorForSources(self):
@@ -1333,10 +1335,8 @@ class Sources:
 			from base64 import b32decode
 			from resources.lib.modules import py_tools
 			log_utils.log('base32 hash: %s' % hash, __name__, log_utils.LOGDEBUG)
-			if py_tools.isPY3:
-				hex = b32decode(hash).hex()
-			else:
-				hex = b32decode(hash).encode('hex') 
+			if py_tools.isPY3: hex = b32decode(hash).hex()
+			else: hex = b32decode(hash).encode('hex') 
 			log_utils.log('base32_to_hex: %s' % hex, __name__, log_utils.LOGDEBUG)
 			return hex
 		try:
