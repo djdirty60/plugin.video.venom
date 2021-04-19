@@ -10,21 +10,20 @@ try: #Py2
 	from urlparse import urlparse
 except ImportError: #Py3
 	from urllib.parse import urlparse
-from resources.lib.modules import cache
+from resources.lib.database import cache, metacache
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import metacache
 from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 
 
-class movies:
+class Movies:
 	def __init__(self):
 		self.count = 40
 		self.list = []
 		self.meta = []
-		disable_fanarttv = control.setting('disable.fanarttv')
+		self.disable_fanarttv = control.setting('disable.fanarttv')
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.utcnow()
 		self.lang = control.apiLanguage()['trakt']
@@ -92,16 +91,16 @@ class movies:
 				if show or 'Episode:' in item: raise Exception() # Some lists contain TV shows.
 
 				try: genre = client.parseDOM(item, 'span', attrs = {'class': 'genre'})[0]
-				except: genre = '0'
+				except: genre = ''
 				genre = ' / '.join([i.strip() for i in genre.split(',')])
 				genre = client.replaceHTMLCodes(genre)
 
 				try: mpaa = client.parseDOM(item, 'span', attrs = {'class': 'certificate'})[0]
-				except: mpaa = '0'
+				except: mpaa = ''
 				if isRatinglink and 'Short' not in genre:
 					if mpaa in ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-13', 'TV-14', 'TV-MA']:
 						raise Exception()
-				if mpaa == '' or mpaa == 'NOT_RATED': mpaa = '0'
+				if mpaa == '' or mpaa == 'NOT_RATED': mpaa = ''
 				mpaa = mpaa.replace('_', '-')
 				mpaa = client.replaceHTMLCodes(mpaa)
 
@@ -112,31 +111,32 @@ class movies:
 					from bs4 import BeautifulSoup
 					html = BeautifulSoup(item, "html.parser")
 					poster = html.find_all('img')[0]['loadlate']
-				except: poster = '0'
+				except: poster = ''
 
-				if '/nopicture/' in poster: poster = '0'
-				poster = re.sub(r'(?:_SX|_SY|_UX|_UY|_CR|_AL)(?:\d+|_).+?\.', '_SX500.', poster)
-				poster = client.replaceHTMLCodes(poster)
+				if '/nopicture/' in poster: poster = ''
+				if poster:
+					poster = re.sub(r'(?:_SX|_SY|_UX|_UY|_CR|_AL)(?:\d+|_).+?\.', '_SX500.', poster)
+					poster = client.replaceHTMLCodes(poster)
 
 				try: duration = re.findall(r'(\d+?) min(?:s|)', item)[-1]
-				except: duration = '0'
+				except: duration = ''
 
-				rating = '0'
+				rating = ''
 				try: rating = client.parseDOM(item, 'span', attrs = {'class': 'rating-rating'})[0]
 				except:
 					try: rating = client.parseDOM(rating, 'span', attrs = {'class': 'value'})[0]
 					except:
 						try: rating = client.parseDOM(item, 'div', ret='data-value', attrs = {'class': '.*?imdb-rating'})[0]
 						except: pass
-				if rating == '' or rating == '-': rating = '0'
-				if rating == '0':
+				if rating == '-': rating = ''
+				if not rating:
 					try:
 						rating = client.parseDOM(item, 'span', attrs = {'class': 'ipl-rating-star__rating'})[0]
-						if rating == '' or rating == '-': rating = '0'
+						if rating == '-': rating = ''
 					except: pass
 				rating = client.replaceHTMLCodes(rating)
 
-				votes = '0'
+				votes = ''
 				try: votes = client.parseDOM(item, 'span', attrs = {'name': 'nv'})[0]
 				except:
 					try: votes = client.parseDOM(item, 'div', ret='title', attrs = {'class': '.*?rating-list'})[0]
@@ -146,51 +146,52 @@ class movies:
 				votes = client.replaceHTMLCodes(votes)
 
 				try: director = re.findall(r'Director(?:s|):(.+?)(?:\||</div>)', item)[0]
-				except: director = '0'
+				except: director = ''
 				director = client.parseDOM(director, 'a')
 				director = ' / '.join(director)
 				director = client.replaceHTMLCodes(director) # check if this needs ensure_str()
 
-				plot = '0'
+				plot = ''
 				try: plot = client.parseDOM(item, 'p', attrs = {'class': 'text-muted'})[0]
 				except:
 					try: plot = client.parseDOM(item, 'div', attrs = {'class': 'item_description'})[0]
 					except: pass
 				plot = plot.rsplit('<span>', 1)[0].strip()
 				plot = re.sub(r'<.+?>|</.+?>', '', plot)
-				if plot == '': plot = '0'
-				if plot == '0':
+				if not plot:
 					try:
 						plot = client.parseDOM(item, 'div', attrs = {'class': 'lister-item-content'})[0] # not sure on this, check html
 						plot = re.sub(r'<p\s*class="">', '<p class="plot_">', plot)
 						plot = client.parseDOM(plot, 'p', attrs = {'class': 'plot_'})[0]
 						plot = re.sub(r'<.+?>|</.+?>', '', plot)
-						if plot == '': plot = '0'
 					except: pass
 				plot = client.cleanHTML(plot)
 
-				item = {}
-				item = {'content': 'movie', 'title': title, 'originaltitle': title, 'year': year, 'premiered': premiered,
-						'studio': '0', 'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa,
+				values = {}
+				values = {'content': 'movie', 'title': title, 'originaltitle': title, 'year': year, 'premiered': premiered,
+						'studio': '', 'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa,
 						'director': director, 'writer': writer, 'cast': cast, 'plot': plot, 'code': tmdb,
-						'imdb': imdb, 'tmdb': tmdb, 'tvdb': '0', 'poster': poster, 'poster2': '0', 'poster3': '0', 'banner': '0',
-						'fanart': '0', 'fanart2': '0', 'fanart3': '0', 'clearlogo': '0', 'clearart': '0', 'landscape': '0',
+						'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'poster': poster, 'poster2': '', 'poster3': '', 'banner': '',
+						'fanart': '', 'fanart2': '', 'fanart3': '', 'clearlogo': '', 'clearart': '', 'landscape': '',
 						'metacache': False, 'next': next}
-				meta = {}
-				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '0', 'lang': self.lang, 'user': self.tmdb_key, 'item': item}
+				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.tmdb_key, 'item': values}
 
-				if disable_fanarttv != 'true':
+				if self.disable_fanarttv != 'true':
 					from resources.lib.indexers import fanarttv
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art:
-						item.update(extended_art)
-						meta.update(item)
+						values.update(extended_art)
+						meta.update(values)
 
-				self.list.append(item)
+				values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '')
+				self.list.append(values)
+
+				if 'next' in meta.get('item'): del meta['item']['next'] # next can not exist in metacache
 				self.meta.append(meta)
-				metacache.insert(self.meta)
+				self.meta = [i for i in self.meta if i.get('tmdb')] # without this ui removed missing tmdb but it still writes these cases to metacache?
+				metacache.insert(self.meta) # don't insert until cleaned up and can also be fetched.
 			except:
-				pass
+				log_utils.error()
 		return self.list
 
 
@@ -250,122 +251,105 @@ class movies:
 	def super_info(self, i):
 		try:
 			if self.list[i]['metacache']: 	return
-			imdb = self.list[i]['imdb'] or '0'
-			tmdb = self.list[i]['tmdb'] or '0'
+			imdb = self.list[i].get('imdb') ; tmdb = self.list[i].get('tmdb')
 			try:
-				item = tmdb_indexer.Movies().get_details(tmdb, imdb)  # api claims int rq'd.  But imdb_id works for movies but not looking like it does for shows
-				if not item and (tmdb == '0' and imdb != '0'):
+				item = tmdb_indexer.Movies().get_movie_request(tmdb, imdb)  # api claims int rq'd.  But imdb_id works for movies but not looking like it does for shows
+				if not item and (not tmdb and imdb):
 					trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
 					if trakt_ids:
-						tmdb = str(trakt_ids.get('tmdb', '0'))
-						if not tmdb or tmdb == 'None': tmdb = '0'
-						else:
-							item = tmdb_indexer.Movies().get_details(tmdb, '0')
+						tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
+						if tmdb: item = tmdb_indexer.Movies().get_movie_request(tmdb, '')
 				if not item:
-					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)[0]
+					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
 					if results:
-						if tmdb == '0': tmdb = str(results.get('movie').get('ids').get('tmdb', '0'))
-						if imdb == '0': imdb = str(results.get('movie').get('ids').get('imdb', '0'))
-						item = tmdb_indexer.Movies().get_details(tmdb, imdb)
+						ids = results[0].get('movie').get('ids')
+						if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
+						if not imdb: imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
+						item = tmdb_indexer.Movies().get_movie_request(tmdb, imdb)
 						if not item: return
 					else: return
 			except:
 				log_utils.error()
 				return
-
-			title = py_tools.ensure_str(item.get('title'))
+			title = item.get('title') or self.list[i]['title']
+			title = py_tools.ensure_str(title)
 			originaltitle = title
 
 #add these so sources module may not have to make a trakt api request
 			# aliases = item.get('alternative_titles').get('titles')
 			# log_utils.log('aliases = %s' % str(aliases), __name__, log_utils.LOGDEBUG)
 
-			if imdb == '0' or imdb is None:
-				imdb = item.get('imdb_id', '0')
-				if not imdb or imdb == 'None': imdb = '0'
-			if tmdb == '0' or tmdb is None:
-				tmdb = str(item.get('id'))
+			if not imdb: imdb = str(item.get('imdb_id', '')) if item.get('imdb_id') else ''
+			if not tmdb: tmdb = str(item.get('id', '')) if item.get('id') else ''
 
-			if 'year' not in self.list[i] or self.list[i]['year'] == '0':
-				year = str(item.get('release_date')[:4])
-			else: year = self.list[i]['year'] or '0'
+			if 'year' not in self.list[i] or not self.list[i]['year']:
+				year = str(item.get('release_date')[:4]) if item.get('release_date') else ''
+			else: year = self.list[i]['year']
 
-			if 'premiered' not in self.list[i] or self.list[i]['premiered'] == '0': # imdb and tmdb difffer often
-				premiered = item.get('release_date')
+			if 'premiered' not in self.list[i] or not self.list[i]['premiered']:
+				premiered = item.get('release_date', '')
 			else: premiered = self.list[i]['premiered']
 
 			if premiered and year not in premiered: # hack fix for imdb vs. tmdb mismatch without a new request.
 				premiered = premiered.replace(premiered[:4], year)
 
-			if 'genre' not in self.list[i] or self.list[i]['genre'] == '0' or self.list[i]['genre'] == 'NA':
+			if 'genre' not in self.list[i] or not self.list[i]['genre']:
 				genre = []
-				for x in item['genres']:
-					genre.append(x.get('name'))
-				if genre == []: genre = 'NA'
+				for x in item['genres']: genre.append(x.get('name'))
 			else: genre = self.list[i]['genre']
 
-			if 'duration' not in self.list[i] or self.list[i]['duration'] == '0':
-				duration = str(item.get('runtime', '0'))
+			if 'duration' not in self.list[i] or not self.list[i]['duration']:
+				duration = str(item.get('runtime', '')) if item.get('runtime') else ''
 			else: duration = self.list[i]['duration']
 
-			if 'rating' not in self.list[i] or self.list[i]['rating'] == '0':
-				rating = str(item.get('vote_average', '0'))
+			if 'rating' not in self.list[i] or not self.list[i]['rating']:
+				rating = str(item.get('vote_average', '')) if item.get('vote_average') else ''
 			else: rating = self.list[i]['rating']
 
-			if 'votes' not in self.list[i] or self.list[i]['votes'] == '0':
-				votes = str(format(int(item.get('vote_count', '0')),',d'))
+			if 'votes' not in self.list[i] or not self.list[i]['votes']:
+				votes = str(item.get('vote_count', '')) if item.get('vote_count') else ''
 			else: votes = self.list[i]['votes']
 
-			if 'mpaa' not in self.list[i] or self.list[i]['mpaa'] == '0' or self.list[i]['mpaa'] == 'NR':
-				mpaa = item['release_dates']['results']
-				mpaa = [x for x in mpaa if x['iso_3166_1'] == 'US']
+			if 'mpaa' not in self.list[i] or not self.list[i]['mpaa']:
+				rel_info = [x for x in item['release_dates']['results'] if x['iso_3166_1'] == 'US'][0]
 				try:
-					mpaa = mpaa[0].get('release_dates')[-1].get('certification')
-					if not mpaa:
-						mpaa = mpaa[0].get('release_dates')[0].get('certification')
-						if not mpaa:
-							mpaa = mpaa[0].get('release_dates')[1].get('certification')
-					mpaa = str(mpaa)
-				except: mpaa = '0'
+					mpaa = ''
+					for cert in rel_info.get('release_dates', {}):
+						if cert['certification']: # loop thru all keys
+							mpaa = cert['certification']
+							break
+				except: mpaa = ''
 			else: mpaa = self.list[i]['mpaa']
 
-			if 'plot' not in self.list[i] or self.list[i]['plot'] == '0': plot = item.get('overview')
+			if 'plot' not in self.list[i] or not self.list[i]['plot']:
+				plot = py_tools.ensure_str(item.get('overview'))
 			else: plot = self.list[i]['plot']
-			plot = py_tools.ensure_str(plot)
 
 			try:
 				trailer = [x for x in item['videos']['results'] if x['site'] == 'YouTube' and x['type'] == 'Trailer'][0]['key']
 				trailer = control.trailer % trailer
 			except: trailer = ''
 
-			castandart = []
-			director = writer = '0'
-			poster3 = fanart3 = '0'
+			director = writer = ''
+			poster3 = fanart3 = ''
 
+			castandart = []
 			for person in item['credits']['cast']:
-				try:
-					# try:
-						# castandart.append({'name': person['name'].encode('utf-8'), 'role': person['character'].encode('utf-8'), 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})
-					# except:
-						# castandart.append({'name': person['name'], 'role': person['character'], 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})
-					castandart.append({'name': person['name'], 'role': person['character'], 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})
-				except: castandart = []
+				try: castandart.append({'name': person['name'], 'role': person['character'], 'thumbnail': ((self.profile_path + person.get('profile_path')) if person.get('profile_path') else '')})
+				except: pass
 				if len(castandart) == 150: break
 
-			for person in item['credits']['crew']:
-				if 'Director' in person['job']:
-					# director = ', '.join([director['name'].encode('utf-8') for director in item['credits']['crew'] if director['job'].lower() == 'director'])
-					director = ', '.join([director['name'] for director in item['credits']['crew'] if director['job'].lower() == 'director'])
-				if person['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']:
-					# writer = ', '.join([writer['name'].encode('utf-8') for writer in item['credits']['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
-					writer = ', '.join([writer['name'] for writer in item['credits']['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
+			crew = item.get('credits', {}).get('crew')
+			try: director = ', '.join([d['name'] for d in [x for x in crew if x['job'] == 'Director']])
+			except: director = ''
+			try: writer = ', '.join([w['name'] for w in [y for y in crew if y['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']]])
+			except: writer = ''
 
-			poster3 = '%s%s' % (self.tmdb_poster, item['poster_path']) if item['poster_path'] else '0'
-			fanart3 = '%s%s' % (self.tmdb_fanart, item['backdrop_path']) if item['backdrop_path'] else '0'
+			poster3 = '%s%s' % (self.tmdb_poster, item['poster_path']) if item['poster_path'] else ''
+			fanart3 = '%s%s' % (self.tmdb_fanart, item['backdrop_path']) if item['backdrop_path'] else ''
 
 			try:
-				if self.lang == 'en' or self.lang not in item.get('available_translations', [self.lang]):
-					raise Exception()
+				if self.lang == 'en' or self.lang not in item.get('available_translations', [self.lang]): raise Exception()
 				trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
 				title = trans_item.get('title') or title
 				plot = trans_item.get('overview') or plot
@@ -374,23 +358,17 @@ class movies:
 
 			item = {'title': title, 'originaltitle': originaltitle, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'premiered': premiered,
 						'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa, 'director': director,
-						'writer': writer, 'castandart': castandart, 'plot': plot, 'poster2': '0', 'poster3': poster3,
-						'banner': '0', 'banner2': '0', 'fanart2': '0', 'fanart3': fanart3, 'clearlogo': '0', 'clearart': '0', 'landscape': '0',
-						'discart': '0', 'mediatype': 'movie', 'trailer': trailer, 'metacache': False}
-			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '0', 'lang': self.lang, 'user': self.user, 'item': item}
-
+						'writer': writer, 'castandart': castandart, 'plot': plot, 'poster2': '', 'poster3': poster3,
+						'banner': '', 'banner2': '', 'fanart2': '', 'fanart3': fanart3, 'clearlogo': '', 'clearart': '', 'landscape': '',
+						'discart': '', 'mediatype': 'movie', 'trailer': trailer, 'metacache': False}
 			if self.disable_fanarttv != 'true':
 				from resources.lib.indexers import fanarttv
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
-				if extended_art:
-					item.update(extended_art)
-					meta.update(item)
-
-			if item.get('landscape', '0') == '0':
-				item.update({'landscape': fanart3})
-				meta.update(item)
-			item = dict((k, v) for k, v in control.iteritems(item) if v and v != '0')
+				if extended_art: item.update(extended_art)
+			if not item.get('landscape'): item.update({'landscape': fanart3})
+			item = dict((k, v) for k, v in control.iteritems(item) if v is not None and and v != '')
 			self.list[i].update(item)
+			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': item}
 			self.meta.append(meta)
 		except:
 			log_utils.error()
@@ -401,6 +379,7 @@ class tvshows:
 		self.count = 40
 		self.list = []
 		self.meta = []
+		self.disable_fanarttv = control.setting('disable.fanarttv')
 
 		self.lang = control.apiLanguage()['tvdb']
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))

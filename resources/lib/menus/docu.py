@@ -3,20 +3,18 @@
 	Venom Add-on
 """
 
-
 import re
 import requests
 import sys
 import xbmcgui
-
-try:
+try: #Py2
 	from urllib import quote_plus
-except:
+except ImportError: #Py3
 	from urllib.parse import quote_plus
-from resources.lib.modules import log_utils
-from resources.lib.modules import cache
+from resources.lib.database import cache
 from resources.lib.modules import client
 from resources.lib.modules import control
+from resources.lib.modules import log_utils
 
 artPath = control.artPath()
 addonFanart = control.addonFanart()
@@ -28,11 +26,9 @@ class documentary:
 		self.docu_link = 'https://topdocumentaryfilms.com/'
 		self.docu_cat_list = 'https://topdocumentaryfilms.com/watch-online/'
 
-
 	def root(self):
 		try:
 			html = client.request(self.docu_cat_list)
-
 			cat_list = client.parseDOM(html, 'div', attrs={'class':'sitemap-wraper clear'})
 			for content in cat_list:
 				cat_info = client.parseDOM(content, 'h2')[0]
@@ -47,15 +43,14 @@ class documentary:
 				self.list.append({'name': cat_title, 'url': cat_url, 'image': cat_icon, 'action': cat_action})
 		except Exception as e:
 			log_utils.log('documentary root : Exception - ' + str(e), level=log_utils.LOGERROR)
-		self.list = self.list[::-1]
+		# self.list = self.list[::-1]
+		self.list = list(reversed(self.list))
 		self.addDirectory(self.list)
 		return self.list
-
 
 	def docu_list(self, url):
 		try:
 			html = client.request(url)
-
 			cat_list = client.parseDOM(html, 'article', attrs={'class':'module'})
 			for content in cat_list:
 				docu_info = client.parseDOM(content, 'h2')[0]
@@ -67,7 +62,6 @@ class documentary:
 					docu_icon = client.parseDOM(content, 'img', ret='src')[0]
 				docu_action = 'docuHeaven&docuPlay=%s' % docu_url
 				self.list.append({'name': docu_title, 'url': docu_url, 'image': docu_icon, 'action': docu_action})
-
 			try:
 				navi_content = client.parseDOM(html, 'div', attrs={'class':'pagination module'})[0]
 				links = client.parseDOM(navi_content, 'a', ret='href')
@@ -81,7 +75,6 @@ class documentary:
 		self.addDirectory(self.list)
 		return self.list
 
-
 	def docu_play(self, url):
 		try:
 			docu_page = client.request(url)
@@ -89,10 +82,8 @@ class documentary:
 			if 'http:' not in docu_item and  'https:' not in docu_item:
 				docu_item = 'https:' + docu_item
 			url = docu_item
-
 			# docu_title = client.parseDOM(docu_page, 'meta', attrs={'property':'og:title'}, ret='content')[0].encode('utf-8', 'ignore').decode('utf-8').replace("&amp;","&").replace('&#39;',"'").replace('&quot;','"').replace('&#39;',"'").replace('&#8211;',' - ').replace('&#8217;',"'").replace('&#8216;',"'").replace('&#038;','&').replace('&acirc;','')
 			docu_title = client.parseDOM(docu_page, 'meta', attrs={'property':'og:title'}, ret='content')[0].replace("&amp;","&").replace('&#39;',"'").replace('&quot;','"').replace('&#39;',"'").replace('&#8211;',' - ').replace('&#8217;',"'").replace('&#8216;',"'").replace('&#038;','&').replace('&acirc;','')
-
 			if 'youtube' in url:
 				if 'videoseries' not in url:
 					video_id = client.parseDOM(docu_page, 'div', attrs={'class':'youtube-player'}, ret='data-id')[0]
@@ -105,7 +96,6 @@ class documentary:
 				log_utils.log('Play Documentary: Unknown Host: ' + str(url), level=log_utils.LOGDEBUG)
 				control.notification(message='Unknown Host - Report To Developer: ' + str(url))
 			control.execute('PlayMedia(%s)' % url)
-
 			# item = xbmcgui.ListItem(str(docu_title), iconImage='DefaultVideo.png', thumbnailImage='DefaultVideo.png') # iconImage and thumbnailImage removed in Kodi Matrix
 			# item.setInfo(type='video', infoLabels={'Title': str(docu_title), 'Plot': str(docu_title)})
 			# item.setProperty('IsPlayable','true')
@@ -114,13 +104,11 @@ class documentary:
 		except Exception as e:
 			log_utils.log('docu_play: Exception - ' + str(e), level=log_utils.LOGERROR)
 
-
 	def sort_key(self, elem):
 		if elem[0] == "auto":
 			return 1
 		else:
 			return int(elem[0].split("@")[0])
-
 
 	# Code originally written by gujal, as part of the DailyMotion Addon in the official Kodi Repo. Modified to fit the needs here.
 	def getDailyMotionStream(self, id):
@@ -138,23 +126,18 @@ class documentary:
 			cc = sorted(cc,key=self.sort_key,reverse=True)
 			m_url = ''
 			other_playable_url = []
-
 			for source,json_source in cc:
 				source = source.split("@")[0]
 				for item in json_source:
-
 					m_url = item.get('url',None)
-
 					if m_url:
 						if source == "auto" : continue
 						elif  int(source) <= 2 :
 							if 'video' in item.get('type', None): return m_url
 						elif '.mnft' in m_url: continue
 						other_playable_url.append(m_url)
-
 			if len(other_playable_url) >0: # probably not needed, only for last resort
 				for m_url in other_playable_url:
-
 					if '.m3u8?auth' in m_url:
 						rr = requests.get(m_url, cookies=r.cookies.get_dict() ,headers=headers)
 						if rr.headers.get('set-cookie'):
@@ -164,41 +147,32 @@ class documentary:
 							strurl = re.findall(r'(http.+)', rr.text)[0].split('#cell')[0]
 						return strurl
 
-
 	def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True):
 		try: name = control.lang(name)
 		except: pass
-
-		sysaddon = sys.argv[0]
-		syshandle = int(sys.argv[1])
-
+		sysaddon = sys.argv[0] ; syshandle = int(sys.argv[1])
 		url = '%s?action=%s' % (sysaddon, query) if isAction is True else query
 		thumb = control.joinPath(artPath, thumb) if artPath is not None else icon
-
 		cm = []
 		if queue:
 			cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 		if context:
 			cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
-
-		item = control.item(label=name)
+		item = control.item(label=name, offscreen=True)
 		item.addContextMenuItems(cm)
 		item.setArt({'icon': thumb, 'thumb': thumb, 'fanart': addonFanart})
 		control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
-
 
 	def endDirectory(self):
 		syshandle = int(sys.argv[1])
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)
 
-
 	def addDirectory(self, items, queue=False, isFolder=True):
 		if items is None or len(items) == 0: 
 			control.hide()
 			control.notification(title=32002, message=33049)
 			sys.exit()
-
 		sysaddon = sys.argv[0]
 		syshandle = int(sys.argv[1])
 		addonThumb = control.addonThumb()
@@ -206,20 +180,16 @@ class documentary:
 		queueMenu = control.lang(32065)
 		playRandom = control.lang(32535)
 		addToLibrary = control.lang(32551)
-
 		for i in items:
 			try:
 				name = i['name']
-
 				if i['image'].startswith('http'):
 					thumb = i['image']
 				elif artPath:
 					thumb = control.joinPath(artPath, i['image'])
 				else:
 					thumb = addonThumb
-
-				item = control.item(label=name)
-
+				item = control.item(label=name, offscreen=True)
 				if isFolder:
 					url = '%s?action=%s' % (sysaddon, i['action'])
 					try: url += '&url=%s' % quote_plus(i['url'])
@@ -232,10 +202,8 @@ class documentary:
 					item.setProperty('IsPlayable', 'true')
 					item.setInfo("mediatype", "video")
 					item.setInfo("audio", '')
-
 				item.setArt({'icon': thumb, 'thumb': thumb, 'fanart': control.addonFanart()})
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 			except: pass
-
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)

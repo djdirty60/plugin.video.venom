@@ -34,7 +34,7 @@ class Trailer:
 			title = control.infoLabel('ListItem.Title')
 			if not title: title = control.infoLabel('ListItem.Label')
 			icon = control.infoLabel('ListItem.Icon')
-			item = control.item(label=title)
+			item = control.item(label=title, offscreen=True)
 			item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'thumb': icon,})
 			item.setInfo(type='video', infoLabels={'title': title})

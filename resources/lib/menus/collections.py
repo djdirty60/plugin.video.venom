@@ -6,25 +6,23 @@
 from datetime import datetime, timedelta
 from json import dumps as jsdumps
 import re
-import sys
+from sys import argv
 try: #Py2
 	from urllib import quote_plus
 	from urlparse import parse_qsl, urlparse
-except ImportError:  #Py3
+except ImportError: #Py3
 	from urllib.parse import quote_plus, parse_qsl, urlparse
-
-from resources.lib.modules import cache
+from resources.lib.database import cache, metacache
+from resources.lib.indexers import tmdb as tmdb_indexer
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import metacache
 from resources.lib.modules import playcount
 from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 from resources.lib.modules import workers
-from resources.lib.indexers import tmdb as tmdb_indexer
 
 
 class Collections:
@@ -45,8 +43,6 @@ class Collections:
 		self.user = str(self.tmdb_key)
 
 		self.tmdb_link = 'https://api.themoviedb.org'
-		self.tmdb_poster = 'https://image.tmdb.org/t/p/w300'
-		self.tmdb_fanart = 'https://image.tmdb.org/t/p/w1280'
 		self.tmdb_api_link = 'https://api.themoviedb.org/4/list/%s?api_key=%s&sort_by=release_date.asc&page=1' % ('%s', self.tmdb_key)
 		self.imdb_link = 'https://www.imdb.com'
 
@@ -695,6 +691,7 @@ class Collections:
 
 
 	def get(self, url, idx=True):
+		self.list = []
 		try:
 			try: url = getattr(self, url + '_link')
 			except: pass
@@ -709,6 +706,7 @@ class Collections:
 			elif u in self.imdb_link:
 				self.list = cache.get(self.imdb_list, 168, url)
 				if idx: self.worker()
+			if self.list is None: self.list = []
 			if idx: self.movieDirectory(self.list)
 			return self.list
 		except:
@@ -724,15 +722,12 @@ class Collections:
 			result = result.replace('\n', ' ')
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
-		except:
-			log_utils.error()
-			return
+		except: return
 
 		next = ''
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
 			result = result.replace('"class="lister-page-next', '" class="lister-page-next')
-			# next = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'lister-page-next.+?'})
 			next = client.parseDOM(result, 'a', ret='href', attrs = {'class': '.*?lister-page-next.*?'})
 			if len(next) == 0:
 				next = client.parseDOM(result, 'div', attrs = {'class': 'pagination'})[0]
@@ -746,91 +741,13 @@ class Collections:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
 				title = py_tools.ensure_str(title)
-
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
 				try: year = re.findall(r'(\d{4})', year[0])[0]
 				except: continue
 				if int(year) > int((self.date_time).strftime('%Y')): continue
-
-				try: show = '–'.decode('utf-8') in str(year).decode('utf-8') or '-'.decode('utf-8') in str(year).decode('utf-8') # check with Matrix
-				except: show = False
-				if show or 'Episode:' in item: raise Exception() # Some lists contain TV shows.
-
-				try: genre = client.parseDOM(item, 'span', attrs = {'class': 'genre'})[0]
-				except: genre = '0'
-				genre = ' / '.join([i.strip() for i in genre.split(',')])
-				if genre == '': genre = '0'
-				genre = client.replaceHTMLCodes(genre)
-
-				try: mpaa = client.parseDOM(item, 'span', attrs = {'class': 'certificate'})[0]
-				except: mpaa = '0'
-				if isRatinglink and 'Short' not in genre:
-					if mpaa in ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-13', 'TV-14', 'TV-MA']:
-						raise Exception()
-				if mpaa == '' or mpaa == 'NOT_RATED': mpaa = '0'
-				mpaa = mpaa.replace('_', '-')
-				mpaa = client.replaceHTMLCodes(mpaa)
-
 				imdb = client.parseDOM(item, 'a', ret='href')[0]
 				imdb = re.findall(r'(tt\d*)', imdb)[0]
-
-				# parseDOM cannot handle elements without a closing tag.
-				try:
-					from bs4 import BeautifulSoup
-					html = BeautifulSoup(item, "html.parser")
-					poster = html.find_all('img')[0]['loadlate']
-				except: poster = '0'
-
-				if '/nopicture/' in poster: poster = '0'
-				poster = re.sub(r'(?:_SX|_SY|_UX|_UY|_CR|_AL)(?:\d+|_).+?\.', '_SX500.', poster)
-				poster = client.replaceHTMLCodes(poster)
-
-				try: duration = re.findall(r'(\d+?) min(?:s|)', item)[-1]
-				except: duration = '0'
-
-				rating = '0'
-				try: rating = client.parseDOM(item, 'span', attrs = {'class': 'rating-rating'})[0]
-				except:
-					try: rating = client.parseDOM(rating, 'span', attrs = {'class': 'value'})[0]
-					except:
-						try: rating = client.parseDOM(item, 'div', ret='data-value', attrs = {'class': '.*?imdb-rating'})[0]
-						except: pass
-				if rating == '' or rating == '-': rating = '0'
-				if rating == '0':
-					try:
-						rating = client.parseDOM(item, 'span', attrs = {'class': 'ipl-rating-star__rating'})[0]
-						if rating == '' or rating == '-': rating = '0'
-					except: pass
-				rating = client.replaceHTMLCodes(rating)
-
-				votes = '0'
-				try: votes = client.parseDOM(item, 'span', attrs = {'name': 'nv'})[0]
-				except:
-					try: votes = client.parseDOM(item, 'div', ret='title', attrs = {'class': '.*?rating-list'})[0]
-					except:
-						try: votes = re.findall(r'\((.+?) vote(?:s|)\)', votes)[0]
-						except: pass
-				if votes == '': votes = '0'
-				votes = client.replaceHTMLCodes(votes)
-
-				try: director = re.findall(r'Director(?:s|):(.+?)(?:\||</div>)', item)[0]
-				except: director = '0'
-				director = client.parseDOM(director, 'a')
-				director = ' / '.join(director)
-				if director == '': director = '0'
-				director = client.replaceHTMLCodes(director)
-				# director = director.encode('utf-8')
-
-				plot = '0'
-				try: plot = client.parseDOM(item, 'p', attrs = {'class': 'text-muted'})[0]
-				except:
-					try: plot = client.parseDOM(item, 'div', attrs = {'class': 'item_description'})[0]
-					except: plot = client.parseDOM(item, 'p', attrs = {'class': '""'})[0]
-				plot = client.cleanHTML(plot)
-
-				list.append({'title': title, 'originaltitle': title, 'year': year, 'premiered': '0', 'genre': genre, 'duration': duration, 'rating': rating,
-									'votes': votes, 'mpaa': mpaa, 'director': director, 'writer': '0', 'plot': plot, 'imdb': imdb,
-									'tmdb': '0', 'tvdb': '0', 'poster': poster, 'fanart': '0', 'next': next})
+				list.append({'title': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '', 'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
 			except:
 				log_utils.error()
 		return list
@@ -851,8 +768,9 @@ class Collections:
 				[i.start() for i in threads]
 				[i.join() for i in threads]
 			if self.meta:
+				self.meta = [i for i in self.meta if i.get('tmdb')] # without this "self.list=" below removes missing tmdb but here still writes these cases to metacache?
 				metacache.insert(self.meta)
-			self.list = [i for i in self.list if (i['imdb'] and i['tmdb'] != '0')]
+			self.list = [i for i in self.list if i.get('tmdb')]
 		except:
 			log_utils.error()
 
@@ -860,183 +778,78 @@ class Collections:
 	def super_imdb_info(self, i):
 		try:
 			if self.list[i]['metacache']: 	return
-			imdb = self.list[i]['imdb'] or '0'
-			tmdb = self.list[i]['tmdb'] or '0'
-			try:
-				item = tmdb_indexer.Movies().get_details(tmdb, imdb)  # api claims int rq'd.  But imdb_id works for movies but not looking like it does for shows
-				if not item and (tmdb == '0' and imdb != '0'):
-					trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
-					if trakt_ids:
-						tmdb = str(trakt_ids.get('tmdb', '0'))
-						if not tmdb or tmdb == 'None': tmdb = '0'
-						else: item = tmdb_indexer.Movies().get_details(tmdb, '0')
-				if not item:
-					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
-					if results:
-						if tmdb == '0': tmdb = str(results[0].get('movie').get('ids').get('tmdb', '0'))
-						if imdb == '0': imdb = str(results[0].get('movie').get('ids').get('imdb', '0'))
-						item = tmdb_indexer.Movies().get_details(tmdb, imdb)
-						if not item: return
-					else: return
-			except:
-				log_utils.error()
-				return
-
-			title = item.get('title') or self.list[i]['title']
-			title = py_tools.ensure_str(title)
-			originaltitle = title
-
-#add these so sources module may not have to make a trakt api request
-			# aliases = item.get('alternative_titles').get('titles')
-			# log_utils.log('aliases = %s' % str(aliases), __name__, log_utils.LOGDEBUG)
-
-			if imdb == '0' or imdb is None:
-				imdb = item.get('imdb_id', '0')
-				if not imdb or imdb == 'None': imdb = '0'
-			if tmdb == '0' or tmdb is None:
-				tmdb = str(item.get('id'))
-
-			if 'year' not in self.list[i] or self.list[i]['year'] == '0':
-				year = str(item.get('release_date')[:4])
-			else: year = self.list[i]['year'] or '0'
-
-			if 'premiered' not in self.list[i] or self.list[i]['premiered'] == '0': # imdb and tmdb difffer often
-				premiered = item.get('release_date')
-			else: premiered = self.list[i]['premiered']
-
-			if premiered and year not in premiered: # hack fix for imdb vs. tmdb mismatch without a new request.
-				premiered = premiered.replace(premiered[:4], year)
-
-			if 'genre' not in self.list[i] or self.list[i]['genre'] == '0' or self.list[i]['genre'] == 'NA':
-				genre = []
-				for x in item['genres']:
-					genre.append(x.get('name'))
-				if genre == []: genre = 'NA'
-			else: genre = self.list[i]['genre']
-
-			if 'duration' not in self.list[i] or self.list[i]['duration'] == '0':
-				duration = str(item.get('runtime', '0'))
-			else: duration = self.list[i]['duration']
-
-			if 'rating' not in self.list[i] or self.list[i]['rating'] == '0':
-				rating = str(item.get('vote_average', '0'))
-			else: rating = self.list[i]['rating']
-
-			if 'votes' not in self.list[i] or self.list[i]['votes'] == '0':
-				votes = str(format(int(item.get('vote_count', '0')),',d'))
-			else: votes = self.list[i]['votes']
-
-			if 'mpaa' not in self.list[i] or self.list[i]['mpaa'] == '0' or self.list[i]['mpaa'] == 'NR':
-				mpaa = item['release_dates']['results']
-				mpaa = [x for x in mpaa if x['iso_3166_1'] == 'US']
+			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '')
+#### -- Missing id's lookup -- ####
+			if not tmdb and imdb:
 				try:
-					mpaa = mpaa[0].get('release_dates')[-1].get('certification')
-					if not mpaa:
-						mpaa = mpaa[0].get('release_dates')[0].get('certification')
-						if not mpaa:
-							mpaa = mpaa[0].get('release_dates')[1].get('certification')
-					mpaa = str(mpaa)
-				except: mpaa = '0'
-			else: mpaa = self.list[i]['mpaa']
-
-			if 'plot' not in self.list[i] or self.list[i]['plot'] == '0':
-				plot = py_tools.ensure_str(item.get('overview'))
-			else: plot = self.list[i]['plot']
-
+					result = tmdb_indexer.Movies().IdLookup(imdb)
+					tmdb = str(result.get('id', '')) if result.get('id') else ''
+				except: tmdb = ''
+			if not tmdb and imdb:
+				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
+				if trakt_ids:
+					tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
+			if not tmdb and not imdb:
+				results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
+				if results:
+					ids = results[0].get('movie').get('ids')
+					if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
+					if not imdb: imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
+				else: return
+#################################
+			if not tmdb: return
+			movie_meta = cache.get(tmdb_indexer.Movies().get_movie_meta, 96, tmdb)
+			if not movie_meta: return
+			values = {}
+			values.update(movie_meta)
+			if not imdb: imdb = values.get('imdb', '')
+			if not values.get('imdb'): values['imdb'] = imdb
+			if not values.get('tmdb'): values['tmdb'] = tmdb
 			try:
-				trailer = [x for x in item['videos']['results'] if x['site'] == 'YouTube' and x['type'] == 'Trailer'][0]['key']
-				trailer = control.trailer % trailer
-			except: trailer = ''
-
-			castandart = []
-			director = writer = '0'
-			poster3 = fanart3 = '0'
-
-			for person in item['credits']['cast']:
-				try:
-					# try:
-						# castandart.append({'name': person['name'].encode('utf-8'), 'role': person['character'].encode('utf-8'), 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})
-					# except:
-						# castandart.append({'name': person['name'], 'role': person['character'], 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})
-					castandart.append({'name': person['name'], 'role': person['character'], 'thumbnail': ((self.tmdb_poster + person.get('profile_path')) if person.get('profile_path') is not None else '0')})
-
-				except: castandart = []
-				if len(castandart) == 150: break
-
-			for person in item['credits']['crew']:
-				if 'Director' in person['job']:
-					# director = ', '.join([director['name'].encode('utf-8') for director in item['credits']['crew'] if director['job'].lower() == 'director'])
-					director = ', '.join([director['name'] for director in item['credits']['crew'] if director['job'].lower() == 'director'])
-				if person['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']:
-					# writer = ', '.join([writer['name'].encode('utf-8') for writer in item['credits']['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
-					writer = ', '.join([writer['name'] for writer in item['credits']['crew'] if writer['job'].lower() in ['writer', 'screenplay', 'author', 'novel']])
-			poster3 = '%s%s' % (self.tmdb_poster, item['poster_path']) if item['poster_path'] else '0'
-			fanart3 = '%s%s' % (self.tmdb_fanart, item['backdrop_path']) if item['backdrop_path'] else '0'
-
-			try:
-				if self.lang == 'en' or self.lang not in item.get('available_translations', [self.lang]):
-					raise Exception()
+				if self.lang == 'en' or self.lang not in values.get('available_translations', [self.lang]): raise Exception()
 				trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
 				title = trans_item.get('title') or title
 				plot = trans_item.get('overview') or plot
 			except:
 				log_utils.error()
-
-			item = {'title': title, 'originaltitle': originaltitle, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'premiered': premiered,
-						'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa, 'director': director,
-						'writer': writer, 'castandart': castandart, 'plot': plot, 'poster2': '0', 'poster3': poster3,
-						'banner': '0', 'banner2': '0', 'fanart2': '0', 'fanart3': fanart3, 'clearlogo': '0', 'clearart': '0', 'landscape': '0',
-						'discart': '0', 'mediatype': 'movie', 'trailer': trailer, 'metacache': False}
-			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '0', 'lang': self.lang, 'user': self.user, 'item': item}
-
 			if self.disable_fanarttv != 'true':
 				from resources.lib.indexers import fanarttv
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
-				if extended_art:
-					item.update(extended_art)
-					meta.update(item)
-
-			if item.get('landscape', '0') == '0':
-				item.update({'landscape': fanart3})
-				meta.update(item)
-			item = dict((k, v) for k, v in control.iteritems(item) if v and v != '0')
-			self.list[i].update(item)
+				if extended_art: values.update(extended_art)
+			values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+			self.list[i].update(values)
+			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
 		except:
 			log_utils.error()
 
 
 	def movieDirectory(self, items, next=True):
-		if not items: 
+		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide()
 			control.notification(title=32000, message=33049)
-			sys.exit()
-
-		sysaddon = sys.argv[0]
-		syshandle = int(sys.argv[1])
+		sysaddon, syshandle = argv[0], int(argv[1])
+		disable_player_art = control.setting('disable.player.art') == 'true'
+		hosts_mode = control.setting('hosts.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart')
 		addonPoster = control.addonPoster()
 		addonFanart = control.addonFanart()
 		addonBanner = control.addonBanner()
 		indicators = playcount.getMovieIndicators()
-
 		isPlayable = 'false'
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
-		elif control.setting('hosts.mode') != '1': isPlayable = 'true'
-
-		if control.setting('hosts.mode') == '2':
+		elif hosts_mode != '1': isPlayable = 'true'
+		if hosts_mode == '2':
 			playbackMenu = control.lang(32063)
 		else:
 			playbackMenu = control.lang(32064)
-
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu = control.lang(32068)
 			unwatchedMenu = control.lang(32069)
 		else:
 			watchedMenu = control.lang(32066)
 			unwatchedMenu = control.lang(32067)
-
 		playlistManagerMenu = control.lang(35522)
 		queueMenu = control.lang(32065)
 		traktManagerMenu = control.lang(32070)
@@ -1044,21 +857,17 @@ class Collections:
 
 		for i in items:
 			try:
-				imdb, tmdb, title, year = i.get('imdb', '0'), i.get('tmdb', '0'), i['title'], i.get('year', '0')
+				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
 				trailer, runtime = i.get('trailer'), i.get('duration')
-				# title = i['originaltitle'] or i['title']
 				label = '%s (%s)' % (title, year)
 				try:
 					if int(re.sub(r'[^0-9]', '', str(i['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
 						label = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, label)
 				except: pass
-
 				sysname, systitle = quote_plus(label), quote_plus(title)
-				meta = dict((k, v) for k, v in control.iteritems(i) if v and v != '0')
+				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
 				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
-				except: pass
-				try: meta.update({'duration': str(int(runtime) * 60)})
 				except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
@@ -1073,9 +882,13 @@ class Collections:
 				thumb = meta.get('thumb') or poster or landscape
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
+
 				art = {}
-				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart,
-								'clearlogo': meta.get('clearlogo'), 'clearart': meta.get('clearart'), 'landscape': landscape, 'discart': meta.get('discart')})
+				if disable_player_art and hosts_mode == '2': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
+					remove_keys = ('clearart', 'clearlogo', 'discart')
+					for k in remove_keys: meta.pop(k, None)
+				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape,
+								'clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', '')})
 				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
 				for k in remove_keys: meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
@@ -1086,15 +899,15 @@ class Collections:
 					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s)' % (sysaddon, sysname, imdb)))
 				try:
 					overlay = int(playcount.getMovieOverlay(indicators, imdb))
-					watched = (overlay == 7)
+					watched = (overlay == 5)
 					if watched:
-						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=6)' % (sysaddon, sysname, imdb)))
-						meta.update({'playcount': 1, 'overlay': 7})
+						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
+						meta.update({'playcount': 1, 'overlay': 5})
 						# lastplayed = trakt.watchedMoviesTime(imdb)
 						# meta.update({'lastplayed': lastplayed})
 					else:
-						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=7)' % (sysaddon, sysname, imdb)))
-						meta.update({'playcount': 0, 'overlay': 6})
+						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=5)' % (sysaddon, sysname, imdb)))
+						meta.update({'playcount': 0, 'overlay': 4})
 				except: pass
 
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
@@ -1105,9 +918,9 @@ class Collections:
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
 
-				if control.setting('hosts.mode') == '1':
+				if hosts_mode == '1':
 					cm.append(('Rescrape Item', 'RunPlugin(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
-				elif control.setting('hosts.mode') != '1':
+				elif hosts_mode != '1':
 					cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
@@ -1118,23 +931,22 @@ class Collections:
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
 
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
-
 				item.setArt(art)
+				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb})
 				item.setProperty('IsPlayable', isPlayable)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				from resources.lib.modules.player import Bookmarks
 				resumetime = Bookmarks().get(name=label, imdb=imdb, tmdb=tmdb, year=str(year), runtime=runtime, ck=True)
-				# item.setProperty('totaltime', str(meta['duration'])) # Adding this property causes the Kodi bookmark CM items to be added
-				item.setProperty('resumetime', str(resumetime))
+				# item.setProperty('TotalTime', str(meta['duration'])) # Adding this property causes the Kodi bookmark CM items to be added
+				item.setProperty('ResumeTime', str(resumetime))
 				try:
-					watched_percent = round(float(resumetime) / float(runtime) * 100, 1) # resumetime and runtime are both in minutes
+					watched_percent = round(float(resumetime) / float(runtime) * 100, 1) # resumetime and runtime are both in seconds
 					item.setProperty('percentplayed', str(watched_percent))
 				except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
+				item.addStreamInfo('video', {'codec': 'h264'})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
@@ -1142,19 +954,18 @@ class Collections:
 
 		if next:
 			try:
+				if not items: raise Exception()
 				url = items[0]['next']
-				if url == '': raise Exception()
+				if not url: raise Exception()
 				nextMenu = control.lang(32053)
 				url_params = dict(parse_qsl(url))
 				if 'imdb.com' in url and 'start' in url_params:
 					page = '  [I](%s)[/I]' % str(((int(url_params.get('start')) - 1) / self.count) + 1)
 				else:
 					page = '  [I](%s)[/I]' % url_params.get('page')
-
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				url = '%s?action=collections&url=%s' % (sysaddon, quote_plus(url))
-
-				item = control.item(label=nextMenu)
+				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -1172,27 +983,22 @@ class Collections:
 		except:
 			log_utils.error()
 
-		sysaddon = sys.argv[0]
-		syshandle = int(sys.argv[1])
+		sysaddon, syshandle = argv[0], int(argv[1])
 		artPath = control.artPath()
 		thumb = control.joinPath(artPath, thumb) if artPath else icon
 
 		url = '%s?action=%s' % (sysaddon, query) if isAction else query
-
 		cm = []
-		if queue:
-			cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
-		if context:
-			cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
+		if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
+		if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
 		cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-
-		item = control.item(label=name)
+		item = control.item(label=name, offscreen=True)
 		item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 		item.addContextMenuItems(cm)
 		control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 
 
 	def endDirectory(self):
-		syshandle = int(sys.argv[1])
+		syshandle = int(argv[1])
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)

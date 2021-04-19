@@ -5,24 +5,20 @@
 
 try: import AddonSignals
 except: pass
-from copy import deepcopy
 from hashlib import md5
 from json import dumps as jsdumps, loads as jsloads
 import sys
 try: from sqlite3 import dbapi2 as database
 except ImportError: from pysqlite2 import dbapi2 as database
-try: # Py2
-	from urllib import quote_plus, unquote_plus
-except ImportError: # Py3
-	from urllib.parse import quote_plus, unquote_plus
 import xbmc
+from resources.lib.database import metacache
 from resources.lib.modules import control
 from resources.lib.modules import cleantitle
 from resources.lib.modules import log_utils
-from resources.lib.modules import metacache
 from resources.lib.modules import playcount
 from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
+LOGNOTICE = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1)) = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1))
 
 
 class Player(xbmc.Player):
@@ -46,76 +42,67 @@ class Player(xbmc.Player):
 			self.media_type = 'movie' if season is None or episode is None else 'episode'
 			self.title = title
 			self.year = str(year)
-
 			if self.media_type == 'movie':
-				self.name = quote_plus(title) + quote_plus(' (%s)' % self.year) 
+				self.name = '%s (%s)' % (title, self.year)
 				self.season = None
 				self.episode = None
-
 			elif self.media_type == 'episode':
-				self.name = quote_plus(title) + quote_plus(' S%02dE%02d' % (int(season), int(episode)))
+				self.name = '%s S%02dE%02d' % (title, int(season), int(episode))
 				self.season = '%01d' % int(season)
 				self.episode = '%01d' % int(episode)
 
-			self.name = unquote_plus(self.name) # this looks dumb, quote to only unquote?
 			self.DBID = None
-			self.imdb = imdb if imdb is not None else '0'
-			self.tmdb = tmdb if tmdb is not None else '0'
-			self.tvdb = tvdb if tvdb is not None else '0'
+			self.imdb = imdb if imdb is not None else ''
+			self.tmdb = tmdb if tmdb is not None else ''
+			self.tvdb = tvdb if tvdb is not None else ''
 			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
-			self.ids = dict((k, v) for k, v in control.iteritems(self.ids) if v != '0')
-			item = control.item(path=url)
 
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
 			self.imdb_user = control.setting('imdb.user').replace('ur', '')
 			self.tmdb_key = control.setting('tmdb.api.key')
 			if not self.tmdb_key: self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
 			self.tvdb_key = control.setting('tvdb.api.key')
-
-			if self.media_type == 'episode':
-				self.user = str(self.imdb_user) + str(self.tvdb_key)
-			else:
-				self.user = str(self.tmdb_key)
+			if self.media_type == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
+			else: self.user = str(self.tmdb_key)
 			self.lang = control.apiLanguage()['tvdb']
-			items = [{'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb}]
-			items_ck = deepcopy(items)
-
 			meta1 = meta
-			meta2 = metacache.fetch(items, self.lang, self.user)[0]
+			meta2 = metacache.fetch([{'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}], self.lang, self.user)[0]
+			if meta2 != self.ids: meta2 = dict((k, v) for k, v in control.iteritems(meta2) if v is not None and v != '')
 			if meta1 is not None:
-				if len(meta2) > len(meta1): meta = meta2
-				else: meta = meta1
-			else: meta = meta2 if meta2 != items_ck[0] else meta1
-			self.meta = meta
+				try:
+					if len(meta2) > len(meta1):
+						meta2.update(meta1)
+						meta = meta2
+					else: meta = meta1
+				except: log_utils.error()
+			else: meta = meta2 if meta2 != self.ids else meta1
 ##################
-
+			self.meta = meta
 			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = self.getMeta(meta)
 			runtime = meta.get('duration') if meta else 0
 			self.offset = Bookmarks().get(name=self.name, imdb=imdb, tmdb=tmdb, tvdb=tvdb, season=season, episode=episode, year=self.year, runtime=runtime)
-
+			item = control.item(path=url)
+			item.setUniqueIDs(self.ids)
+			if control.setting('disable.player.art') == 'true':
+				remove_keys = ('clearart', 'clearlogo', 'discart')
+				for k in remove_keys: meta.pop(k, None)
 			if self.media_type == 'episode':
-				self.episodeIDS = meta.get('episodeIDS', '0')
-				item.setUniqueIDs(self.episodeIDS)
 				if control.setting('disable.player.art') == 'true':
 					item.setArt({'thumb': thumb, 'tvshow.poster': season_poster, 'season.poster': season_poster, 'tvshow.fanart': fanart})
 				else:
 					item.setArt({'tvshow.clearart': clearart, 'tvshow.clearlogo': clearlogo, 'tvshow.discart': discart, 'thumb': thumb, 'tvshow.poster': season_poster, 'season.poster': season_poster, 'tvshow.fanart': fanart})
 			else:
-				item.setUniqueIDs(self.ids)
 				if control.setting('disable.player.art') == 'true': item.setArt({'thumb': thumb, 'poster': poster, 'fanart': fanart})
 				else: item.setArt({'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
 
 			if 'castandart' in meta: item.setCast(meta.get('castandart', ''))
 			item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-
 			if 'plugin' not in control.infoLabel('Container.PluginName') or select != '1':
 				control.busy()
 				control.resolve(int(sys.argv[1]), True, item)
-
 			elif select == '1':
 				control.busy()
 				control.player.play(url, item)
-
 			control.homeWindow.setProperty('script.trakt.ids', jsdumps(self.ids))
 			self.keepAlive()
 			control.homeWindow.clearProperty('script.trakt.ids')
@@ -156,7 +143,7 @@ class Player(xbmc.Player):
 			if 'mediatype' not in meta:
 				meta.update({'mediatype': 'movie'})
 			if 'duration' not in meta:
-				meta.update({'duration': meta.get('runtime') / 60})
+				meta.update({'duration': meta.get('runtime') / 60}) # this doesn't make sense
 
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
@@ -182,14 +169,13 @@ class Player(xbmc.Player):
 			meta = [i for i in meta if self.year == str(i['year']) and t == cleantitle.get(i['title'])][0]
 			tvshowid = meta['tvshowid']
 			poster = meta['thumbnail']
-
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
 			meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['episodes'][0]
 			if 'mediatype' not in meta:
 				meta.update({'mediatype': 'episode'})
 			if 'duration' not in meta:
-				meta.update({'duration': meta.get('runtime') / 60})
+				meta.update({'duration': meta.get('runtime') / 60}) # this doesn't make sense
 
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
@@ -213,11 +199,9 @@ class Player(xbmc.Player):
 		if self.isPlayback():
 			try:
 				position = self.getTime()
-				if position != 0:
-					self.current_time = position
+				if position != 0: self.current_time = position
 				total_length = self.getTotalTime()
-				if total_length != 0:
-					self.media_length = total_length
+				if total_length != 0: self.media_length = total_length
 			except: pass
 		current_position = self.current_time
 		total_length = self.media_length
@@ -225,8 +209,7 @@ class Player(xbmc.Player):
 		if int(total_length) != 0:
 			try:
 				watched_percent = float(current_position) / float(total_length) * 100
-				if watched_percent > 100:
-					watched_percent = 100
+				if watched_percent > 100: watched_percent = 100
 			except:
 				log_utils.error()
 		return watched_percent
@@ -240,7 +223,8 @@ class Player(xbmc.Player):
 			overlay = playcount.getMovieOverlay(playcount.getMovieIndicators(), self.imdb)
 		elif self.media_type == 'episode':
 			overlay = playcount.getEpisodeOverlay(playcount.getTVShowIndicators(), self.imdb, self.tvdb, self.season, self.episode)
-		else: overlay = '6'
+		else: overlay = '4'
+
 
 		for i in range(0, 240):
 			if self.isPlayback():
@@ -264,23 +248,23 @@ class Player(xbmc.Player):
 				property = control.homeWindow.getProperty(pname)
 				if self.media_type == 'movie':
 					try:
-						if watcher and property != '7':
-							control.homeWindow.setProperty(pname, '7')
-							playcount.markMovieDuringPlayback(self.imdb, '7')
-						# elif watcher is False and property != '6': # removes any previousely watched indicator, NO
-							# control.homeWindow.setProperty(pname, '6')
-							# playcount.markMovieDuringPlayback(self.imdb, '6')
+						if watcher and property != '5':
+							control.homeWindow.setProperty(pname, '5')
+							playcount.markMovieDuringPlayback(self.imdb, '5')
+						# elif watcher is False and property != '4': # removes any previousely watched indicator, NO
+							# control.homeWindow.setProperty(pname, '4')
+							# playcount.markMovieDuringPlayback(self.imdb, '4')
 					except: continue
 					xbmc.sleep(2000)
 
 				elif self.media_type == 'episode':
 					try:
-						if watcher and property != '7':
-							control.homeWindow.setProperty(pname, '7')
-							playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '7')
-						# elif watcher is False and property != '6':# removes any previousely watched indicator, NO
-							# control.homeWindow.setProperty(pname, '6')
-							# playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '6')
+						if watcher and property != '5':
+							control.homeWindow.setProperty(pname, '5')
+							playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '5')
+						# elif watcher is False and property != '4':# removes any previousely watched indicator, NO
+							# control.homeWindow.setProperty(pname, '4')
+							# playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '4')
 					except: continue
 					xbmc.sleep(2000)
 			except:
@@ -306,7 +290,6 @@ class Player(xbmc.Player):
 				source_id = 'plugin.video.venom'
 				return_id = 'plugin.video.venom_play_action'
 				try:
-					# if int(control.playlist.getposition()) < (control.playlist.size() - 1) and not int(control.playlist.getposition()) == -1:
 					if int(control.playlist.getposition()) < (control.playlist.size() - 1):
 						if self.media_type is None: return
 						next_info = self.next_info()
@@ -354,7 +337,7 @@ class Player(xbmc.Player):
 		if control.setting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
 		self.start_playback()
-		xbmc.log('[ plugin.video.venom ] onAVStarted callback', 2)
+		xbmc.log('[ plugin.video.venom ] onAVStarted callback', LOGNOTICE)
 
 
 	def onPlayBackStarted(self):
@@ -369,7 +352,7 @@ class Player(xbmc.Player):
 		if control.setting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
 		self.start_playback()
-		xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', 2)
+		xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', LOGNOTICE)
 
 
 	def onPlayBackStopped(self):
@@ -387,7 +370,7 @@ class Player(xbmc.Player):
 			# control.sleep(500)
 		# control.playlist.clear()
 		control.trigger_widget_refresh()
-		xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', 2)
+		xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGNOTICE)
 
 
 	def onPlayBackEnded(self):
@@ -398,48 +381,56 @@ class Player(xbmc.Player):
 			# control.refresh()
 			# control.sleep(500)
 		control.trigger_widget_refresh()
-		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', 2)
+		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', LOGNOTICE)
 
 
 	def onPlayBackError(self):
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 		log_utils.error()
 		sys.exit(1)
-		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', 2)
+		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', LOGNOTICE)
 
 
 	def signals_callback(self, data):
-		if not self.play_next_triggered:
-			if not self.scrobbled:
-				try:
-					self.onPlayBackEnded()
-					self.scrobbled = True
-				except: pass
-			self.play_next_triggered = True
-			# Using a seek here as playnext causes Kodi gui to wig out. So we seek instead so it looks more graceful
-			self.seekTime(self.media_length)
+		try:
+			log_utils.log('self.play_next_triggered = %s' % self.play_next_triggered)
+			log_utils.log('data = %s' % data)
+
+			if not self.play_next_triggered:
+				if not self.scrobbled:
+					try:
+						self.onPlayBackEnded()
+						self.scrobbled = True
+					except: pass
+				self.play_next_triggered = True
+				# Using a seek here as playnext causes Kodi gui to wig out. So we seek instead so it looks more graceful
+				log_utils.log('forced AddonSignals seek')
+				self.seekTime(self.media_length)
+		except:
+			log_utils.error()
 
 
 	def next_info(self):
 		current_info = self.meta
 		current_episode = {}
-		current_episode["episodeid"] = current_info.get('episodeIDS', {}).get('trakt')
-		current_episode["tvshowid"] = current_info.get('tvdb')
-		current_episode["title"] = current_info.get('title')
+		current_episode["episodeid"] = current_info.get('tmdb_epID', '')
+		current_episode["tvshowid"] = current_info.get('tvdb', '')
+		current_episode["title"] = current_info.get('title', '')
 		current_episode["art"] = {}
-		current_episode["art"]["tvshow.poster"] = current_info.get('poster')
-		current_episode["art"]["thumb"] = current_info.get('thumb')
-		current_episode["art"]["tvshow.fanart"] = current_info.get('fanart')
-		current_episode["art"]["tvshow.landscape"] = current_info.get('fanart')
-		current_episode["art"]["tvshow.clearart"] = current_info.get('clearart')
-		current_episode["art"]["tvshow.clearlogo"] = current_info.get('clearlogo')
-		current_episode["plot"] = current_info.get('plot')
-		current_episode["showtitle"] = current_info.get('tvshowtitle')
-		current_episode["playcount"] = current_info.get('playcount')
-		current_episode["season"] = current_info.get('season')
-		current_episode["episode"] = current_info.get('episode')
-		current_episode["rating"] = current_info.get('rating')
-		current_episode["firstaired"] = current_info.get('tvshowyear')
+		current_episode["art"]["thumb"] = current_info.get('thumb', '')
+		current_episode["art"]["tvshow.clearart"] = current_info.get('clearart', '')
+		current_episode["art"]["tvshow.clearlogo"] = current_info.get('clearlogo', '')
+		current_episode["art"]["tvshow.fanart"] = current_info.get('fanart', '')
+		current_episode["art"]["tvshow.landscape"] = current_info.get('fanart', '')
+		current_episode["art"]["tvshow.poster"] = current_info.get('poster', '')
+		current_episode["season"] = current_info.get('season', '')
+		current_episode["episode"] = current_info.get('episode', '')
+		current_episode["showtitle"] = current_info.get('tvshowtitle', '')
+		current_episode["plot"] = current_info.get('plot', '')
+		current_episode["playcount"] = current_info.get('playcount', '')
+		current_episode["rating"] = current_info.get('rating', '')
+		current_episode["firstaired"] = current_info.get('premiered', '')
+		current_episode["runtime"] = current_info.get('duration', '')
 		# log_utils.log('current_episode = %s' % current_episode, __name__, log_utils.LOGDEBUG)
 
 		current_position = control.playlist.getposition()
@@ -453,28 +444,27 @@ class Player(xbmc.Player):
 		next_info = jsloads(params.get('meta'))
 
 		next_episode = {}
-		next_episode["episodeid"] = next_info.get('episodeIDS', {}).get('trakt')
-		next_episode["tvshowid"] = next_info.get('tvdb')
-		next_episode["title"] = next_info.get('title')
+		next_episode["episodeid"] = next_info.get('tmdb_epID', '')
+		next_episode["tvshowid"] = next_info.get('tvdb', '')
+		next_episode["title"] = next_info.get('title', '')
 		next_episode["art"] = {}
-		next_episode["art"]["tvshow.poster"] = next_info.get('poster')
-		next_episode["art"]["thumb"] = next_info.get('thumb')
-		next_episode["art"]["tvshow.fanart"] = next_info.get('fanart')
-		next_episode["art"]["tvshow.landscape"] = next_info.get('fanart')
-		next_episode["art"]["tvshow.clearart"] = next_info.get('clearart')
-		next_episode["art"]["tvshow.clearlogo"] = next_info.get('clearlogo')
-		next_episode["plot"] = next_info.get('plot')
-		next_episode["showtitle"] = next_info.get('tvshowtitle')
-		next_episode["playcount"] = next_info.get('playcount')
-		next_episode["season"] = next_info.get('season')
-		next_episode["episode"] = next_info.get('episode')
-		next_episode["rating"] = next_info.get('rating')
-		next_episode["firstaired"] = next_info.get('tvshowyear')
-		next_episode["tvshowimdb"] = next_info.get('imdb')
-		next_episode["year"] = next_info.get('year')
+		next_episode["art"]["thumb"] = next_info.get('thumb', '')
+		next_episode["art"]["tvshow.clearart"] = next_info.get('clearart', '')
+		next_episode["art"]["tvshow.clearlogo"] = next_info.get('clearlogo', '')
+		next_episode["art"]["tvshow.fanart"] = next_info.get('fanart', '')
+		next_episode["art"]["tvshow.landscape"] = next_info.get('fanart', '')
+		next_episode["art"]["tvshow.poster"] = next_info.get('poster', '')
+		next_episode["season"] = next_info.get('season', '')
+		next_episode["episode"] = next_info.get('episode', '')
+		next_episode["showtitle"] = next_info.get('tvshowtitle', '')
+		next_episode["plot"] = next_info.get('plot', '')
+		next_episode["playcount"] = next_info.get('playcount', '')
+		next_episode["rating"] = next_info.get('rating', '')
+		next_episode["firstaired"] = next_info.get('premiered', '')
+		next_episode["runtime"] = next_info.get('duration', '')
 
 		play_info = {}
-		play_info["item_id"] = current_info.get('episodeIDS', {}).get('trakt')
+		play_info["item_id"] = next_info.get('tmdb_epID', '')
 
 		next_info = {
 			"current_episode": current_episode,
@@ -570,9 +560,9 @@ class Bookmarks:
 		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
 			try:
 				scrobbble = 'Trakt Scrobble'
-				from resources.lib.modules import traktsync
+				from resources.lib.database import traktsync
 				progress = float(traktsync.fetch_bookmarks(imdb, tmdb, tvdb, season, episode))
-				offset = (float(progress / 100) * int(runtime))
+				offset = float(progress / 100) * int(float(runtime)) # runtime vs. media_length can differ resulting in 10-30sec difference using Trakt scrobble, meta providers report runtime in full minutes
 				seekable = (2 <= progress <= 85)
 				if not seekable: return '0'
 			except:
@@ -591,7 +581,6 @@ class Bookmarks:
 				return offset
 			finally:
 				dbcur.close() ; dbcon.close()
-
 			if not match: return offset
 			offset = str(match[1])
 
@@ -607,10 +596,11 @@ class Bookmarks:
 
 	def reset(self, current_time, media_length, name, year='0'):
 		try:
-			from resources.lib.modules import cache
+			from resources.lib.database import cache
 			cache.clear_local_bookmarks()
 			if control.setting('bookmarks') != 'true' or media_length == 0 or current_time == 0: return
 			timeInSeconds = str(current_time)
+
 			seekable = (int(current_time) > 180 and (current_time / media_length) <= .85)
 			idFile = md5()
 			try: [idFile.update(str(i)) for i in name]

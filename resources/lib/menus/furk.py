@@ -175,7 +175,7 @@ class Furk:
 		except:
 			log_utils.error()
 		url = '%s?action=%s' % (argv[0], query) if isAction else query
-		item = control.item(label=name)
+		item = control.item(label=name, offscreen=True)
 		item.setArt({'icon': thumb, 'poster': thumb, 'thumb': thumb})
 		control.addItem(handle=argv[1], url=url, listitem=item)
 

@@ -6,9 +6,9 @@
 from json import loads as jsloads
 try: #Py2
 	from urllib import urlencode
-except: #Py3
+except ImportError: #Py3
 	from urllib.parse import urlencode
-from resources.lib.modules import cache
+from resources.lib.database import cache
 from resources.lib.modules import client
 from resources.lib.modules import log_utils
 

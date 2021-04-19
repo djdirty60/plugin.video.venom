@@ -26,11 +26,8 @@ def get(title):
 
 def normalize(title):
 	try:
-		if py_tools.isPY2:
-			try: return py_tools.ensure_str(py_tools.ensure_text(title, encoding='ascii'))
-			except: pass
-		# return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
-		return ''.join(c for c in unicodedata.normalize('NFKD', py_tools.ensure_text(py_tools.ensure_str(title))) if unicodedata.category(c) != 'Mn')
+		title = ''.join(c for c in unicodedata.normalize('NFKD', py_tools.ensure_text(py_tools.ensure_str(title))) if unicodedata.category(c) != 'Mn')
+		return str(title)
 	except:
 		log_utils.error()
 		return title

@@ -11,7 +11,7 @@ try: #Py2
 	from urllib import quote_plus
 except ImportError: #Py3
 	from urllib.parse import quote_plus
-from resources.lib.modules import cache
+from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules.source_utils import supported_video_extensions
@@ -29,7 +29,7 @@ class AllDebrid:
 	def __init__(self):
 		self.token = control.setting('alldebrid.token')
 		self.timeout = 15.0
-		self.server_notifications = True
+		self.server_notifications = control.setting('alldebrid.server.notifications')
 
 
 	def _get(self, url, url_append=''):
@@ -42,11 +42,13 @@ class AllDebrid:
 				if response.get('status') == 'success':
 					if 'data' in response:
 						response = response['data']
-				elif response.get('status') == 'error' and self.server_notifications:
-					control.notification(message=response.get('error').get('message'))
+				elif response.get('status') == 'error':
+					if self.server_notifications: control.notification(message=response.get('error').get('message'))
+					log_utils.log('AllDebrid: %s' % response.get('error').get('message'), __name__, log_utils.LOGWARNING)
 					return None
 		except requests.exceptions.ConnectionError:
-			control.notification(message='Failed to connect to All Debrid', icon=ad_icon)
+			if self.server_notifications: control.notification(message='Failed to connect to AllDebrid', icon=ad_icon)
+			log_utils.log('Failed to connect to AllDebrid', __name__, log_utils.LOGWARNING)
 		except BaseException:
 			log_utils.error()
 		return response
@@ -62,11 +64,13 @@ class AllDebrid:
 				if response.get('status') == 'success':
 					if 'data' in response:
 						response = response['data']
-				elif response.get('status') == 'error' and self.server_notifications:
-					control.notification(message=response.get('error').get('message'))
+				elif response.get('status') == 'error':
+					if self.server_notifications:control.notification(message=response.get('error').get('message'))
+					log_utils.log('AllDebrid: %s' % response.get('error').get('message'), __name__, log_utils.LOGWARNING)
 					return None
 		except requests.exceptions.ConnectionError:
-			control.notification(message='Failed to connect to All Debrid', icon=ad_icon)
+			control.notification(message='Failed to connect to AllDebrid', icon=ad_icon)
+			log_utils.log('Failed to connect to AllDebrid', __name__, log_utils.LOGWARNING)
 		except BaseException:
 			log_utils.error()
 		return response
@@ -78,7 +82,9 @@ class AllDebrid:
 		response = response['data']
 		if 'error' in response:
 			self.token = 'failed'
-			return control.notification(message=40021)
+			control.notification(message=40021)
+			log_utils.log(40021, __name__, log_utils.LOGWARNING)
+			return
 		if response['activated']:
 			try:
 				control.progressDialog.close()
@@ -86,7 +92,9 @@ class AllDebrid:
 				control.setSetting('alldebrid.token', self.token)
 			except:
 				self.token = 'failed'
-				return control.notification(message=40021)
+				control.notification(message=40021)
+				log_utils.log(40021, __name__, log_utils.LOGWARNING)
+				return
 		return
 
 
@@ -111,7 +119,8 @@ class AllDebrid:
 		control.sleep(2000)
 		account_info = self._get('user')
 		control.setSetting('alldebrid.username', str(account_info['user']['username']))
-		control.notification(message=40010, icon=pm_icon)
+		control.notification(message=40010, icon=ad_icon)
+		log_utils.log(40010, __name__, log_utils.LOGWARNING)
 
 
 	def revoke_auth(self):
@@ -143,7 +152,7 @@ class AllDebrid:
 			items += [control.lang(40037) % status]
 			items += [control.lang(40041) % expires]
 			items += [control.lang(40042) % days_remaining]
-			return control.selectDialog(items, 'All Debrid')
+			return control.selectDialog(items, 'AllDebrid')
 		except:
 			log_utils.error()
 		return
@@ -188,7 +197,7 @@ class AllDebrid:
 			url_append = '&magnet=%s' % magnet
 			result = self._get(url, url_append)
 			result = result['magnets'][0]
-			log_utils.log('All Debrid: Sending MAGNET URL %s to the All Debrid cloud' % magnet, __name__, log_utils.LOGDEBUG)
+			log_utils.log('AllDebrid: Sending MAGNET URL %s to the AllDebrid cloud' % magnet, __name__, log_utils.LOGDEBUG)
 			try: return result.get('id', "")
 			except: return None
 		except:
@@ -218,8 +227,8 @@ class AllDebrid:
 			if silent: return
 			else:
 				if response and 'message' in response:
-					control.notification(message=response.get('message'))
-					log_utils.log('%s successfully deleted from the All Debrid cloud' % folder_name, __name__, log_utils.LOGDEBUG)
+					if self.server_notifications: control.notification(message=response.get('message'), icon=ad_icon)
+					log_utils.log('%s successfully deleted from the AllDebrid cloud' % folder_name, __name__, log_utils.LOGDEBUG)
 					control.refresh()
 					return
 		except:
@@ -236,7 +245,8 @@ class AllDebrid:
 			if silent: return
 			else:
 				if response and 'message' in response:
-					control.notification(message=response.get('message'))
+					if self.server_notifications: control.notification(message=response.get('message'), icon=ad_icon)
+					log_utils.log('AllDebrid: %s' % response.get('message'), __name__, log_utils.LOGDEBUG)
 					control.refresh()
 					return
 		except:
@@ -253,7 +263,8 @@ class AllDebrid:
 		syshandle = int(sys.argv[1])
 		transfer_files = self.user_cloud()['magnets']
 		if not transfer_files:
-			control.notification(message='Request Failure-Empty Content')
+			if self.server_notifications: control.notification(message='Request Failure-Empty Content', icon=ad_icon)
+			log_utils.log('AllDebrid: Request Failure-Empty Content', __name__, log_utils.LOGDEBUG)
 			return
 		folder_str, deleteMenu, restartMenu = control.lang(40046).upper(), control.lang(40050), control.lang(40008)
 		for count, item in enumerate(transfer_files, 1):
@@ -367,12 +378,12 @@ class AllDebrid:
 
 
 	def resolve_magnet(self, magnet_url, info_hash, season, episode, ep_title):
-		from resources.lib.modules.source_utils import seas_ep_filter, episode_extras_filter
+		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter
 		try:
 			file_url = None
 			correct_files = []
 			extensions = supported_video_extensions()
-			extras_filtering_list = episode_extras_filter()
+			extras_filtering_list = extras_filter()
 			transfer_id = self.create_transfer(magnet_url)
 			transfer_info = self.list_transfer(transfer_id)
 			valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == '']

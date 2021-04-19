@@ -224,24 +224,24 @@ msgid "[B]SETTINGS[/B] : Providers"
 msgstr "[B]INSTELLINGEN[/B] : Bronnen"
 
 msgctxt "#32048"
-msgid "[B]Overeasy[/B] : Downloads"
-msgstr "[B]Overeasy[/B] : Downloads"
+msgid "[B]VENOM[/B] : Downloads"
+msgstr "[B]VENOM[/B] : Downloads"
 
 msgctxt "#32049"
-msgid "[B]Overeasy[/B] : Viewtypes"
-msgstr "[B]Overeasy[/B] : Layout instellingen"
+msgid "[B]VENOM[/B] : Viewtypes"
+msgstr "[B]VENOM[/B] : Layout instellingen"
 
 msgctxt "#32050"
-msgid "[B]Overeasy[/B] : Clear providers..."
-msgstr "[B]Overeasy[/B] : Opschonen van Bronnen..."
+msgid "Remove CAM and SD sources"
+msgstr "Remove CAM and SD sources"
 
 msgctxt "#32051"
-msgid "[B]Overeasy[/B] : Clear metadata..."
-msgstr "[B]Overeasy[/B] : Opschonen van MetaData..."
+msgid "Remove 3D sources"
+msgstr "Remove 3D sources"
 
 msgctxt "#32052"
-msgid "[B]Overeasy[/B] : Clear cache..."
-msgstr "[B]Overeasy[/B] : Opschonen van Cache..."
+msgid "Enable Resolution Quality Icons"
+msgstr "Enable Resolution Quality Icons"
 
 msgctxt "#32053"
 msgid "[I]Next Page[/I]"
@@ -312,8 +312,8 @@ msgid "Unwatched in Trakt"
 msgstr "Bekeken status verwijderen in Trakt"
 
 msgctxt "#32070"
-msgid "[COLOR = yellowgreen]Trakt Manager[/COLOR]"
-msgstr "[COLOR = yellowgreen]Trakt Beheer[/COLOR]"
+msgid "[COLOR yellowgreen]Trakt Manager[/COLOR]"
+msgstr "[COLOR yellowgreen]Trakt Beheer[/COLOR]"
 
 msgctxt "#32071"
 msgid "Browse Series"
@@ -572,8 +572,40 @@ msgid "Providers Language"
 msgstr "Taal van bronnen"
 
 msgctxt "#32363"
-msgid "HEVC"
-msgstr "HEVC"
+msgid "Remove HEVC sources"
+msgstr "Remove HEVC sources"
+
+msgctxt "#32364"
+msgid "Disable CloudFlare protected providers"
+msgstr ""
+
+msgctxt "#32365"
+msgid " (IMDb)"
+msgstr ""
+
+msgctxt "#32366"
+msgid " (TMDb)"
+msgstr ""
+
+msgctxt "#32367"
+msgid " (TVDb)"
+msgstr ""
+
+msgctxt "#32368"
+msgid " (Trakt)"
+msgstr ""
+
+msgctxt "#32369"
+msgid "TVDB api key1"
+msgstr ""
+
+msgctxt "#32370"
+msgid "TVDB api key2"
+msgstr ""
+
+msgctxt "#32371"
+msgid "TVDB api key3"
+msgstr ""
 
 msgctxt "#32372"
 msgid "When playback ends..."
@@ -587,20 +619,124 @@ msgctxt "#32374"
 msgid "Enable Debug"
 msgstr "Schakel Debug in"
 
+msgctxt "#32375"
+msgid "TV "Networks" menu options"
+msgstr ""
+
+msgctxt "#32376"
+msgid "List Mode"
+msgstr ""
+
+msgctxt "#32377"
+msgid "This Season's Shows"
+msgstr ""
+
+msgctxt "#32378"
+msgid "View All Shows"
+msgstr ""
+
+msgctxt "#32379"
+msgid "Allowed Shows"
+msgstr ""
+
+msgctxt "#32380"
+msgid "Airing"
+msgstr ""
+
+msgctxt "#32381"
+msgid "Ended"
+msgstr ""
+
+msgctxt "#32382"
+msgid "Documentary"
+msgstr ""
+
+msgctxt "#32383"
+msgid "Talk-Show"
+msgstr ""
+
+msgctxt "#32384"
+msgid "Airing/Ended"
+msgstr ""
+
+msgctxt "#32385"
+msgid "All"
+msgstr ""
+
+msgctxt "#32386"
+msgid "Scraper Progress Dialog"
+msgstr ""
+
+msgctxt "#32387"
+msgid "Sources Select"
+msgstr ""
+
+msgctxt "#32388"
+msgid "Remove Dolby Vision sources"
+msgstr ""
+
+msgctxt "#32389"
+msgid "Remove HDR sources"
+msgstr ""
+
+msgctxt "#32390"
+msgid ""
+msgstr ""
+
+msgctxt "#32391"
+msgid ""
+msgstr ""
+
+msgctxt "#32392"
+msgid ""
+msgstr ""
+
+msgctxt "#32393"
+msgid ""
+msgstr ""
+
+msgctxt "#32394"
+msgid ""
+msgstr ""
+
+msgctxt "#32395"
+msgid ""
+msgstr ""
+
+msgctxt "#32396"
+msgid ""
+msgstr ""
+
+msgctxt "#32397"
+msgid ""
+msgstr ""
+
+msgctxt "#32398"
+msgid ""
+msgstr ""
+
+msgctxt "#32399"
+msgid "Error with Debrid Pack"
+msgstr ""
+
+msgctxt "#32400"
+msgid "Sources Cancelled"
+msgstr ""
+
 msgctxt "#32401"
 msgid "No stream available"
 msgstr "Geen stream beschikbaar"
 
 msgctxt "#32402"
-msgid "Playback outside Venom is not allowed"
-msgstr "Afspelen buiten Venom is niet toegestaan"
+msgid ""
+msgstr ""
 
 msgctxt "#32403"
 msgid "Download"
 msgstr "Downloaden"
 
 msgctxt "#32404"
-msgid "Time elapsed: %s seconds"
+msgid "[COLOR cyan]Time elapsed:[/COLOR]  %s seconds"
 msgstr "Tijd verstreken: %s seconden"
 
 msgctxt "#32405"
@@ -608,16 +744,384 @@ msgid "%s seconds"
 msgstr "%s seconden"
 
 msgctxt "#32406"
-msgid "Remaining providers: %s"
+msgid "[COLOR cyan]Remaining providers:[/COLOR] %s"
 msgstr "Overgebleven Bronnen: %s"
 
 msgctxt "#32407"
-msgid "Are you sure?"
-msgstr "Weet u het zeker?"
+msgid ""
+msgstr ""
 
 msgctxt "#32408"
-msgid "Process Complete"
-msgstr "Voortgang Compleet"
+msgid ""
+msgstr ""
+
+msgctxt "#32409"
+msgid ""
+msgstr ""
+
+msgctxt "#32410"
+msgid ""
+msgstr ""
+
+msgctxt "#32411"
+msgid ""
+msgstr ""
+
+msgctxt "#32412"
+msgid ""
+msgstr ""
+
+msgctxt "#32413"
+msgid ""
+msgstr ""
+
+msgctxt "#32414"
+msgid ""
+msgstr ""
+
+msgctxt "#32415"
+msgid ""
+msgstr ""
+
+msgctxt "#32416"
+msgid ""
+msgstr ""
+
+msgctxt "#32417"
+msgid ""
+msgstr ""
+
+msgctxt "#32418"
+msgid ""
+msgstr ""
+
+msgctxt "#32419"
+msgid ""
+msgstr ""
+
+msgctxt "#32420"
+msgid "In Theaters"
+msgstr ""
+
+msgctxt "#32421"
+msgid "In Theaters (IMDb)"
+msgstr ""
+
+msgctxt "#32422"
+msgid "Now Playing"
+msgstr ""
+
+msgctxt "#32423"
+msgid "Now Playing (TMDb)"
+msgstr ""
+
+msgctxt "#32424"
+msgid "Anticipated"
+msgstr ""
+
+msgctxt "#32425"
+msgid "Anticipated (Trakt)"
+msgstr ""
+
+msgctxt "#32426"
+msgid "Upcoming"
+msgstr ""
+
+msgctxt "#32427"
+msgid "Upcoming (TMDb)"
+msgstr ""
+
+msgctxt "#32428"
+msgid "Most Popular"
+msgstr ""
+
+msgctxt "#32429"
+msgid "Most Popular (IMDb)"
+msgstr ""
+
+msgctxt "#32430"
+msgid "Popular"
+msgstr ""
+
+msgctxt "#32431"
+msgid "Popular (TMDb)"
+msgstr ""
+
+msgctxt "#32432"
+msgid "Popular"
+msgstr ""
+
+msgctxt "#32433"
+msgid "Popular (Trakt)"
+msgstr ""
+
+msgctxt "#32434"
+msgid "Box Office"
+msgstr ""
+
+msgctxt "#32435"
+msgid "Box Office (IMDb)"
+msgstr ""
+
+msgctxt "#32436"
+msgid "Box Office (TMDb)"
+msgstr ""
+
+msgctxt "#32437"
+msgid "Box Office (Trakt)"
+msgstr ""
+
+msgctxt "#32438"
+msgid "Most Voted"
+msgstr ""
+
+msgctxt "#32439"
+msgid "Most Voted (IMDb)"
+msgstr ""
+
+msgctxt "#32440"
+msgid "Top Rated"
+msgstr ""
+
+msgctxt "#32441"
+msgid "Top Rated (TMDb)"
+msgstr ""
+
+msgctxt "#32442"
+msgid "Trending"
+msgstr ""
+
+msgctxt "#32443"
+msgid "Trending (Trakt)"
+msgstr ""
+
+msgctxt "#32444"
+msgid "Recommended"
+msgstr ""
+
+msgctxt "#32445"
+msgid "Recommended (Trakt)"
+msgstr ""
+
+msgctxt "#32446"
+msgid "Featured"
+msgstr ""
+
+msgctxt "#32447"
+msgid "Featured (IMDb)"
+msgstr ""
+
+msgctxt "#32448"
+msgid "Highly Rated"
+msgstr ""
+
+msgctxt "#32449"
+msgid "Highly Rated (IMDb)"
+msgstr ""
+
+msgctxt "#32450"
+msgid "Calendar (TVMaze)"
+msgstr ""
+
+msgctxt "#32451"
+msgid "Oscar Winners"
+msgstr ""
+
+msgctxt "#32452"
+msgid "Oscar Winners (IMDb)"
+msgstr ""
+
+msgctxt "#32453"
+msgid "Oscar Nominees"
+msgstr ""
+
+msgctxt "#32454"
+msgid "Oscar Nominees (IMDb)"
+msgstr ""
+
+msgctxt "#32455"
+msgid "Genres"
+msgstr ""
+
+msgctxt "#32456"
+msgid "Genres (IMDb)"
+msgstr ""
+
+msgctxt "#32457"
+msgid "Year"
+msgstr ""
+
+msgctxt "#32458"
+msgid "Year (IMDb)"
+msgstr ""
+
+msgctxt "#32459"
+msgid "People"
+msgstr ""
+
+msgctxt "#32460"
+msgid "People (IMDb)"
+msgstr ""
+
+msgctxt "#32461"
+msgid "Languages"
+msgstr ""
+
+msgctxt "#32462"
+msgid "Languages (IMDb)"
+msgstr ""
+
+msgctxt "#32463"
+msgid "Certificates"
+msgstr ""
+
+msgctxt "#32464"
+msgid "Certificates (IMDb)"
+msgstr ""
+
+msgctxt "#32465"
+msgid "Airing Today"
+msgstr ""
+
+msgctxt "#32466"
+msgid "Airing Today (IMDb)"
+msgstr ""
+
+msgctxt "#32467"
+msgid "Airing Today (TMDb)"
+msgstr ""
+
+msgctxt "#32468"
+msgid "Networks (TMDb)"
+msgstr ""
+
+msgctxt "#32469"
+msgid "Networks"
+msgstr ""
+
+msgctxt "#32470"
+msgid "Networks (TVMaze)"
+msgstr ""
+
+msgctxt "#32471"
+msgid "On TV"
+msgstr ""
+
+msgctxt "#32472"
+msgid "On TV (TMDb)"
+msgstr ""
+
+msgctxt "#32473"
+msgid "Returning TV Shows"
+msgstr ""
+
+msgctxt "#32474"
+msgid "Returning TV Shows (IMDb)"
+msgstr ""
+
+msgctxt "#32475"
+msgid "New TV Shows"
+msgstr ""
+
+msgctxt "#32476"
+msgid "New TV Shows (IMDb)"
+msgstr ""
+
+msgctxt "#32477"
+msgid "New Movies"
+msgstr ""
+
+msgctxt "#32478"
+msgid "New Movies (IMDb)"
+msgstr ""
+
+msgctxt "#32479"
+msgid "New Movies (Trakt)"
+msgstr ""
+
+msgctxt "#32480"
+msgid "New Episodes"
+msgstr ""
+
+msgctxt "#32481"
+msgid "New Episodes (TVMaze)"
+msgstr ""
+
+msgctxt "#32482"
+msgid "New Episodes (Trakt)"
+msgstr ""
+
+msgctxt "#32483"
+msgid "Recently aired"
+msgstr ""
+
+msgctxt "#32484"
+msgid "Recently aired (TVMaze)"
+msgstr ""
+
+msgctxt "#32485"
+msgid ""
+msgstr ""
+
+msgctxt "#32486"
+msgid ""
+msgstr ""
+
+msgctxt "#32487"
+msgid ""
+msgstr ""
+
+msgctxt "#32488"
+msgid ""
+msgstr ""
+
+msgctxt "#32489"
+msgid ""
+msgstr ""
+
+msgctxt "#32490"
+msgid ""
+msgstr ""
+
+msgctxt "#32491"
+msgid ""
+msgstr ""
+
+msgctxt "#32492"
+msgid ""
+msgstr ""
+
+msgctxt "#32493"
+msgid ""
+msgstr ""
+
+msgctxt "#32494"
+msgid ""
+msgstr ""
+
+msgctxt "#32495"
+msgid ""
+msgstr ""
+
+msgctxt "#32496"
+msgid ""
+msgstr ""
+
+msgctxt "#32497"
+msgid ""
+msgstr ""
+
+msgctxt "#32498"
+msgid ""
+msgstr ""
+
+msgctxt "#32499"
+msgid ""
+msgstr ""
+
+msgctxt "#32500"
+msgid ""
+msgstr ""
 
 msgctxt "#32501"
 msgid "Start from beginning"
@@ -860,51 +1364,51 @@ msgid "Recently watched"
 msgstr ""
 
 msgctxt "#32587"
-msgid "Show Extra Source Info"
+msgid ""
 msgstr ""
 
 msgctxt "#32588"
-msgid "Debrid Source Identifier Color"
+msgid "Debrid(Hoster) Source Color"
 msgstr ""
 
 msgctxt "#32589"
-msgid "Blue"
+msgid "[COLOR blue]Blue[/COLOR]"
 msgstr ""
 
 msgctxt "#32590"
-msgid "Red"
+msgid "[COLOR red]Red[/COLOR]"
 msgstr ""
 
 msgctxt "#32591"
-msgid "Yellow"
+msgid "[COLOR yellow]Yellow[/COLOR]"
 msgstr ""
 
 msgctxt "#32592"
-msgid "Deep Pink"
+msgid "[COLOR deeppink]Deep Pink[/COLOR]"
 msgstr ""
 
 msgctxt "#32593"
-msgid "Cyan"
+msgid "[COLOR cyan]Cyan[/COLOR]"
 msgstr ""
 
 msgctxt "#32594"
-msgid "Lawn Green"
+msgid "[COLOR lawngreen]Lawn Green[/COLOR]"
 msgstr ""
 
 msgctxt "#32595"
-msgid "Gold"
+msgid "[COLOR gold]Gold[/COLOR]"
 msgstr ""
 
 msgctxt "#32596"
-msgid "Magenta"
+msgid "[COLOR magenta]Magenta[/COLOR]"
 msgstr ""
 
 msgctxt "#32597"
-msgid "Yellow Green"
+msgid "[COLOR yellowgreen]Yellow Green[/COLOR]"
 msgstr ""
 
 msgctxt "#32598"
-msgid "No Color"
+msgid "[COLOR nocolor]No Color[/COLOR]"
 msgstr ""
 
 msgctxt "#32599"
@@ -1660,5 +2164,63 @@ msgctxt "#40062"
 msgid "Trakt Username"
 msgstr "Trakt-gebruikersnaam"
 
+msgctxt "#40063"
+msgid "Months to Rollback for Hide in Cinema"
+msgstr ""
 
+msgctxt "#40064"
+msgid "   Enable Christmas Collections"
+msgstr ""
+
+msgctxt "#40065"
+msgid "Enable UpNext Integration"
+msgstr ""
+
+msgctxt "#40066"
+msgid "UpNext Notification time"
+msgstr ""
+
+msgctxt "#40067"
+msgid "Clear Providers Cache After Changing Scraper Provider"
+msgstr ""
+
+msgctxt "#40068"
+msgid "Enable Anime Menu"
+msgstr ""
+
+msgctxt "#40069"
+msgid "Enable Originals (ex. Netflix)"
+msgstr ""
+
+msgctxt "#40070"
+msgid "Originals"
+msgstr ""
+
+msgctxt "#40071"
+msgid "Originals (TVMaze)"
+msgstr ""
+
+msgctxt "#40072"
+msgid "Watched Progress"
+msgstr ""
+
+msgctxt "#40073"
+msgid "Calendar"
+msgstr ""
+
+msgctxt "#40074"
+msgid "Select Menu type to hide from"
+msgstr ""
+
+msgctxt "#40075"
+msgid "[COLOR red][B]Hide[/B][/COLOR] %s"
+msgstr ""
+
+msgctxt "#40076"
+msgid "[COLOR red][B]Scrobbble Reset[/B][/COLOR] Item"
+msgstr ""
+
+msgctxt "#40077"
+msgid "Originals (TMDb)"
+msgstr ""
 

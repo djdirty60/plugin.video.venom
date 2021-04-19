@@ -164,8 +164,8 @@ def doDownload(url, dest, title, image, headers):
 		percent = min(100 * downloaded / content, 100)
 		if percent >= notify:
 			# control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message=dest, icon=image, time=10000)
-			control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message='', icon=image, time=3000) #xbmcgui.Dialog().notification() auto scroll time to complete supercedes allowed "time=" to run, removed dest
-			notify += 10
+			control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message='', icon=image, time=3000) #xbmcgui.Dialog().notification() auto scroll time to complete supercedes allowed "time=" to run in Silvo, removed dest
+			notify += 20
 		chunk = None
 		error = False
 		try:

@@ -82,13 +82,11 @@ def playlistAdd(name, url, meta, art):
 	labelPosition = position(label=name)
 	if labelPosition >= 0:
 		return control.notification(title=35522, message=32120)
-	# if isinstance(meta, basestring):
 	if isinstance(meta, py_tools.string_types):
 		meta = jsloads(meta)
-	# if isinstance(art, basestring):
 	if isinstance(art, py_tools.string_types):
 		art = jsloads(art)
-	item = control.item(label=name)
+	item = control.item(label=name, offscreen=True)
 	item.setArt(art)
 	item.setProperty('IsPlayable', 'true')
 	item.setInfo(type='video', infoLabels=control.metadataClean(meta))

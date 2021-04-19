@@ -8,11 +8,7 @@ from resources.lib.modules import log_utils
 from resources.lib.externals import pytz
 
 
-###################################################################
-#---Time
-###################################################################
 class Time(object):
-
 	# Use time.clock() instead of time.time() for processing time.
 	# NB: Do not use time.clock(). Gives the wrong answer in timestamp() AND runs very fast in Linux. Hence, in the stream finding dialog, for every real second, Linux progresses 5-6 seconds.
 	# https://stackoverflow.com/questions/85451/python-time-clock-vs-time-time-accuracy
@@ -26,7 +22,7 @@ class Time(object):
 	FormatTime = '%H:%M:%S'
 	FormatTimeShort = '%H:%M'
 
-	def __init__(self, start = False):
+	def __init__(self, start=False):
 		self.mStart = None
 		if start: self.start()
 
@@ -36,7 +32,7 @@ class Time(object):
 
 	# datetime object from string
 	@classmethod
-	def datetime(self, string, format = FormatDateTime):
+	def datetime(self, string, format=FormatDateTime):
 		try:
 			return datetime.datetime.strptime(string, format)
 		except:
@@ -46,10 +42,8 @@ class Time(object):
 
 	@classmethod
 	def localZone(self):
-		if time.daylight:
-			offsetHour = time.altzone / 3600
-		else:
-			offsetHour = time.timezone / 3600
+		if time.daylight: offsetHour = time.altzone / 3600
+		else: offsetHour = time.timezone / 3600
 		return 'Etc/GMT%+d' % offsetHour
 
 	@classmethod
@@ -61,8 +55,7 @@ class Time(object):
 				# Use current datetime (now) in order to accomodate for daylight saving time.
 				stringTime = '%s %s' % (datetime.datetime.now().strftime('%Y-%m-%d'), stringTime)
 				formatNew = '%Y-%m-%d %H:%M'
-			else:
-				formatNew = formatInput
+			else: formatNew = formatInput
 
 			if zoneFrom == Time.ZoneUtc: zoneFrom = pytz.timezone('UTC')
 			elif zoneFrom == Time.ZoneLocal: zoneFrom = pytz.timezone(self.localZone())
@@ -72,8 +65,7 @@ class Time(object):
 			elif zoneTo == Time.ZoneLocal: zoneTo = pytz.timezone(self.localZone())
 			else: zoneTo = pytz.timezone(zoneTo)
 
-			timeobject = self.datetime(string = stringTime, format = formatNew)
-
+			timeobject = self.datetime(string=stringTime, format=formatNew)
 			if stringDay:
 				stringDay = stringDay.lower()
 				if stringDay.startswith('mon'): weekday = 0
@@ -93,13 +85,10 @@ class Time(object):
 
 			stringTime = timeobject.strftime(formatOutput)
 			if stringDay:
-				if abbreviate:
-					stringDay = calendar.day_abbr[timeobject.weekday()]
-				else:
-					stringDay = calendar.day_name[timeobject.weekday()]
+				if abbreviate: stringDay = calendar.day_abbr[timeobject.weekday()]
+				else: stringDay = calendar.day_name[timeobject.weekday()]
 				return (stringTime, stringDay)
-			else:
-				return stringTime
+			else: return stringTime
 		except:
 			log_utils.error()
 			return stringTime

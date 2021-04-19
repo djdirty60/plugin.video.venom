@@ -10,7 +10,7 @@ try: #Py2
 	from urllib import quote_plus, unquote
 except ImportError: #Py3
 	from urllib.parse import quote_plus, unquote
-from resources.lib.modules import cache
+from resources.lib.database import cache
 from resources.lib.modules import cleantitle
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -53,6 +53,7 @@ class RealDebrid:
 		self.device_code = ''
 		self.auth_timeout = 0
 		self.auth_step = 0
+		self.server_notifications = control.setting('realdebrid.server.notifications')
 
 
 	def _get(self, url, fail_check=False, token_ck=False):
@@ -60,7 +61,7 @@ class RealDebrid:
 			original_url = url
 			url = rest_base_url + url
 			if self.token == '':
-				log_utils.log('No Real-Debrid Token Found', __name__, log_utils.LOGDEBUG)
+				log_utils.log('No Real-Debrid Token Found', __name__, log_utils.LOGWARNING)
 				return None
 			# if not fail_check: # with fail_check=True new token does not get added
 			if '?' not in url:
@@ -69,8 +70,8 @@ class RealDebrid:
 				url += "&auth_token=%s" % self.token
 			response = requests.get(url, timeout=30)
 			if 'Temporarily Down For Maintenance' in response.text:
-				control.notification(message='Real-Debrid Temporarily Down For Maintenance')
-				log_utils.log('Real-Debrid Temporarily Down For Maintenance', __name__, log_utils.LOGDEBUG)
+				if self.server_notifications: control.notification(message='Real-Debrid Temporarily Down For Maintenance', icon=rd_icon)
+				log_utils.log('Real-Debrid Temporarily Down For Maintenance', __name__, log_utils.LOGWARNING)
 				return None
 			else: response = response.json()
 			if any(value in str(response) for value in ['bad_token', 'Bad Request']):
@@ -89,7 +90,7 @@ class RealDebrid:
 			original_url = url
 			url = rest_base_url + url
 			if self.token == '':
-				log_utils.log('No Real Debrid Token Found', __name__, log_utils.LOGDEBUG)
+				log_utils.log('No Real Debrid Token Found', __name__, log_utils.LOGWARNING)
 				return None
 			if '?' not in url:
 				url += "?auth_token=%s" % self.token
@@ -98,15 +99,18 @@ class RealDebrid:
 			response = requests.post(url, data=data, timeout=15)
 			if '[204]' in str(response): return None
 			if 'Temporarily Down For Maintenance' in response.text:
-				control.notification(message='Real-Debrid Temporarily Down For Maintenance')
-				log_utils.log('Real-Debrid Temporarily Down For Maintenance', __name__, log_utils.LOGDEBUG)
+				if self.server_notifications: control.notification(message='Real-Debrid Temporarily Down For Maintenance', icon=rd_icon)
+				log_utils.log('Real-Debrid Temporarily Down For Maintenance', __name__, log_utils.LOGWARNING)
 				return None
 			else: response = response.json()
 			if any(value in str(response) for value in ['bad_token', 'Bad Request']):
 				self.refresh_token()
 				response = self._post(original_url, data)
 			elif 'error' in str(response):
-				control.notification(message=response.get('error'))
+				message = response.get('error')
+				if message == 'action_already_done': return None
+				if self.server_notifications: control.notification(message=message, icon=rd_icon)
+				log_utils.log('Real-Debrid Error:  %s' % message, __name__, log_utils.LOGWARNING)
 				return None
 			return response
 		except:
@@ -241,7 +245,9 @@ class RealDebrid:
 				except: pass
 			pack_info = sorted(file_info, key=lambda k: k['path'])
 		except:
-			return control.notification(message=33586)
+			if self.server_notifications: control.notification(message='Real-Debrid Error:  browse_user_torrents failed', icon=rd_icon)
+			log_utils.log('Real-Debrid Error:  browse_user_torrents failed', __name__, log_utils.LOGWARNING)
+			return
 
 		file_str, downloadMenu, renameMenu, deleteMenu, clearFinishedMenu = \
 				control.lang(40047).upper(), control.lang(40048), control.lang(40049), control.lang(40050), control.lang(40051)
@@ -287,8 +293,8 @@ class RealDebrid:
 				log_utils.log('Real-Debrid: %s was removed from your active Torrents' % name, __name__, log_utils.LOGDEBUG)
 				control.refresh()
 				return
-		except Exception as e:
-			log_utils.log('Real-Debrid Error: DELETE TORRENT %s | %s' % (name, e), __name__, log_utils.LOGDEBUG)
+		except:
+			log_utils.error('Real-Debrid Error: DELETE USER TORRENT %s : ' % name)
 			raise
 
 
@@ -374,12 +380,13 @@ class RealDebrid:
 			ck_token = self._get('user', token_ck=True) # check token, and refresh if needed
 			url = downloads_delete_url + "/%s&auth_token=%s" % (media_id, self.token)
 			response = requests.delete(rest_base_url + url).text
-			if not 'error' in response:
+			if response and not 'error' in response:
+				if self.server_notifications: control.notification(message='Real-Debrid: %s was removed from your MyDownloads' % name, icon=rd_icon)
 				log_utils.log('Real-Debrid: %s was removed from your MyDownloads' % name, __name__, log_utils.LOGDEBUG)
 				control.refresh()
 				return
-		except Exception as e:
-			log_utils.log('Real-Debrid Error: DELETE DOWNLOAD %s | %s' % (name, e), __name__, log_utils.LOGDEBUG)
+		except:
+			log_utils.error('Real-Debrid Error: DELETE DOWNLOAD %s : ' % name)
 
 
 	def check_cache_list(self, hashList):
@@ -407,29 +414,37 @@ class RealDebrid:
 			log_utils.error()
 
 
-	def resolve_magnet(self, magnet_url, info_hash, season, episode, ep_title):
-		from resources.lib.modules.source_utils import seas_ep_filter, episode_extras_filter
+	def resolve_magnet(self, magnet_url, info_hash, season, episode, title):
+		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter
 		try:
 			torrent_id = None
 			rd_url = None
 			match = False
 			extensions = supported_video_extensions()
-			extras_filtering_list = episode_extras_filter()
+			extras_filtering_list = extras_filter()
 			info_hash = info_hash.lower()
 			torrent_files = self._get(check_cache_url + '/' + info_hash)
 			if not info_hash in torrent_files: return None
-			torrent_id = self.add_magnet(magnet_url)
-			torrent_info = self.torrent_info(torrent_id)
+			torrent_id = self.add_magnet(magnet_url) # add_magent() returns id
 			torrent_files = torrent_files[info_hash]['rd']
 			for item in torrent_files:
+				# log_utils.log('item = %s' % item, __name__)
 				try:
 					video_only = self.video_only(item, extensions)
 					if not video_only: continue
+					correct_file_check = False
+					item_values = [i['filename'] for i in item.values()]
 					if season:
-						correct_file_check = False
-						item_values = [i['filename'] for i in item.values()]
 						for value in item_values:
 							correct_file_check = seas_ep_filter(season, episode, value)
+							if correct_file_check: break
+						if not correct_file_check: continue
+					else:
+						compare_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace('\'', '')).lower()
+						for value in item_values:
+							filename = re.sub(r'[^A-Za-z0-9-]+', '.', value.replace('\'', '')).lower()
+							if any(x in filename for x in extras_filtering_list): continue
+							correct_file_check = re.search(compare_title, filename)
 							if correct_file_check: break
 						if not correct_file_check: continue
 					torrent_keys = item.keys()
@@ -437,7 +452,7 @@ class RealDebrid:
 					torrent_keys = ','.join(torrent_keys)
 					self.add_torrent_select(torrent_id, torrent_keys)
 					torrent_info = self.torrent_info(torrent_id)
-					status = torrent_info.get('status')
+					# status = torrent_info.get('status') # downloaded?
 					if 'error' in torrent_info: continue
 					selected_files = [(idx, i) for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
 					if season:
@@ -449,12 +464,11 @@ class RealDebrid:
 								correct_files.append(value[1])
 								break
 						if len(correct_files) == 0: continue
-						episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', ep_title.replace("\'", '')).lower()
+						episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace("\'", '')).lower()
 						for i in correct_files:
 							compare_link = seas_ep_filter(season, episode, i['path'], split=True)
 							compare_link = re.sub(episode_title, '', compare_link)
-							if any(x in compare_link for x in extras_filtering_list):
-								continue
+							if any(x in compare_link for x in extras_filtering_list): continue
 							else:
 								match = True
 								break
@@ -462,19 +476,30 @@ class RealDebrid:
 							index = [i[0] for i in selected_files if i[1]['path'] == correct_files[0]['path']][0]
 							break
 					else:
-						match, index = True, 0
+						match = False
+						item_values = [i['filename'] for i in item.values()]
+						compare_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace('\'', '')).lower()
+						for value in selected_files:
+							filename = re.sub(r'[^A-Za-z0-9-]+', '.', value[1]['path'].replace('\'', '')).lower()
+							if any(x in filename for x in extras_filtering_list): continue
+							match = re.search(compare_title, filename)
+							if match:
+								index = value[0]
+								break
+						if match: break
 				except:
 					log_utils.error()
 			if match:
 				rd_link = torrent_info['links'][index]
-				rd_url = self.unrestrict_link(rd_link)
-				if rd_url.endswith('rar'): rd_url = None
+				file_url = self.unrestrict_link(rd_link)
+				if file_url.endswith('rar'): file_url = None
+				if not any(file_url.lower().endswith(x) for x in extensions): file_url = None
 				if not store_to_cloud: self.delete_torrent(torrent_id)
-				return rd_url
+				return file_url
 			self.delete_torrent(torrent_id)
-		except Exception as e:
+		except:
+			log_utils.error('Real-Debrid Error: RESOLVE MAGNET %s : ' % magnet_url)
 			if torrent_id: self.delete_torrent(torrent_id)
-			log_utils.log('Real-Debrid Error: RESOLVE MAGNET %s | %s' % (magnet_url, e), __name__, log_utils.LOGDEBUG)
 			return None
 
 
@@ -508,10 +533,10 @@ class RealDebrid:
 			list_file_items = [{'link': i['link'], 'filename': i['path'].replace('/', ''), 'size': float(i['bytes'])/1073741824} for i in list_file_items]
 			self.delete_torrent(torrent_id)
 			return list_file_items
-		except Exception as e:
+		except:
+			log_utils.error('Real-Debrid Error: DISPLAY MAGNET PACK %s : ' % magnet_url)
 			if torrent_id: self.delete_torrent(torrent_id)
-			log_utils.log('Real-Debrid Error: DISPLAY MAGNET PACK %s | %s' % (magnet_url, str(e)), __name__, log_utils.LOGDEBUG)
-			raise
+
 
 
 	def torrents_activeCount(self):
@@ -601,7 +626,7 @@ class RealDebrid:
 			status = torrent_info['status']
 			if status == 'downloaded':
 				control.hide()
-				control.notification(message=control.lang(32057))
+				control.notification(message=control.lang(32057), icon=rd_icon)
 				return True
 			file_size = round(float(video['bytes']) / (1000 ** 3), 2)
 			line1 = '%s...' % (control.lang(40017) % control.lang(40058))
@@ -641,8 +666,9 @@ class RealDebrid:
 		try:
 			url = torrents_info_url + "/%s" % torrent_id
 			return self._get(url)
-		except Exception as e:
-			log_utils.log('Real-Debrid Error: TORRENT INFO | %s' % e, __name__, log_utils.LOGDEBUG)
+		except:
+			log_utils.error('Real-Debrid Error: TORRENT INFO %s : ' % torrent_id)
+			return None
 
 
 	def add_magnet(self, magnet):
@@ -650,8 +676,8 @@ class RealDebrid:
 			data = {'magnet': magnet}
 			response = self._post(add_magnet_url, data)
 			return response.get('id', "")
-		except Exception as e:
-			log_utils.log('Real-Debrid Error: ADD MAGNET %s | %s' % (magnet, e), __name__, log_utils.LOGDEBUG)
+		except:
+			log_utils.error('Real-Debrid Error: ADD MAGNET %s : ' % magnet)
 			return None
 
 
@@ -660,8 +686,8 @@ class RealDebrid:
 			url = '%s/%s' % (select_files_url, torrent_id)
 			data = {'files': file_ids}
 			return self._post(url, data)
-		except Exception as e:
-			log_utils.log('Real-Debrid Error: ADD SELECT FILES | %s' % e, __name__, log_utils.LOGDEBUG)
+		except:
+			log_utils.error('Real-Debrid Error: ADD SELECT FILES %s : ' % torrent_id)
 			return None
 
 
@@ -679,9 +705,8 @@ class RealDebrid:
 			response = requests.delete(rest_base_url + url)
 			log_utils.log('Real-Debrid: Torrent ID %s was removed from your active torrents' % torrent_id, __name__, log_utils.LOGDEBUG)
 			return True
-		except Exception as e:
-			log_utils.log('Real-Debrid Error: DELETE TORRENT | %s' % e, __name__, log_utils.LOGDEBUG)
-			raise
+		except:
+			log_utils.error('Real-Debrid Error: DELETE TORRENT %s : ')
 
 
 	def get_link(self, link):
@@ -762,8 +787,8 @@ class RealDebrid:
 			control.addon('script.module.myaccounts').setSetting('realdebrid.token', self.token)
 			control.setSetting('realdebrid.refresh', response['refresh_token'])
 			return True
-		except Exception as e:
-			log_utils.log('Real Debrid Authorization Failed: %s' % e, __name__, log_utils.LOGDEBUG)
+		except:
+			log_utils.error('Real Debrid Authorization Failed : ')
 			return False
 
 
@@ -787,8 +812,8 @@ class RealDebrid:
 			# regexes = [regex[1:-1].replace(r'\/', '/').rstrip('\\') for regex in js_result]
 			# logger.log_debug('RealDebrid hosters : %s' % regexes)
 			# hosters = [re.compile(regex, re.I) for regex in regexes]
-		# except Exception as e:
-			# logger.log_error('Error getting RD regexes: %s' % e)
+		# except:
+			# log_utils.error('Error getting RD regexes : ')
 		# return hosters
 
 

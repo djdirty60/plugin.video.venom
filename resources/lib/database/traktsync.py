@@ -14,10 +14,8 @@ from resources.lib.modules import log_utils
 def fetch_bookmarks(imdb, tmdb='', tvdb='', season=None, episode=None):
 	progress = '0'
 	try:
-		if not control.existsPath(control.dataPath):
-			control.makeFile(control.dataPath)
-		dbcon = db.connect(control.traktSyncFile)
-		dbcur = dbcon.cursor()
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
 		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='bookmarks';''').fetchone()
 		if not ck_table:
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmarks (imdb TEXT, tmdb TEXT, tvdb TEXT, season TEXT, episode TEXT, percent_played TEXT, paused_at TEXT,
@@ -51,10 +49,8 @@ def fetch_bookmarks(imdb, tmdb='', tvdb='', season=None, episode=None):
 
 def insert_bookmarks(items, new_scrobble=False):
 	try:
-		if not control.existsPath(control.dataPath):
-			control.makeFile(control.dataPath)
-		dbcon = db.connect(control.traktSyncFile)
-		dbcur = dbcon.cursor()
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmarks (imdb TEXT, tmdb TEXT, tvdb TEXT, season TEXT, episode TEXT, percent_played TEXT, paused_at TEXT,
 		UNIQUE(imdb, tmdb, tvdb, season, episode));''')
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
@@ -81,10 +77,8 @@ def insert_bookmarks(items, new_scrobble=False):
 
 def delete_bookmark(items):
 	try:
-		if not control.existsPath(control.dataPath):
-			control.makeFile(control.dataPath)
-		dbcon = db.connect(control.traktSyncFile)
-		dbcur = dbcon.cursor()
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
 		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='bookmarks';''').fetchone()
 		if not ck_table:
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmarks (imdb TEXT, tmdb TEXT, tvdb TEXT, season TEXT, episode TEXT, percent_played TEXT, paused_at TEXT,
@@ -113,10 +107,8 @@ def delete_bookmark(items):
 def last_paused_at():
 	last_paused = 0
 	try:
-		if not control.existsPath(control.dataPath):
-			control.makeFile(control.dataPath)
-		dbcon = db.connect(control.traktSyncFile)
-		dbcur = dbcon.cursor()
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
 		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='service';''').fetchone()
 		if ck_table:
 			match = dbcur.execute('''SELECT * FROM service WHERE setting="last_paused_at";''').fetchone()
@@ -128,3 +120,15 @@ def last_paused_at():
 	finally:
 		dbcur.close() ; dbcon.close()
 	return last_paused
+
+def get_connection():
+	if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
+	dbcon = db.connect(control.traktSyncFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
+	# dbcon.row_factory = _dict_factory
+	return dbcon
+
+def get_connection_cursor(dbcon):
+	dbcur = dbcon.cursor()
+	dbcur.execute('''PRAGMA synchronous = OFF''')
+	dbcur.execute('''PRAGMA journal_mode = OFF''')
+	return dbcur

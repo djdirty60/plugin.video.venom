@@ -6,29 +6,37 @@
 import re
 try: #Py2
 	from urllib import unquote, unquote_plus
-except: #Py3
+except ImportError: #Py3
 	from urllib.parse import unquote, unquote_plus
 from resources.lib.modules import log_utils
 
-
+HDR = ['.hdr.', 'hdr10', 'hdr.10', '2160p.bluray.remux', 'uhd.bluray.2160p', '2160p.uhd.bluray', '2160p.bluray.hevc.truehd', '2160p.remux']
 CODEC_H265 = ['hevc', 'h265', 'h.265', 'x265', 'x.265']
 CODEC_H264 = ['avc', 'h264', 'h.264', 'x264', 'x.264']
 CODEC_XVID = ['xvid', '.x.vid']
 CODEC_DIVX = ['divx', 'divx ', 'div2', 'div3', 'div4']
 CODEC_MPEG = ['.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', 'msmpeg', 'mpegurl']
-CODEC_MKV = ['mkv', '.mkv', 'matroska']
+CODEC_MKV = ['.mkv', 'matroska']
 
-AUDIO_8CH = ['ch8.', '8ch.', '7.1.']
-AUDIO_7CH = ['ch7.', '7ch.', '6.1.']
-AUDIO_6CH = ['ch6.', '6ch.', '5.1.']
-AUDIO_2CH = ['ch2', '2ch', '2.0', 'audio.2.0.', 'stereo']
+DOLBY_VISION = ['.dv.', 'dolby.vision', 'dolbyvision']
+DOLBY_TRUEHD = ['true.hd', 'truehd']
+DOLBY_DIGITALPLUS = ['dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3']
+DOLBY_DIGITALEX = ['.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.']
+DOLBYDIGITAL = ['dd2.', 'dd5', 'dd7', 'dolby.digital', 'dolbydigital', '.ac3', '.ac.3.', '.dd.']
 
-MULTI_LANG = ['hindi.eng', 'ara.eng', 'ces.eng', 'chi.eng', 'cze.eng', 'dan.eng', 'dut.eng', 'ell.eng', 'esl.eng',
-			  'esp.eng', 'fin.eng', 'fra.eng', 'fre.eng', 'frn.eng', 'gai.eng', 'ger.eng', 'gle.eng', 'gre.eng',
-			  'gtm.eng', 'heb.eng', 'hin.eng', 'hun.eng', 'ind.eng', 'iri.eng', 'ita.eng', 'jap.eng', 'jpn.eng', 'kor.eng',
-			  'lat.eng', 'lebb.eng', 'lit.eng', 'nor.eng', 'pol.eng', 'por.eng', 'rus.eng', 'som.eng', 'spa.eng', 'sve.eng',
-			  'swe.eng', 'tha.eng', 'tur.eng', 'uae.eng', 'ukr.eng', 'vie.eng', 'zho.eng', 'dual.audio', 'multi']
+DTSX = ['dts.x.', 'dtsx']
+DTS_HDMA = ['hd.ma', 'hdma']
+DTS_HD = ['dts.hd.', 'dtshd']
 
+AUDIO_8CH = ['ch8.', '8ch.', '7.1ch', '7.1.']
+AUDIO_7CH = ['ch7.', '7ch.', '6.1ch', '6.1.']
+AUDIO_6CH = ['ch6.', '6ch.', '5.1ch', '5.1.']
+AUDIO_2CH = ['ch2', '2ch', '2.0ch', '2.0.', 'audio.2.0.', 'stereo']
+
+MULTI_LANG = ['hindi.eng', 'ara.eng', 'ces.eng', 'chi.eng', 'cze.eng', 'dan.eng', 'dut.eng', 'ell.eng', 'esl.eng', 'esp.eng', 'fin.eng', 'fra.eng', 'fre.eng',
+				'frn.eng', 'gai.eng', 'ger.eng', 'gle.eng', 'gre.eng', 'gtm.eng', 'heb.eng', 'hin.eng', 'hun.eng', 'ind.eng', 'iri.eng', 'ita.eng', 'jap.eng', 'jpn.eng',
+				'kor.eng', 'lat.eng', 'lebb.eng', 'lit.eng', 'nor.eng', 'pol.eng', 'por.eng', 'rus.eng', 'som.eng', 'spa.eng', 'sve.eng', 'swe.eng', 'tha.eng', 'tur.eng',
+				'uae.eng', 'ukr.eng', 'vie.eng', 'zho.eng', 'dual.audio', 'multi']
 SUBS = ['subita', 'subfrench', 'subspanish', 'subtitula', 'swesub', 'nl.subs']
 ADDS = ['1xbet', 'betwin']
 
@@ -96,16 +104,13 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		# log_utils.error()
 		# return None
 
-
-def episode_extras_filter():
-	return ['extra', 'extras', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'bloopers', 'making of', 'feature', 'sample']
-
+def extras_filter():
+	return ['sample', 'extra', 'extras', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'bloopers', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer']
 
 def supported_video_extensions():
 	import xbmc
 	supported_video_extensions = xbmc.getSupportedMedia('video').split('|')
 	return [i for i in supported_video_extensions if i != '' and i != '.zip']
-
 
 def getFileType(name_info=None, url=None):
 	try:
@@ -113,64 +118,54 @@ def getFileType(name_info=None, url=None):
 		if name_info: fmt = name_info
 		elif url: fmt = url_strip(url)
 		if not fmt: return type
-		if any(value in fmt for value in CODEC_H264):
-			type += ' AVC /'
-		# if any(value in fmt for value in CODEC_H265): # returned from scrapers 'info'...why idk
-			# type += ' HEVC /'
-		if any(value in fmt for value in CODEC_XVID):
-			type += ' XVID /'
-		if any(value in fmt for value in CODEC_DIVX):
-			type += ' DIVX /'
-		if '.wmv' in fmt:
-			type += ' WMV /'
-		if any(value in fmt for value in CODEC_MPEG):
-			type += ' MPEG /'
-		if '.avi' in fmt:
-			type += ' AVI /'
-		if any(value in fmt for value in CODEC_MKV):
-			type += ' MKV /'
-		if '.hdr' in fmt:
-			type += ' HDR /'
-		if 'remux' in fmt:
-			type += ' REMUX /'
-		if any(value in fmt for value in ['bluray', 'blu.ray', 'bdrip', 'bd.rip', 'brrip', 'br.rip']):
-			type += ' BLURAY /'
-		if any(i in fmt for i in ['dvdrip', 'dvd.rip']):
-			type += ' DVD /'
-		if any(value in fmt for value in ['webdl', 'web.dl', 'webrip', 'web.rip']):
-			type += ' WEB /'
-		if any(value in fmt for value in ['hdrip', 'hd.rip']):
-			type += ' HDRIP /'
-		if 'atmos' in fmt:
-			type += ' ATMOS /'
-		if any(value in fmt for value in ['truehd.7.1', 'truehd7.1', 'dd.7.1ch', 'dd.true.hd.', 'dd.truehd', 'ddtruehd']):
-			type += ' DOLBY-TRUEHD /'
-		elif any(value in fmt for value in ['dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp5.1', 'ddp.5.1', 'ddp7.1', 'ddp.7.1', 'eac3']):
-			type += ' DD+ /'
-		elif any(value in fmt for value in ['.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.']):
-			type += ' DD-EX /'
-		elif any(value in fmt for value in ['dd.5.1.', 'dd.5.1ch.', 'dd5.1.', 'dolby.digital', 'dolbydigital', '.ac3', '.ac.3.', '.dd.']):
-			type += ' DOLBYDIGITAL /'
-		if any(value in fmt for value in ['dts.x.', 'dtsx']):
-			type += ' DTS-X /'
-		elif any(value in fmt for value in ['dts.hd.ma.', 'dtshd.ma.', 'dtshdma', '.hd.ma.', 'hdma']):
-			type += ' DTS-HD MA /'
-		elif any(value in fmt for value in ['dts.hd.', 'dtshd']):
-			type += ' DTS-HD /'
-		elif '.dts' in fmt:
-			type += ' DTS /'
-		if any(value in fmt for value in AUDIO_8CH):
-			type += ' 8CH /'
-		elif any(value in fmt for value in AUDIO_7CH):
-			type += ' 7CH /'
-		elif any(value in fmt for value in AUDIO_6CH):
-			type += ' 6CH /'
-		elif any(value in fmt for value in AUDIO_2CH):
-			type += ' 2CH /'
-		if any(value in fmt for value in MULTI_LANG):
-			type += ' MULTI-LANG /'
-		if any(value in fmt for value in ADDS):
-			type += ' ADDS /'
+
+		if any(value in fmt for value in CODEC_H264): type += ' AVC /'
+		# if any(value in fmt for value in CODEC_H265): type += ' HEVC /' # returned from scrapers 'info'...why idk
+		elif any(value in fmt for value in CODEC_XVID): type += ' XVID /'
+		elif any(value in fmt for value in CODEC_DIVX): type += ' DIVX /'
+
+		if '.wmv' in fmt: type += ' WMV /'
+		elif any(value in fmt for value in CODEC_MPEG): type += ' MPEG /'
+		elif '.avi' in fmt: type += ' AVI /'
+		elif any(value in fmt for value in CODEC_MKV): type += ' MKV /'
+
+		if '.sdr' in fmt: type += ' SDR /'
+		elif any(value in fmt for value in HDR): type += ' HDR /'
+
+		if 'remux' in fmt: type += ' REMUX /'
+
+		if any(value in fmt for value in ['bluray', 'blu.ray', 'bdrip', 'bd.rip', 'brrip', 'br.rip']): type += ' BLURAY /'
+		elif any(value in fmt for value in ['.web.', 'webdl', 'web.dl', 'webrip', 'web.rip']): type += ' WEB /'
+		elif any(i in fmt for i in ['dvdrip', 'dvd.rip']): type += ' DVD /'
+		elif 'hdtv' in fmt: type += ' HDTV /'
+		elif 'pdtv' in fmt: type += ' PDTV /'
+		elif any(value in fmt for value in ['dvdscr', 'dvd.scr']): type += ' DVDSCR /'
+		elif any(value in fmt for value in ['screener', '.scr']): type += ' SCR /'
+		elif any(value in fmt for value in ['hdrip', 'hd.rip']): type += ' HDRIP /'
+
+		if any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
+		if 'atmos' in fmt: type += ' ATMOS /'
+		if any(value in fmt for value in DOLBY_TRUEHD): type += ' DOLBY-TRUEHD /'
+		elif any(value in fmt for value in DOLBY_DIGITALPLUS): type += ' DD+ /'
+		elif any(value in fmt for value in DOLBY_DIGITALEX): type += ' DD-EX /'
+		elif any(value in fmt for value in DOLBYDIGITAL): type += ' DOLBYDIGITAL /'
+
+		if 'aac' in fmt: type += ' AAC /'
+		elif 'mp3' in fmt: type += ' MP3 /'
+
+		if any(value in fmt for value in DTSX): type += ' DTS-X /'
+		elif any(value in fmt for value in DTS_HDMA): type += ' DTS-HD MA /'
+		elif any(value in fmt for value in DTS_HD): type += ' DTS-HD /'
+		elif '.dts' in fmt: type += ' DTS /'
+
+		if any(value in fmt for value in AUDIO_8CH): type += ' 8CH /'
+		elif any(value in fmt for value in AUDIO_7CH): type += ' 7CH /'
+		elif any(value in fmt for value in AUDIO_6CH): type += ' 6CH /'
+		elif any(value in fmt for value in AUDIO_2CH): type += ' 2CH /'
+
+		if any(value in fmt for value in ['.hc', 'korsub', 'kor.sub']): type += ' HC /'
+		if any(value in fmt for value in MULTI_LANG): type += ' MULTI-LANG /'
+		if any(value in fmt for value in ADDS): type += ' ADDS /'
 		if any(value in fmt for value in SUBS):
 			if type != '': type += ' WITH SUBS'
 			else: type = 'SUBS'
@@ -179,7 +174,6 @@ def getFileType(name_info=None, url=None):
 	except:
 		log_utils.error()
 		return ''
-
 
 def url_strip(url):
 	try:

@@ -5,7 +5,7 @@
 
 from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
-import imp
+# import imp
 import re
 import threading
 import time
@@ -13,13 +13,12 @@ try: #Py2
 	from urlparse import urljoin
 except ImportError: #Py3
 	from urllib.parse import urljoin
-from resources.lib.modules import cache
+from resources.lib.database import cache, traktsync
 from resources.lib.modules import cleandate
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import py_tools
-from resources.lib.modules import traktsync
 from resources.lib.modules import utils
 
 BASE_URL = 'https://api.trakt.tv'
@@ -147,11 +146,8 @@ def authTrakt():
 				control.setSetting(id='trakt.token', value='')
 				control.setSetting(id='trakt.refresh', value='')
 			raise Exception()
-
 		result = getTraktAsJson('/oauth/device/code', {'client_id': V2_API_KEY})
-		# verification_url = (control.lang(32513) % result['verification_url']).encode('utf-8')
 		verification_url = (control.lang(32513) % result['verification_url'])
-		# user_code = (control.lang(32514) % result['user_code']).encode('utf-8')
 		user_code = (control.lang(32514) % result['user_code'])
 		expires_in = int(result['expires_in'])
 		device_code = result['device_code']
@@ -298,6 +294,8 @@ def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
 	try:
 		addon = 'script.trakt'
 		if control.condVisibility('System.HasAddon(%s)' % addon):
+			import imp
+			# from importlib import import_module ?
 			data = {}
 			data['action'] = action
 			if tvdb:
@@ -319,7 +317,8 @@ def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
 				data['media_type'] = 'movie'
 				data['dbid'] = 4
 			script = control.joinPath(control.addonPath(addon), 'resources', 'lib', 'sqlitequeue.py')
-			sqlitequeue = imp.load_source('sqlitequeue', script)
+			sqlitequeue = imp.load_source('sqlitequeue', script) # this may be deprecated
+
 			data = {'action': 'manualRating', 'ratingData': data}
 			sqlitequeue.SqliteQueue().append(data)
 		else:
@@ -373,10 +372,8 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 		lists = [lists[i//2] for i in range(len(lists)*2)]
 
 		for i in range(0, len(lists), 2):
-			# lists[i] = ((control.lang(33580) % lists[i][0]).encode('utf-8'), '/users/me/lists/%s/items' % lists[i][1])
 			lists[i] = ((control.lang(33580) % lists[i][0]), '/users/me/lists/%s/items' % lists[i][1])
 		for i in range(1, len(lists), 2):
-			# lists[i] = ((control.lang(33581) % lists[i][0]).encode('utf-8'), '/users/me/lists/%s/items/remove' % lists[i][1])
 			lists[i] = ((control.lang(33581) % lists[i][0]), '/users/me/lists/%s/items/remove' % lists[i][1])
 		items += lists
 
@@ -488,12 +485,15 @@ def getActivity():
 		activity.append(i['movies']['collected_at'])
 		activity.append(i['movies']['watchlisted_at'])
 		activity.append(i['movies']['paused_at']) # added 8/30/20
+		activity.append(i['movies']['hidden_at']) # added 4/02/21
 		activity.append(i['episodes']['watched_at']) # added 8/30/20
 		activity.append(i['episodes']['collected_at'])
 		activity.append(i['episodes']['watchlisted_at'])
 		activity.append(i['episodes']['paused_at']) # added 8/30/20
 		activity.append(i['shows']['watchlisted_at'])
+		activity.append(i['shows']['hidden_at']) # added 4/02/21
 		activity.append(i['seasons']['watchlisted_at'])
+		activity.append(i['seasons']['hidden_at']) # added 4/02/21
 		activity.append(i['lists']['liked_at'])
 		activity.append(i['lists']['updated_at'])
 		activity = [int(cleandate.iso_2_utc(i)) for i in activity]
@@ -940,7 +940,7 @@ def _released_key(item):
 
 def getMovieAliases(id):
 	try:
-		return cache.get(getTraktAsJson, 48, '/movies/%s/aliases' % id)
+		return cache.get(getTraktAsJson, 96, '/movies/%s/aliases' % id)
 	except:
 		log_utils.error()
 		return []
@@ -948,7 +948,7 @@ def getMovieAliases(id):
 
 def getTVShowAliases(id):
 	try:
-		return cache.get(getTraktAsJson, 48, '/shows/%s/aliases' % id)
+		return cache.get(getTraktAsJson, 96, '/shows/%s/aliases' % id)
 	except:
 		log_utils.error()
 		return []
@@ -958,7 +958,7 @@ def getPeople(id, content_type, full=True):
 	try:
 		url = '/%s/%s/people' % (content_type, id)
 		if full: url += '?extended=full'
-		return cache.get(getTraktAsJson, 48, url)
+		return cache.get(getTraktAsJson, 96, url)
 	except:
 		log_utils.error()
 
@@ -1016,7 +1016,7 @@ def getGenre(content, type, type_id):
 		return []
 
 
-def IdLookup(id_type, id, type):
+def IdLookup(id_type, id, type): # ("id_type" can be trakt , imdb , tmdb , tvdb) (type can be one of "movie , show , episode , person , list")
 	try:
 		r = '/search/%s/%s?type=%s' % (id_type, id, type)
 		r = cache.get(getTraktAsJson, 96, r)

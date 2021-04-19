@@ -8,7 +8,7 @@ import random
 import re
 import sys
 import time
-from resources.lib.modules import cache
+from resources.lib.database import cache
 from resources.lib.modules import dom_parser
 from resources.lib.modules import log_utils
 from resources.lib.modules import py_tools
@@ -160,7 +160,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			if not ignore:
 				if response.code in [301, 307, 308, 503, 403]: # 403:Forbidden added 3/3/21 for cloudflare, fails on bad User-Agent
 					cf_result = response.read(5242880)
-					log_utils.log('cf_result = %s' % str(cf_result), level=log_utils.LOGDEBUG)
+					# log_utils.log('cf_result = %s' % str(cf_result), level=log_utils.LOGDEBUG)
 					try: encoding = response.headers["Content-Encoding"]
 					except: encoding = None
 					if encoding == 'gzip': cf_result = gzip.GzipFile(fileobj=StringIO(cf_result)).read()

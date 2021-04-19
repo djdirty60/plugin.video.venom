@@ -3,18 +3,17 @@
 	Venom Add-on
 """
 
-import copy
-import json
-import time
+# import copy
+from json import dumps as jsdumps, loads as jsloads
+from time import time
 import requests
+from resources.lib.database import cache
 from resources.lib.modules import control
-from resources.lib.modules import cache
-from resources.lib.modules import client
-from resources.lib.modules import workers
-from resources.lib.modules import trakt
 from resources.lib.modules import cleantitle
+from resources.lib.modules import client
 from resources.lib.modules import log_utils
-
+from resources.lib.modules import trakt
+from resources.lib.modules import workers
 
 
 class TVDBAPI:
@@ -45,14 +44,14 @@ class TVDBAPI:
 
 
 	def _post_request(self, url, postData):
-		postData = json.dumps(postData)
+		postData = jsdumps(postData)
 		url = self.baseUrl + url
 		response = requests.post(url, data=postData, headers=self.headers).text
 		if 'Not Authorized' in response:
 			self.renewToken()
 			self.headers['Authorization'] = 'Bearer %s' % self.jwToken
 			response = requests.post(url, data=postData, headers=self.headers).text
-		response = json.loads(response)
+		response = jsloads(response)
 		return response
 
 
@@ -63,38 +62,38 @@ class TVDBAPI:
 			self.renewToken()
 			self.headers['Authorization'] = 'Bearer %s' % self.jwToken
 			response = requests.get(url, headers=self.headers).text
-		response = json.loads(response)
+		response = jsloads(response)
 		return response
 
 
 	def renewToken(self):
 		url = self.baseUrl + 'refresh_token'
 		response = requests.post(url, headers=self.headers)
-		response = json.loads(response.text)
+		response = jsloads(response.text)
 
 		if 'Error' in response:
 			self.newToken(True)
 		else:
 			self.jwToken = response['token']
 			control.setSetting('tvdb.jw', self.jwToken)
-			control.setSetting('tvdb.expiry', str(time.time() + (24 * (60 * 60))))
+			control.setSetting('tvdb.expiry', str(time() + (24 * (60 * 60))))
 		return
 
 
 	def newToken(self, ignore_lock=False):
 		url = self.baseUrl + "login"
 		postdata = {"apikey": self.apiKey}
-		postdata = json.dumps(postdata)
+		postdata = jsdumps(postdata)
 		headers = self.headers
 		if 'Authorization' in headers:
 			headers.pop('Authorization')
-		response = json.loads(requests.post(url, data=postdata, headers=self.headers).text)
+		response = jsloads(requests.post(url, data=postdata, headers=self.headers).text)
 		self.jwToken = response['token']
 		# tools.tvdb_refresh = self.jwToken
 		control.setSetting('tvdb.jw', self.jwToken)
 		self.headers['Authorization'] = self.jwToken
 		log_utils.log('Refreshed TVDB Token', level=log_utils.LOGDEBUG)
-		control.setSetting('tvdb.expiry', str(time.time() + (24 * (60 * 60))))
+		control.setSetting('tvdb.expiry', str(time() + (24 * (60 * 60))))
 		return response
 
 

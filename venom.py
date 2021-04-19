@@ -4,7 +4,6 @@
 """
 
 from sys import argv
-import xbmcaddon
 try: #Py2
 	from urlparse import parse_qsl
 	from urllib import quote_plus
@@ -13,7 +12,6 @@ except ImportError: #Py3
 from resources.lib.modules import control
 
 params = dict(parse_qsl(argv[2].replace('?','')))
-
 action = params.get('action')
 id = params.get('id')
 name = params.get('name')
@@ -32,15 +30,11 @@ source = params.get('source')
 
 windowedtrailer = params.get('windowedtrailer')
 windowedtrailer = int(windowedtrailer) if windowedtrailer in ("0","1") else 0
-
-playAction = xbmcaddon.Addon('plugin.video.venom').getSetting('hosts.mode')
-autoPlay = 'true' if playAction == '2' else ''
-control.homeWindow.setProperty('plugin.video.venom.autoPlay', autoPlay)
-
+control.refresh_playAction()
 
 if action is None:
 	from resources.lib.menus import navigator
-	from resources.lib.modules import cache
+	from resources.lib.database import cache
 	run = control.setting('first.info')
 	if run == '': run = 'true' #clean install scenerio
 	if cache._find_cache_version(): run = 'true'
@@ -51,7 +45,6 @@ if action is None:
 		control.setSetting(id='first.info', value='false')
 	cache.cache_version_check()
 	navigator.Navigator().root()
-
 
 ####################################################
 #---MOVIES
@@ -132,7 +125,6 @@ elif action == 'movieUserlists':
 	from resources.lib.menus import movies
 	movies.Movies().userlists()
 
-
 ####################################################
 #---Collections
 ####################################################
@@ -169,7 +161,6 @@ if action and action.startswith('collections'):
 		from resources.lib.menus import collections
 		collections.Collections().get(url)
 
-
 ####################################################
 #---Furk
 ####################################################
@@ -193,7 +184,6 @@ if action and action.startswith('furk'):
 	elif action == "furkSearchNew":
 		from resources.lib.menus import furk
 		furk.Furk().search_new()
-
 
 ####################################################
 # TV Shows
@@ -283,32 +273,31 @@ elif action == 'tvOriginals':
 	from resources.lib.menus import tvshows
 	tvshows.TVshows().originals()
 
-
 ####################################################
 #---SEASONS
 ####################################################
 if action and action.startswith('seasons'):
 	if action == 'seasons':
 		from resources.lib.menus import seasons
-		seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb)
+		art = params.get('art')
+		seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, art)
 
-	elif action == 'seasonsUserlists':
-		from resources.lib.indexers import seasons
-		seasons.Seasons().userlists()
+	# elif action == 'seasonsUserlists':
+		# from resources.lib.indexers import seasons
+		# seasons.Seasons().userlists()
 
-	elif action == 'seasonsList':
-		from resources.lib.menus import seasons
-		seasons.Seasons().seasonList(url)
-
+	# elif action == 'seasonsList':
+		# from resources.lib.menus import seasons
+		# seasons.Seasons().seasonList(url)
 
 ####################################################
 #---EPISODES
 ####################################################
 if action == 'playEpisodesList':
-	# import json
 	from json import dumps as jsdumps
 	from resources.lib.menus import episodes
-	items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, season, episode, idx=False)
+	meta = params.get('meta')
+	items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode, idx=False)
 	control.playlist.clear()
 	for i in items:
 		title = i['title']
@@ -325,17 +314,14 @@ if action == 'playEpisodesList':
 		sysmeta = quote_plus(jsdumps(i))
 		url = 'plugin://plugin.video.venom/?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select="2"' % (
 								systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
-		item = control.item(label=title)
+		item = control.item(label=title, offscreen=True)
 		control.playlist.add(url=url, listitem=item)
 	control.player2().play(control.playlist)
 
 elif action == 'episodes':
 	from resources.lib.menus import episodes
-	episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, season, episode)
-
-elif action == 'episodesPage':
-	from resources.lib.menus import episodes
-	episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, season, episode)
+	meta = params.get('meta')
+	episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode)
 
 elif action == 'calendar':
 	from resources.lib.menus import episodes
@@ -352,7 +338,6 @@ elif action == 'episodesUnfinished':
 elif action == 'episodesUserlists':
 	from resources.lib.menus import episodes
 	episodes.Episodes().userlists()
-
 
 ####################################################
 #---Premium Services
@@ -464,7 +449,6 @@ if action and action.startswith('ad_'):
 		from resources.lib.debrid import alldebrid
 		alldebrid.AllDebrid().restart_transfer(id, name, silent=False)
 
-
 ####################################################
 #---Anime
 ####################################################
@@ -481,7 +465,6 @@ if action and action.startswith('anime_'):
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().get(url)
 
-
 ####################################################
 #---YouTube
 ####################################################
@@ -492,7 +475,6 @@ if action == 'youtube':
 
 elif action == 'sectionItem':
 	pass # Placeholder. This is a non-clickable menu item for notes, etc.
-
 
 ####################################################
 #---Download
@@ -545,7 +527,6 @@ if action and action.startswith('download'):
 			except:
 				import traceback
 				traceback.print_exc()
-
 
 ####################################################
 #---Tools
@@ -658,7 +639,6 @@ if action and action.startswith('tools_'):
 		from resources.lib.modules import trakt
 		trakt.sync_watched()
 
-
 ####################################################
 #---Play
 ####################################################
@@ -736,22 +716,23 @@ elif action == 'random':
 	if rtype == 'movie':
 		from resources.lib.menus import movies
 		rlist = movies.Movies().get(url, idx=False)
-		r = argv[0]+"?action=play"
+		r = argv[0] + "?action=play"
 
 	elif rtype == 'episode':
 		from resources.lib.menus import episodes
-		rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, season, idx=False)
-		r = argv[0]+"?action=play"
+		meta = params.get('meta')
+		rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, idx=False)
+		r = argv[0] + "?action=play"
 
 	elif rtype == 'season':
 		from resources.lib.menus import seasons
 		rlist = seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, idx=False)
-		r = argv[0]+"?action=random&rtype=episode"
+		r = argv[0] + "?action=random&rtype=episode"
 
 	elif rtype == 'show':
 		from resources.lib.menus import tvshows
 		rlist = tvshows.TVshows().get(url, idx=False)
-		r = argv[0]+"?action=random&rtype=season"
+		r = argv[0] + "?action=random&rtype=season"
 
 	from random import randint
 	from json import dumps as jsdumps
@@ -775,7 +756,6 @@ elif action == 'random':
 		control.execute('RunPlugin(%s)' % r)
 	except:
 		control.notification(message=32537)
-
 
 ####################################################
 #---Playlist
@@ -802,7 +782,6 @@ if action and action.startswith('playlist_'):
 		else:
 			control.notification(title=name, message=35519)
 
-
 ####################################################
 #---Playcount
 ####################################################
@@ -818,7 +797,6 @@ if action and action.startswith('playcount_'):
 	elif action == 'playcount_TVShow':
 		from resources.lib.modules import playcount
 		playcount.tvshows(name, imdb, tvdb, season, query)
-
 
 ####################################################
 #---Library Actions
@@ -886,7 +864,6 @@ if action and action.startswith('library_'):
 		from resources.lib.modules import libtools
 		libtools.lib_tools().service()
 
-
 ####################################################
 #---Cache
 ####################################################
@@ -928,5 +905,5 @@ if action and action.startswith('cache_'):
 		navigator.Navigator().clearBookmark(name, year)
 
 	elif action == 'cache_clearKodiBookmark': # context.venom action call only
-		from resources.lib.modules import cache
+		from resources.lib.database import cache
 		cache.clear_local_bookmark(url)

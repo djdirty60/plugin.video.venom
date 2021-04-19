@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="4.4.5">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.0.0">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -15,7 +15,7 @@
 	<extension library="service.py" point="xbmc.service" start="startup" />
 	<extension library="resources/lib/" point="xbmc.python.module" /> 
 	<extension point="xbmc.addon.metadata">
-		<reuselanguageinvoker>false</reuselanguageinvoker>
+		<reuselanguageinvoker>true</reuselanguageinvoker>
 		<summary lang="en">[B][COLOR red]Venom[/COLOR][/B] - We do not host any of the contents streamed</summary>
 		<description lang="en">[B][COLOR red]Venom[/COLOR][/B][CR] This addon does not form part of the Kodi Media Centre. Please do not seek assistance with this addon from any of the Official Kodi Support Channels.[CR]The author does not host any of the content in this addon and takes no responsibility for content found</description>
 		<platform>all</platform>
@@ -32,18 +32,27 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v4.4.5 - March 11, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed ampersand sign in news to be encoded.  Sorry about that
-    folks, simply forgot.[/I]
-[B][COLOR red]Update - v4.4.4 - March 11, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Note TMDBHelper player files have been updated.  Be sure
-    to update via the TMDBHelper settings.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed TMDBHelper playback of library files(.strm) when
-    TMDBHelper is set to "Automatically play local files".[/I]
-[COLOR yellow]--[/COLOR][I] Few tweaks to some annoying folder and file names used for
-    library integration. Ex. "&amp;" was replaced with an underscore,
-    now replaced with the word "and".  Apostrophes in names
-    were being replaces with a "."(dot), now just removed.[/I]
+[B][COLOR red]Update - v5.0.0 - April 18, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] TVShow meta provider is now switched from TVDb to TMDb
+    throughout the addon.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed disable player artwork under autoplay configuration.[/I]
+[COLOR yellow]--[/COLOR][I] Added new window property to set the playback method chosen
+    in settings.  This now allows the Venom global context menu
+    addon to recognize the playback method on the fly without
+    the need to reload skin, or wait for a widget refresh.[/I]
+[COLOR yellow]--[/COLOR][I] New library setting allows .strm files to be created for TMDB Helper.[/I]
+[COLOR yellow]--[/COLOR][I] Alias title checking of source results has been improved for more
+    alias matches.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed a sorting issue when TVShows were set to "Default" resulting in
+    some item lists being empty.[/I]
+[COLOR yellow]--[/COLOR][I] Revised icon overlay values for Kodi doc changes.[/I]
+[COLOR yellow]--[/COLOR][I] Added new "Remove HDR sources" filter.[/I]
+[COLOR yellow]--[/COLOR][I] Added new "Remove Dolby Vision sources" filter.[/I]
+[COLOR yellow]--[/COLOR][I] Added some new source Indentifiers for "Additional Info" display.[/I]
+[COLOR yellow]--[/COLOR][I] Database handling and speed improvements.[/I]
+[COLOR yellow]--[/COLOR][I] Show packs will no longer scrape seasons that are still airing.[/I]
+[COLOR yellow]--[/COLOR][I] Added "date watched" to item label in Trakt History for movies
+    and episodes.[/I]
 		</news>
 	</extension>
 </addon>

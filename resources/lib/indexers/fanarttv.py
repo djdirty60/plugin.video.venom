@@ -23,18 +23,6 @@ retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 50
 session.mount('http://', HTTPAdapter(max_retries=retries))
 
 
-def timeIt(func):
-	import time
-	fnc_name = func.__name__
-	def wrap(*args, **kwargs):
-		started_at = time.time()
-		result = func(*args, **kwargs)
-		log_utils.log('%s.%s = %s' % (__name__, fnc_name, time.time() - started_at), level=log_utils.LOGDEBUG)
-		return result
-	return wrap
-
-
-# @timeIt
 def get_request(url):
 	try:
 		try:
@@ -87,7 +75,6 @@ def parse_art(img):
 		# return None
 	# return ret_img
 
-
 # def parse_art(img):
 	# if not img: return None
 	# ret_img = []
@@ -109,6 +96,7 @@ def parse_art(img):
 
 
 def get_movie_art(imdb, tmdb):
+	if not imdb and not tmdb: return None
 	url = base_url % ('movies', tmdb)
 	art = get_request(url)
 	if art is None:
@@ -119,7 +107,7 @@ def get_movie_art(imdb, tmdb):
 	try:
 		if 'movieposter' not in art: raise Exception()
 		poster2 = parse_art(art['movieposter'])
-	except: poster2 = '0'
+	except: poster2 = ''
 
 	try:
 		if 'moviebackground' in art:
@@ -128,12 +116,12 @@ def get_movie_art(imdb, tmdb):
 			if 'moviethumb' not in art: raise Exception()
 			fanart2 = art['moviethumb']
 		fanart2 = parse_art(fanart2)
-	except: fanart2 = '0'
+	except: fanart2 = ''
 
 	try:
 		if 'moviebanner' not in art: raise Exception()
 		banner2 = parse_art(art['moviebanner'])
-	except: banner2 = '0'
+	except: banner2 = ''
 
 	try:
 		if 'hdmovielogo' in art:
@@ -142,7 +130,7 @@ def get_movie_art(imdb, tmdb):
 			if 'movielogo' not in art: raise Exception()
 			clearlogo = art['movielogo']
 		clearlogo = parse_art(clearlogo)
-	except: clearlogo = '0'
+	except: clearlogo = ''
 
 	try:
 		if 'hdmovieclearart' in art:
@@ -151,12 +139,12 @@ def get_movie_art(imdb, tmdb):
 			if 'movieart' not in art: raise Exception()
 			clearart = art['movieart']
 		clearart = parse_art(clearart)
-	except: clearart = '0'
+	except: clearart = ''
 
 	try:
 		if 'moviedisc' not in art: raise Exception()
 		discart = parse_art(art['moviedisc'])
-	except: discart = '0'
+	except: discart = ''
 
 	try:
 		if 'moviethumb' in art:
@@ -165,14 +153,14 @@ def get_movie_art(imdb, tmdb):
 			if 'moviebackground' not in art: raise Exception()
 			landscape = art['moviebackground']
 		landscape = parse_art(landscape)
-	except: landscape = '0'
+	except: landscape = ''
 
 	# try:
 		# keyart = art['movieposter']
 		# keyart = [(x['url'], x['likes']) for x in keyart if any(value in x.get('lang') for value in ['00', 'None', None])]
 		# keyart = sorted(keyart, key=lambda x: int(x[1]), reverse=True)
 		# keyart = [x[0] for x in keyart][0]
-	# except: keyart = '0'
+	# except: keyart = ''
 
 	extended_art = {'extended': True, 'poster2': poster2, 'fanart2': fanart2, 'banner2': banner2, 'clearlogo': clearlogo, 'clearart': clearart, 'discart': discart, 'landscape': landscape}
 	# extended_art = {'extended': True, 'poster2': poster2, 'fanart2': fanart2, 'banner2': banner2, 'clearlogo': clearlogo, 'clearart': clearart, 'discart': discart, 'landscape': landscape, 'keyart': keyart}
@@ -180,30 +168,30 @@ def get_movie_art(imdb, tmdb):
 
 
 def get_tvshow_art(tvdb):
-	if tvdb == '0': return None
+	if not tvdb: return None
 	url = base_url % ('tv', tvdb)
 	art = get_request(url)
-	if art is None: return None
+	if not art: return None
 
 	try:
 		if 'tvposter' not in art: raise Exception()
 		poster2 = parse_art(art['tvposter'])
-	except: poster2 = '0'
+	except: poster2 = ''
 
-	# try:
+	# try: # will need season number to fetch correct one
 		# if 'seasonposter' not in art: raise Exception()
-		# seasonposter2 = parse_art(art['seasonposter'])
-	# except: seasonposter2 = '0'
+		# season_poster2 = parse_art(art['seasonposter'])
+	# except: season_poster2 = ''
 
 	try:
 		if 'showbackground' not in art: raise Exception()
 		fanart2 = parse_art(art['showbackground'])
-	except: fanart2= '0'
+	except: fanart2= ''
 
 	try:
 		if 'tvbanner' not in art: raise Exception()
 		banner2 = parse_art(art['tvbanner'])
-	except: banner2 = '0'
+	except: banner2 = ''
 
 	try:
 		if 'hdtvlogo' in art:
@@ -212,7 +200,7 @@ def get_tvshow_art(tvdb):
 			if 'clearlogo' not in art: raise Exception()
 			clearlogo = art['clearlogo']
 		clearlogo = parse_art(clearlogo)
-	except: clearlogo = '0'
+	except: clearlogo = ''
 
 	try:
 		if 'hdclearart' in art:
@@ -221,7 +209,7 @@ def get_tvshow_art(tvdb):
 			if 'clearart' not in art: raise Exception()
 			clearart = art['clearart']
 		clearart = parse_art(clearart)
-	except: clearart = '0'
+	except: clearart = ''
 
 	try:
 		if 'tvthumb' in art:
@@ -230,6 +218,6 @@ def get_tvshow_art(tvdb):
 			if 'showbackground' not in art: raise Exception()
 			landscape = art['showbackground']
 		landscape = parse_art(landscape)
-	except: landscape = '0'
+	except: landscape = ''
 	extended_art = {'extended': True, 'poster2': poster2, 'banner2': banner2, 'fanart2': fanart2, 'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape}
 	return extended_art

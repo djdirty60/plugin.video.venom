@@ -8,7 +8,6 @@ from resources.lib.modules import control
 venom_path = control.addonPath(control.addonId())
 venom_version = control.addonVersion(control.addonId())
 
-
 def get(file):
 	helpFile = control.joinPath(venom_path, 'resources', 'help', file + '.txt')
 	r = open(helpFile)

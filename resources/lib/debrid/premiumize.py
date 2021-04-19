@@ -10,7 +10,7 @@ try: #Py2
 	from urllib import quote_plus, urlencode, unquote
 except ImportError: #Py3
 	from urllib.parse import quote_plus, urlencode, unquote
-from resources.lib.modules import cache
+from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules.source_utils import supported_video_extensions
@@ -44,7 +44,7 @@ class Premiumize:
 		self.patterns = []
 		self.token = control.setting('premiumize.token')
 		self.headers = {'User-Agent': 'Venom for Kodi', 'Authorization': 'Bearer %s' % self.token}
-		self.server_notifications = False
+		self.server_notifications = control.setting('premiumize.server.notifications')
 
 
 	def _get(self, url):
@@ -53,8 +53,9 @@ class Premiumize:
 			if 'status' in response:
 				if response.get('status') == 'success':
 					return response
-				if response.get('status') == 'error' and self.server_notifications:
-					control.notification(message=response.get('message'))
+				if response.get('status') == 'error':
+					if self.server_notifications: control.notification(message=response.get('message'), icon=pm_icon)
+					log_utils.log('Premiumize.me: %s' % response.get('message'), __name__, log_utils.LOGWARNING)
 		except:
 			log_utils.error()
 		return response
@@ -66,8 +67,9 @@ class Premiumize:
 			if 'status' in response:
 				if response.get('status') == 'success':
 					return response
-				if response.get('status') == 'error' and self.server_notifications:
-					control.notification(message=response.get('message'))
+				if response.get('status') == 'error':
+					if self.server_notifications: control.notification(message=response.get('message'), icon=pm_icon)
+					log_utils.log('Premiumize.me: %s' % response.get('message'), __name__, log_utils.LOGWARNING)
 		except:
 			log_utils.error()
 		return response
@@ -94,6 +96,7 @@ class Premiumize:
 		progressDialog.close()
 		if success:
 			control.notification(message=40052, icon=pm_icon)
+			log_utils.log('Premiumize.me Successfully Authorized', __name__, log_utils.LOGDEBUG)
 
 
 	def poll_token(self, device_code):
@@ -187,12 +190,12 @@ class Premiumize:
 
 
 	def resolve_magnet(self, magnet_url, info_hash, season, episode, ep_title):
-		from resources.lib.modules.source_utils import seas_ep_filter, episode_extras_filter
+		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter
 		try:
 			file_url = None
 			correct_files = []
 			extensions = supported_video_extensions()
-			extras_filtering_list = episode_extras_filter()
+			extras_filtering_list = extras_filter()
 			data = {'src': magnet_url}
 			response = self._post(transfer_directdl_url, data)
 			if not 'status' in response or response['status'] != 'success': return None
@@ -321,7 +324,8 @@ class Premiumize:
 					if isinstance(response, list):
 						return response[0]
 				if result.get('status') == 'error':
-					control.notification(message=result.get('message'))
+					if self.server_notifications: control.notification(message=result.get('message'), icon=pm_icon)
+					log_utils.log('Premiumize.me: %s' % response.get('message'), __name__, log_utils.LOGDEBUG)
 		except:
 			log_utils.error()
 		return False
@@ -378,10 +382,11 @@ class Premiumize:
 				if not control.yesnoDialog(control.lang(40050) % '?[CR]' + folder_name, '', ''): return
 			data = {'id': media_id}
 			response = self._post(transfer_delete_url, data)
-			if not response: return
-			if 'status' in response:
-				if response.get('status') == 'success':
-					log_utils.log('Transfer successfully deleted from the Premiumize.me cloud', __name__, log_utils.LOGDEBUG)
+			if silent: return
+			else:
+				if response and response.get('status') == 'success':
+					if self.server_notifications: control.notification(message='%s successfully deleted from the Premiumize.me cloud' % folder_name, icon=pm_icon)
+					log_utils.log('%s successfully deleted from the Premiumize.me cloud' % folder_name, __name__, log_utils.LOGDEBUG)
 					control.refresh()
 					return
 		except:
@@ -406,7 +411,8 @@ class Premiumize:
 			extensions = supported_video_extensions()
 			cloud_files = self.my_files(folder_id)
 			if not cloud_files:
-				control.notification(message='Request Failure-Empty Content')
+				if self.server_notifications: control.notification(message='Request Failure-Empty Content', icon=pm_icon)
+				log_utils.log('Premiumize.me: Request Failure-Empty Content', __name__, log_utils.LOGDEBUG)
 				return
 			cloud_files = [i for i in cloud_files if ('link' in i and i['link'].lower().endswith(tuple(extensions))) or i['type'] == 'folder']
 			cloud_files = sorted(cloud_files, key=lambda k: k['name'])
@@ -471,7 +477,8 @@ class Premiumize:
 			extensions = supported_video_extensions()
 			transfer_files = self.user_transfers()
 			if not transfer_files:
-				control.notification(message='Request Failure-Empty Content')
+				if self.server_notifications: control.notification(message='Request Failure-Empty Content', icon=pm_icon)
+				log_utils.log('Premiumize.me: Request Failure-Empty Content', __name__, log_utils.LOGDEBUG)
 				return
 		except:
 			log_utils.error()
@@ -502,7 +509,8 @@ class Premiumize:
 					isFolder = False
 					details = self.item_details(item['file_id'])
 					if not details:
-						control.notification(message='Request Failure-Empty Content')
+						if self.server_notifications: control.notification(message='Request Failure-Empty Content', icon=pm_icon)
+						log_utils.log('Premiumize.me: Request Failure-Empty Content', __name__, log_utils.LOGDEBUG)
 						return
 					url_link = details['link']
 					if url_link.startswith('/'):

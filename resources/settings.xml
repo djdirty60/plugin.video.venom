@@ -87,7 +87,7 @@
 
 	<!-- TV Shows - 2 -->
 	<category label="32002">
-		<setting id="flatten.tvshows" type="bool" label="32317" default="false" />
+		<setting id="flatten.tvshows" type="bool" label="32317" default="false" visible="true" /> <!-- invisible for now till I code to flatten new TMDb results -->
 		<setting id="tv.specials" type="bool" label="32649" default="false" />
 		<setting id="showunaired" type="bool" label="32570" default="false" />
 		<setting id="unaired.identify" type="select" label="32608" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" enable="eq(-1,true)" />
@@ -167,7 +167,9 @@
 		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=DebridSort)" />
 		<setting id="remove.duplicates" type="bool" label="32035" default="true" />
 		<setting id="remove.duplicates.logging" type="bool" label=" -- Do not spam log with removed duplicates" default="true" enable="eq(-1,true)" />
+		<setting id="remove.dolby.vision" type="bool" label="32388" default="false" />
 		<setting id="remove.hevc" type="bool" label="32363" default="false" />
+		<setting id="remove.hdr" type="bool" label="32389" default="false" />
 		<setting id="remove.CamSd.sources" type="bool" label="32050" default="false" />
 		<setting id="remove.3D.sources" type="bool" label="32051" default="true" />
 		<setting id="torrent.min.seeders" type="slider" label="32638" default="1" range="1,100" option="int" visible="false" /> <!-- Hard coded by Fenomscrapers so not visible for now-->
@@ -221,12 +223,13 @@
 
 		<setting type="lsep" label="All Debrid" />
 		<setting type="action" label="[I]Please visit My Accounts for setup[/I]" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.5&amp;opensettings=true&amp;query2=7.4)" visible="eq(2,)" />
-		<setting id="alldebrid.enable" type="bool" label="32081" default="true" visible="!eq(2,)" />
+		<setting id="alldebrid.enable" type="bool" label="32081" default="true" visible="!eq(1,)" />
 		<setting id="alldebrid.token" label="alldebrid token" type="text" default="" visible="false" />
 		<setting id="alldebrid.username" label="40006" type="text" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
 		<setting id="alldebrid.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-2,) + eq(-3,true)" />
-		<setting id="alldebrid.saveToCloud" type="bool" label="32684" default="false" enable="eq(-4,true)" visible="!eq(-3,) + eq(-4,true)" />
-		<setting type="action" label="Account Info" action="RunPlugin(plugin://plugin.video.venom/?action=tools_adAcctMyAccounts)" visible="!eq(-4,) + eq(-5,true)" />
+		<setting id="alldebrid.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-3,) + eq(-4,true)" />
+		<setting id="alldebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,) + eq(-5,true)" />
+		<setting type="action" label="Account Info" action="RunPlugin(plugin://plugin.video.venom/?action=tools_adAcctMyAccounts)" visible="!eq(-5,) + eq(-6,true)" />
 
 		<setting type="lsep" label="Premiumize.me" />
 		<setting type="action" label="[I]Please visit My Accounts for setup[/I]" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.13&amp;opensettings=true&amp;query2=7.11)" visible="eq(2,)" />
@@ -235,7 +238,8 @@
 		<setting id="premiumize.username" label="40006" type="text" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
 		<setting id="premiumize.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-2,) + eq(-3,true)" />
 		<setting id="premiumize.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-3,) + eq(-4,true)" />
-		<setting type="action" label="Account Info" action="RunPlugin(plugin://plugin.video.venom/?action=tools_pmAcctMyAccounts)" visible="!eq(-4,) + eq(-5,true)" />
+		<setting id="premiumize.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,) + eq(-5,true)" />
+		<setting type="action" label="Account Info" action="RunPlugin(plugin://plugin.video.venom/?action=tools_pmAcctMyAccounts)" visible="!eq(-5,) + eq(-6,true)" />
 
 		<setting type="lsep" label="Real-Debrid" />
 		<setting type="action" label="[I]Please visit My Accounts for setup[/I]" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.21&amp;opensettings=true&amp;query2=7.26)" visible="eq(2,)" />
@@ -247,7 +251,8 @@
 		<setting id="realdebrid.secret" label="realdebrid secret" type = "text" default="" visible="false" />
 		<setting id="realdebrid.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-5,) + eq(-6,true)" />
 		<setting id="realdebrid.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-6,) +eq(-7,true)" />
-		<setting type="action" label="Account Info" action="RunPlugin(plugin://plugin.video.venom/?action=tools_rdAcctMyAccounts)" visible="!eq(-7,) + eq(-8,true)" />
+		<setting id="realdebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-7,) + eq(-8,true)" />
+		<setting type="action" label="Account Info" action="RunPlugin(plugin://plugin.video.venom/?action=tools_rdAcctMyAccounts)" visible="!eq(-8,) + eq(-9,true)" />
 
 		<setting type="lsep" label="FANART.TV" />
 		<setting type="action" label="[I]Please visit My Accounts for setup[/I]" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=2.1&amp;opensettings=true&amp;query2=7.38)" visible="eq(1,)" />
@@ -261,9 +266,9 @@
 		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=tmdbUser)" />
 		<setting id="tmdb.session_id" type="text" default="" label="session_id" enable="false" />
 
-		<setting type="lsep" label="TVDb" />
-		<setting id="tvdb.api.key" type="text" option = 'hidden' label="TVDb API key (legacy)" default="" enable="false" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=tvdbApiKey)" />
+<!-- 		<setting type="lsep" label="TVDb" visible="false" /> -->
+		<setting id="tvdb.api.key" type="text" option = 'hidden' label="TVDb API key (legacy)" default="" enable="false" visible="false" />
+		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=tvdbApiKey)" visible="false" />
 		<setting id="tvdb.jw" type="text" default="" visible="false" />
 
 		<setting type="lsep" label="IMDb" />
@@ -295,6 +300,7 @@
 		<setting id="library.check_movie" type="bool" label="32549" default="false" />
 		<setting id="library.check_episode" type="bool" label="32550" default="false" />
 		<setting id="library.include_unknown" type="bool" label="32565" default="true" />
+		<setting id="library.strm.use_tmdbhelper" type="bool" label="Create .strm files for TMDB Helper" default="false" />
 	</category>
 
 	<!-- Downloads - 9 -->

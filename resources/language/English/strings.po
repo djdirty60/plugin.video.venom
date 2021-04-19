@@ -232,11 +232,11 @@ msgid "[B]VENOM[/B] : Viewtypes"
 msgstr ""
 
 msgctxt "#32050"
-msgid "Remove CAM and SD Sources"
+msgid "Remove CAM and SD sources"
 msgstr ""
 
 msgctxt "#32051"
-msgid "Remove 3D Sources"
+msgid "Remove 3D sources"
 msgstr ""
 
 msgctxt "#32052"
@@ -848,7 +848,7 @@ msgid "[B]SETTINGS[/B] : Navigation"
 msgstr ""
 
 msgctxt "#32363"
-msgid "Remove HEVC streams"
+msgid "Remove HEVC sources"
 msgstr ""
 
 msgctxt "#32364"
@@ -948,11 +948,11 @@ msgid "Sources Select"
 msgstr ""
 
 msgctxt "#32388"
-msgid ""
+msgid "Remove Dolby Vision sources"
 msgstr ""
 
 msgctxt "#32389"
-msgid ""
+msgid "Remove HDR sources"
 msgstr ""
 
 msgctxt "#32390"
@@ -1268,7 +1268,7 @@ msgid "Airing Today (TMDb)"
 msgstr ""
 
 msgctxt "#32468"
-msgid ""
+msgid "Networks (TMDb)"
 msgstr ""
 
 msgctxt "#32469"
@@ -3735,4 +3735,8 @@ msgstr ""
 
 msgctxt "#40076"
 msgid "[COLOR red][B]Scrobbble Reset[/B][/COLOR] Item"
+msgstr ""
+
+msgctxt "#40077"
+msgid "Originals (TMDb)"
 msgstr ""

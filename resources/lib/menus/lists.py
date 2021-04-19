@@ -18,12 +18,10 @@ except ImportError: #Py3
 	from urllib.parse import quote_plus, unquote_plus, parse_qsl, parse_qs, urlparse
 try: from sqlite3 import dbapi2 as database
 except ImportError: from pysqlite2 import dbapi2 as database
-
-from resources.lib.modules import cache
+from resources.lib.database import cache, metacache
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import metacache
 from resources.lib.modules import py_tools
 from resources.lib.modules import regex
 from resources.lib.modules import trailer
@@ -919,19 +917,17 @@ class indexer:
 				except: devurl = None
 				if devurl == 'developer' and not devmode is True: raise Exception()
 
-				poster = i['poster'] if 'poster' in i else '0'
-				banner = i['banner'] if 'banner' in i else '0'
-				fanart = i['fanart'] if 'fanart' in i else '0'
-				if poster == '0': poster = addonPoster
-				if banner == '0' and poster == '0': banner = addonBanner
-				elif banner == '0': banner = poster
+				poster = i['poster'] if 'poster' in i else ''
+				banner = i['banner'] if 'banner' in i else ''
+				fanart = i['fanart'] if 'fanart' in i else ''
+				if not poster: poster = addonPoster
+				if not banner and not poster: banner = addonBanner
+				elif banner == '': banner = poster
 
-				content = i['content'] if 'content' in i else '0'
+				content = i['content'] if 'content' in i else ''
 				folder = i['folder'] if 'folder' in i else True
 
-				# meta = dict((k, v) for k, v in i.iteritems() if v != '0' and v != '')
-				try: meta = dict((k, v) for k, v in i.iteritems() if v != '0' and v != '')
-				except: meta = dict((k, v) for k, v in i.items() if v != '0' and v != '')
+				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				cm = []
 
 				if content in ['movies', 'tvshows']:
@@ -971,7 +967,7 @@ class indexer:
 					try: cm.append(('Open in browser', 'RunPlugin(%s?action=browser&url=%s)' % (sysaddon, quote_plus(i['url']))))
 					except: pass
 
-				item = control.item(label=name)
+				item = control.item(label=name, offscreen=True)
 				if fanart == '0': fanart = addonFanart
 				try: item.setArt({'poster': poster, 'fanart': fanart, 'tvshow.poster': poster, 'season.poster': poster, 'banner': banner, 'tvshow.banner': banner, 'season.banner': banner})
 				except: pass
@@ -998,7 +994,7 @@ class indexer:
 				# nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 
 			url = '%s?action=%s&url=%s' % (sysaddon, i['nextaction'], quote_plus(i['next']))
-			item = control.item(label=control.lang(30500))
+			item = control.item(label=control.lang(30500), offscreen=True)
 			item.setArt({'addonPoster': addonPoster, 'thumb': addonPoster, 'poster': addonPoster, 'fanart': addonFanart, 'tvshow.poster': addonPoster, 'season.poster': addonPoster, 'banner': addonPoster, 'tvshow.banner': addonPoster, 'season.banner': addonPoster})
 			control.addItem(handle=int(argv[1]), url=url, listitem=item, isFolder=True)
 		except:
@@ -1211,7 +1207,7 @@ class player(xbmc.Player):
 			for i in ['title', 'originaltitle', 'tvshowtitle', 'year', 'season', 'episode', 'genre', 'rating', 'votes', 'director', 'writer', 'plot', 'tagline']:
 				try: meta[i] = control.infoLabel('listitem.%s' % i)
 				except: pass
-			meta = dict((k, v) for k, v in control.iteritems(meta) if v and v != '0')
+			meta = dict((k, v) for k, v in control.iteritems(meta) if v in not None and v != '')
 
 			if not 'title' in meta: meta['title'] = control.infoLabel('listitem.label')
 			icon = control.infoLabel('listitem.icon')
@@ -1223,8 +1219,7 @@ class player(xbmc.Player):
 			f4m = resolver().f4m(url, self.name)
 			if not f4m is None: return
 
-			# item = control.item(path=url, iconImage=icon, thumbnailImage=icon)  # iconImage and thumbnailImage removed in Kodi Matrix
-			item = control.item(label= self.name)
+			item = control.item(label=self.name, offscreen=True)
 			item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'thumb': icon,})
 			item.setInfo(type='video', infoLabels = meta)
@@ -1232,9 +1227,7 @@ class player(xbmc.Player):
 			control.addItem(handle=int(argv[1]), url=url, listitem=item, isFolder=False)
 			# control.player.play(url, item)
 			control.resolve(handle=int(argv[1]), succeeded=True, listitem=item)
-
 			self.totalTime = 0 ; self.currentTime = 0
-
 			for i in range(0, 240):
 				if self.isPlayingVideo(): break
 				control.sleep(1000)

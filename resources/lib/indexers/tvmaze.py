@@ -9,16 +9,15 @@ try: #Py2
 	from urllib import quote_plus
 except ImportError: #Py3
 	from urllib.parse import quote_plus
-from resources.lib.modules import cache
+from resources.lib.database import cache, metacache
+from resources.lib.indexers import tmdb as tmdb_indexer
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import metacache
 from resources.lib.modules import py_tools
-from resources.lib.indexers import tvdb_v1
+from resources.lib.modules import trakt
 from resources.lib.modules import workers
-
 
 networks_this_season = [
 			('A&E', '/networks/29/ae', 'https://i.imgur.com/xLDfHjH.png'),
@@ -62,6 +61,7 @@ networks_this_season = [
 			('Disney XD', '/networks/25/disney-xd', 'https://i.imgur.com/PAJJoqQ.png'),
 			('E! Entertainment', '/networks/43/e', 'https://i.imgur.com/3Delf9f.png'),
 			('E4', '/networks/41/e4', 'https://i.imgur.com/frpunK8.png'),
+			('Epix', '/networks/253/epix', 'https://i.postimg.cc/3JMv8Q1g/epix.png'),
 			# ('Fearnet', '/networks/466/fearnet', 'https://i.imgur.com/CdJ6fZt.png'),
 			('FOX', '/networks/4/fox', 'https://i.imgur.com/6vc0Iov.png'),
 			('Freeform', '/networks/26/freeform', 'https://i.imgur.com/f9AqoHE.png'),
@@ -79,12 +79,13 @@ networks_this_season = [
 			('MTV', '/networks/22/mtv', 'https://i.imgur.com/QM6DpNW.png'),
 			('National Geographic', '/networks/42/national-geographic-channel', 'https://i.imgur.com/XCGNKVQ.png'),
 			('NBC', '/networks/1/nbc', 'https://i.imgur.com/yPRirQZ.png'),
-			('Netflix', '/webchannels/1/netflix', 'https://i.imgur.com/jI5c3bw.png'),
+			('Netflix', '/webchannels/1/netflix', 'https://i.postimg.cc/c4vHp9wV/netflix.png'),
 			('Nickelodeon', '/networks/27/nickelodeon', 'https://i.imgur.com/OUVoqYc.png'),
 			('Nicktoons', '/networks/73/nicktoons', 'https://i.imgur.com/890wBrw.png'),
 			('Oxygen', '/networks/79/oxygen', 'https://i.imgur.com/uFCQvbR.png'),
+			('Paramount Network', '/networks/34/paramount-network', 'https://i.postimg.cc/fL9YCz5R/paramount-network.png'),
 			('PBS', '/networks/85/pbs', 'https://i.imgur.com/r9qeDJY.png'),
-			# ('Playboy TV', '/networks/1035/playboy-tv', 'https://static.tvmaze.com/uploads/images/original_untouched/46/115366.jpg'),
+			# ('Playboy TV', '/networks/1035/playboy-tv', 'https://i.postimg.cc/sxVWPpL3/playboy-tv.png'),
 			('Showcase', '/networks/270/showcase', 'https://i.postimg.cc/CKN3Ph8S/66074.jpg'),
 			('Showtime', '/networks/9/showtime', 'https://i.imgur.com/SawAYkO.png'),
 			('Sky1', '/networks/63/sky-1', 'https://i.imgur.com/xbgzhPU.png'),
@@ -102,10 +103,8 @@ networks_this_season = [
 			('VH1', '/networks/55/vh1', 'https://i.imgur.com/IUtHYzA.png'),
 			('Viceland', '/networks/1006/viceland', 'https://i.imgur.com/sLNNqEY.png'),
 			('WGN', '/networks/28/wgn-america', 'https://i.imgur.com/TL6MzgO.png'),
-			('WWE Network', '/webchannels/15/wwe-network', 'https://i.imgur.com/JjbTbb2.png')
-			# ('YouTube', '/webchannels/21/youtube', 'https://i.imgur.com/ZfewP1Y.png'),
-			# ('YouTube Premium', '/webchannels/43/youtube-premium', 'https://static.tvmaze.com/uploads/images/medium_landscape/160/401362.jpg')
-		]
+			('WWE Network', '/webchannels/15/wwe-network', 'https://i.imgur.com/JjbTbb2.png'),
+			('YouTube Premium', '/webchannels/43/youtube-premium', 'https://i.postimg.cc/vHtqdhyt/youtube-premium.png')]
 
 networks_view_all = [
 			('A&E', '/shows?Show[network_id]=29&page=1', 'https://i.imgur.com/xLDfHjH.png'),
@@ -130,6 +129,7 @@ networks_view_all = [
 			('Cartoon Network', '/shows?Show[network_id]=11&page=1', 'https://i.imgur.com/zmOLbbI.png'),
 			('CBC', '/shows?Show[network_id]=36&page=1', 'https://i.imgur.com/unQ7WCZ.png'),
 			('CBS', '/shows?Show[network_id]=2&page=1', 'https://i.imgur.com/8OT8igR.png'),
+			# ('CBS All Access', '1709', 'https://i.imgur.com/ZvaWMuU.png'),
 			('CNBC', '/shows?Show[network_id]=93&page=1', 'https://i.imgur.com/ENjlkvv.png'),
 			('Channel 4', '/shows?Show[network_id]=45&page=1', 'https://i.imgur.com/6ZA9UHR.png'),
 			('Channel 5', '/shows?Show[network_id]=135&page=1', 'https://i.imgur.com/5ubnvOh.png'),
@@ -143,12 +143,13 @@ networks_view_all = [
 			('DC Universe', '/shows?Show%5BwebChannel_id%5D=187&page=1', 'https://i.imgur.com/bhWIubn.png'),
 			('Discovery Channel', '/shows?Show[network_id]=66&page=1', 'https://i.imgur.com/8UrXnAB.png'),
 			('Discovery ID', '/shows?Show[network_id]=89&page=1', 'https://i.imgur.com/07w7BER.png'),
-			('Disney+', '/shows?Show[webChannel_id]=287&page=1', 'https://i.postimg.cc/SQ8fG2qF/435560.jpg'),
+			('Disney+', '/shows?Show[webChannel_id]=287&page=1', 'https://i.postimg.cc/zBNHHbKZ/disney.png'),
 			('Disney Channel', '/shows?Show[network_id]=78&page=1', 'https://i.imgur.com/ZCgEkp6.png'),
 			('Disney Junior', '/shows?Show[network_id]=1039&page=1', 'https://i.imgur.com/EqPPq5S.png'),
 			('Disney XD', '/shows?Show[network_id]=25&page=1', 'https://i.imgur.com/PAJJoqQ.png'),
 			('E! Entertainment', '/shows?Show[network_id]=43&page=1', 'https://i.imgur.com/3Delf9f.png'),
 			('E4', '/shows?Show[network_id]=41&page=1', 'https://i.imgur.com/frpunK8.png'),
+			('Epix', '/shows?Show[network_id]=253&page=1', 'https://i.postimg.cc/3JMv8Q1g/epix.png'),
 			('Fearnet', '/shows?Show[network_id]=466&page=1', 'https://i.imgur.com/CdJ6fZt.png'),
 			('FOX', '/shows?Show[network_id]=4&page=1', 'https://i.imgur.com/6vc0Iov.png'),
 			('Freeform', '/shows?Show[network_id]=26&page=1', 'https://i.imgur.com/f9AqoHE.png'),
@@ -157,6 +158,7 @@ networks_view_all = [
 			('Hallmark', '/shows?Show[network_id]=50&page=1', 'https://i.imgur.com/zXS64I8.png'),
 			('Hallmark Movies & Mysteries', '/shows?Show[network_id]=252&page=1', 'https://static.tvmaze.com/uploads/images/original_untouched/13/34664.jpg'),
 			('HBO', '/shows?Show[network_id]=8&page=1', 'https://i.imgur.com/Hyu8ZGq.png'),
+			# ('HBO Max', '3186', 'https://i.imgur.com/mmRMG75.png'),
 			('HGTV', '/shows?Show[network_id]=192&page=1', 'https://i.imgur.com/INnmgLT.png'),
 			('History Channel', '/shows?Show[network_id]=53&page=1', 'https://i.imgur.com/LEMgy6n.png'),
 			('H2', '/shows?Show[network_id]=74&page=1', 'https://i.imgur.com/OvkmoDA.png'),
@@ -166,15 +168,19 @@ networks_view_all = [
 			('MTV', '/shows?Show[network_id]=22&page=1', 'https://i.imgur.com/QM6DpNW.png'),
 			('National Geographic', '/shows?Show[network_id]=42&page=1', 'https://i.imgur.com/XCGNKVQ.png'),
 			('NBC', '/shows?Show[network_id]=1&page=1', 'https://i.imgur.com/yPRirQZ.png'),
-			('Netflix', '/shows?Show[webChannel_id]=1&page=1', 'https://i.imgur.com/jI5c3bw.png'),
+			('Netflix', '/shows?Show[webChannel_id]=1&page=1', 'https://i.postimg.cc/c4vHp9wV/netflix.png'),
+			# ('Nick Junior', '35', 'https://i.imgur.com/leuCWYt.png'),
 			('Nickelodeon', '/shows?Show[network_id]=27&page=1', 'https://i.imgur.com/OUVoqYc.png'),
 			('Nicktoons', '/shows?Show[network_id]=73&page=1', 'https://i.imgur.com/890wBrw.png'),
 			('Oxygen', '/shows?Show[network_id]=79&page=1', 'https://i.imgur.com/uFCQvbR.png'),
-			# ('Playboy TV', '/shows?Show[network_id]=1035&page=1', 'https://static.tvmaze.com/uploads/images/original_untouched/46/115366.jpg'),
+			# ('Playboy TV', '/shows?Show[network_id]=1035&page=1', 'https://i.postimg.cc/sxVWPpL3/playboy-tv.png'),
+			('Paramount Network', '/shows?Show[network_id]=34&page=1', 'https://i.postimg.cc/fL9YCz5R/paramount-network.png'),
 			('PBS', '/shows?Show[network_id]=85&page=1', 'https://i.imgur.com/r9qeDJY.png'),
 			('Showcase', '/shows?Show[network_id]=270&page=1', 'https://i.postimg.cc/CKN3Ph8S/66074.jpg'),
 			('Showtime', '/shows?Show[network_id]=9&page=1', 'https://i.imgur.com/SawAYkO.png'),
 			('Sky1', '/shows?Show[network_id]=63&page=1', 'https://i.imgur.com/xbgzhPU.png'),
+			# ('Sky Atlantic', '1063', 'https://i.imgur.com/9u6M0ef.png'),
+			# ('Spike', '55', 'https://i.imgur.com/BhXYytR.png'),
 			('Starz', '/shows?Show[network_id]=17&page=1', 'https://i.imgur.com/Z0ep2Ru.png'),
 			('Sundance', '/shows?Show[network_id]=33&page=1', 'https://i.imgur.com/qldG5p2.png'),
 			('Syfy', '/shows?Show[network_id]=16&page=1', 'https://i.imgur.com/9yCq37i.png'),
@@ -185,26 +191,24 @@ networks_view_all = [
 			('TruTV', '/shows?Show[network_id]=84&page=1', 'https://i.imgur.com/HnB3zfc.png'),
 			('TV Land', '/shows?Show[network_id]=57&page=1', 'https://i.imgur.com/1nIeDA5.png'),
 			('TV One', '/shows?Show[network_id]=224&page=1', 'https://i.imgur.com/gGCTa8s.png'),
-			('USA', '/shows?Show[network_id]=30&page=1', 'https://i.imgur.com/Doccw9E.png'),
+			('USA Network', '/shows?Show[network_id]=30&page=1', 'https://i.imgur.com/Doccw9E.png'),
 			('VH1', '/shows?Show[network_id]=55&page=1', 'https://i.imgur.com/IUtHYzA.png'),
 			('Viceland', '/shows?Show[network_id]=1006&page=1', 'https://i.imgur.com/sLNNqEY.png'),
-			('WGN', '/shows?Show[network_id]=28&page=1', 'https://i.imgur.com/TL6MzgO.png'),
-			('WWE Network', '/shows?Show[webChannel_id]=15&page=1', 'https://i.imgur.com/JjbTbb2.png')
+			# ('WB', '21', 'https://i.imgur.com/rzfVME6.png'),
+			('WGN America', '/shows?Show[network_id]=28&page=1', 'https://i.imgur.com/TL6MzgO.png'),
+			('WWE Network', '/shows?Show[webChannel_id]=15&page=1', 'https://i.imgur.com/JjbTbb2.png'),
 			# ('YouTube', '/webchannels/21/youtube', 'https://i.imgur.com/ZfewP1Y.png'),
-			# ('YouTube Premium', '/webchannels/43/youtube-premium', 'https://static.tvmaze.com/uploads/images/medium_landscape/160/401362.jpg')
-		]
+			('YouTube Premium', '/shows?Show[webChannel_id]=43&page=1', 'https://i.postimg.cc/vHtqdhyt/youtube-premium.png')]
 
 originals_this_season = [
 			('Amazon', '/webchannels/3/amazon', 'https://i.imgur.com/ru9DDlL.png'),
 			('Hulu', '/webchannels/2/hulu', 'https://i.imgur.com/gvHOZgC.png'),
-			('Netflix', '/webchannels/1/netflix', 'https://i.imgur.com/jI5c3bw.png')
-		]
+			('Netflix', '/webchannels/1/netflix', 'https://i.postimg.cc/c4vHp9wV/netflix.png')]
 
 originals_view_all = [
 			('Amazon', '/shows?Show[webChannel_id]=3&page=1', 'https://i.imgur.com/ru9DDlL.png'),
 			('Hulu', '/shows?Show[webChannel_id]=2&page=1', 'https://i.imgur.com/gvHOZgC.png'),
-			('Netflix', '/shows?Show[webChannel_id]=1&page=1', 'https://i.imgur.com/jI5c3bw.png')
-		]
+			('Netflix', '/shows?Show[webChannel_id]=1&page=1', 'https://i.postimg.cc/c4vHp9wV/netflix.png')]
 
 
 # API calls are rate limited to allow at least 20 calls every 10 seconds per IP address
@@ -245,16 +249,10 @@ class tvshows:
 
 		self.base_link = 'https://api.tvmaze.com'
 		self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed=cast'
-
+		# self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed[]=seasons&embed[]=cast' #TVMaze throttles embedding multiple links allot
 		self.tvdb_key = control.setting('tvdb.api.key')
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
-
-		self.tvdb_info_link = 'https://thetvdb.com/api/%s/series/%s/%s.xml' % (self.tvdb_key, '%s', '%s')
-		self.tvdb_by_imdb = 'https://thetvdb.com/api/GetSeriesByRemoteID.php?imdbid=%s'
-		self.tvdb_by_query = 'https://thetvdb.com/api/GetSeries.php?seriesname=%s'
-		self.tvdb_image = 'https://thetvdb.com/banners/'
-
 
 	def tvmaze_list(self, url):
 		try:
@@ -264,22 +262,19 @@ class tvshows:
 				result = client.parseDOM(result, 'section', attrs = {'id': 'this-seasons-shows'})
 				items = client.parseDOM(result, 'span', attrs = {'class': 'title .*'})
 				list_count = 60
-
 			if control.setting('tvshows.networks.view') == '1':
 				result = client.parseDOM(result, 'div', attrs = {'id': 'w1'})
 				items = client.parseDOM(result, 'span', attrs = {'class': 'title'})
-
 				list_count = 25
 				page = int(str(url.split('&page=', 1)[1]))
 				next = '%s&page=%s' % (url.split('&page=', 1)[0], page+1)
-
 				last = []
 				last = client.parseDOM(result, 'li', attrs = {'class': 'last disabled'})
 				if last != []: next = ''
-
 			items = [client.parseDOM(i, 'a', ret='href') for i in items]
+			# log_utils.log('Network url=%s: items=%s' % (url, items))
 			items = [i[0] for i in items if len(i) > 0]
-			items = [re.findall(r'/(\d+)/', i) for i in items]
+			items = [re.findall(r'/(\d+)/', i) for i in items] #https://www.tvmaze.com/networks/645/tlc pulls tvmaze_id from link
 			items = [i[0] for i in items if len(i) > 0]
 			items = items[:list_count]
 			sortList = items
@@ -287,174 +282,105 @@ class tvshows:
 			log_utils.error()
 			return
 
-		def items_list(i):
-			# if i['metacache']: return
+		def items_list(tvmaze_id):
+			# if i['metacache']: return # not possible with only a tvmaze_id
 			try:
-				tvmaze = i
-				url = self.tvmaze_info_link % i
+				values = {}
+				values['next'] = next
+				values['tvmaze'] = tvmaze_id
+				url = self.tvmaze_info_link % tvmaze_id
 				item = get_request(url) 
-				content = item.get('type', '0').lower()
-				title = item.get('name')
-				title = py_tools.ensure_str(title)
-				tvshowtitle = title
-
-				premiered = item.get('premiered', '0')
-				try: year = re.search(r"(\d{4})", premiered).group(1)
-				except: year = '0'
-
-				imdb = item.get('externals').get('imdb', '0')
-				if not imdb or imdb == 'None': imdb = '0'
-				tvdb = str(item.get('externals').get('thetvdb', '0'))
-				if not tvdb or tvdb == 'None': tvdb = '0'
-				# TVMaze does not have tmdb_id in api
-				tmdb = '0'
-
+				values['content'] = item.get('type', '').lower()
+				values['mediatype'] = 'tvshow'
+				values['title'] = py_tools.ensure_str(item.get('name'))
+				values['originaltitle'] = values['title']
+				values['tvshowtitle'] = values['title']
+				values['premiered'] = str(item.get('premiered', '')) if item.get('premiered') else ''
+				try: values['year'] = values['premiered'][:4]
+				except: values['year'] = ''
+				ids = item.get('externals')
+				imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
+				tvdb = str(ids.get('thetvdb', '')) if ids.get('thetvdb') else ''
+				tmdb = '' # TVMaze does not have tmdb_id in api
 				studio = item.get('network', {}) or item.get('webChannel', {})
-				studio = studio.get('name', '0')
-				genre = []
-				for i in item['genres']: genre.append(i.title())
-				if genre == []: genre = 'NA'
-				duration = str(item.get('runtime', '0'))
-				rating = str(item.get('rating').get('average', '0'))
-				plot = client.cleanHTML(item.get('summary', '0'))
-				plot = py_tools.ensure_str(plot)
-				status = item.get('status', '0')
-
-				castandart = []
+				values['studio'] = studio.get('name', '')
+				values['genre'] = []
+				for i in item['genres']: values['genre'].append(i.title())
+				if values['genre'] == []: values['genre'] = 'NA'
+				values['duration'] = int(item.get('runtime', '')) * 60 if item.get('runtime') else ''
+				values['rating'] = str(item.get('rating').get('average', '')) if item.get('rating').get('average') else ''
+				values['plot'] = client.cleanHTML(py_tools.ensure_str(item['summary'])) if item.get('summary') else ''
+				values['status'] = item.get('status', '')
+				values['castandart'] = []
 				for person in item['_embedded']['cast']:
+					try: values['castandart'].append({'name': person['person']['name'], 'role': person['character']['name'], 'thumbnail': (person['person']['image']['medium'] if person['person']['image']['medium'] else '')})
+					except: pass
+					if len(values['castandart']) == 150: break
+				image = item.get('image', {}) or ''
+				values['poster'] = image.get('original', '') if image else ''
+				values['fanart'] = '' ; values['banner'] = ''
+				values['mpaa'] = '' ; values['votes'] = ''
+				try: values['airday'] = item['schedule']['days'][0]
+				except: values['airday'] = ''
+				values['airtime'] = item['schedule']['time'] or ''
+				try: values['airzone'] = item['network']['country']['timezone']
+				except: values['airzone'] = ''
+				values['metacache'] = False 
+
+#### -- Missing id's lookup -- ####
+				if not tmdb and (imdb or tvdb):
 					try:
-						# try:
-							# castandart.append({'name': person['person']['name'].encode('utf-8'), 'role': person['character']['name'].encode('utf-8'), 'thumbnail': (person['person']['image']['original'] if person['person']['image']['original'] is not None else '0')})
-						# except:
-							# castandart.append({'name': person['person']['name'], 'role': person['character']['name'], 'thumbnail': (person['person']['image']['medium'] if person['person']['image']['medium'] is not None else '0')})
-						castandart.append({'name': person['person']['name'], 'role': person['character']['name'], 'thumbnail': (person['person']['image']['medium'] if person['person']['image']['medium'] is not None else '0')})
-					except:
-						castandart = []
-					if len(castandart) == 150: break
-
-				image = item.get('image')
-				poster = image.get('original', '0') if image is not None else '0'
-				fanart = '0' ; banner = '0'
-				mpaa = '0' ; votes = '0'
-				airday = '0' ; airtime = '0'
-
-				# self.list = metacache.fetch(self.list, self.lang, self.user)
-				# if self.list['metacache'] is True:
-					# raise Exception()
-
-				if (imdb == '0' or tmdb == '0') and tvdb != '0':
-					from resources.lib.modules import trakt
-					trakt_ids = trakt.IdLookup('tvdb', tvdb, 'show')
-					if trakt_ids:
-						if imdb == '0':
-							imdb = str(trakt_ids.get('imdb', '0'))
-							if not imdb or imdb == 'None': imdb = '0'
-						if tmdb == '0':
-							tmdb = str(trakt_ids.get('tmdb', '0'))
-							if not tmdb or tmdb == 'None': tmdb = '0'
-
-				if tvdb == '0' and imdb != '0': # Check TVDb by IMDB_ID for missing tvdb_id
-					try: tvdb = cache.get(tvdb_v1.getSeries_ByIMDB, 96, tvshowtitle, year, imdb)
-					except: tvdb = '0'
-
-				if tvdb == '0': # Check TVDb by seriesname for missing tvdb_id
+						result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
+						tmdb = str(result.get('id', '')) if result.get('id') else ''
+					except: tmdb = ''
+				if not imdb or not tmdb or not tvdb:
 					try:
-						ids = cache.get(tvdb_v1.getSeries_ByName, 96, tvshowtitle, year)
-						if ids: tvdb = ids.get(tvdb, '0') or '0'
+						trakt_ids = trakt.SearchTVShow(quote_plus(values['tvshowtitle']), values['year'], full=False)
+						if not trakt_ids: raise Exception
+						ids = trakt_ids[0].get('show', {}).get('ids', {})
+						if not imdb: imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
+						if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
+						if not tvdb: tvdb = str(ids.get('tvdb', '')) if ids.get('tvdb') else ''
 					except:
-						tvdb = '0'
 						log_utils.error()
+#################################
+				if not tmdb:
+					log_utils.log('tvshowtitle: (%s) missing tmdb_id' % values['tvshowtitle'], __name__, log_utils.LOGDEBUG) # log TMDb does not have show
+					return
+				# self.list = metacache.fetch(self.list, self.lang, self.user)
+				# if self.list['metacache'] is True: raise Exception()
 
-				if tvdb == '0': raise Exception()
-				try:
-					url = self.tvdb_info_link % (tvdb, self.lang)
-					# item3 = requests.get(url).content ## maybe switch to client.request # test .content vs. .text
-					item3 = requests.get(url).text # test .content vs. .text
-					# item3 = py_tools.six_decode(item3)
-				except: item3 = None
-
-				if item3:
-					if poster == '0':
-						poster = client.parseDOM(item3, 'poster')[0]
-						poster = '%s%s' % (self.tvdb_image, poster) if poster else '0'
-
-					fanart = client.parseDOM(item3, 'fanart')[0]
-					fanart = '%s%s' % (self.tvdb_image, fanart) if fanart else '0'
-
-					banner = client.parseDOM(item3, 'banner')[0]
-					banner = '%s%s' % (self.tvdb_image, banner) if banner else '0'
-
-					mpaa = client.parseDOM(item3, 'ContentRating')[0] or '0'
-
-					if duration == '0':
-						duration = client.parseDOM(item3, 'Runtime')[0] or '0'
-
-					if rating == '0':
-						rating = client.parseDOM(item3, 'Rating')[0] or '0'
-					votes = client.parseDOM(item3, 'RatingCount')[0] or '0'
-
-					if status == '0':
-						status = client.parseDOM(item3, 'Status')[0] or '0'
-
-					if premiered == '0':
-						premiered = client.parseDOM(item3, 'FirstAired')[0] or '0'
-					if year == '0':
-						try: year = re.compile(r'(\d{4})').findall(premiered)[0]
-						except: year = '0'
-
-					if not plot:
-						plot = client.parseDOM(item3, 'Overview')[0] or '0'
-						plot = client.replaceHTMLCodes(plot)
-
-
-					airday = client.parseDOM(item3, 'Airs_DayOfWeek')[0] or '0'
-					airtime = client.parseDOM(item3, 'Airs_Time')[0] or '0'
-
-				item = {}
-				item = {'content': content, 'tvshowtitle': tvshowtitle, 'title': title, 'originaltitle': title, 'year': year, 'premiered': premiered, 'studio': studio, 'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 
-							'mpaa': mpaa, 'castandart': castandart, 'plot': plot, 'tagline': '0', 'status': status, 'imdb': imdb, 'tvdb': tvdb, 'tmdb': tmdb, 'tvmaze': tvmaze, 'airday': airday, 'airtime': airtime, 'poster': poster,
-							'poster2': '0', 'banner': banner, 'banner2': '0', 'fanart': fanart, 'fanart2': '0', 'clearlogo': '0', 'clearart': '0', 'landscape': fanart, 'metacache': False, 'next': next}
-
-				meta = {}
-				meta = {'tmdb': tmdb, 'imdb': imdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': item}
-
+				showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
+				if not showSeasons: return
+				showSeasons = dict((k, v) for k, v in control.iteritems(showSeasons) if v is not None and v != '') # removes empty keys so .update() doesn't over-write good meta
+				values.update(showSeasons)
+				if not values.get('imdb'): values['imdb'] = imdb
+				if not values.get('tmdb'): values['tmdb'] = tmdb
+				if not values.get('tvdb'): values['tvdb'] = tvdb
+				# # values['counts'] = tmdb_indexer.TVshows().seasonCountParse(values.get('seasons'))  # this is now parsed from TMDB's original showSeasons call
+				remove_keys = ('seasons',) # pop() keys from showSeasons that are not needed anymore
+				for k in remove_keys: values.pop(k, None)
 				if self.disable_fanarttv != 'true':
 					from resources.lib.indexers import fanarttv
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
-					if extended_art:
-						item.update(extended_art)
-						meta.update(item)
-
-				if (self.disable_fanarttv == 'true' and (poster == '0' or fanart == '0')) or (
-					self.disable_fanarttv != 'true' and ((poster == '0' and item.get('poster2') == '0') or (
-					fanart == '0' and item.get('fanart2') == '0'))):
-					from resources.lib.indexers.tmdb import TVshows
-					tmdb_art = TVshows().get_art(tmdb)
-					if tmdb_art:
-						item.update(tmdb_art)
-						if item.get('landscape', '0') == '0':
-							landscape = item.get('fanart3', '0')
-							item.update({'landscape': landscape})
-						meta.update(item)
-
-				item = dict((k,v) for k,v in control.iteritems(item) if v != '0')
-				self.list.append(item)
-
-				if 'next' in meta.get('item'):
-					del meta['item']['next']
-
+					if extended_art: values.update(extended_art)
+				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values} # DO NOT move this after "values = dict()" below or it becomes the same object and "del meta['item']['next']" removes it from both
+				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '')
+				self.list.append(values)
+				if 'next' in meta.get('item'): del meta['item']['next'] # next can not exist in metacache
 				self.meta.append(meta)
+				self.meta = [i for i in self.meta if i.get('tmdb')] # without this ui removed missing tmdb but it still writes these cases to metacache?
 				metacache.insert(self.meta)
 			except:
 				log_utils.error()
-
 		try:
 			threads = []
-			for i in items:
-				threads.append(workers.Thread(items_list, i))
+			for tvmaze_id in items:
+				threads.append(workers.Thread(items_list, tvmaze_id))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			sorted_list = []
+			self.list = [i for i in self.list if i.get('tmdb') and i.get('tmdb') != '0'] # to rid missing tmdb_id's because season list can not load without
 			for i in sortList:
 				sorted_list += [item for item in self.list if str(item['tvmaze']) == str(i)]
 			return sorted_list
@@ -462,12 +388,10 @@ class tvshows:
 			log_utils.error()
 			return
 
-
 	def show_lookup(self, tvdb):
 		url = '%s%s' % (self.base_link, '/lookup/shows?thetvdb=%s' % tvdb)
 		response = get_request(url)
 		return response['id']
-
 
 	def get_full_series(self, tvmaze):
 		url = '%s%s' % (self.base_link, '/shows/%s?embed[]=seasons&embed[]=episodes&embed[]=cast&embed[]=images' % tvmaze)

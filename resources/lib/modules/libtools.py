@@ -16,7 +16,6 @@ try: #Py2
 	from urllib import quote_plus
 except ImportError: #Py3
 	from urllib.parse import parse_qsl, quote_plus
-
 from resources.lib.modules import control
 from resources.lib.modules import cleantitle
 from resources.lib.modules import log_utils
@@ -480,7 +479,10 @@ class libmovies:
 			try: transtitle = title.translate(None, '\/:*?"<>|')
 			except: transtitle = title.translate(title.maketrans('', '', '\/:*?"<>|'))
 			transtitle = cleantitle.normalize(transtitle)
-			content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s' % (sys.argv[0], systitle, year, imdb, tmdb)
+			if control.setting('library.strm.use_tmdbhelper') == 'true':
+				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=movie&islocal=True&tmdb_id=%s' % tmdb
+			else:
+				content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s' % (sys.argv[0], systitle, year, imdb, tmdb)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			lib_tools.create_folder(folder)
 			lib_tools.write_file(control.joinPath(folder, lib_tools.legal_filename(transtitle) + '.' + year + '.strm'), content)
@@ -586,61 +588,64 @@ class libtvshows:
 			if general_notification:
 				if not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 					control.notification(title=tvshowtitle, message=32552)
-
 			try:
-				# from resources.lib.menus import episodes
-				# items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, idx=False)
 				from resources.lib.menus import seasons
-				items = seasons.Seasons().tvdb_list(tvshowtitle, year, imdb, tmdb, tvdb, control.apiLanguage()['tvdb'], '-1') # fetch fresh meta (uncached)
+				from resources.lib.menus import episodes
+				seasons = seasons.Seasons().tmdb_list(tvshowtitle, imdb, tmdb, tvdb, art=None) # fetch fresh meta (uncached)
+				# status = seasons[0]['status'].lower()
 			except:
 				log_utils.error()
 				return
 
-			status = items[0]['status'].lower()
-
-			try: items = [{'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'tvshowtitle': i['tvshowtitle'], 'premiered': i['premiered']} for i in items]
-			except: items = []
-			if items == []: return
-
-			try:
-				if self.dupe_chk != 'true': raise Exception()
-				id = [items[0]['imdb'], items[0]['tvdb']]
-				# lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["imdbnumber", "title", "year"]}, "id": 1}')
-				lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties": ["imdbnumber", "title", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
-				lib = py_tools.ensure_text(lib, errors='ignore')
-				lib = jsloads(lib)['result']['tvshows']
-				# lib = [i['title'].encode('utf-8') for i in lib if str(i['imdbnumber']) in id or (i['title'].encode('utf-8') == items[0]['tvshowtitle'] and str(i['year']) == items[0]['year'])][0]
-				lib = [i['title'] for i in lib if str(i['imdbnumber']) in id or (i['title'] == items[0]['tvshowtitle'] and str(i['year']) == items[0]['year'])][0]
-				lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % lib)
-				lib = py_tools.ensure_text(lib, errors='ignore')
-				lib = jsloads(lib)['result']['episodes']
-				lib = ['S%02dE%02d' % (int(i['season']), int(i['episode'])) for i in lib]
-				items = [i for i in items if not 'S%02dE%02d' % (int(i['season']), int(i['episode'])) in lib]
-			except:
-				lib = []
-
-			files_added = 0
-			for i in items:
-				if lib != []: continue
-				if control.monitor.abortRequested(): return sys.exit()
+			for season in seasons:
 				try:
-					if self.check_setting == 'true':
-						if i['episode'] == '1':
-							self.block = True
-							src = lib_tools.check_sources(i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['tvshowtitle'], i['premiered'])
-							if src: self.block = False
-						if self.block: continue
-					# Show Season Special(Season0).
-					if str(i.get('season')) == '0' and control.setting('tv.specials') == 'false': continue
-					# Show Unaired or Unknown items.
-					premiered = i.get('premiered', '0')
-					if premiered == '0' and self.include_unknown == 'false': continue
-					elif int(re.sub(r'[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.date))):
-						if self.showunaired != 'true': continue
-					self.strmFile(i)
-					files_added += 1
+					items = episodes.Episodes().tmdb_list(tvshowtitle, imdb, tmdb, tvdb, meta=season, season=season['season'])
 				except:
 					log_utils.error()
+					return
+
+				try: items = [{'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'tvshowtitle': i['tvshowtitle'], 'premiered': i['premiered']} for i in items]
+				except: items = []
+				if items == []: return
+
+				try:
+					if self.dupe_chk != 'true': raise Exception()
+					id = [items[0]['imdb'], items[0]['tvdb']] # imdbnumber is all that it compares from kodi library
+					# lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["imdbnumber", "title", "year"]}, "id": 1}')
+					lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties": ["imdbnumber", "title", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
+					lib = py_tools.ensure_text(lib, errors='ignore')
+					lib = jsloads(lib)['result']['tvshows']
+					lib = [i['title'] for i in lib if str(i['imdbnumber']) in id or (i['title'] == items[0]['tvshowtitle'] and str(i['year']) == items[0]['year'])][0]
+					lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % lib)
+					lib = py_tools.ensure_text(lib, errors='ignore')
+					lib = jsloads(lib)['result']['episodes']
+					lib = ['S%02dE%02d' % (int(i['season']), int(i['episode'])) for i in lib]
+					items = [i for i in items if not 'S%02dE%02d' % (int(i['season']), int(i['episode'])) in lib]
+				except:
+					lib = []
+
+				files_added = 0
+				for i in items:
+					if lib != []: continue
+					if control.monitor.abortRequested(): return sys.exit()
+					try:
+						if self.check_setting == 'true':
+							if i['episode'] == '1':
+								self.block = True
+								src = lib_tools.check_sources(i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['tvshowtitle'], i['premiered'])
+								if src: self.block = False
+							if self.block: continue
+						# Show Season Special(Season0).
+						if str(i.get('season')) == '0' and control.setting('tv.specials') == 'false': continue
+						# Show Unaired or Unknown items.
+						premiered = i.get('premiered', '0')
+						if premiered == '0' and self.include_unknown == 'false': continue
+						elif int(re.sub(r'[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.date))):
+							if self.showunaired != 'true': continue
+						self.strmFile(i)
+						files_added += 1
+					except:
+						log_utils.error()
 
 			if files_added == 0 and general_notification: control.notification(title=tvshowtitle, message=32652)
 			if range: return files_added
@@ -762,13 +767,17 @@ class libtvshows:
 	def strmFile(self, i):
 		try:
 			title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered = i['title'], i['year'], i['imdb'], i['tmdb'], i['tvdb'], i['season'], i['episode'], i['tvshowtitle'], i['premiered']
-			episodetitle = quote_plus(title)
-			systitle, syspremiered = quote_plus(tvshowtitle), quote_plus(premiered)
+			systitle = quote_plus(title)
+			systvshowtitle, syspremiered = quote_plus(tvshowtitle), quote_plus(premiered)
 			try: transtitle = tvshowtitle.translate(None, '\/:*?"<>|')
 			except: transtitle = tvshowtitle.translate(tvshowtitle.maketrans('', '', '\/:*?"<>|'))
 			transtitle = cleantitle.normalize(transtitle)
-			content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
-							sys.argv[0], episodetitle, year, imdb, tmdb, tvdb, season, episode, systitle, syspremiered)
+			if control.setting('library.strm.use_tmdbhelper') == 'true':
+				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&islocal=True&tmdb_id=%s&season=%s&episode=%s&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&tvshowtitle=%s&premiered=%s' % (
+							tmdb, season, episode, systitle, year, imdb, tmdb, tvdb, systvshowtitle, syspremiered)
+			else:
+				content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
+							sys.argv[0], systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			if not control.isfilePath(control.joinPath(folder, 'tvshow.nfo')):
 				lib_tools.create_folder(folder)
@@ -793,12 +802,11 @@ class libepisodes:
 
 
 	def update(self):
-		if control.setting('library.service.update') == 'false': control.notification(message=32106)
+		# if control.setting('library.service.update') == 'false': control.notification(message=32106)
 		contains = lib_tools().ckKodiSources()
 		if not contains:
 			control.notification(message=32107)
 			return
-
 		try:
 			items, season, episode = [], [], []
 			show = [control.joinPath(self.library_folder, i) for i in control.listDir(self.library_folder)[0]]
@@ -815,28 +823,18 @@ class libepisodes:
 				try:
 					file = control.openFile(file)
 					read = file.read()
-					# read = read.encode('utf-8')
 					file.close()
-					if not read.startswith(sys.argv[0]): continue
-
+					if not read.startswith('plugin://plugin.video.themoviedb.helper') and not read.startswith(sys.argv[0]): continue
 					params = dict(parse_qsl(read.replace('?','')))
 					try: tvshowtitle = params['tvshowtitle']
-					except: tvshowtitle = None
-
-					try: tvshowtitle = params['show']
-					except: pass
-
-					if tvshowtitle is None or tvshowtitle == '': continue
-
-					year, imdb, tvdb = params['year'], params['imdb'], params['tvdb']
-					imdb = 'tt' + re.sub(r'[^0-9]', '', str(imdb))
-					tmdb = params.get('tmdb', '0')
-
+					except:
+						try: tvshowtitle = params['show'] # this does not appear written to .strm files...?
+						except: tvshowtitle = None
+					if not tvshowtitle: continue
+					year, imdb, tvdb, tmdb = params['year'], params.get('imdb', ''), params.get('tvdb', ''), params.get('tmdb', '')
 					items.append({'tvshowtitle': tvshowtitle, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb})
 				except: pass
-
 			items = [i for x, i in enumerate(items) if i not in items[x + 1:]]
-
 			if len(items) == 0: return
 		except:
 			log_utils.error()
@@ -845,7 +843,6 @@ class libepisodes:
 		try:
 			lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties": ["imdbnumber", "title", "year"]}, "id": 1 }')
 			# lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties": ["imdbnumber", "title", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
-			# lib = unicode(lib, 'utf-8', errors='ignore')
 			lib = py_tools.ensure_text(lib, errors='ignore')
 			lib = jsloads(lib)['result']['tvshows']
 		except:
@@ -861,8 +858,8 @@ class libepisodes:
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS tvshows (id TEXT, items TEXT, UNIQUE(id));''')
 			dbcur.connection.commit()
-			# from resources.lib.menus import episodes
-			from resources.lib.menus import seasons
+			from resources.lib.menus import seasons as seasonsX
+			from resources.lib.menus import episodes as episodesX
 		except:
 			log_utils.error()
 			try: dbcur.close() ; dbcon.close()
@@ -882,32 +879,28 @@ class libepisodes:
 				try: dbcur.close() ; dbcon.close()
 				except: pass
 				return sys.exit()
-
 			try:
-				fetch = dbcur.execute("SELECT * FROM tvshows WHERE id = '%s'" % item['tvdb']).fetchone()
-				# if fetch: it = eval(fetch[1].encode('utf-8'))
+				fetch = dbcur.execute('''SELECT * FROM tvshows WHERE id=?''', (item['tvdb'],)).fetchone()
 				if fetch: it = eval(fetch[1])
 			except:
 				log_utils.error()
-
 			try:
 				if it: raise Exception()
-				# it = episodes.Episodes().get(item['tvshowtitle'], item['year'], item['imdb'], item['tmdb'], item['tvdb'], idx=False)
-				it = seasons.Seasons().tvdb_list(item['tvshowtitle'], item['year'], item['imdb'], item['tmdb'], item['tvdb'], control.apiLanguage()['tvdb'], '-1') # fetch fresh meta (uncached)
-				if not it: continue
-				status = it[0]['status'].lower()
-				it = [{'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'tvshowtitle': i['tvshowtitle'], 'premiered': i['premiered']} for i in it]
-				if status == 'continuing': raise Exception()
-				dbcur.execute("INSERT INTO tvshows Values (?, ?)", (item['tvdb'], repr(it)))
+				seasons = seasonsX.Seasons().tmdb_list(item['tvshowtitle'], item['imdb'], item['tmdb'], item['tvdb'], art=None) # fetch fresh meta (uncached)
+				if not seasons: continue
+				status = seasons[0]['status'].lower()
+				it = []
+				for season in seasons:
+					episodes = episodesX.Episodes().tmdb_list(item['tvshowtitle'], item['imdb'], item['tmdb'], item['tvdb'], meta=season, season=season['season'])
+					it += [{'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'tvshowtitle': i['tvshowtitle'], 'premiered': i['premiered']} for i in episodes]
+				if status in ['continuing', 'returning series']: raise Exception() # only write db entry for completed(Ended) shows
+				dbcur.execute('''INSERT INTO tvshows Values (?, ?)''', (item['tvdb'], repr(it)))
 				dbcur.connection.commit()
 			except:
 				log_utils.error()
-
 			try:
 				id = [item['imdb'], item['tvdb']]
-				if item['tmdb'] != '0':
-					id += [item['tmdb']]
-				# ep = [x['title'].encode('utf-8') for x in lib if str(x['imdbnumber']) in id or (x['title'].encode('utf-8') == item['tvshowtitle'] and str(x['year']) == item['year'])][0]
+				if item['tmdb'] != '0': id += [item['tmdb']]
 				ep = [x['title'] for x in lib if str(x['imdbnumber']) in id or (x['title'] == item['tvshowtitle'] and str(x['year']) == item['year'])][0]
 				ep = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % ep)
 				ep = py_tools.ensure_text(ep, errors='ignore')
@@ -915,10 +908,13 @@ class libepisodes:
 				ep = [{'season': int(i['season']), 'episode': int(i['episode'])} for i in ep]
 				ep = sorted(ep, key = lambda x: (x['season'], x['episode']))[-1]
 				num = [x for x,y in enumerate(it) if str(y['season']) == str(ep['season']) and str(y['episode']) == str(ep['episode'])][-1]
+				log_utils.log('num = %s' % num, __name__)
+				log_utils.log('it = %s' % it, __name__)
+				log_utils.log('len(it) = %s' % len(it), __name__)
 				it = [y for x,y in enumerate(it) if x > num]
+				log_utils.log('it = %s' % it, __name__)
 				if len(it) == 0: continue
 			except:
-				# log_utils.error()
 				continue
 
 			for i in it:
@@ -933,17 +929,14 @@ class libepisodes:
 						if self.showunaired != 'true': continue
 					libtvshows().strmFile(i)
 					files_added += 1
-					if service_notification :
-						control.notification(title=item['tvshowtitle'], message=32678)
+					if service_notification : control.notification(title=item['tvshowtitle'], message=32678)
 				except:
 					log_utils.error()
 
 		try: dbcur.close() ; dbcon.close()
 		except: pass
 
-		if files_added == 0 and service_notification :
-			control.notification(message=32109)
-
+		if files_added == 0 and service_notification : control.notification(message=32109)
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and files_added > 0:
 			if contains:
 				if service_notification:

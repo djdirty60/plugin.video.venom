@@ -4,19 +4,18 @@
 """
 
 # import datetime
-import json
+from json import loads as jsloads
 import re
-import sys
+# import sys
 try:
 	from urllib import urlencode
 	from urlparse import parse_qsl, urlparse, urlsplit
 except:
 	from urllib.parse import urlencode, parse_qsl, urlparse, urlsplit
 
-from resources.lib.modules import cache
+# from resources.lib.database import cache, metacache
 from resources.lib.modules import client
-from resources.lib.modules import metacache
-from resources.lib.modules import playcount
+# from resources.lib.modules import playcount
 from resources.lib.modules import trakt
 from resources.lib.modules import workers
 
@@ -47,9 +46,7 @@ def trakt_list(self, url, user):
 		q.update({'extended': 'full'})
 		q = (urlencode(q)).replace('%2C', ',')
 		u = url.replace('?' + urlparse(url).query, '') + '?' + q
-
 		result = trakt.getTraktAsJson(u)
-
 		items = []
 		for i in result:
 			try:
@@ -75,53 +72,37 @@ def trakt_list(self, url, user):
 
 	for item in items:
 		try:
-			# try: title = (item.get('title')).encode('utf-8')
-			# except: title = item.get('title')
 			title = item.get('title')
-			premiered = item.get('released', '0')
-
-			year = str(item.get('year', '0'))
-			if year == 'None' or year == '0':
-				year = str(premiered)
-				year = re.search(r"(\d{4})", year).group(1)
-
+			premiered = str(item.get('released', '')) if item.get('released') else ''
+			year = str(item.get('year', '')) if item.get('year') else ''
+			if not year:
+				try: year = premiered[:4]
+				except: year = ''
 			# if int(year) > int((self.date_time).strftime('%Y')): raise Exception()
 
-			try:
-				progress = item['progress']
-			except:
-				progress = None
+			try: progress = item['progress']
+			except: progress = None
 
-			imdb = item.get('ids', {}).get('imdb', '0')
-			if imdb == '' or imdb is None or imdb == 'None':
-				imdb = '0'
-
-			tmdb = str(item.get('ids', {}).get('tmdb', 0))
-			if tmdb == '' or tmdb is None or tmdb == 'None':
-				tmdb = '0'
+			ids = item.get('ids', {})
+			imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
+			tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
 
 			genre = []
 			for x in item['genres']:
 				genre.append(x.title())
 			if genre == []: genre = 'NA'
 
-			duration = str(item.get('runtime', '0'))
-
-			rating = str(item.get('rating', '0'))
-			votes = str(format(int(item.get('votes', '0')),',d'))
-
-			mpaa = item.get('certification', '0')
-
+			duration = str(item.get('runtime', ''))
+			rating = str(item.get('rating', ''))
+			votes = str(item.get('votes', ''))
+			mpaa = item.get('certification', '')
 			plot = item.get('overview')
-			# try: plot = plot.encode('utf-8')
-			# except: pass
-
-			# tagline = item.get('tagline', '0')
-			tagline = '0'
+			# tagline = item.get('tagline', '')
+			tagline = ''
 
 			self.list.append({'title': title, 'originaltitle': title, 'year': year, 'premiered': premiered, 'genre': genre, 'duration': duration,
 										'rating': rating, 'votes': votes, 'mpaa': mpaa, 'plot': plot, 'tagline': tagline, 'imdb': imdb, 'tmdb': tmdb,
-										'tvdb': '0', 'poster': '0', 'fanart': '0', 'next': next, 'progress': progress})
+										'tvdb': '', 'poster': '', 'fanart': '', 'next': next, 'progress': progress})
 		except:
 			pass
 	return self.list
@@ -130,23 +111,18 @@ def trakt_list(self, url, user):
 def trakt_user_list(self, url, user):
 	try:
 		result = trakt.getTrakt(url)
-		items = json.loads(result)
-	except:
-		pass
+		items = jsloads(result)
+	except: pass
 
 	for item in items:
 		try:
 			try: name = item['list']['name']
 			except: name = item['name']
 			name = client.replaceHTMLCodes(name)
-			# name = name.encode('utf-8')
 
-			try:
-				url = (trakt.slug(item['list']['user']['username']), item['list']['ids']['slug'])
-			except:
-				url = ('me', item['ids']['slug'])
+			try: url = (trakt.slug(item['list']['user']['username']), item['list']['ids']['slug'])
+			except: url = ('me', item['ids']['slug'])
 			url = self.traktlist_link % url
-			# url = url.encode('utf-8')
 
 			self.list.append({'name': name, 'url': url, 'context': url})
 		except:

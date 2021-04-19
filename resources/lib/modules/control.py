@@ -32,17 +32,12 @@ getLangString = xbmcaddon.Addon().getLocalizedString
 # setting = xbmcaddon.Addon().getSetting
 # setSetting = xbmcaddon.Addon().setSetting
 
-button = xbmcgui.ControlButton
 dialog = xbmcgui.Dialog()
 getCurrentDialogId = xbmcgui.getCurrentWindowDialogId()
 homeWindow = xbmcgui.Window(10000)
-image = xbmcgui.ControlImage
 item = xbmcgui.ListItem
-labelControl = xbmcgui.ControlLabel
-listControl = xbmcgui.ControlList
 progressDialog = xbmcgui.DialogProgress()
 progressDialogBG = xbmcgui.DialogProgressBG()
-windowDialog = xbmcgui.WindowDialog()
 
 addItem = xbmcplugin.addDirectoryItem
 content = xbmcplugin.setContent
@@ -76,7 +71,6 @@ openFile = xbmcvfs.File
 joinPath = os.path.join
 isfilePath = os.path.isfile
 
-skinPath = transPath('special://skin/')
 SETTINGS_PATH = transPath(joinPath(addonInfo('path'), 'resources', 'settings.xml'))
 try: dataPath = transPath(addonInfo('profile')).decode('utf-8')
 except: dataPath = transPath(addonInfo('profile'))
@@ -99,7 +93,6 @@ else:
 	def iteritems(d, **kw):
 		return d.iteritems(**kw)
 
-
 def syncMyAccounts(silent=False):
 	import myaccounts
 	all_acct = myaccounts.getAll()
@@ -110,17 +103,14 @@ def syncMyAccounts(silent=False):
 		setSetting('trakt.username', trakt_acct.get('username'))
 		setSetting('trakt.refresh', trakt_acct.get('refresh'))
 		setSetting('trakt.expires', trakt_acct.get('expires'))
-
 	ad_acct = all_acct.get('alldebrid')
 	if setting('alldebrid.username') != ad_acct.get('username'):
 		setSetting('alldebrid.token', ad_acct.get('token'))
 		setSetting('alldebrid.username', ad_acct.get('username'))
-
 	pm_acct = all_acct.get('premiumize')
 	if setting('premiumize.username') != pm_acct.get('username'):
 		setSetting('premiumize.token', pm_acct.get('token'))
 		setSetting('premiumize.username', pm_acct.get('username'))
-
 	rd_acct = all_acct.get('realdebrid')
 	if setting('realdebrid.username') != rd_acct.get('username'):
 		setSetting('realdebrid.token', rd_acct.get('token'))
@@ -128,11 +118,9 @@ def syncMyAccounts(silent=False):
 		setSetting('realdebrid.client_id', rd_acct.get('client_id'))
 		setSetting('realdebrid.refresh', rd_acct.get('refresh'))
 		setSetting('realdebrid.secret', rd_acct.get('secret'))
-
 	fanart_acct = all_acct.get('fanart_tv')
 	if setting('fanart.tv.api.key') != fanart_acct.get('api_key'):
 		setSetting('fanart.tv.api.key', fanart_acct.get('api_key'))
-
 	tmdb_acct = all_acct.get('tmdb')
 	if setting('tmdb.api.key') != tmdb_acct.get('api_key'):
 		setSetting('tmdb.api.key', tmdb_acct.get('api_key'))
@@ -142,15 +130,12 @@ def syncMyAccounts(silent=False):
 		setSetting('tmdb.password', tmdb_acct.get('password'))
 	if setting('tmdb.session_id') != tmdb_acct.get('session_id'):
 		setSetting('tmdb.session_id', tmdb_acct.get('session_id'))
-
 	tvdb_acct = all_acct.get('tvdb')
 	if setting('tvdb.api.key') != tvdb_acct.get('api_key'):
 		setSetting('tvdb.api.key', tvdb_acct.get('api_key'))
-
 	imdb_acct = all_acct.get('imdb')
 	if setting('imdb.user') != imdb_acct.get('user'):
 		setSetting('imdb.user', imdb_acct.get('user'))
-
 	fu_acct = all_acct.get('furk')
 	if setting('furk.username') != fu_acct.get('username'):
 		setSetting('furk.username', fu_acct.get('username'))
@@ -161,7 +146,6 @@ def syncMyAccounts(silent=False):
 	if not silent:
 		notification(message=32114)
 
-
 def setting(id, fallback=None):
 	try: settings_dict = jsloads(homeWindow.getProperty('venom_settings'))
 	except: settings_dict = make_settings_dict()
@@ -171,17 +155,14 @@ def setting(id, fallback=None):
 	if value == '': return fallback
 	return value
 
-
 def settings_fallback(id):
 	return {id: xbmcaddon.Addon().getSetting(id)}
-
 
 def setSetting(id, value):
 	from xbmcaddon import Addon
 	Addon().setSetting(id, value)
 
-
-def make_settings_dict():
+def make_settings_dict(): # service runs upon a setting change
 	try:
 		root = ET.parse(settingsFile).getroot()
 		settings_dict = {}
@@ -194,18 +175,22 @@ def make_settings_dict():
 			dict_item = {setting_id: setting_value}
 			settings_dict.update(dict_item)
 		homeWindow.setProperty('venom_settings', jsdumps(settings_dict))
-		# xbmc.log('settings_dict = %s' % settings_dict, 2)
+		# log('settings_dict = %s' % settings_dict, 2)
+		refresh_playAction()
 		return settings_dict
 	except:
 		return None
 
+def refresh_playAction(): # for venom global CM play actions
+	playAction = setting('hosts.mode')
+	autoPlay = 'true' if playAction == '2' else ''
+	homeWindow.setProperty('plugin.video.venom.autoPlay', autoPlay)
 
 def lang(language_id):
 	text = getLangString(language_id)
 	if getKodiVersion() < 19:
 		text = text.encode('utf-8', 'replace')
 	return str(text)
-
 
 def strip_non_ascii_and_unprintable(text):
 	try:
@@ -215,17 +200,14 @@ def strip_non_ascii_and_unprintable(text):
 		from resources.lib.modules import log_utils
 		log_utils.error()
 
-
-def sleep(time):  # Modified `sleep`(in milli secs) command that honors a user exit request
+def sleep(time):  # Modified `sleep`(in milli secs) that honors a user exit request
 	while time > 0 and not monitor.abortRequested():
 		xbmc.sleep(min(100, time))
 		time = time - 100
 
-
 def getCurrentViewId():
 	win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
 	return str(win.getFocusId())
-
 
 def check_version_numbers(current, new):
 	# Compares version numbers and return True if new version is newer
@@ -233,32 +215,26 @@ def check_version_numbers(current, new):
 	new = new.split('.')
 	step = 0
 	for i in current:
-		if int(new[step]) > int(i):
-			return True
-		if int(i) > int(new[step]):
-			return False
+		if int(new[step]) > int(i): return True
+		if int(i) > int(new[step]): return False
 		if int(i) == int(new[step]):
 			step += 1
 			continue
 	return False
 
-
 def getVenomVersion():
 	return xbmcaddon.Addon('plugin.video.venom').getAddonInfo('version')
-
 
 def addonVersion(addon):
 	return xbmcaddon.Addon(addon).getAddonInfo('version')
 
-
 def addonId():
 	return addonInfo('id')
-
 
 def addonName():
 	return addonInfo('name')
 
-
+# addonPath = transPath(addonInfo('path'))
 def addonPath(addon):
 	try: addonID = xbmcaddon.Addon(addon)
 	except: addonID = None
@@ -267,72 +243,51 @@ def addonPath(addon):
 		try: return transPath(addonID.getAddonInfo('path').decode('utf-8'))
 		except: return transPath(addonID.getAddonInfo('path'))
 
-
 def artPath():
 	theme = appearance()
 	return joinPath(xbmcaddon.Addon('plugin.video.venom').getAddonInfo('path'), 'resources', 'artwork', theme)
-
+	# return joinPath(addonPath('plugin.video.venom'), 'resources', 'artwork', theme)
 
 def appearance():
 	appearance = setting('appearance.1').lower()
 	return appearance
 
-
 def addonIcon():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']):
-		return joinPath(art, 'icon.png')
+	if not (art is None and theme in ['-', '']): return joinPath(art, 'icon.png')
 	return addonInfo('icon')
-
 
 def addonThumb():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']):
-		return joinPath(art, 'poster.png')
-	elif theme == '-':
-		return 'DefaultFolder.png'
+	if not (art is None and theme in ['-', '']): return joinPath(art, 'poster.png')
+	elif theme == '-': return 'DefaultFolder.png'
 	return addonInfo('icon')
-
 
 def addonPoster():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']):
-		return joinPath(art, 'poster.png')
+	if not (art is None and theme in ['-', '']): return joinPath(art, 'poster.png')
 	return 'DefaultVideo.png'
-
 
 def addonBanner():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']):
-		return joinPath(art, 'banner.png')
+	if not (art is None and theme in ['-', '']): return joinPath(art, 'banner.png')
 	return 'DefaultVideo.png'
-
 
 def addonFanart():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']):
-		return joinPath(art, 'fanart.jpg')
+	if not (art is None and theme in ['-', '']): return joinPath(art, 'fanart.jpg')
 	return addonInfo('fanart')
-
 
 def addonNext():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']):
-		return joinPath(art, 'next.png')
+	if not (art is None and theme in ['-', '']): return joinPath(art, 'next.png')
 	return 'DefaultVideo.png'
-
-
-# def metaFile():
-	# # if condVisibility('System.HasAddon(script.venom.metadata)'):
-		# # return joinPath(xbmcaddon.Addon('script.venom.metadata').getAddonInfo('path'), 'resources', 'data', 'meta.db')
-	# return joinPath(dataPath, 'metadata.db')
-
 
 def metadataClean(metadata):
 	if not metadata: return metadata
@@ -343,8 +298,6 @@ def metadataClean(metadata):
 					'tag', 'imdbnumber', 'code', 'aired', 'credits', 'lastplayed', 'album', 'artist', 'votes', 'path',
 					'trailer', 'dateadded', 'mediatype', 'dbid']
 	return {k: v for k, v in iteritems(metadata) if k in allowed}
-
-
 
 ####################################################
 # --- Dialogs
@@ -387,27 +340,19 @@ def context(items=None, labels=None):
 	else: return dialog.contextmenu(labels)
 
 def busy():
-	if getKodiVersion() >= 18:
-		return execute('ActivateWindow(busydialognocancel)')
+	if getKodiVersion() >= 18: return execute('ActivateWindow(busydialognocancel)')
 	else: return execute('ActivateWindow(busydialog)')
 
 def hide():
-	if getKodiVersion() >= 18 and condVisibility('Window.IsActive(busydialognocancel)'):
-		return execute('Dialog.Close(busydialognocancel)')
-	else: return execute('Dialog.Close(busydialog)')
+	execute('Dialog.Close(busydialog)')
+	if getKodiVersion() >= 18: execute('Dialog.Close(busydialognocancel)')
 
 def closeAll():
-	return execute('Dialog.Close(all, true)')
+	return execute('Dialog.Close(all,true)')
 
 def closeOk():
-	return execute('Dialog.Close(okdialog, true)')
-
-def visible():
-	if getKodiVersion() >= 18 and xbmc.getCondVisibility('Window.IsActive(busydialognocancel)') == 1:
-		return True
-	return xbmc.getCondVisibility('Window.IsActive(busydialog)') == 1
+	return execute('Dialog.Close(okdialog,true)')
 ########################
-
 
 def cancelPlayback():
 	try:
@@ -418,14 +363,11 @@ def cancelPlayback():
 		from resources.lib.modules import log_utils
 		log_utils.error()
 
-
 def refresh():
 	return execute('Container.Refresh')
 
-
 def queueItem():
 	return execute('Action(Queue)')
-
 
 def openSettings(query=None, id=addonInfo('id')):
 	try:
@@ -443,33 +385,24 @@ def openSettings(query=None, id=addonInfo('id')):
 		from resources.lib.modules import log_utils
 		log_utils.error()
 
-
-
 def apiLanguage(ret_name=None):
-	langDict = {'Bulgarian': 'bg', 'Chinese': 'zh', 'Croatian': 'hr', 'Czech': 'cs', 'Danish': 'da', 'Dutch': 'nl',
-						'English': 'en', 'Finnish': 'fi', 'French': 'fr', 'German': 'de', 'Greek': 'el', 'Hebrew': 'he',
-						'Hungarian': 'hu', 'Italian': 'it', 'Japanese': 'ja', 'Korean': 'ko', 'Norwegian': 'no', 'Polish': 'pl',
-						'Portuguese': 'pt', 'Romanian': 'ro', 'Russian': 'ru', 'Serbian': 'sr', 'Slovak': 'sk',
+	langDict = {'Bulgarian': 'bg', 'Chinese': 'zh', 'Croatian': 'hr', 'Czech': 'cs', 'Danish': 'da', 'Dutch': 'nl', 'English': 'en', 'Finnish': 'fi',
+					'French': 'fr', 'German': 'de', 'Greek': 'el', 'Hebrew': 'he', 'Hungarian': 'hu', 'Italian': 'it', 'Japanese': 'ja', 'Korean': 'ko',
+					'Norwegian': 'no', 'Polish': 'pl', 'Portuguese': 'pt', 'Romanian': 'ro', 'Russian': 'ru', 'Serbian': 'sr', 'Slovak': 'sk',
 						'Slovenian': 'sl', 'Spanish': 'es', 'Swedish': 'sv', 'Thai': 'th', 'Turkish': 'tr', 'Ukrainian': 'uk'}
-	trakt = ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl',
-				'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'zh']
-	tvdb = ['en', 'sv', 'no', 'da', 'fi', 'nl', 'de', 'it', 'es', 'fr', 'pl', 'hu', 'el', 'tr', 'ru', 'he', 'ja', 'pt',
-				'zh', 'cs', 'sl', 'hr', 'ko']
-	youtube = ['gv', 'gu', 'gd', 'ga', 'gn', 'gl', 'ty', 'tw', 'tt', 'tr', 'ts', 'tn', 'to', 'tl', 'tk', 'th', 'ti',
-						'tg', 'te', 'ta', 'de', 'da', 'dz', 'dv', 'qu', 'zh', 'za', 'zu', 'wa', 'wo', 'jv', 'ja', 'ch', 'co',
-						'ca', 'ce', 'cy', 'cs', 'cr', 'cv', 'cu', 'ps', 'pt', 'pa', 'pi', 'pl', 'mg', 'ml', 'mn', 'mi', 'mh',
-						'mk', 'mt', 'ms', 'mr', 'my', 've', 'vi', 'is', 'iu', 'it', 'vo', 'ii', 'ik', 'io', 'ia', 'ie', 'id',
-						'ig', 'fr', 'fy', 'fa', 'ff', 'fi', 'fj', 'fo', 'ss', 'sr', 'sq', 'sw', 'sv', 'su', 'st', 'sk', 'si',
-						'so', 'sn', 'sm', 'sl', 'sc', 'sa', 'sg', 'se', 'sd', 'lg', 'lb', 'la', 'ln', 'lo', 'li', 'lv', 'lt',
-						'lu', 'yi', 'yo', 'el', 'eo', 'en', 'ee', 'eu', 'et', 'es', 'ru', 'rw', 'rm', 'rn', 'ro', 'be', 'bg',
-						'ba', 'bm', 'bn', 'bo', 'bh', 'bi', 'br', 'bs', 'om', 'oj', 'oc', 'os', 'or', 'xh', 'hz', 'hy', 'hr',
-						'ht', 'hu', 'hi', 'ho', 'ha', 'he', 'uz', 'ur', 'uk', 'ug', 'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an',
-						'as', 'ar', 'av', 'ay', 'az', 'nl', 'nn', 'no', 'na', 'nb', 'nd', 'ne', 'ng', 'ny', 'nr', 'nv', 'ka',
-						'kg', 'kk', 'kj', 'ki', 'ko', 'kn', 'km', 'kl', 'ks', 'kr', 'kw', 'kv', 'ku', 'ky']
+	trakt = ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'zh']
+	tvdb = ['en', 'sv', 'no', 'da', 'fi', 'nl', 'de', 'it', 'es', 'fr', 'pl', 'hu', 'el', 'tr', 'ru', 'he', 'ja', 'pt', 'zh', 'cs', 'sl', 'hr', 'ko']
+	youtube = ['gv', 'gu', 'gd', 'ga', 'gn', 'gl', 'ty', 'tw', 'tt', 'tr', 'ts', 'tn', 'to', 'tl', 'tk', 'th', 'ti', 'tg', 'te', 'ta', 'de', 'da', 'dz', 'dv', 'qu', 'zh', 'za', 'zu',
+					'wa', 'wo', 'jv', 'ja', 'ch', 'co', 'ca', 'ce', 'cy', 'cs', 'cr', 'cv', 'cu', 'ps', 'pt', 'pa', 'pi', 'pl', 'mg', 'ml', 'mn', 'mi', 'mh', 'mk', 'mt', 'ms',
+					'mr', 'my', 've', 'vi', 'is', 'iu', 'it', 'vo', 'ii', 'ik', 'io', 'ia', 'ie', 'id', 'ig', 'fr', 'fy', 'fa', 'ff', 'fi', 'fj', 'fo', 'ss', 'sr', 'sq', 'sw', 'sv', 'su', 'st', 'sk',
+					'si', 'so', 'sn', 'sm', 'sl', 'sc', 'sa', 'sg', 'se', 'sd', 'lg', 'lb', 'la', 'ln', 'lo', 'li', 'lv', 'lt', 'lu', 'yi', 'yo', 'el', 'eo', 'en', 'ee', 'eu', 'et', 'es', 'ru',
+					'rw', 'rm', 'rn', 'ro', 'be', 'bg', 'ba', 'bm', 'bn', 'bo', 'bh', 'bi', 'br', 'bs', 'om', 'oj', 'oc', 'os', 'or', 'xh', 'hz', 'hy', 'hr', 'ht', 'hu', 'hi', 'ho',
+					'ha', 'he', 'uz', 'ur', 'uk', 'ug', 'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'as', 'ar', 'av', 'ay', 'az', 'nl', 'nn', 'no', 'na', 'nb', 'nd', 'ne', 'ng',
+					'ny', 'nr', 'nv', 'ka', 'kg', 'kk', 'kj', 'ki', 'ko', 'kn', 'km', 'kl', 'ks', 'kr', 'kw', 'kv', 'ku', 'ky']
+	tmdb = ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'zh']
 	name = None
 	name = setting('api.language')
-	if not name:
-		name = 'AUTO'
+	if not name: name = 'AUTO'
 	if name[-1].isupper():
 		try: name = xbmc.getLanguage(xbmc.ENGLISH_NAME).split(' ')[0]
 		except: pass
@@ -478,36 +411,17 @@ def apiLanguage(ret_name=None):
 	lang = {'trakt': name} if name in trakt else {'trakt': 'en'}
 	lang['tvdb'] = name if name in tvdb else 'en'
 	lang['youtube'] = name if name in youtube else 'en'
+	lang['tmdb'] = name if name in tmdb else 'en'
 	if ret_name:
 		lang['trakt'] = [i[0] for i in iteritems(langDict) if i[1] == lang['trakt']][0]
 		lang['tvdb'] = [i[0] for i in iteritems(langDict) if i[1] == lang['tvdb']][0]
 		lang['youtube'] = [i[0] for i in iteritems(langDict) if i[1] == lang['youtube']][0]
+		lang['tmdb'] = [i[0] for i in iteritems(langDict) if i[1] == lang['tmdb']][0]
 	return lang
 
-
-def cdnImport(uri, name):
-	import imp
-	from resources.lib.modules import client
-	path = joinPath(dataPath, 'py' + name)
-	path = path.decode('utf-8')
-	deleteDir(joinPath(path, ''), force=True)
-	makeFile(dataPath)
-	makeFile(path)
-	r = client.request(uri)
-	p = joinPath(path, name + '.py')
-	f = openFile(p, 'w');
-	f.write(r);
-	f.close()
-	m = imp.load_source(name, p)
-	deleteDir(joinPath(path, ''), force=True)
-	return m
-
-
-###---start adding TMDb to params
-def autoTraktSubscription(tvshowtitle, year, imdb, tvdb):
+def autoTraktSubscription(tvshowtitle, year, imdb, tvdb): #---start adding TMDb to params
 	from resources.lib.modules import libtools
 	libtools.libtvshows().add(tvshowtitle, year, imdb, tvdb)
-
 
 def getSettingDefault(id):
 	try:
@@ -520,7 +434,6 @@ def getSettingDefault(id):
 	except:
 		return None
 
-
 def getColor(n):
 	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
 						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor']
@@ -528,13 +441,10 @@ def getColor(n):
 	color = colorChart[int(n)]
 	return color
 
-
 def getMenuEnabled(menu_title):
 	is_enabled = setting(menu_title).strip()
-	if (is_enabled == '' or is_enabled == 'false'):
-		return False
+	if (is_enabled == '' or is_enabled == 'false'): return False
 	return True
-
 
 def trigger_widget_refresh():
 	import time
@@ -546,18 +456,13 @@ def trigger_widget_refresh():
 # should prob make this run only on "isVenom_widget"
 	# execute('UpdateLibrary(video,/fake/path/to/force/refresh/on/home)') # make sure this is ok coupled with above
 
-
 def get_video_database_path():
 	database_path = os.path.abspath(joinPath(dataPath, '..', '..', 'Database', ))
 	kodi_version = getKodiVersion()
-	if kodi_version == 17:
-		database_path = joinPath(database_path, 'MyVideos107.db')
-	elif kodi_version == 18:
-		database_path = joinPath(database_path, 'MyVideos116.db')
-	elif kodi_version == 19:
-		database_path = joinPath(database_path, 'MyVideos119.db')
+	if kodi_version == 17: database_path = joinPath(database_path, 'MyVideos107.db')
+	elif kodi_version == 18: database_path = joinPath(database_path, 'MyVideos116.db')
+	elif kodi_version == 19: database_path = joinPath(database_path, 'MyVideos119.db')
 	return database_path
-
 
 def datetime_workaround(string_date, format="%Y-%m-%d", date_only=True):
 	sleep(200)
@@ -573,8 +478,6 @@ def datetime_workaround(string_date, format="%Y-%m-%d", date_only=True):
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
-
-
 
 def add_source(source_name, source_path, source_content, source_thumbnail, type='video'):
 	xml_file = transPath('special://profile/sources.xml')
@@ -609,7 +512,6 @@ def add_source(source_name, source_path, source_content, source_thumbnail, type=
 	if _add_source_xml(xml_file, source_name, source_path, source_thumbnail, type=type) and source_content != '':
 		_remove_source_content(source_path) # Added to also rid any remains because manual delete sources and kodi leaves behind a record in MyVideos*.db
 		_set_source_content(source_content)
-
 
 def _add_source_xml(xml_file, name, path, thumbnail, type='video'):
 	tree = ET.parse(xml_file)
@@ -660,7 +562,6 @@ def _add_source_xml(xml_file, name, path, thumbnail, type='video'):
 	tree.write(xml_file)
 	return True
 
-
 def _indent_xml(elem, level=0):
 	i = '\n' + level*'\t'
 	if len(elem):
@@ -676,7 +577,6 @@ def _indent_xml(elem, level=0):
 		if level and (not elem.tail or not elem.tail.strip()):
 			elem.tail = i
 
-
 def _get_source_attr(xml_file, name, attr, type='video'):
 	tree = ET.parse(xml_file)
 	root = tree.getroot()
@@ -686,7 +586,6 @@ def _get_source_attr(xml_file, name, attr, type='video'):
 		if xml_name == name:
 			return source.find(attr).text
 	return None
-
 
 def _db_execute(db_name, command):
 	databaseFile = _get_database(db_name)
@@ -700,7 +599,6 @@ def _db_execute(db_name, command):
 	dbcur.close ; dbcon.close()
 	return True
 
-
 def _get_database(db_name):
 	from glob import glob
 	path_db = 'special://profile/Database/%s' % db_name
@@ -708,17 +606,14 @@ def _get_database(db_name):
 	if filelist: return filelist[-1]
 	return None
 
-
 def _remove_source_content(path):
 	q = 'DELETE FROM path WHERE strPath LIKE "%{0}%"'.format(path)
 	return _db_execute('MyVideos*.db', q)
-
 
 def _set_source_content(content):
 	q = 'INSERT OR REPLACE INTO path (strPath,strContent,strScraper,strHash,scanRecursive,useFolderNames,strSettings,noUpdate,exclude,dateAdded,idParentPath) VALUES '
 	q += content
 	return _db_execute('MyVideos*.db', q)
-
 
 def clean_settings():
 	def _make_content(dict_object):
@@ -782,7 +677,6 @@ def clean_settings():
 			log_utils.error()
 			notification(title=addon_name, message=32115)
 
-
 def set_reuselanguageinvoker():
 	if getKodiVersion() < 18:
 		notification(message=32116)
@@ -814,7 +708,6 @@ def set_reuselanguageinvoker():
 		from resources.lib.modules import log_utils
 		log_utils.error()
 
-
 def gen_file_hash(file):
 	try:
 		from hashlib import md5
@@ -826,7 +719,6 @@ def gen_file_hash(file):
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
-
 
 def copy2clip(txt):
 	from sys import platform as sys_platform
