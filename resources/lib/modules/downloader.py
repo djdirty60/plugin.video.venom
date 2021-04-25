@@ -89,7 +89,6 @@ def download(name, image, url, meta_name=None):
 	except:
 		log_utils.error()
 
-
 def getResponse(url, headers, size):
 	try:
 		if size > 0:
@@ -101,7 +100,6 @@ def getResponse(url, headers, size):
 	except:
 		log_utils.error()
 		return None
-
 
 def done(title, dest, downloaded):
 	try:
@@ -118,7 +116,6 @@ def done(title, dest, downloaded):
 			control.homeWindow.clearProperty('GEN-DOWNLOADED')
 	except:
 		log_utils.error()
-
 
 def doDownload(url, dest, title, image, headers):
 	file = dest.rsplit(os.sep, 1)[-1]
@@ -179,10 +176,10 @@ def doDownload(url, dest, title, image, headers):
 						f.write(c)
 						del c
 					f.close()
-					log_utils.log('Download Complete: %s' % (dest))
+					log_utils.log('Download Complete: %s' % (dest), level=log_utils.LOGDEBUG)
 					return done(title, dest, True)
 		except:
-			log_utils.error('DOWNNLOADER EXCEPTION: ', __name__, log_utils.LOGERROR)
+			log_utils.error('DOWNNLOADER EXCEPTION: ')
 			error = True
 			sleep = 10
 			errno = 0
@@ -214,7 +211,7 @@ def doDownload(url, dest, title, image, headers):
 		if (resumable and errors > 0) or errors >= 10:
 			if (not resumable and resume >= 50) or resume >= 500:
 				#Give up!
-				log_utils.log('Download Canceled: %s - too many errors whilst downloading' % (dest), level=LOGDEBUG)
+				log_utils.log('Download Canceled: %s - too many errors whilst downloading' % (dest), level=log_utils.LOGWARNING)
 				return done(title, dest, False)
 			resume += 1
 			errors  = 0
@@ -223,7 +220,6 @@ def doDownload(url, dest, title, image, headers):
 				#create new response
 				resp = getResponse(url, headers, total)
 			else: pass
-
 
 def titlecase(string):
 	# not perfect but close enough

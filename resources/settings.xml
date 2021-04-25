@@ -207,8 +207,9 @@
 		<setting id="trakt.message1" type="text" label="32098" enable="false" />
 		<setting id="trakt.scrobble.notify" type="bool" label="32099" default="false" visible="!eq(-9,) + eq(-2,true)" />
 		<setting id="resume.source" type="enum" label="32095" lvalues="32314|32096" default="0" visible="!eq(-10,) + eq(-3,true)" />
+		<setting id="trakt.progress.showunaired" type="bool" label="32572" default="false" visible="!eq(-11,)" />
 		<setting type="lsep" label="32645" />
-		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-12,)" />
+		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-13,)" />
 		<setting id="schedTraktTime" type="slider" label="32647" default="0" range="0,24" option="int" enable="eq(-1,true)" />
 		<setting id="trakt.message2" type="text" label="32648" default="" enable="false" />
 	</category>
@@ -297,8 +298,9 @@
 		<setting id="library.check" type="bool" label="32548" default="true" />
 		<setting type="sep" />
 		<setting id="library.importdelay" type="bool" label="$NUMBER[24]HR delay before import" default="true" />
-		<setting id="library.check_movie" type="bool" label="32549" default="false" />
-		<setting id="library.check_episode" type="bool" label="32550" default="false" />
+<!-- 		<setting id="library.check_movie" type="bool" label="32549" default="false" />
+		<setting id="library.check_episode" type="bool" label="32550" default="false" /> -->
+		<setting id="library.include_specials" type="bool" label="32649" default="false" />
 		<setting id="library.include_unknown" type="bool" label="32565" default="true" />
 		<setting id="library.strm.use_tmdbhelper" type="bool" label="Create .strm files for TMDB Helper" default="false" />
 	</category>

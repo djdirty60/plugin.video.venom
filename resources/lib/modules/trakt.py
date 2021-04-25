@@ -8,7 +8,7 @@ from json import dumps as jsdumps, loads as jsloads
 # import imp
 import re
 import threading
-import time
+from time import sleep
 try: #Py2
 	from urlparse import urljoin
 except ImportError: #Py3
@@ -77,7 +77,6 @@ def getTrakt(url, post=None, extended=False):
 		log_utils.error('getTrakt Error: ')
 	return None
 
-
 def getTraktAsJson(url, post=None):
 	try:
 		res_headers = {}
@@ -92,7 +91,6 @@ def getTraktAsJson(url, post=None):
 		return r
 	except:
 		log_utils.error()
-
 
 def re_auth(headers):
 	try:
@@ -118,7 +116,7 @@ def re_auth(headers):
 				log_utils.error()
 				return False
 			if 'error' in result and result['error'] == 'invalid_grant':
-				log_utils.log('Please Re-Authorize your Trakt Account: %s' % result['error'], __name__, level=log_utils.LOGERROR)
+				log_utils.log('Please Re-Authorize your Trakt Account: %s' % result['error'], __name__, level=log_utils.LOGWARNING)
 				control.notification(title=32315, message=33677)
 				return False
 
@@ -135,7 +133,6 @@ def re_auth(headers):
 			return False
 	except:
 		log_utils.error()
-
 
 def authTrakt():
 	try:
@@ -158,7 +155,7 @@ def authTrakt():
 		for i in range(0, expires_in):
 			try:
 				if progressDialog.iscanceled(): break
-				time.sleep(1)
+				sleep(1)
 				if not float(i) % interval == 0: continue
 				r = getTraktAsJson('/oauth/device/token', {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'code': device_code})
 				if not r: continue
@@ -183,7 +180,6 @@ def authTrakt():
 	except:
 		log_utils.error()
 
-
 def getTraktCredentialsInfo():
 	username = control.setting('trakt.username').strip()
 	token = control.setting('trakt.token')
@@ -192,12 +188,10 @@ def getTraktCredentialsInfo():
 		return False
 	return True
 
-
 def getTraktIndicatorsInfo():
 	indicators = control.setting('indicators') if not getTraktCredentialsInfo() else control.setting('indicators.alt')
 	indicators = True if indicators == '1' else False
 	return indicators
-
 
 def getTraktAddonMovieInfo():
 	try: scrobble = control.addon('script.trakt').getSetting('scrobble_movie')
@@ -210,7 +204,6 @@ def getTraktAddonMovieInfo():
 		return True
 	else: return False
 
-
 def getTraktAddonEpisodeInfo():
 	try: scrobble = control.addon('script.trakt').getSetting('scrobble_episode')
 	except: scrobble = ''
@@ -222,9 +215,9 @@ def getTraktAddonEpisodeInfo():
 		return True
 	else: return False
 
-
 def watch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
-	if not tvdb: 
+	control.busy()
+	if not tvdb:
 		markMovieAsWatched(imdb)
 		cachesyncMovies()
 	elif episode:
@@ -239,18 +232,16 @@ def watch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	else:
 		markMovieAsWatched(imdb)
 		cachesyncMovies()
-	if refresh:
-		control.refresh()
+	control.hide()
+	if refresh: control.refresh()
 	control.trigger_widget_refresh()
 	if control.setting('trakt.general.notifications') == 'true':
-		if season and not episode:
-			name = '%s-Season%s...' % (name, season)
-		if season and episode:
-			name = '%s-S%sxE%02d...' % (name, season, int(episode))
+		if season and not episode: name = '%s-Season%s...' % (name, season)
+		if season and episode: name = '%s-S%sxE%02d...' % (name, season, int(episode))
 		control.notification(title=32315, message=control.lang(35502) % name)
 
-
 def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
+	control.busy()
 	if not tvdb:
 		markMovieAsNotWatched(imdb)
 		cachesyncMovies()
@@ -266,31 +257,26 @@ def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 	else:
 		markMovieAsNotWatched(imdb)
 		cachesyncMovies()
-	if refresh:
-		control.refresh()
+	control.hide()
+	if refresh: control.refresh()
 	control.trigger_widget_refresh()
 	if control.setting('trakt.general.notifications') == 'true':
-		if season and not episode:
-			name = '%s-Season%s...' % (name, season)
-		if season and episode:
-			name = '%s-S%sxE%02d...' % (name, season, int(episode))
+		if season and not episode: name = '%s-Season%s...' % (name, season)
+		if season and episode: name = '%s-S%sxE%02d...' % (name, season, int(episode))
 		control.notification(title=32315, message=control.lang(35503) % name)
-
 
 def rate(imdb=None, tvdb=None, season=None, episode=None):
 	return _rating(action='rate', imdb=imdb, tvdb=tvdb, season=season, episode=episode)
 
-
 def unrate(imdb=None, tvdb=None, season=None, episode=None):
 	return _rating(action='unrate', imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-
 
 def rateShow(imdb=None, tvdb=None, season=None, episode=None):
 	if control.setting('trakt.rating') == 1:
 		rate(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
 
-
 def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
+	control.busy()
 	try:
 		addon = 'script.trakt'
 		if control.condVisibility('System.HasAddon(%s)' % addon):
@@ -318,30 +304,29 @@ def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
 				data['dbid'] = 4
 			script = control.joinPath(control.addonPath(addon), 'resources', 'lib', 'sqlitequeue.py')
 			sqlitequeue = imp.load_source('sqlitequeue', script) # this may be deprecated
-
 			data = {'action': 'manualRating', 'ratingData': data}
 			sqlitequeue.SqliteQueue().append(data)
 		else:
 			control.notification(title=32315, message=33659)
+		control.hide()
 	except:
 		log_utils.error()
-
 
 def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	sections = ['progress_watched', 'calendar']
 	sections_display = [control.lang(40072), control.lang(40073)]
 	selection = control.selectDialog([i for i in sections_display], heading=control.addonInfo('name') + ' - ' + control.lang(40074))
 	if selection == -1: return
+	control.busy()
 	section = sections[selection]
 	if episode: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
 	else: post = {"movies": [{"ids": {"imdb": imdb}}]}
 	getTrakt('users/hidden/%s' % section, post=post)[0]
-	if refresh:
-		control.refresh()
+	control.hide()
+	if refresh: control.refresh()
 	control.trigger_widget_refresh()
 	if control.setting('trakt.general.notifications') == 'true':
 		control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
-
 
 def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	lists = []
@@ -383,29 +368,17 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 		if select == -1: return
 		if select >= 0:
 			if items[select][0] == control.lang(33651):
-				control.busy()
 				watch(name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=refresh)
-				control.hide()
 			elif items[select][0] == control.lang(33652):
-				control.busy()
 				unwatch(name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=refresh)
-				control.hide()
 			elif items[select][0] == control.lang(33653):
-				control.busy()
 				rate(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-				control.hide()
 			elif items[select][0] == control.lang(33654):
-				control.busy()
 				unrate(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-				control.hide()
 			elif items[select][0] == control.lang(40075) % media_type:
-				control.busy()
 				hideItem(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-				control.hide()
 			elif items[select][0] == control.lang(40076):
-				control.busy()
 				scrobbleReset(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-				control.hide()
 			else:
 				if not tvdb:
 					post = {"movies": [{"ids": {"imdb": imdb}}]}
@@ -422,27 +395,24 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 						else:
 							post = {"shows": [{"ids": {"tvdb": tvdb}, "seasons": [{"number": season}]}]}
 							name = name + ' - ' + 'Season %s' % season
-					else:
-						post = {"shows": [{"ids": {"tvdb": tvdb}}]}
-
+					else: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
 				if items[select][0] == control.lang(33579):
 					slug = listAdd(successNotification=True)
-					if slug:
-						getTrakt(items[select][1] % slug, post=post)[0]
+					if slug: getTrakt(items[select][1] % slug, post=post)[0]
 				else:
 					getTrakt(items[select][1], post=post)[0]
-
 				control.hide()
-				message = 33583 if 'remove' in items[select][1] else 33582
-				if refresh:
-					control.refresh()
+				list = re.search('\[B](.+?)\[/B]', items[select][0]).group(1)
+				message = control.lang(33583) if 'remove' in items[select][1] else control.lang(33582)
+				if items[select][0].startswith('Add'): refresh = False
+				control.hide()
+				if refresh: control.refresh()
 				control.trigger_widget_refresh()
 				if control.setting('trakt.general.notifications') == 'true':
-					control.notification(title=name, message=message)
+					control.notification(title=name, message=message + ' (%s)' % list)
 	except:
 		log_utils.error()
 		control.hide()
-
 
 def listAdd(successNotification=True):
 	t = control.lang(32520)
@@ -452,21 +422,17 @@ def listAdd(successNotification=True):
 	result = getTrakt('/users/me/lists', post = {"name" : new, "privacy" : "private"})
 	try:
 		slug = jsloads(result)['ids']['slug']
-		if successNotification:
-			control.notification(title=32070, message=33661)
+		if successNotification: control.notification(title=32070, message=33661)
 		return slug
 	except:
 		control.notification(title=32070, message=33584)
 		return None
 
-
 def lists(id=None):
 	return cache.get(getTraktAsJson, 48, 'https://api.trakt.tv/users/me/lists' + ('' if not id else ('/' + str(id))))
 
-
 def list(id):
 	return lists(id=id)
-
 
 def slug(name):
 	name = name.strip()
@@ -474,7 +440,6 @@ def slug(name):
 	name = re.sub(r'[^a-z0-9_]', '-', name) # check apostrophe
 	name = re.sub(r'--+', '-', name)
 	return name
-
 
 def getActivity():
 	try:
@@ -502,7 +467,6 @@ def getActivity():
 	except:
 		log_utils.error()
 
-
 def getWatchedActivity():
 	try:
 		i = getTraktAsJson('/sync/last_activities')
@@ -516,7 +480,6 @@ def getWatchedActivity():
 	except:
 		log_utils.error()
 
-
 def getMoviesWatchedActivity():
 	try:
 		i = getTraktAsJson('/sync/last_activities')
@@ -528,7 +491,6 @@ def getMoviesWatchedActivity():
 		return activity
 	except:
 		log_utils.error()
-
 
 def getEpisodesWatchedActivity():
 	try:
@@ -542,7 +504,6 @@ def getEpisodesWatchedActivity():
 	except:
 		log_utils.error()
 
-
 def getCollectedActivity():
 	try:
 		i = getTraktAsJson('/sync/last_activities')
@@ -555,7 +516,6 @@ def getCollectedActivity():
 		return activity
 	except:
 		log_utils.error()
-
 
 def getWatchListedActivity():
 	try:
@@ -572,7 +532,6 @@ def getWatchListedActivity():
 	except:
 		log_utils.error()
 
-
 def getPausedActivity():
 	try:
 		i = getTraktAsJson('/sync/last_activities')
@@ -586,11 +545,9 @@ def getPausedActivity():
 	except:
 		log_utils.error()
 
-
 def cachesyncMovies(timeout=0):
 	indicators = cache.get(syncMovies, timeout)
 	return indicators
-
 
 def sync_watched():
 	try:
@@ -607,16 +564,13 @@ def sync_watched():
 				log_utils.log('Trakt Watched Episodes Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
 								(str(db_episoodes_last_watched), str(episodesWatchedActivity)), __name__, log_utils.LOGDEBUG)
 				cachesyncTVShows()
-			if control.monitor.waitForAbort(60*15):
-				break
+			if control.monitor.waitForAbort(60*15): break
 	except:
 		log_utils.error()
-
 
 def timeoutsyncMovies():
 	timeout = cache.timeout(syncMovies)
 	return timeout
-
 
 def syncMovies():
 	try:
@@ -629,7 +583,6 @@ def syncMovies():
 	except:
 		log_utils.error()
 
-
 def watchedMovies():
 	try:
 		if not getTraktCredentialsInfo(): return
@@ -637,33 +590,27 @@ def watchedMovies():
 	except:
 		log_utils.error()
 
-
 def watchedMoviesTime(imdb):
 	try:
 		imdb = str(imdb)
 		items = watchedMovies()
 		for item in items:
-			if str(item['movie']['ids']['imdb']) == imdb:
-				return item['last_watched_at']
+			if str(item['movie']['ids']['imdb']) == imdb: return item['last_watched_at']
 	except:
 		log_utils.error()
-
 
 def cachesyncTV(imdb):
 	threads = [threading.Thread(target=cachesyncTVShows), threading.Thread(target=cachesyncSeason, args=(imdb,))]
 	[i.start() for i in threads]
 	[i.join() for i in threads]
 
-
 def cachesyncTVShows(timeout=0):
 	indicators = cache.get(syncTVShows, timeout)
 	return indicators
 
-
 def timeoutsyncTVShows():
 	timeout = cache.timeout(syncTVShows)
 	return timeout
-
 
 def syncTVShows():
 	try:
@@ -676,14 +623,12 @@ def syncTVShows():
 	except:
 		log_utils.error()
 
-
 def watchedShows():
 	try:
 		if not getTraktCredentialsInfo(): return
 		return getTraktAsJson('/users/me/watched/shows?extended=full')
 	except:
 		log_utils.error()
-
 
 def watchedShowsTime(tvdb, season, episode):
 	try:
@@ -703,16 +648,13 @@ def watchedShowsTime(tvdb, season, episode):
 	except:
 		log_utils.error()
 
-
 def cachesyncSeason(imdb, timeout=0):
 	indicators = cache.get(syncSeason, timeout, imdb)
 	return indicators
 
-
 def timeoutsyncSeason(imdb):
 	timeout = cache.timeout(syncSeason, imdb)
 	return timeout
-
 
 def syncSeason(imdb):
 	try:
@@ -730,7 +672,6 @@ def syncSeason(imdb):
 		log_utils.error()
 		return None
 
-
 def showCount(imdb, refresh=True, wait=False):
 	try:
 		if not imdb: return None
@@ -746,7 +687,6 @@ def showCount(imdb, refresh=True, wait=False):
 	except:
 		log_utils.error()
 		return None
-
 
 def seasonCount(imdb, refresh=True, wait=False):
 	try:
@@ -764,10 +704,8 @@ def seasonCount(imdb, refresh=True, wait=False):
 		log_utils.error()
 		return None
 
-
 def _seasonCountCache(imdb):
 	return cache.get(_seasonCountRetrieve, 0.3, imdb)
-
 
 	# indicators = getTraktAsJson('/users/me/watched/shows?extended=full')
 def _seasonCountRetrieve(imdb):
@@ -785,70 +723,53 @@ def _seasonCountRetrieve(imdb):
 		log_utils.error()
 		return None
 
-
 def markMovieAsWatched(imdb):
-	if not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if not imdb.startswith('tt'): imdb = 'tt' + imdb
 	return getTrakt('/sync/history', {"movies": [{"ids": {"imdb": imdb}}]})[0]
 
-
 def markMovieAsNotWatched(imdb):
-	if not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if not imdb.startswith('tt'): imdb = 'tt' + imdb
 	return getTrakt('/sync/history/remove', {"movies": [{"ids": {"imdb": imdb}}]})[0]
 
-
 def markTVShowAsWatched(imdb, tvdb):
-	if imdb and not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	result = getTrakt('/sync/history', {"shows": [{"ids": {"tvdb": tvdb}}]})[0]
 	seasonCount(imdb)
 	return result
 
-
 def markTVShowAsNotWatched(imdb, tvdb):
-	if imdb and not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	result = getTrakt('/sync/history/remove', {"shows": [{"ids": {"tvdb": tvdb}}]})[0]
 	seasonCount(imdb)
 	return result
 
-
 def markSeasonAsWatched(imdb, tvdb, season):
-	if imdb and not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season = int('%01d' % int(season))
 	result = getTrakt('/sync/history', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})[0]
 	seasonCount(imdb)
 	return result
 
-
 def markSeasonAsNotWatched(imdb, tvdb, season):
-	if imdb and not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season = int('%01d' % int(season))
 	result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})[0]
 	seasonCount(imdb)
 	return result
 
-
 def markEpisodeAsWatched(imdb, tvdb, season, episode):
-	if imdb and not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
 	result = getTrakt('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
 	seasonCount(imdb)
 	return result
 
-
 def markEpisodeAsNotWatched(imdb, tvdb, season, episode):
-	if imdb and not imdb.startswith('tt'):
-		imdb = 'tt' + imdb
+	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
 	result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
 	seasonCount(imdb)
 	return result
-
 
 def getMovieTranslation(id, lang, full=False):
 	url = '/movies/%s/translations/%s' % (id, lang)
@@ -858,7 +779,6 @@ def getMovieTranslation(id, lang, full=False):
 		return None if result == 'none' else result
 	except:
 		log_utils.error()
-
 
 def getTVShowTranslation(id, lang, season=None, episode=None, full=False):
 	if season and episode: url = '/shows/%s/seasons/%s/episodes/%s/translations/%s' % (id, season, episode, lang)
@@ -870,7 +790,6 @@ def getTVShowTranslation(id, lang, season=None, episode=None, full=False):
 	except:
 		log_utils.error()
 
-
 def getMovieSummary(id, full=True):
 	try:
 		url = '/movies/%s' % id
@@ -878,7 +797,6 @@ def getMovieSummary(id, full=True):
 		return cache.get(getTraktAsJson, 48, url)
 	except:
 		log_utils.error()
-
 
 def getTVShowSummary(id, full=True):
 	try:
@@ -888,7 +806,6 @@ def getTVShowSummary(id, full=True):
 	except:
 		log_utils.error()
 
-
 def getEpisodeSummary(id, season, episode, full=True):
 	try:
 		url = '/shows/%s/seasons/%s/episodes/%s' % (id, season, episode)
@@ -896,7 +813,6 @@ def getEpisodeSummary(id, season, episode, full=True):
 		return cache.get(getTraktAsJson, 48, url)
 	except:
 		log_utils.error()
-
 
 def getSeasons(id, full=True):
 	try:
@@ -906,53 +822,36 @@ def getSeasons(id, full=True):
 	except:
 		log_utils.error()
 
-
 def sort_list(sort_key, sort_direction, list_data):
 	reverse = False if sort_direction == 'asc' else True
-	if sort_key == 'rank':
-		return sorted(list_data, key=lambda x: x['rank'], reverse=reverse)
-	elif sort_key == 'added':
-		return sorted(list_data, key=lambda x: x['listed_at'], reverse=reverse)
-	elif sort_key == 'title':
-		return sorted(list_data, key=lambda x: utils.title_key(x[x['type']].get('title')), reverse=reverse)
-	elif sort_key == 'released':
-		return sorted(list_data, key=lambda x: _released_key(x[x['type']]), reverse=reverse)
-	elif sort_key == 'runtime':
-		return sorted(list_data, key=lambda x: x[x['type']].get('runtime', 0), reverse=reverse)
-	elif sort_key == 'popularity':
-		return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
-	elif sort_key == 'percentage':
-		return sorted(list_data, key=lambda x: x[x['type']].get('rating', 0), reverse=reverse)
-	elif sort_key == 'votes':
-		return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
-	else:
-		return list_data
-
+	if sort_key == 'rank': return sorted(list_data, key=lambda x: x['rank'], reverse=reverse)
+	elif sort_key == 'added': return sorted(list_data, key=lambda x: x['listed_at'], reverse=reverse)
+	elif sort_key == 'title': return sorted(list_data, key=lambda x: utils.title_key(x[x['type']].get('title')), reverse=reverse)
+	elif sort_key == 'released': return sorted(list_data, key=lambda x: _released_key(x[x['type']]), reverse=reverse)
+	elif sort_key == 'runtime': return sorted(list_data, key=lambda x: x[x['type']].get('runtime', 0), reverse=reverse)
+	elif sort_key == 'popularity': return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
+	elif sort_key == 'percentage': return sorted(list_data, key=lambda x: x[x['type']].get('rating', 0), reverse=reverse)
+	elif sort_key == 'votes': return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
+	else: return list_data
 
 def _released_key(item):
-	if 'released' in item:
-		return item['released']
-	elif 'first_aired' in item:
-		return item['first_aired']
-	else:
-		return 0
-
+	if 'released' in item: return item['released']
+	elif 'first_aired' in item: return item['first_aired']
+	else: return 0
 
 def getMovieAliases(id):
 	try:
-		return cache.get(getTraktAsJson, 96, '/movies/%s/aliases' % id)
+		return cache.get(getTraktAsJson, 168, '/movies/%s/aliases' % id)
 	except:
 		log_utils.error()
 		return []
-
 
 def getTVShowAliases(id):
 	try:
-		return cache.get(getTraktAsJson, 96, '/shows/%s/aliases' % id)
+		return cache.get(getTraktAsJson, 168, '/shows/%s/aliases' % id)
 	except:
 		log_utils.error()
 		return []
-
 
 def getPeople(id, content_type, full=True):
 	try:
@@ -962,14 +861,12 @@ def getPeople(id, content_type, full=True):
 	except:
 		log_utils.error()
 
-
 def SearchAll(title, year, full=True):
 	try:
 		return SearchMovie(title, year, full) + SearchTVShow(title, year, full)
 	except:
 		log_utils.error()
 		return
-
 
 def SearchMovie(title, year, fields=None, full=True):
 	try:
@@ -982,7 +879,6 @@ def SearchMovie(title, year, fields=None, full=True):
 		log_utils.error()
 		return
 
-
 def SearchTVShow(title, year, fields=None, full=True):
 	try:
 		url = '/search/show?query=%s' % title
@@ -994,7 +890,6 @@ def SearchTVShow(title, year, fields=None, full=True):
 		log_utils.error()
 		return
 
-
 def SearchEpisode(title, season, episode, full=True):
 	try:
 		url = '/search/%s/seasons/%s/episodes/%s' % (title, season, episode)
@@ -1004,28 +899,25 @@ def SearchEpisode(title, season, episode, full=True):
 		log_utils.error()
 		return
 
-
 def getGenre(content, type, type_id):
 	try:
 		r = '/search/%s/%s?type=%s&extended=full' % (type, type_id, content)
-		r = cache.get(getTraktAsJson, 96, r)
+		r = cache.get(getTraktAsJson, 168, r)
 		r = r[0].get(content, {}).get('genres', [])
 		return r
 	except:
 		log_utils.error()
 		return []
 
-
 def IdLookup(id_type, id, type): # ("id_type" can be trakt , imdb , tmdb , tvdb) (type can be one of "movie , show , episode , person , list")
 	try:
 		r = '/search/%s/%s?type=%s' % (id_type, id, type)
-		r = cache.get(getTraktAsJson, 96, r)
+		r = cache.get(getTraktAsJson, 168, r)
 		if not r: return None
 		return r[0].get(type).get('ids')
 	except:
 		log_utils.error()
 		return None
-
 
 def scrobbleMovie(imdb, tmdb, watched_percent):
 	try:
@@ -1033,12 +925,10 @@ def scrobbleMovie(imdb, tmdb, watched_percent):
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		items = [{'progress': watched_percent, 'paused_at': timestamp, 'type': 'movie', 'movie': {'ids': {'imdb': imdb, 'tmdb': tmdb}}}]
 		traktsync.insert_bookmarks(items, new_scrobble=True)
-		if control.setting('trakt.scrobble.notify') == 'true':
-			control.notification(message=32088)
+		if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
 		return getTrakt('/scrobble/pause', {"movie": {"ids": {"imdb": imdb}}, "progress": watched_percent})
 	except:
 		log_utils.error()
-
 
 def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 	try:
@@ -1046,14 +936,13 @@ def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		items = [{'progress': watched_percent, 'paused_at': timestamp, 'type': 'episode', 'episode': {'season': season, 'number': episode}, 'show': {'ids': {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb}}}]
 		traktsync.insert_bookmarks(items, new_scrobble=True)
-		if control.setting('trakt.scrobble.notify') == 'true':
-			control.notification(message=32088)
+		if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
 		return getTrakt('/scrobble/pause', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": watched_percent})
 	except:
 		log_utils.error()
 
-
 def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True):
+	control.busy()
 	try:
 		type = 'movie' if not episode else 'episode'
 		if type == 'movie':
@@ -1065,14 +954,12 @@ def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True):
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		items[0].update({'paused_at': timestamp})
 		traktsync.delete_bookmark(items)
-		if refresh:
-			control.refresh()
+		control.hide()
+		if refresh: control.refresh()
 		control.trigger_widget_refresh()
-		if control.setting('trakt.scrobble.notify') == 'true':
-			control.notification(message=32082)
+		if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32082)
 	except:
 		log_utils.error()
-
 
 def sync_progress():
 	try:
@@ -1085,7 +972,6 @@ def sync_progress():
 				link = '/sync/playback/'
 				items = getTraktAsJson(link)
 				if items: traktsync.insert_bookmarks(items)
-			if control.monitor.waitForAbort(60*15):
-				break
+			if control.monitor.waitForAbort(60*15): break
 	except:
 		log_utils.error()

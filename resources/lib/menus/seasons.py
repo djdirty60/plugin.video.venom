@@ -31,30 +31,25 @@ class Seasons:
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.utcnow()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
-
 		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w300'
-
 		self.trakt_user = control.setting('trakt.user').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/seasons'
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
-
-		self.showunaired = control.setting('showunaired') or 'true'
+		self.showunaired = control.setting('showunaired') == 'true'
 		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
+		self.showspecials = control.setting('tv.specials') == 'true'
 
-
-	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, art, idx=True): # may need to add a cache duration over-ride param to pass
+	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, art, idx=True, create_directory=True): # may need to add a cache duration over-ride param to pass
 		self.list = []
 		if idx:
-			# self.list = self.tmdb_list(tvshowtitle, imdb, tmdb, tvdb, art)
 			self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, art)
 			if self.list is None: self.list = []
-			self.seasonDirectory(self.list)
+			if create_directory: self.seasonDirectory(self.list)
 			return self.list
 		else:
 			self.list = self.tmdb_list(tvshowtitle, imdb, tmdb, tvdb, art)
 			return self.list
-
 
 	def tmdb_list(self, tvshowtitle, imdb, tmdb, tvdb, art):
 		if not tmdb and (imdb or tvdb):
@@ -70,7 +65,7 @@ class Seasons:
 
 		for item in showSeasons['seasons']: # seasons not parsed in tmdb module so ['seasons'] here is direct json response data
 			try:
-				if not control.setting('tv.specials') == 'true' and item['season_number'] == 0: continue
+				if not self.showspecials and item['season_number'] == 0: continue
 				values = {}
 				values.update(showSeasons)
 				values['mediatype'] = 'season'
@@ -81,11 +76,11 @@ class Seasons:
 					if values['status'].lower() == 'ended': pass # season level unaired
 					elif not values['premiered']:
 						values['unaired'] = 'true'
-						if self.showunaired != 'true': continue
+						if not self.showunaired: continue
 						pass
 					elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
 						values['unaired'] = 'true'
-						if self.showunaired != 'true': continue
+						if not self.showunaired: continue
 				except:
 					log_utils.error()
 
@@ -112,22 +107,19 @@ class Seasons:
 				log_utils.error()
 		return self.list
 
-
 	def seasonDirectory(self, items):
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide()
 			control.notification(title=32054, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
-		settingFanart = control.setting('fanart')
+		settingFanart = control.setting('fanart') == 'true'
 		addonPoster = control.addonPoster()
 		addonFanart = control.addonFanart()
 		addonBanner = control.addonBanner()
-
 		try: indicators = playcount.getSeasonIndicators(items[0]['imdb'], refresh=True)
 		except: indicators = None
 		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
-
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu = control.lang(32068)
 			unwatchedMenu = control.lang(32069)
@@ -141,18 +133,16 @@ class Seasons:
 		labelMenu = control.lang(32055)
 		playRandom = control.lang(32535)
 		addToLibrary = control.lang(32551)
-
 		try: multi = [i['tvshowtitle'] for i in items]
 		except: multi = []
 		multi = len([x for y,x in enumerate(multi) if x not in multi[:y]])
 		multi = True if multi > 1 else False
-
 		for i in items:
 			try:
 				imdb, tmdb, tvdb, year, season = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('season')
 				title = i.get('tvshowtitle')
 				label = '%s %s' % (labelMenu, i.get('season'))
-				if not self.season_special and control.setting('tv.specials') == 'true':
+				if not self.season_special and self.showspecials:
 					self.season_special = True if int(season) == 0 else False
 				try:
 					if i['unaired'] == 'true': label = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, label)
@@ -165,14 +155,12 @@ class Seasons:
 				except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
-
 				# First check thumbs, since they typically contains the seasons poster. The normal poster contains the show poster.
 				poster = meta.get('thumb') or meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
 				season_poster = meta.get('season_poster') or poster
 				landscape = meta.get('landscape')
 				fanart = ''
-				if settingFanart:
-					fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or landscape or addonFanart
+				if settingFanart: fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or landscape or addonFanart
 				thumb = season_poster
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
@@ -182,7 +170,6 @@ class Seasons:
 				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3')
 				for k in remove_keys: meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
-
 ####-Context Menu and Overlays-####
 				cm = []
 				if self.traktCredentials:
@@ -197,23 +184,22 @@ class Seasons:
 						meta.update({'playcount': 0, 'overlay': 4})
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_TVShow&name=%s&imdb=%s&tvdb=%s&season=%s&query=5)' % (sysaddon, systitle, imdb, tvdb, season)))
 				except: pass
-				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=episode&tvshowtitle=%s&year=%s&imdb=%s&tvdb=%s&season=%s)' % (sysaddon, systitle, year, imdb, tvdb, season)))
+				sysmeta = quote_plus(jsdumps(meta))
+				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=episode&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta, season)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, systitle)))
 				cm.append((showPlaylistMenu, 'RunPlugin(%s?action=playlist_Show)' % sysaddon))
 				cm.append((clearPlaylistMenu, 'RunPlugin(%s?action=playlist_Clear)' % sysaddon))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb)))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
-
-				sysmeta = quote_plus(jsdumps(meta))
 				url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta, season)
-
-				item = control.item(label=label, offscreen=True)
+				try: item = control.item(label=label, offscreen=True)
+				except: item = control.item(label=label)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				if unwatchedEnabled:
 					try:
-						count = playcount.getSeasonCount(imdb, season, self.season_special)
+						count = playcount.getSeasonCount(imdb, season, self.season_special) # self.season_special is just a flag to set if a season special exists and we are set to show it
 						if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 					except: pass
 				item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
@@ -230,10 +216,8 @@ class Seasons:
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				log_utils.error()
-
 		try: control.property(syshandle, 'showplot', items[0]['plot'])
 		except: pass
-
 		control.content(syshandle, 'seasons')
 		control.directory(syshandle, cacheToDisc=True)
 		views.setView('seasons', {'skin.estuary': 55, 'skin.confluence': 500})

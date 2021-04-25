@@ -7,7 +7,7 @@ try: import AddonSignals
 except: pass
 from hashlib import md5
 from json import dumps as jsdumps, loads as jsloads
-import sys
+from sys import argv, exit as sysexit
 try: from sqlite3 import dbapi2 as database
 except ImportError: from pysqlite2 import dbapi2 as database
 import xbmc
@@ -99,7 +99,7 @@ class Player(xbmc.Player):
 			item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 			if 'plugin' not in control.infoLabel('Container.PluginName') or select != '1':
 				control.busy()
-				control.resolve(int(sys.argv[1]), True, item)
+				control.resolve(int(argv[1]), True, item)
 			elif select == '1':
 				control.busy()
 				control.player.play(url, item)
@@ -387,7 +387,7 @@ class Player(xbmc.Player):
 	def onPlayBackError(self):
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 		log_utils.error()
-		sys.exit(1)
+		sysexit(1)
 		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', LOGNOTICE)
 
 

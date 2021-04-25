@@ -41,8 +41,8 @@ class documentary:
 					cat_icon = client.parseDOM(content, 'img', ret='src')[0]
 				cat_action = 'docuHeaven&docuCat=%s' % cat_url
 				self.list.append({'name': cat_title, 'url': cat_url, 'image': cat_icon, 'action': cat_action})
-		except Exception as e:
-			log_utils.log('documentary root : Exception - ' + str(e), level=log_utils.LOGERROR)
+		except:
+			log_utils.error('root() Exception: ')
 		# self.list = self.list[::-1]
 		self.list = list(reversed(self.list))
 		self.addDirectory(self.list)
@@ -70,8 +70,8 @@ class documentary:
 				docu_action = 'docuHeaven&docuCat=%s' % link
 				self.list.append({'name': control.lang(32053), 'url': link, 'image': control.addonNext(), 'action': docu_action})
 			except: pass
-		except Exception as e:
-			log_utils.log('documentary docu_list : Exception - ' + str(e), level=log_utils.LOGERROR)
+		except:
+			log_utils.error('docu_list() Exception: ')
 		self.addDirectory(self.list)
 		return self.list
 
@@ -101,8 +101,8 @@ class documentary:
 			# item.setProperty('IsPlayable','true')
 			# item.setPath(url)
 			# control.resolve(int(sys.argv[1]), True, item)
-		except Exception as e:
-			log_utils.log('docu_play: Exception - ' + str(e), level=log_utils.LOGERROR)
+		except:
+			log_utils.error('docu_play() Exception: ')
 
 	def sort_key(self, elem):
 		if elem[0] == "auto":
@@ -158,7 +158,8 @@ class documentary:
 			cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 		if context:
 			cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
-		item = control.item(label=name, offscreen=True)
+		try: item = control.item(label=name, offscreen=True)
+		except: item = control.item(label=name)
 		item.addContextMenuItems(cm)
 		item.setArt({'icon': thumb, 'thumb': thumb, 'fanart': addonFanart})
 		control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
@@ -183,13 +184,11 @@ class documentary:
 		for i in items:
 			try:
 				name = i['name']
-				if i['image'].startswith('http'):
-					thumb = i['image']
-				elif artPath:
-					thumb = control.joinPath(artPath, i['image'])
-				else:
-					thumb = addonThumb
-				item = control.item(label=name, offscreen=True)
+				if i['image'].startswith('http'): thumb = i['image']
+				elif artPath: thumb = control.joinPath(artPath, i['image'])
+				else: thumb = addonThumb
+				try: item = control.item(label=name, offscreen=True)
+				except: item = control.item(label=name)
 				if isFolder:
 					url = '%s?action=%s' % (sysaddon, i['action'])
 					try: url += '&url=%s' % quote_plus(i['url'])

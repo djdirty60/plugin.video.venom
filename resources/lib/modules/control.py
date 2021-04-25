@@ -8,7 +8,7 @@ from json import dumps as jsdumps, loads as jsloads
 import os.path
 import re
 from string import printable
-from sys import argv, version_info
+from sys import version_info
 import time
 import xbmc
 import xbmcaddon
@@ -17,9 +17,11 @@ import xbmcplugin
 import xbmcvfs
 import xml.etree.ElementTree as ET
 
-def getKodiVersion():
-	return int(xbmc.getInfoLabel("System.BuildVersion")[:2])
+def getKodiVersion(full=False):
+	if full: return xbmc.getInfoLabel("System.BuildVersion")
+	else: return int(xbmc.getInfoLabel("System.BuildVersion")[:2])
 
+pythonVersion = '{}.{}.{}'.format(version_info[0], version_info[1], version_info[2])
 isPY2 = version_info[0] == 2
 isPY3 = version_info[0] == 3
 
@@ -356,6 +358,7 @@ def closeOk():
 
 def cancelPlayback():
 	try:
+		from sys import argv
 		playlist.clear()
 		resolve(int(argv[1]), False, item(offscreen=True))
 		closeOk()

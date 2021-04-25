@@ -362,7 +362,6 @@ class Collections:
 		self.thor_link = 'https://www.imdb.com/search/title?title=thor&title_type=feature&num_votes=1000,&genres=action&countries=us&languages=en&sort=release_date,asc'
 		self.xmen_link = self.tmdb_api_link % '33137'
 
-
 	def collections_Navigator(self, lite=False):
 		self.addDirectoryItem('Movies', 'collections_Boxset', 'boxsets.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Martial Arts', 'collections_MartialArts', 'boxsets.png', 'DefaultVideoPlaylists.png')
@@ -373,7 +372,6 @@ class Collections:
 		self.addDirectoryItem('Superheroes', 'collections_Superhero', 'boxsets.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Kids Collections', 'collections_Kids', 'boxsets.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
-
 
 	def collections_Boxset(self):
 		self.addDirectoryItem('12 Rounds (2009-2015)', 'collections&url=rounds', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
@@ -568,12 +566,10 @@ class Collections:
 		self.addDirectoryItem('Zorro (1998-2005)', 'collections&url=zorro', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
 
-
 	def collections_martial_arts(self):
 		self.addDirectoryItem('All Movies', 'collections&url=martialartsmovies', 'boxsets.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('By Actors', 'collections_MartialArtsActors', 'people.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
-
 
 	def collections_martial_arts_actors(self):
 		self.addDirectoryItem('Brandon Lee', 'collections&url=brandonlee', 'people.png', 'DefaultActor.png')
@@ -597,13 +593,11 @@ class Collections:
 		self.addDirectoryItem('Tony Jaa', 'collections&url=tonyjaa', 'people.png', 'DefaultActor.png')
 		self.endDirectory()
 
-
 	def collections_Kids(self):
 		self.addDirectoryItem('Disney Collection', 'collections&url=disneymovies', 'collectiondisney.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Kids Boxset Collection', 'collections_BoxsetKids', 'collectionkidsboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Kids Movie Collection', 'collections&url=kidsmovies', 'collectionkids.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
-
 
 	def collections_BoxsetKids(self):
 		self.addDirectoryItem('101 Dalmations (1961-2003)', 'collections&url=onehundredonedalmations', 'collectionkidsboxset.png', 'DefaultVideoPlaylists.png')
@@ -674,7 +668,6 @@ class Collections:
 		self.addDirectoryItem('Wizard of Oz (1939-2013)', 'collections&url=wizardofoz', 'collectionkidsboxset.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
 
-
 	def collections_Superhero(self):
 		self.addDirectoryItem('Avengers (2008-2017)', 'collections&url=avengers', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Batman (1989-2016)', 'collections&url=batman', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
@@ -689,8 +682,7 @@ class Collections:
 		self.addDirectoryItem('X-Men (2000-2016)', 'collections&url=xmen', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
 
-
-	def get(self, url, idx=True):
+	def get(self, url):
 		self.list = []
 		try:
 			try: url = getattr(self, url + '_link')
@@ -705,13 +697,12 @@ class Collections:
 				self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=False)
 			elif u in self.imdb_link:
 				self.list = cache.get(self.imdb_list, 168, url)
-				if idx: self.worker()
+				self.worker()
 			if self.list is None: self.list = []
-			if idx: self.movieDirectory(self.list)
+			self.movieDirectory(self.list)
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def imdb_list(self, url, isRatinglink=False):
 		list = []
@@ -723,7 +714,6 @@ class Collections:
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except: return
-
 		next = ''
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
@@ -736,7 +726,6 @@ class Collections:
 			next = url.replace(urlparse(url).query, urlparse(next[0]).query)
 			next = client.replaceHTMLCodes(next)
 		except: next = ''
-
 		for item in items:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
@@ -751,7 +740,6 @@ class Collections:
 			except:
 				log_utils.error()
 		return list
-
 
 	def worker(self, level=1):
 		try:
@@ -773,7 +761,6 @@ class Collections:
 			self.list = [i for i in self.list if i.get('tmdb')]
 		except:
 			log_utils.error()
-
 
 	def super_imdb_info(self, i):
 		try:
@@ -823,7 +810,6 @@ class Collections:
 		except:
 			log_utils.error()
 
-
 	def movieDirectory(self, items, next=True):
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide()
@@ -832,7 +818,7 @@ class Collections:
 		disable_player_art = control.setting('disable.player.art') == 'true'
 		hosts_mode = control.setting('hosts.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
-		settingFanart = control.setting('fanart')
+		settingFanart = control.setting('fanart') == 'true'
 		addonPoster = control.addonPoster()
 		addonFanart = control.addonFanart()
 		addonBanner = control.addonBanner()
@@ -840,10 +826,8 @@ class Collections:
 		isPlayable = 'false'
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
 		elif hosts_mode != '1': isPlayable = 'true'
-		if hosts_mode == '2':
-			playbackMenu = control.lang(32063)
-		else:
-			playbackMenu = control.lang(32064)
+		if hosts_mode == '2': playbackMenu = control.lang(32063)
+		else: playbackMenu = control.lang(32064)
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu = control.lang(32068)
 			unwatchedMenu = control.lang(32069)
@@ -854,7 +838,6 @@ class Collections:
 		queueMenu = control.lang(32065)
 		traktManagerMenu = control.lang(32070)
 		addToLibrary = control.lang(32551)
-
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -873,16 +856,13 @@ class Collections:
 				except: pass
 				try: meta.update({'year': int(meta['year'])})
 				except: pass
-
 				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
 				fanart = ''
-				if settingFanart:
-					fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or addonFanart
+				if settingFanart: fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or addonFanart
 				landscape = meta.get('landscape')
 				thumb = meta.get('thumb') or poster or landscape
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
-
 				art = {}
 				if disable_player_art and hosts_mode == '2': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
 					remove_keys = ('clearart', 'clearlogo', 'discart')
@@ -892,7 +872,6 @@ class Collections:
 				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
 				for k in remove_keys: meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
-
 ####-Context Menu and Overlays-####
 				cm = []
 				if self.traktCredentials:
@@ -909,15 +888,12 @@ class Collections:
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=5)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 0, 'overlay': 4})
 				except: pass
-
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				url = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
 				sysurl = quote_plus(url)
-
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-
 				if hosts_mode == '1':
 					cm.append(('Rescrape Item', 'RunPlugin(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				elif hosts_mode != '1':
@@ -927,11 +903,10 @@ class Collections:
 				cm.append((control.lang(32611), 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
-
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
-
-				item = control.item(label=label, offscreen=True)
+				try: item = control.item(label=label, offscreen=True)
+				except: item = control.item(label=label)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb})
@@ -951,7 +926,6 @@ class Collections:
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
 				log_utils.error()
-
 		if next:
 			try:
 				if not items: raise Exception()
@@ -965,7 +939,8 @@ class Collections:
 					page = '  [I](%s)[/I]' % url_params.get('page')
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				url = '%s?action=collections&url=%s' % (sysaddon, quote_plus(url))
-				item = control.item(label=nextMenu, offscreen=True)
+				try: item = control.item(label=nextMenu, offscreen=True)
+				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -976,27 +951,24 @@ class Collections:
 		control.sleep(500)
 		views.setView('movies', {'skin.estuary': 55, 'skin.confluence': 500})
 
-
 	def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True):
 		try:
 			if isinstance(name, int): name = control.lang(name)
 		except:
 			log_utils.error()
-
 		sysaddon, syshandle = argv[0], int(argv[1])
 		artPath = control.artPath()
 		thumb = control.joinPath(artPath, thumb) if artPath else icon
-
 		url = '%s?action=%s' % (sysaddon, query) if isAction else query
 		cm = []
 		if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 		if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
 		cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-		item = control.item(label=name, offscreen=True)
+		try: item = control.item(label=name, offscreen=True)
+		except: item = control.item(label=name)
 		item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 		item.addContextMenuItems(cm)
 		control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
-
 
 	def endDirectory(self):
 		syshandle = int(argv[1])

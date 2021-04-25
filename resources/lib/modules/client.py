@@ -6,8 +6,8 @@
 import gzip
 import random
 import re
-import sys
-import time
+from sys import version_info
+from time import sleep
 from resources.lib.database import cache
 from resources.lib.modules import dom_parser
 from resources.lib.modules import log_utils
@@ -23,7 +23,6 @@ try: #Py2
 	from urlparse import parse_qs, urlparse, urljoin
 	unescape = HTMLParser().unescape
 	HTTPError = urllib2.HTTPError
-
 except ImportError: #Py3
 	from http import cookiejar as cookielib
 	from html import unescape
@@ -64,7 +63,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			opener = urllib2.build_opener(*handlers)
 			urllib2.install_opener(opener)
 
-		if not verifySsl and sys.version_info >= (2, 7, 12):
+		if not verifySsl and version_info >= (2, 7, 12):
 			try:
 				import ssl
 				ssl_context = ssl._create_unverified_context()
@@ -74,7 +73,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			except:
 				log_utils.error()
 
-		if verifySsl and ((2, 7, 8) < sys.version_info < (2, 7, 12)):
+		if verifySsl and ((2, 7, 8) < version_info < (2, 7, 12)):
 			# try:
 				# import ssl
 				# ssl_context = ssl.create_default_context()
@@ -90,7 +89,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 				try:
 					import _ssl
 					CERT_NONE = _ssl.CERT_NONE
-				except Exception:
+				except:
 					CERT_NONE = ssl.CERT_NONE
 				ssl_context = ssl.create_default_context()
 				ssl_context.check_hostname = False
@@ -412,17 +411,14 @@ class cfcookie:
 	def __init__(self):
 		self.cookie = None
 
-
 	def get(self, netloc, ua, timeout):
 		threads = []
 		for i in list(range(0, 15)):
 			threads.append(workers.Thread(self.get_cookie, netloc, ua, timeout))
 		[i.start() for i in threads]
 		for i in list(range(0, 30)):
-			if self.cookie is not None:
-				return self.cookie
-			time.sleep(1)
-
+			if self.cookie is not None: return self.cookie
+			sleep(1)
 
 	def get_cookie(self, netloc, ua, timeout):
 		try:
@@ -455,8 +451,7 @@ class cfcookie:
 			if 'type="hidden" name="pass"' in result:
 				passval = re.findall(r'name\s*=\s*["\']pass["\']\s*value\s*=\s*["\'](.*?)["\']', result, re.I)[0]
 				query = '%s/cdn-cgi/l/chk_jschl?pass=%s&jschl_vc=%s&jschl_answer=%s' % (netloc, quote_plus(passval), jschl, answer)
-				time.sleep(6)
-
+				sleep(6)
 			cookies = cookielib.LWPCookieJar()
 			handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
 			opener = urllib2.build_opener(*handlers)
@@ -472,7 +467,6 @@ class cfcookie:
 			if 'cf_clearance' in cookie: self.cookie = cookie
 		except:
 			log_utils.error()
-
 
 	def parseJSString(self, s):
 		try:

@@ -967,7 +967,8 @@ class indexer:
 					try: cm.append(('Open in browser', 'RunPlugin(%s?action=browser&url=%s)' % (sysaddon, quote_plus(i['url']))))
 					except: pass
 
-				item = control.item(label=name, offscreen=True)
+				try: item = control.item(label=name, offscreen=True)
+				except: item = control.item(label=name)
 				if fanart == '0': fanart = addonFanart
 				try: item.setArt({'poster': poster, 'fanart': fanart, 'tvshow.poster': poster, 'season.poster': poster, 'banner': banner, 'tvshow.banner': banner, 'season.banner': banner})
 				except: pass
@@ -994,7 +995,8 @@ class indexer:
 				# nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 
 			url = '%s?action=%s&url=%s' % (sysaddon, i['nextaction'], quote_plus(i['next']))
-			item = control.item(label=control.lang(30500), offscreen=True)
+			try: item = control.item(label=control.lang(30500), offscreen=True)
+			except: item = control.item(label=control.lang(30500))
 			item.setArt({'addonPoster': addonPoster, 'thumb': addonPoster, 'poster': addonPoster, 'fanart': addonFanart, 'tvshow.poster': addonPoster, 'season.poster': addonPoster, 'banner': addonPoster, 'tvshow.banner': addonPoster, 'season.banner': addonPoster})
 			control.addItem(handle=int(argv[1]), url=url, listitem=item, isFolder=True)
 		except:
@@ -1219,7 +1221,8 @@ class player(xbmc.Player):
 			f4m = resolver().f4m(url, self.name)
 			if not f4m is None: return
 
-			item = control.item(label=self.name, offscreen=True)
+			try: item = control.item(label=self.name, offscreen=True)
+			except: item = control.item(label=self.name)
 			item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'thumb': icon,})
 			item.setInfo(type='video', infoLabels = meta)

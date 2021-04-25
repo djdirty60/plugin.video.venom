@@ -62,6 +62,12 @@ def seas_ep_filter(season, episode, release_title, split=False):
 				r'(s<<S>>e<<E1>>-<<E2>>-)|' \
 				r'(s<<S>>e<<E1>>\.<<E2>>\.)|' \
 				r'(s<<S>>e<<E1>><<E2>>)'
+		string5 = r'(?<![a-z])(ep<<E>>[.-])|' \
+				r'(?<![a-z])(ep[.-]<<E>>[.-])'
+		# string1 = r'(s<<S>>[.-]?e[p]?<<E>>)'
+		# string4 = r'(s<<S>>e<<E1>>[.-]?e?<<E2>>[.-])'
+		# string5 = r'(?<![a-z])(ep[.-]?<<E>>[.-])'
+
 		string_list = []
 		string_list.append(string1.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
 		string_list.append(string1.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
@@ -73,7 +79,12 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		string_list.append(string3.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
 		string_list.append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(int(episode)-1).zfill(2)).replace('<<E2>>', str(episode).zfill(2)))
 		string_list.append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(episode).zfill(2)).replace('<<E2>>', str(int(episode)+1).zfill(2)))
+		string_list.append(string5.replace('<<E>>', str(episode).zfill(2)))
+
 		final_string = '|'.join(string_list)
+		log_utils.log('release_title=%s' % release_title)
+		log_utils.log('final_string=%s' % final_string)
+
 		reg_pattern = re.compile(final_string)
 		if split:
 			return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]

@@ -401,8 +401,6 @@ class RealDebrid:
 			torrent_id = self.add_magnet(magnet_url) # add_magent() returns id
 			torrent_files = torrent_files[info_hash]['rd']
 			torrent_files = [item for item in torrent_files if self.video_only(item, extensions)]
-			# log_utils.log('torrent_files=%s' % torrent_files)
-
 			if not season:
 				m2ts_check = self.m2ts_check(torrent_files)
 				if m2ts_check:
@@ -414,14 +412,12 @@ class RealDebrid:
 					if season:
 						for value in item_values:
 							correct_file_check = seas_ep_filter(season, episode, value)
-							# log_utils.log('correct_file_check=%s' % correct_file_check)
-
 							if correct_file_check: break
 						if not correct_file_check: continue
 					elif not m2ts_check:
-						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '')).lower()
+						compare_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace('\'', '')).lower()
 						for value in item_values:
-							filename = re.sub(r'[^A-Za-z0-9]+', '.', value.replace('\'', '')).lower()
+							filename = re.sub(r'[^A-Za-z0-9-]+', '.', value.replace('\'', '')).lower()
 							if any(x in filename for x in extras_filtering_list): continue
 							correct_file_check = re.search(compare_title, filename)
 							if correct_file_check: break
@@ -438,16 +434,13 @@ class RealDebrid:
 						correct_file_check = False
 						for value in selected_files:
 							correct_file_check = seas_ep_filter(season, episode, value[1]['path'])
-							# log_utils.log('correct_file_check=%s' % correct_file_check)
 							if correct_file_check:
 								correct_files.append(value[1])
 								break
 						if len(correct_files) == 0: continue
-						# episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace("\'", '')).lower()
-						episode_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace("\'", '')).lower()
+						episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace("\'", '')).lower()
 						for i in correct_files:
 							compare_link = seas_ep_filter(season, episode, i['path'], split=True)
-							# log_utils.log('compare_link=%s' % compare_link)
 							compare_link = re.sub(episode_title, '', compare_link)
 							if any(x in compare_link for x in extras_filtering_list): continue
 							else:
@@ -460,9 +453,9 @@ class RealDebrid:
 						match, index = True, [i[0] for i in selected_files if i[1]['id'] == m2ts_key][0]
 					else:
 						match = False
-						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '')).lower()
+						compare_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace('\'', '')).lower()
 						for value in selected_files:
-							filename = re.sub(r'[^A-Za-z0-9]+', '.', value[1]['path'].replace('\'', '')).lower()
+							filename = re.sub(r'[^A-Za-z0-9-]+', '.', value[1]['path'].replace('\'', '')).lower()
 							if any(x in filename for x in extras_filtering_list): continue
 							match = re.search(compare_title, filename)
 							if match:
@@ -478,11 +471,9 @@ class RealDebrid:
 				if not any(file_url.lower().endswith(x) for x in extensions): file_url = None
 				if not store_to_cloud: self.delete_torrent(torrent_id)
 				return file_url
-			else:
-				log_utils.log('Real-Debrid FAILED TO RESOLVE MAGNET : %s' % magnet_url, __name__, log_utils.LOGWARNING)
 			self.delete_torrent(torrent_id)
 		except:
-			log_utils.error('Real-Debrid Error RESOLVE MAGNET %s : ' % magnet_url)
+			log_utils.error('Real-Debrid Error: RESOLVE MAGNET %s : ' % magnet_url)
 			if torrent_id: self.delete_torrent(torrent_id)
 			return None
 
@@ -511,7 +502,7 @@ class RealDebrid:
 			self.add_torrent_select(torrent_id, torrent_keys)
 			torrent_info = self.torrent_info(torrent_id)
 			list_file_items = [dict(i, **{'link':torrent_info['links'][idx]})  for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
-			list_file_items = [{'link': i['link'], 'filename': i['path'].replace('/', ''), 'size': float(i['bytes']) / 1073741824} for i in list_file_items]
+			list_file_items = [{'link': i['link'], 'filename': i['path'].replace('/', ''), 'size': float(i['bytes'])/1073741824} for i in list_file_items]
 			self.delete_torrent(torrent_id)
 			return list_file_items
 		except:
@@ -565,7 +556,7 @@ class RealDebrid:
 			try: control.progressDialog.close()
 			except: pass
 		if status == 'magnet_conversion': return _return_failed()
-		if status == 'waiting_files_selection': 
+		if status == 'waiting_files_selection':
 			video_files = []
 			all_files = torrent_info['files']
 			for item in all_files:
@@ -671,8 +662,10 @@ class RealDebrid:
 
 	def get_link(self, link):
 		if 'download' in link:
-			if 'quality' in link: label = '[%s] %s' % (link['quality'], link['download'])
-			else: label = link['download']
+			if 'quality' in link:
+				label = '[%s] %s' % (link['quality'], link['download'])
+			else:
+				label = link['download']
 			return label, link['download']
 
 	def video_only(self, storage_variant, extensions):
@@ -684,6 +677,7 @@ class RealDebrid:
 		return False
 
 	def m2ts_key_value(self, torrent_files):
+		from resources.lib.modules.py_tools import iteritems
 		total_max_size, total_min_length = 0, 10000000000
 		for item in torrent_files:
 			max_filesize, item_length = max([i['filesize'] for i in item.values()]), len(item)
@@ -691,7 +685,7 @@ class RealDebrid:
 				if item_length < total_min_length:
 					total_max_size, total_min_length = max_filesize, item_length
 					dict_item = item
-					key = int([k for k,v in control.iteritems(item) if v['filesize'] == max_filesize][0])
+					key = int([k for k,v in iteritems(item) if v['filesize'] == max_filesize][0])
 		return key, [dict_item,]
 
 	def valid_url(self, host):

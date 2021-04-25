@@ -86,7 +86,8 @@ def playlistAdd(name, url, meta, art):
 		meta = jsloads(meta)
 	if isinstance(art, py_tools.string_types):
 		art = jsloads(art)
-	item = control.item(label=name, offscreen=True)
+	try: item = control.item(label=name, offscreen=True)
+	except: item = control.item(label=name)
 	item.setArt(art)
 	item.setProperty('IsPlayable', 'true')
 	item.setInfo(type='video', infoLabels=control.metadataClean(meta))

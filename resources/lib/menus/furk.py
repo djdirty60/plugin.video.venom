@@ -5,8 +5,10 @@
 
 from sys import argv
 import requests
-try: from urllib import quote_plus
-except ImportError: from urllib.parse import quote_plus
+try: #Py2
+	from urllib import quote_plus
+except ImportError: #Py3
+	from urllib.parse import quote_plus
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules.source_utils import supported_video_extensions
@@ -175,7 +177,8 @@ class Furk:
 		except:
 			log_utils.error()
 		url = '%s?action=%s' % (argv[0], query) if isAction else query
-		item = control.item(label=name, offscreen=True)
+		try: item = control.item(label=name, offscreen=True)
+		except: item = control.item(label=name)
 		item.setArt({'icon': thumb, 'poster': thumb, 'thumb': thumb})
 		control.addItem(handle=argv[1], url=url, listitem=item)
 

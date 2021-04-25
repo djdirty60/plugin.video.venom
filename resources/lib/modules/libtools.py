@@ -6,9 +6,8 @@
 from datetime import datetime, timedelta
 from json import loads as jsloads
 import re
-# Import _strptime to workaround python 2 bug with threads
-import _strptime
-import sys
+import _strptime # import _strptime to workaround python 2 bug with threads
+from sys import argv, exit as sysexit
 try: from sqlite3 import dbapi2 as database
 except: from pysqlite2 import dbapi2 as database
 try: #Py2
@@ -47,7 +46,6 @@ class lib_tools:
 		except:
 			log_utils.error()
 
-
 	@staticmethod
 	def write_file(path, content):
 		try:
@@ -60,7 +58,6 @@ class lib_tools:
 		except:
 			log_utils.error()
 
-
 	@staticmethod
 	def nfo_url(media_string, ids):
 		tvdb_url = 'https://thetvdb.com/?tab=series&id=%s'
@@ -71,7 +68,6 @@ class lib_tools:
 		elif 'tmdb' in ids: return tmdb_url % (media_string, str(ids['tmdb']))
 		else: return ''
 
-
 	@staticmethod
 	def check_sources(title, year, imdb, tvdb=None, season=None, episode=None, tvshowtitle=None, premiered=None):
 		try:
@@ -80,7 +76,6 @@ class lib_tools:
 			return src and len(src) > 5
 		except:
 			return False
-
 
 	@staticmethod
 	def legal_filename(filename):
@@ -96,7 +91,6 @@ class lib_tools:
 			log_utils.error()
 			return filename
 
-
 	@staticmethod
 	def make_path(base_path, title, year = '', season = ''):
 		try:
@@ -109,11 +103,9 @@ class lib_tools:
 		except:
 			log_utils.error()
 
-
 	@staticmethod
 	def clean():
 		control.execute('CleanLibrary(video)')
-
 
 	@staticmethod
 	def total_setup():
@@ -125,7 +117,6 @@ class lib_tools:
 		except:
 			log_utils.error()
 			control.notification(message=32111)
-
 
 	def ckKodiSources(self, paths=None):
 		contains = False
@@ -159,8 +150,7 @@ class lib_tools:
 			try:
 				global folder_setup
 				global service_update
-				if control.setting('library.service.update') == 'false' or service_update is False:
-					return contains
+				if control.setting('library.service.update') == 'false' or service_update is False: return contains
 				if folder_setup:
 					contains = True
 					return contains
@@ -181,7 +171,6 @@ class lib_tools:
 				log_utils.error()
 		return contains
 
-
 	def service(self):
 		self.property = '%s_service_property' % control.addonInfo('name').lower()
 		try:
@@ -199,19 +188,13 @@ class lib_tools:
 				last_service = "1970-01-01 23:59:00.000000"
 				dbcur.execute('''INSERT INTO service Values (?, ?)''', ('last_run', last_service))
 				dbcur.connection.commit()
-			else:
-				last_service = str(fetch[1])
+			else: last_service = str(fetch[1])
 		except:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
-		try:
-			control.homeWindow.setProperty(self.property, last_service)
-		except:
-			log_utils.error()
-			return
-
+		try: control.homeWindow.setProperty(self.property, last_service)
+		except: return log_utils.error()
 		while not control.monitor.abortRequested():
 			try:
 				last_service = control.homeWindow.getProperty(self.property)
@@ -233,13 +216,10 @@ class lib_tools:
 					log_utils.error()
 				finally:
 					dbcur.close() ; dbcon.close()
-
-				if control.setting('library.service.update') == 'false' or service_update is False:
-					continue
+				if control.setting('library.service.update') == 'false' or service_update is False: continue
 				libepisodes().update()
 				libmovies().list_update()
 				libtvshows().list_update()
-
 				if control.monitor.waitForAbort(60*15): break
 			except:
 				log_utils.error()
@@ -249,28 +229,22 @@ class lib_tools:
 class libmovies:
 	def __init__(self):
 		self.library_folder = control.joinPath(control.transPath(control.setting('library.movie')), '')
-		self.check_setting = control.setting('library.check_movie') or 'false'
 		self.library_update = control.setting('library.update') or 'true' 
 		self.dupe_chk = control.setting('library.check') or 'true'
-
 
 	def auto_movie_setup(self):
 		try:
 			control.makeFile(self.library_folder)
-			icon = 'DefaultMovies.png'
-			source_name = 'Venom Movies'
 			source_content = "('%s','movies','metadata.themoviedb.org','',2147483647,1,'<settings version=\"2\"><setting id=\"certprefix\" default=\"true\">Rated </setting><setting id=\"fanart\">true</setting><setting id=\"imdbanyway\">true</setting><setting id=\"keeporiginaltitle\" default=\"true\">false</setting><setting id=\"language\" default=\"true\">en</setting><setting id=\"RatingS\" default=\"true\">TMDb</setting><setting id=\"tmdbcertcountry\" default=\"true\">us</setting><setting id=\"trailer\">true</setting></settings>',0,0,NULL,NULL)" % self.library_folder
-			control.add_source(source_name, self.library_folder, source_content, icon)
+			control.add_source('Venom Movies', self.library_folder, source_content, 'DefaultMovies.png')
 		except:
 			log_utils.error()
-
 
 	def list_update(self):
 		contains = lib_tools().ckKodiSources()
 		if not contains: return
 		try:
-			if not control.existsPath(control.dataPath):
-				control.makeFile(control.dataPath)
+			if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
 			dbcon = database.connect(control.libcacheFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS lists (type TEXT, list_name TEXT, url TEXT, UNIQUE(type, list_name, url));''')
@@ -279,20 +253,14 @@ class libmovies:
 			log_utils.error()
 		try:
 			results = dbcur.execute('''SELECT * FROM lists WHERE type="movies";''').fetchall()
-			if not results:
-				control.notification(message=32113)
-				return
+			if not results: return control.notification(message=32113)
 		except:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
+		total_added = 0
 		for list in results:
-			type = list[0]
-			list_name = list[1]
-			url = list[2]
-			# type, list_name, url = list[0], list[1], list[2]
-
+			type, list_name, url = list[0], list[1], list[2]
 			try:
 				if 'trakt' in url:
 					from resources.lib.menus import movies
@@ -303,28 +271,22 @@ class libmovies:
 					else: items = tmdb.Movies().tmdb_collections_list(url)
 			except:
 				log_utils.error()
-
 			if not items: 	continue
 			if service_notification and not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 				control.notification(title='list...' + list_name + ' - ' + type, message=32552)
-
-			total_added = 0
 			for i in items:
-				if control.monitor.abortRequested(): return sys.exit()
+				if control.monitor.abortRequested(): return sysexit()
 				try:
 					files_added = self.add('%s (%s)' % (i['title'], i['year']), i['title'], i['year'], i['imdb'], i['tmdb'], range=True)
 					if general_notification and files_added > 0: control.notification(title='%s (%s)' % (i['title'], i['year']), message=32554)
 					if files_added > 0: total_added += 1
 				except:
 					log_utils.error()
-
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and total_added > 0:
 			if contains:
 				control.sleep(10000)
 				control.execute('UpdateLibrary(video)')
-			elif service_notification:
-				control.notification(message=32103)
-
+			elif service_notification: control.notification(message=32103)
 
 	def add(self, name, title, year, imdb, tmdb, range=False):
 		try:
@@ -332,33 +294,22 @@ class libmovies:
 			if general_notification:
 				if not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 					control.notification(title=name, message=32552)
-
 			try:
 				if not self.dupe_chk == 'true': raise Exception()
-				id = [imdb, tmdb] if tmdb != '0' else [imdb]
+				id = [imdb, tmdb] if tmdb else [imdb]
 				lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["imdbnumber", "title", "originaltitle", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
 				lib = py_tools.ensure_text(lib, errors='ignore')
 				lib = jsloads(lib)['result']['movies']
-				# lib = [i for i in lib if str(i['imdbnumber']) in id or (cleantitle.get(title) in [cleantitle.get(i['title'].encode('utf-8')), cleantitle.get(i['originaltitle'].encode('utf-8'))] and str(i['year']) == year)]
 				lib = [i for i in lib if str(i['imdbnumber']) in id or (cleantitle.get(title) in [cleantitle.get(i['title']), cleantitle.get(i['originaltitle'])] and str(i['year']) == year)]
-			except:
-				lib = []
-
+			except: lib = []
 			files_added = 0
 			try:
 				if lib != []: raise Exception()
-				if self.check_setting == 'true':
-					src = lib_tools.check_sources(title, year, imdb, None, None, None, None, None)
-					if not src: raise Exception()
 				self.strmFile({'name': name, 'title': title, 'year': year, 'imdb': imdb, 'tmdb': tmdb})
 				files_added += 1
 			except: pass
-
-			if files_added == 0 and general_notification:
-				control.notification(title=name, message=32652)
-
+			if files_added == 0 and general_notification: control.notification(title=name, message=32652)
 			if range: return files_added
-
 			if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and files_added > 0:
 				if contains:
 					if general_notification: control.notification(title=name, message=32554)
@@ -367,34 +318,29 @@ class libmovies:
 				elif general_notification: control.notification(title=name, message=32104)
 		except: pass
 
-
 	def silent(self, url):
 		control.hide()
 		contains = lib_tools().ckKodiSources()
 		if service_notification and not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 			control.notification(message=32645)
-
 		from resources.lib.menus import movies
-		items = movies.Movies().get(url, idx=False)
-		if items is None: items = []
-
+		items = movies.Movies().get(url, create_directory=False)
+		if mot items: items = []
 		total_added = 0
 		for i in items:
 			try:
-				if control.monitor.abortRequested(): return sys.exit()
+				if control.monitor.abortRequested(): return sysexit()
 				files_added = self.add('%s (%s)' % (i['title'], i['year']), i['title'], i['year'], i['imdb'], i['tmdb'], range=True)
 				if general_notification and files_added > 0: control.notification(title='%s (%s)' % (i['title'], i['year']), message=32554)
 				if files_added > 0: total_added += 1
 			except:
 				log_utils.error()
-
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and total_added > 0:
 			if contains:
 				control.sleep(10000)
 				control.execute('UpdateLibrary(video)')
 			elif general_notification: control.notification(message=32103)
 		if service_notification: control.notification(message=32105)
-
 
 	def range(self, url, list_name):
 		control.hide()
@@ -410,11 +356,9 @@ class libmovies:
 			else: message = 'list import'
 		except:
 			log_utils.error()
-
 		if general_notification:
 			if not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 				control.notification(message=message)
-
 		items = []
 		try:
 			if 'trakt' in url:
@@ -435,23 +379,17 @@ class libmovies:
 				items = tmdb.Movies().tmdb_collections_list(url)
 		except:
 			log_utils.error()
-
-		if items is None or items == []:
-			if general_notification: control.notification(title=message, message=33049)
-			return
-
+		if not items: if general_notification: return control.notification(title=message, message=33049)
 		contains = lib_tools().ckKodiSources()
-
 		total_added = 0
 		for i in items:
-			if control.monitor.abortRequested(): return sys.exit()
+			if control.monitor.abortRequested(): return sysexit()
 			try:
 				files_added = self.add('%s (%s)' % (i['title'], i['year']), i['title'], i['year'], i['imdb'], i['tmdb'], range=True)
 				if general_notification and files_added > 0: control.notification(title='%s (%s)' % (i['title'], i['year']), message=32554)
 				if files_added > 0: total_added += 1
 			except:
 				log_utils.error()
-
 		try:
 			type = 'movies'
 			control.makeFile(control.dataPath)
@@ -464,13 +402,11 @@ class libmovies:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and total_added > 0:
 			if contains:
 				control.sleep(10000)
 				control.execute('UpdateLibrary(video)')
 			elif general_notification: control.notification(message=32103)
-
 
 	def strmFile(self, i):
 		try:
@@ -482,7 +418,7 @@ class libmovies:
 			if control.setting('library.strm.use_tmdbhelper') == 'true':
 				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=movie&islocal=True&tmdb_id=%s' % tmdb
 			else:
-				content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s' % (sys.argv[0], systitle, year, imdb, tmdb)
+				content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s' % (argv[0], systitle, year, imdb, tmdb)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			lib_tools.create_folder(folder)
 			lib_tools.write_file(control.joinPath(folder, lib_tools.legal_filename(transtitle) + '.' + year + '.strm'), content)
@@ -494,17 +430,15 @@ class libmovies:
 class libtvshows:
 	def __init__(self):
 		self.library_folder = control.joinPath(control.transPath(control.setting('library.tv')),'')
-		self.check_setting = control.setting('library.check_episode') or 'false'
 		self.library_update = control.setting('library.update') or 'true'
 		self.dupe_chk = control.setting('library.check') or 'true'
+		self.include_special = control.setting('library.include_special') or 'true'
 		self.include_unknown = control.setting('library.include_unknown') or 'true'
-		self.showunaired = control.setting('showunaired') or 'true'
 		# self.date_time = (datetime.utcnow() - timedelta(hours = 5))
 		self.date_time = datetime.utcnow()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
 		else: self.date = (self.date_time - timedelta(hours = 24)).strftime('%Y%m%d')
 		self.block = False
-
 
 	def auto_tv_setup(self):
 		try:
@@ -520,13 +454,11 @@ class libtvshows:
 		except:
 			log_utils.error()
 
-
 	def list_update(self):
 		contains = lib_tools().ckKodiSources()
 		if not contains: return
 		try:
-			if not control.existsPath(control.dataPath):
-				control.makeFile(control.dataPath)
+			if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
 			dbcon = database.connect(control.libcacheFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS lists (type TEXT, list_name TEXT, url TEXT, UNIQUE(type, list_name, url));''')
@@ -535,20 +467,14 @@ class libtvshows:
 			log_utils.error()
 		try:
 			results = dbcur.execute('''SELECT * FROM lists WHERE type="tvshows";''').fetchall()
-			if not results:
-				control.notification(message=32124)
-				return
+			if not results: return control.notification(message=32124)
 		except:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
+		total_added = 0 ; items = []
 		for list in results:
-			type = list[0]
-			list_name = list[1]
-			url = list[2]
-			# type, list_name, url = list[0], list[1], list[2]
-
+			type, list_name, url = list[0], list[1], list[2]
 			try:
 				if 'trakt' in url:
 					from resources.lib.menus import tvshows
@@ -559,28 +485,23 @@ class libtvshows:
 					else: items = tmdb.TVshows().tmdb_collections_list(url)
 			except:
 				log_utils.error()
-
 			if not items: continue
-
 			if service_notification and not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 				control.notification(title='list...' + list_name + ' - ' + type, message=32552)
-
-			total_added = 0
 			for i in items:
-				if control.monitor.abortRequested(): return sys.exit()
+				if control.monitor.abortRequested(): return sysexit()
 				try:
 					files_added = self.add(i['title'], i['year'], i['imdb'], i['tmdb'], i['tvdb'], range=True)
+					if files_added is None: continue
 					if general_notification and files_added > 0: control.notification(title=i['title'], message=32554)
 					if files_added > 0: total_added += 1
 				except:
 					log_utils.error()
-
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and total_added > 0:
 			if contains:
 				control.sleep(10000)
 				control.execute('UpdateLibrary(video)')
 			elif service_notification: control.notification(message=32103)
-
 
 	def add(self, tvshowtitle, year, imdb, tmdb, tvdb, range=False):
 		try:
@@ -589,25 +510,18 @@ class libtvshows:
 				if not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 					control.notification(title=tvshowtitle, message=32552)
 			try:
-				from resources.lib.menus import seasons
-				from resources.lib.menus import episodes
+				from resources.lib.menus import seasons, episodes
 				seasons = seasons.Seasons().tmdb_list(tvshowtitle, imdb, tmdb, tvdb, art=None) # fetch fresh meta (uncached)
 				# status = seasons[0]['status'].lower()
 			except:
-				log_utils.error()
-				return
-
+				return log_utils.error()
+			files_added = 0
 			for season in seasons:
-				try:
-					items = episodes.Episodes().tmdb_list(tvshowtitle, imdb, tmdb, tvdb, meta=season, season=season['season'])
-				except:
-					log_utils.error()
-					return
-
+				try: items = episodes.Episodes().tmdb_list(tvshowtitle, imdb, tmdb, tvdb, meta=season, season=season['season'])
+				except: return log_utils.error()
 				try: items = [{'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'tvshowtitle': i['tvshowtitle'], 'premiered': i['premiered']} for i in items]
 				except: items = []
-				if items == []: return
-
+				if not items: return
 				try:
 					if self.dupe_chk != 'true': raise Exception()
 					id = [items[0]['imdb'], items[0]['tvdb']] # imdbnumber is all that it compares from kodi library
@@ -623,30 +537,17 @@ class libtvshows:
 					items = [i for i in items if not 'S%02dE%02d' % (int(i['season']), int(i['episode'])) in lib]
 				except:
 					lib = []
-
-				files_added = 0
 				for i in items:
 					if lib != []: continue
-					if control.monitor.abortRequested(): return sys.exit()
+					if control.monitor.abortRequested(): return sysexit()
 					try:
-						if self.check_setting == 'true':
-							if i['episode'] == '1':
-								self.block = True
-								src = lib_tools.check_sources(i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['tvshowtitle'], i['premiered'])
-								if src: self.block = False
-							if self.block: continue
-						# Show Season Special(Season0).
-						if str(i.get('season')) == '0' and control.setting('tv.specials') == 'false': continue
-						# Show Unaired or Unknown items.
-						premiered = i.get('premiered', '0')
-						if premiered == '0' and self.include_unknown == 'false': continue
-						elif int(re.sub(r'[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.date))):
-							if self.showunaired != 'true': continue
+						if str(i.get('season')) == '0' and self.include_special == 'false': continue
+						premiered = i.get('premiered', '')
+						if not premiered and self.include_unknown == 'false': continue
 						self.strmFile(i)
 						files_added += 1
 					except:
 						log_utils.error()
-
 			if files_added == 0 and general_notification: control.notification(title=tvshowtitle, message=32652)
 			if range: return files_added
 			if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and files_added > 0:
@@ -654,36 +555,32 @@ class libtvshows:
 					if general_notification: control.notification(title=tvshowtitle, message=32554)
 					control.execute('UpdateLibrary(video)')
 				elif general_notification: control.notification(title=tvshowtitle, message=32104)
-		except: pass
-
+		except:
+			log_utils.error()
 
 	def silent(self, url):
 		control.hide()
 		contains = lib_tools().ckKodiSources()
 		if service_notification and not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 			control.notification(message=32645)
-
 		from resources.lib.menus import tvshows
 		items = tvshows.TVshows().get(url, idx=False)
-		if items is None: items = []
-
+		if not items: items = []
 		total_added = 0
 		for i in items:
-			if control.monitor.abortRequested(): return sys.exit()
+			if control.monitor.abortRequested(): return sysexit()
 			try:
 				files_added = self.add(i['title'], i['year'], i['imdb'], i['tmdb'], i['tvdb'], range=True)
 				if general_notification and files_added > 0: control.notification(title=i['title'], message=32554)
 				if files_added > 0: total_added += 1
 			except:
 				log_utils.error()
-
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and total_added > 0:
 			if contains:
 				control.sleep(10000)
 				control.execute('UpdateLibrary(video)')
 			elif service_notification: control.notification(message=32103)
 		if service_notification: control.notification(message='Trakt TV Show Sync Complete')
-
 
 	def range(self, url, list_name):
 		control.hide()
@@ -699,11 +596,9 @@ class libtvshows:
 			else: message = 'list import'
 		except:
 			log_utils.error()
-
 		if general_notification:
 			if not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 				control.notification(message=message)
-
 		items = []
 		try:
 			if 'trakt' in url:
@@ -711,7 +606,6 @@ class libtvshows:
 				if 'traktwatchlist' in url: url = 'https://api.trakt.tv/users/me/watchlist/shows'
 				from resources.lib.menus import tvshows
 				items = tvshows.TVshows().trakt_list(url, control.setting('trakt.user').strip())
-
 			if 'tmdb' in url:
 				if 'tmdb_watchlist' in url:
 					url = 'https://api.themoviedb.org/3/account/{account_id}/watchlist/tv?api_key=%s&session_id=%s' % ('%s', tmdb_session_id)
@@ -719,30 +613,24 @@ class libtvshows:
 					url = 'https://api.themoviedb.org/3/account/{account_id}/favorite/tv?api_key=%s&session_id=%s' % ('%s', tmdb_session_id) 
 				from resources.lib.indexers import tmdb
 				items = tmdb.TVshows().tmdb_list(url)
-
 			if (all(i in url for i in ['themoviedb', '/list/'])):
 				url = url.split('&sort_by')[0]
 				from resources.lib.indexers import tmdb
 				items = tmdb.TVshows().tmdb_collections_list(url)
 		except:
 			log_utils.error()
-
-		if items is None or items == []:
-			if general_notification: control.notification(title=message, message=33049)
-			return
-
+		if not items:
+			if general_notification: return control.notification(title=message, message=33049)
 		contains = lib_tools().ckKodiSources()
-
 		total_added = 0
 		for i in items:
-			if control.monitor.abortRequested(): return sys.exit()
+			if control.monitor.abortRequested(): return sysexit()
 			try:
 				files_added = self.add(i['title'], i['year'], i['imdb'], i['tmdb'], i['tvdb'], range=True)
 				if general_notification and files_added > 0: control.notification(title=i['title'], message=32554)
 				if files_added > 0: total_added += 1
 			except:
 				log_utils.error()
-
 		try:
 			type = 'tvshows'
 			control.makeFile(control.dataPath)
@@ -755,14 +643,12 @@ class libtvshows:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and total_added > 0:
 			if contains:
 				control.sleep(10000)
 				control.execute('UpdateLibrary(video)')
 			elif general_notification:
 				control.notification(message=32103)
-
 
 	def strmFile(self, i):
 		try:
@@ -777,7 +663,7 @@ class libtvshows:
 							tmdb, season, episode, systitle, year, imdb, tmdb, tvdb, systvshowtitle, syspremiered)
 			else:
 				content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
-							sys.argv[0], systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered)
+							argv[0], systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			if not control.isfilePath(control.joinPath(folder, 'tvshow.nfo')):
 				lib_tools.create_folder(folder)
@@ -793,26 +679,22 @@ class libepisodes:
 	def __init__(self):
 		self.library_folder = control.joinPath(control.transPath(control.setting('library.tv')),'')
 		self.library_update = control.setting('library.update') or 'true'
+		self.include_special = control.setting('library.include_special') or 'true'
 		self.include_unknown = control.setting('library.include_unknown') or 'true'
-		self.showunaired = control.setting('showunaired') or 'true'
 		# self.date_time = (datetime.utcnow() - timedelta(hours = 5))
 		self.date_time = datetime.utcnow()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
 		else: self.date = (self.date_time - timedelta(hours = 24)).strftime('%Y%m%d')
 
-
 	def update(self):
 		# if control.setting('library.service.update') == 'false': control.notification(message=32106)
 		contains = lib_tools().ckKodiSources()
-		if not contains:
-			control.notification(message=32107)
-			return
+		if not contains: return control.notification(message=32107)
 		try:
 			items, season, episode = [], [], []
 			show = [control.joinPath(self.library_folder, i) for i in control.listDir(self.library_folder)[0]]
 			if show == []:
-				control.notification(message=32108)
-				return
+				return control.notification(message=32108)
 			for s in show:
 				try: season += [control.joinPath(s, i) for i in control.listDir(s)[0]]
 				except: pass
@@ -824,7 +706,7 @@ class libepisodes:
 					file = control.openFile(file)
 					read = file.read()
 					file.close()
-					if not read.startswith('plugin://plugin.video.themoviedb.helper') and not read.startswith(sys.argv[0]): continue
+					if not read.startswith('plugin://plugin.video.themoviedb.helper') and not read.startswith(argv[0]): continue
 					params = dict(parse_qsl(read.replace('?','')))
 					try: tvshowtitle = params['tvshowtitle']
 					except:
@@ -839,7 +721,6 @@ class libepisodes:
 		except:
 			log_utils.error()
 			return
-
 		try:
 			lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties": ["imdbnumber", "title", "year"]}, "id": 1 }')
 			# lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties": ["imdbnumber", "title", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
@@ -848,10 +729,8 @@ class libepisodes:
 		except:
 			log_utils.error()
 			return
-
 		if service_notification and not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 			control.notification(message=32553)
-
 		try:
 			control.makeFile(control.dataPath)
 			dbcon = database.connect(control.libcacheFile)
@@ -865,20 +744,18 @@ class libepisodes:
 			try: dbcur.close() ; dbcon.close()
 			except: pass
 			return
-
 		files_added = 0
 		# __init__ doesn't get called from services so self.date never gets updated and new episodes are not added to the library
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.utcnow()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
 		else: self.date = (self.date_time - timedelta(hours=24)).strftime('%Y%m%d')
-
 		for item in items:
 			it = None
 			if control.monitor.abortRequested():
 				try: dbcur.close() ; dbcon.close()
 				except: pass
-				return sys.exit()
+				return sysexit()
 			try:
 				fetch = dbcur.execute('''SELECT * FROM tvshows WHERE id=?''', (item['tvdb'],)).fetchone()
 				if fetch: it = eval(fetch[1])
@@ -891,16 +768,17 @@ class libepisodes:
 				status = seasons[0]['status'].lower()
 				it = []
 				for season in seasons:
-					episodes = episodesX.Episodes().tmdb_list(item['tvshowtitle'], item['imdb'], item['tmdb'], item['tvdb'], meta=season, season=season['season'])
-					it += [{'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'tvshowtitle': i['tvshowtitle'], 'premiered': i['premiered']} for i in episodes]
-				if status in ['continuing', 'returning series']: raise Exception() # only write db entry for completed(Ended) shows
-				dbcur.execute('''INSERT INTO tvshows Values (?, ?)''', (item['tvdb'], repr(it)))
+					episodes = episodesX.Episodes().tmdb_list(item['tvshowtitle'], item['imdb'], item['tmdb'], item['tvdb'], meta=season, season=season['season']) # fetch fresh meta (uncached)
+					it += [{'tvshowtitle': i['tvshowtitle'], 'status': status, 'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'premiered': i['premiered']} for i in episodes]
+				# if not status or any(value in status for value in ['continuing', 'returning series']): raise Exception() # only write db entry for completed(Ended) shows
+				if status == 'ended':
+					dbcur.execute('''INSERT INTO tvshows Values (?, ?)''', (item['tvdb'], repr(it)))
 				dbcur.connection.commit()
 			except:
 				log_utils.error()
 			try:
 				id = [item['imdb'], item['tvdb']]
-				if item['tmdb'] != '0': id += [item['tmdb']]
+				if item['tmdb']: id += [item['tmdb']]
 				ep = [x['title'] for x in lib if str(x['imdbnumber']) in id or (x['title'] == item['tvshowtitle'] and str(x['year']) == item['year'])][0]
 				ep = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % ep)
 				ep = py_tools.ensure_text(ep, errors='ignore')
@@ -908,34 +786,23 @@ class libepisodes:
 				ep = [{'season': int(i['season']), 'episode': int(i['episode'])} for i in ep]
 				ep = sorted(ep, key = lambda x: (x['season'], x['episode']))[-1]
 				num = [x for x,y in enumerate(it) if str(y['season']) == str(ep['season']) and str(y['episode']) == str(ep['episode'])][-1]
-				log_utils.log('num = %s' % num, __name__)
-				log_utils.log('it = %s' % it, __name__)
-				log_utils.log('len(it) = %s' % len(it), __name__)
 				it = [y for x,y in enumerate(it) if x > num]
-				log_utils.log('it = %s' % it, __name__)
 				if len(it) == 0: continue
 			except:
 				continue
-
 			for i in it:
-				if control.monitor.abortRequested(): return sys.exit()
+				if control.monitor.abortRequested(): return sysexit()
 				try:
-					# Show Season Special(Season0).
-					if str(i.get('season')) == '0' and control.setting('tv.specials') == 'false': continue
-					# Show Unaired items.
-					premiered = i.get('premiered', '0')
-					if premiered == '0' and self.include_unknown == 'false': continue
-					elif int(re.sub(r'[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.date))):
-						if self.showunaired != 'true': continue
+					if str(i.get('season')) == '0' and self.include_special == 'false': continue
+					premiered = i.get('premiered', '')
+					if not premiered and self.include_unknown == 'false': continue
 					libtvshows().strmFile(i)
 					files_added += 1
 					if service_notification : control.notification(title=item['tvshowtitle'], message=32678)
 				except:
 					log_utils.error()
-
 		try: dbcur.close() ; dbcon.close()
 		except: pass
-
 		if files_added == 0 and service_notification : control.notification(message=32109)
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and files_added > 0:
 			if contains:

@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 import _strptime # import _strptime to workaround python 2 bug with threads
-import sys
-import time
+from sys import exit as sysexit, platform as sys_platform # something is up with argv[1] when module re-initializes for "addItem()"
+from time import time, sleep
 try: #Py2
 	from urllib import quote_plus, unquote
 	from urlparse import parse_qsl
@@ -51,7 +51,6 @@ class Sources:
 		self.extensions = source_utils.supported_video_extensions()
 		self.highlight_color = control.getColor(control.setting('highlight.color'))
 
-
 	def play(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape=None):
 		gdriveEnabled = control.addon('script.module.fenomscrapers').getSetting('gdrive.cloudflare_url') != ''
 		if not self.debrid_resolvers and not gdriveEnabled:
@@ -86,12 +85,10 @@ class Sources:
 
 			if tvshowtitle is None and control.setting('imdb.year.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
 				year, title = self.movie_chk_imdb(imdb, title, year)
-
 			if tvshowtitle is not None: # get "total_seasons" and "season_isAiring" for Pack scrapers. 1st=passed meta, 2nd=matacache check, 3rd=request
 				self.mediatype = 'episode'
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
-			if rescrape :
-				self.clr_item_providers(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
+			if rescrape: self.clr_item_providers(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
 			items = providerscache.get(self.getSources, 48, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered) # start passing aliases to avoid trakt request
 			if not items:
 				self.url = url
@@ -132,7 +129,8 @@ class Sources:
 					control.homeWindow.clearProperty(self.itemProperty)
 					control.homeWindow.setProperty(self.itemProperty, jsdumps(items))
 					control.sleep(200)
-					return control.execute('Container.Update(%s?action=addItem&title=%s)' % (sys.argv[0], quote_plus(title)))
+					return control.execute('Container.Update(plugin://plugin.video.venom/?action=addItem&title=%s)' % quote_plus(title))
+
 				elif select == '0' or select == '1': url = self.sourcesDialog(items)
 				else: url = self.sourcesAutoPlay(items)
 
@@ -148,7 +146,6 @@ class Sources:
 			log_utils.error()
 			control.cancelPlayback()
 
-
 	def addItem(self, title):
 		control.hide()
 		def sourcesDirMeta(metadata):
@@ -163,36 +160,37 @@ class Sources:
 		if not items:
 			control.sleep(200)
 			control.hide()
-			sys.exit()
+			sysexit()
+		try:
+			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+			meta = sourcesDirMeta(meta)
+			from sys import argv
+			sysaddon = argv[0] ; syshandle = int(argv[1])
+			systitle = sysname = quote_plus(title)
 
-		meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
-		meta = sourcesDirMeta(meta)
+			downloads = True if control.setting('downloads') == 'true' and (control.setting(
+				'movie.download.path') != '' or control.setting('tv.download.path') != '') else False
+			poster = meta.get('poster') or control.addonPoster()
+			if 'tvshowtitle' in meta and 'season' in meta and 'episode' in meta:
+				poster = meta.get('season_poster') or poster or control.addonPoster()
+				sysname += quote_plus(' S%02dE%02d' % (int(meta['season']), int(meta['episode'])))
+			elif 'year' in meta: sysname += quote_plus(' (%s)' % meta['year'])
 
-		sysaddon = sys.argv[0] ; syshandle = int(sys.argv[1])
-		systitle = sysname = quote_plus(title)
+			fanart = meta.get('fanart')
+			if control.setting('fanart') != 'true': fanart = ''
 
-		downloads = True if control.setting('downloads') == 'true' and (control.setting(
-			'movie.download.path') != '' or control.setting('tv.download.path') != '') else False
-		poster = meta.get('poster') or control.addonPoster()
-		if 'tvshowtitle' in meta and 'season' in meta and 'episode' in meta:
-			poster = meta.get('season_poster') or poster or control.addonPoster()
-			sysname += quote_plus(' S%02dE%02d' % (int(meta['season']), int(meta['episode'])))
-		elif 'year' in meta: sysname += quote_plus(' (%s)' % meta['year'])
-
-		fanart = meta.get('fanart')
-		if control.setting('fanart') != 'true': fanart = ''
-
-		resquality_icons = control.setting('enable.resquality.icons') == 'true'
-		artPath = control.artPath()
-		sysimage = quote_plus(poster)
-		downloadMenu = control.lang(32403)
+			resquality_icons = control.setting('enable.resquality.icons') == 'true'
+			artPath = control.artPath()
+			sysimage = quote_plus(poster)
+			downloadMenu = control.lang(32403)
+		except:
+			log_utils.error('Error addItem: ')
 
 		for i in range(len(items)):
 			try:
 				label = str(items[i]['label'])
 				syssource = quote_plus(jsdumps([items[i]]))
 				sysurl = '%s?action=playItem&title=%s&source=%s' % (sysaddon, systitle, syssource)
-
 				cm = []
 				link_type = 'pack' if 'package' in items[i] else 'single'
 				isCached = True if re.match(r'^cached.*torrent', items[i]['source']) else False
@@ -201,11 +199,9 @@ class Sources:
 					except: new_sysname = sysname
 					cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&source=%s&caller=sources&title=%s)' %
 										(sysaddon, new_sysname, sysimage, syssource, sysname)))
-
 				if link_type == 'pack' and isCached:
 					cm.append(('[B]Browse Debrid Pack[/B]', 'RunPlugin(%s?action=showDebridPack&caller=%s&name=%s&url=%s&source=%s)' %
 									(sysaddon, quote_plus(items[i]['debrid']), quote_plus(items[i]['name']), quote_plus(items[i]['url']), quote_plus(items[i]['hash']))))
-
 				if not isCached and 'magnet:' in items[i]['url']:
 					d = self.debrid_abv(items[i]['debrid'])
 					if d in ('PM', 'RD', 'AD'):
@@ -213,17 +209,15 @@ class Sources:
 						except: seeders = '0'
 						cm.append(('[B]Cache to %s Cloud (seeders=%s)[/B]' % (d, seeders), 'RunPlugin(%s?action=cacheTorrent&caller=%s&type=%s&title=%s&url=%s&source=%s)' %
 											(sysaddon, d, link_type, sysname, quote_plus(items[i]['url']), syssource)))
-
-				cm.append(('[B]Additional Link Info[/B]', 'RunPlugin(%s?action=sourceInfo&source=%s)' %
-									(sysaddon, syssource)))
-
+				cm.append(('[B]Additional Link Info[/B]', 'RunPlugin(%s?action=sourceInfo&source=%s)' % (sysaddon, syssource)))
 				if resquality_icons:
 					quality = items[i]['quality']
 					thumb = '%s%s' % (quality, '.png')
 					thumb = control.joinPath(artPath, thumb) if artPath else ''
 				else: thumb = meta.get('thumb') or poster or fanart or control.addonThumb()
 
-				item = control.item(label=label, offscreen=True)
+				try: item = control.item(label=label, offscreen=True)
+				except: item = control.item(label=label)
 				item.setArt({'icon': thumb, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
 				video_streaminfo = {'codec': 'h264'}
 				item.addStreamInfo('video', video_streaminfo)
@@ -236,7 +230,6 @@ class Sources:
 				log_utils.error('Error addItem: ')
 		control.content(syshandle, 'files')
 		control.directory(syshandle, cacheToDisc=True)
-
 
 	def playItem(self, title, source):
 		try:
@@ -294,7 +287,7 @@ class Sources:
 					m = ''
 					for x in range(3600):
 						try:
-							if control.monitor.abortRequested(): return sys.exit()
+							if control.monitor.abortRequested(): return sysexit()
 							if progressDialog.iscanceled(): return progressDialog.close()
 						except: pass
 						k = control.condVisibility('Window.IsActive(virtualkeyboard)')
@@ -303,17 +296,15 @@ class Sources:
 						k = control.condVisibility('Window.IsActive(yesnoDialog)')
 						if k: m += '1' ; m = m[-1]
 						if (not w.is_alive() or x > 30 + offset) and not k: break
-						time.sleep(0.5)
-
+						sleep(0.5)
 					for x in range(30):
 						try:
-							if control.monitor.abortRequested(): return sys.exit()
+							if control.monitor.abortRequested(): return sysexit()
 							if progressDialog.iscanceled(): return progressDialog.close()
 						except: pass
 						if m == '': break
 						if not w.is_alive(): break
-						time.sleep(0.5)
-
+						sleep(0.5)
 					if w.is_alive(): block = items[i]['source']
 					if not self.url: raise Exception()
 					if not any(x in self.url.lower() for x in self.extensions):
@@ -334,11 +325,9 @@ class Sources:
 			try: progressDialog.close()
 			except: pass
 			del progressDialog
-
 			self.errorForSources()
 		except:
 			log_utils.error('Error playItem: ')
-
 
 	def getSources(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, quality='HD', timeout=30):
 		progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
@@ -353,8 +342,7 @@ class Sources:
 		if content == 'movie': sourceDict = [(i[0], i[1], getattr(i[1], 'movie', None)) for i in sourceDict]
 		else: sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
 		sourceDict = [(i[0], i[1]) for i in sourceDict if i[2] is not None]
-		if control.setting('cf.disable') == 'true':
-			sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
+		if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
 		sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
 		sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
 
@@ -362,27 +350,22 @@ class Sources:
 		try:
 			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
 			aliases = meta.get('aliases', [])
-			# log_utils.log('tmdb_aliases = %s' % aliases, __name__)
 		except: pass
 
 		threads = []
 		if content == 'movie':
-			trakt_aliases = self.getAliasTitles(imdb, content) # start passing aliases to avoid trakt request
-			# log_utils.log('trakt_aliases = %s' % trakt_aliases, __name__)
-			try: aliases.extend([i for i in trakt_aliases if not i in aliases])
+			trakt_aliases = self.getAliasTitles(imdb, content)
+			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 			except: pass
-			# log_utils.log('combined_aliases = %s' % aliases, __name__)
 			aliases = jsdumps(aliases)
 			for i in sourceDict:
 				threads.append(workers.Thread(self.getMovieSource, title, aliases, year, imdb, i[0], i[1]))
 		else:
 			from fenomscrapers import pack_sources
 			self.packDict = providerscache.get(pack_sources, 192)
-			trakt_aliases = self.getAliasTitles(imdb, content) # start passing aliases to avoid trakt request
-			# log_utils.log('trakt_aliases = %s' % trakt_aliases, __name__)
-			try: aliases.extend([i for i in trakt_aliases if not i in aliases])
+			trakt_aliases = self.getAliasTitles(imdb, content)
+			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 			except: pass
-			# log_utils.log('combined_aliases = %s' % aliases, __name__)
 			aliases = jsdumps(aliases)
 			for i in sourceDict:
 				threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
@@ -399,7 +382,7 @@ class Sources:
 
 		try: timeout = int(control.setting('scrapers.timeout'))
 		except: pass
-		start_time = time.time()
+		start_time = time()
 		end_time = start_time + timeout
 
 		quality = control.setting('hosts.quality')
@@ -416,7 +399,7 @@ class Sources:
 		control.hide()
 		while True:
 			try:
-				if control.monitor.abortRequested(): return sys.exit()
+				if control.monitor.abortRequested(): return sysexit()
 				try:
 					if progressDialog.iscanceled(): break
 				except: pass
@@ -461,11 +444,11 @@ class Sources:
 				try:
 					info = [sourcelabelDict[x.getName()] for x in threads if x.is_alive() == True]
 					line1 = pdiag_format % (source_4k_label, source_1080_label, source_720_label, source_sd_label)
-					line2 = string4 % source_total_label + '     ' + string1 % round(time.time() - start_time, 1)
+					line2 = string4 % source_total_label + '     ' + string1 % round(time() - start_time, 1)
 					if len(info) > 6: line3 = string3 % str(len(info))
 					elif len(info) > 0: line3 = string3 % (', '.join(info))
 					else: break
-					current_time = time.time()
+					current_time = time()
 					current_progress = current_time - start_time
 					percent = int((current_progress / float(timeout)) * 100)
 					if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1 + '[CR]' + line2 + '[CR]' + line3)
@@ -483,10 +466,8 @@ class Sources:
 		del progressDialog
 		del threads[:] # Make sure any remaining providers are stopped.
 		self.sources.extend(self.scraper_sources)
-		if len(self.sources) > 0:
-			self.sourcesFilter()
+		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
-
 
 	def prepareSources(self):
 		try:
@@ -500,7 +481,6 @@ class Sources:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
 
 	def getMovieSource(self, title, aliases, year, imdb, source, call):
 		try:
@@ -550,7 +530,6 @@ class Sources:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
 
 	def getEpisodeSource(self, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, source, call):
 		try:
@@ -681,7 +660,6 @@ class Sources:
 		finally:
 			dbcon.close() ; dbcon.close()
 
-
 	def alterSources(self, url, meta):
 		try:
 			if control.setting('hosts.mode') == '2' or (control.setting('enable.upnext') == 'true' and 'episode' in meta): url += '&select=1'
@@ -690,7 +668,6 @@ class Sources:
 			control.execute('PlayMedia(%s)' % url)
 		except:
 			log_utils.error()
-
 
 	def sourcesFilter(self):
 		control.busy()
@@ -854,7 +831,6 @@ class Sources:
 		control.hide()
 		return self.sources
 
-
 	def filter_dupes(self):
 		filter = []
 		log_dupes = control.setting('remove.duplicates.logging') == 'false'
@@ -879,7 +855,6 @@ class Sources:
 		control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
 		log_utils.log('Removed %s duplicate sources for (%s) from list' % (len(self.sources) - len(filter), control.homeWindow.getProperty(self.labelProperty)), level=log_utils.LOGDEBUG)
 		return filter
-
 
 	def sourcesResolve(self, item):
 		url = item['url']
@@ -933,7 +908,6 @@ class Sources:
 					log_utils.error()
 					return
 
-
 	def sourcesDialog(self, items):
 		try:
 			labels = [i['label'] for i in items]
@@ -968,7 +942,7 @@ class Sources:
 						try:
 							if control.monitor.abortRequested():
 								control.notification(message=32400)
-								return sys.exit()
+								return sysexit()
 							if progressDialog.iscanceled():
 								control.notification(message=32400)
 								return progressDialog.close()
@@ -980,13 +954,12 @@ class Sources:
 						k = control.condVisibility('Window.IsActive(yesnoDialog)')
 						if k: m += '1' ; m = m[-1]
 						if (not w.is_alive() or x > 30 + offset) and not k: break
-						time.sleep(0.5)
-
+						sleep(0.5)
 					for x in range(30):
 						try:
 							if control.monitor.abortRequested():
 								control.notification(message=32400)
-								return sys.exit()
+								return sysexit()
 							if progressDialog.iscanceled():
 								control.notification(message=32400)
 								return progressDialog.close()
@@ -994,8 +967,7 @@ class Sources:
 
 						if m == '': break
 						if not w.is_alive(): break
-						time.sleep(0.5)
-
+						sleep(0.5)
 					if w.is_alive(): block = items[i]['source']
 					if not self.url: raise Exception()
 					if not any(x in self.url.lower() for x in self.extensions):
@@ -1020,10 +992,8 @@ class Sources:
 			except: pass
 			del progressDialog
 
-
 	def sourcesAutoPlay(self, items):
-		if control.setting('autoplay.sd') == 'true':
-			items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p', 'HD']]
+		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p', 'HD']]
 		u = None
 		header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
 		try:
@@ -1040,11 +1010,11 @@ class Sources:
 				progressDialog.update(int((100 / float(len(items))) * i), label)
 			except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
 			try:
-				if control.monitor.abortRequested(): return sys.exit()
+				if control.monitor.abortRequested(): return sysexit()
 				url = self.sourcesResolve(items[i])
 				if not any(x in url.lower() for x in self.extensions):
-						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
-						raise Exception()
+					log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
+					raise Exception()
 				if not u: u = url
 				if url: break
 			except: pass
@@ -1052,7 +1022,6 @@ class Sources:
 		except: pass
 		del progressDialog
 		return u
-
 
 	def debridPackDialog(self, provider, name, magnet_url, info_hash):
 		try:
@@ -1103,11 +1072,9 @@ class Sources:
 			log_utils.error('Error debridPackDialog: ')
 			control.hide()
 
-
 	def sourceInfo(self, info):
 		try:
-			platform = sys.platform
-			supported_platform = any(value in platform for value in ['win32', 'linux2'])
+			supported_platform = any(value in sys_platform for value in ['win32', 'linux2'])
 			source = jsloads(info)[0]
 			try: f = ' / '.join(['%s' % info.strip() for info in source.get('info').split('|')])
 			except: f = ''
@@ -1133,7 +1100,6 @@ class Sources:
 		except:
 			log_utils.error('Error sourceInfo: ' )
 
-
 	def errorForSources(self):
 		try:
 			control.sleep(200) # added 5/14
@@ -1143,7 +1109,6 @@ class Sources:
 			control.cancelPlayback()
 		except:
 			log_utils.error()
-
 
 	def getAliasTitles(self, imdb, content):
 		try:
@@ -1156,11 +1121,9 @@ class Sources:
 			log_utils.error()
 			return []
 
-
 	def getTitle(self, title):
 		title = cleantitle.normalize(title)
 		return title
-
 
 	def getConstants(self): # gets initialized multiple times
 		self.itemProperty = 'plugin.video.venom.container.items'
@@ -1185,10 +1148,8 @@ class Sources:
 				return list(set(hosts))
 			except:
 				return premium_hosters.hostprDict
-
 		self.hostprDict = providerscache.get(cache_prDict, 192)
 		self.sourcecfDict = premium_hosters.sourcecfDict
-
 
 	def calc_pack_size(self):
 		seasoncount = None ; counts = None
@@ -1261,7 +1222,6 @@ class Sources:
 				continue
 		return self.sources
 
-
 	def ad_cache_chk_list(self, torrent_List):
 		if len(torrent_List) == 0: return
 		try:
@@ -1285,7 +1245,6 @@ class Sources:
 		except:
 			log_utils.error()
 
-
 	def pm_cache_chk_list(self, torrent_List):
 		if len(torrent_List) == 0: return
 		try:
@@ -1304,7 +1263,6 @@ class Sources:
 			return torrent_List
 		except:
 			log_utils.error()
-
 
 	def rd_cache_chk_list(self, torrent_List):
 		if len(torrent_List) == 0: return
@@ -1337,7 +1295,6 @@ class Sources:
 		except:
 			log_utils.error()
 
-
 	def clr_item_providers(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered):
 		providerscache.remove(self.getSources, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered) # function cache removal of selected item ONLY
 		try:
@@ -1353,7 +1310,6 @@ class Sources:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-
 
 	def movie_chk_imdb(self, imdb, title, year):
 		try:
@@ -1376,7 +1332,6 @@ class Sources:
 			log_utils.error()
 			return year, title
 
-
 	def get_season_info(self, imdb, tmdb, tvdb, meta, season):
 		total_seasons = None
 		season_isAiring = None
@@ -1384,9 +1339,6 @@ class Sources:
 			meta = jsloads(unquote(meta.replace('%22', '\\"')))
 			total_seasons = meta.get('total_seasons', None)
 			season_isAiring = meta.get('season_isAiring', None)
-			# log_utils.log('meta = %s' % meta, __name__)
-			# log_utils.log('total_seasons = %s for tvshowtitle = %s' % (total_seasons, meta.get('tvshowtitle', '')), __name__)
-			# log_utils.log('season_isAiring = %s for tvshowtitle = %s' % (season_isAiring, meta.get('tvshowtitle', '')), __name__)
 		except: pass
 		if not total_seasons or season_isAiring is None: # check metacache, 2nd fallback
 			try:
@@ -1396,10 +1348,8 @@ class Sources:
 				meta_lang = control.apiLanguage()['tvdb']
 				ids = [{'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb}]
 				meta2 = metacache.fetch(ids, meta_lang, user)[0]
-				if not total_seasons:
-					total_seasons = meta2.get('total_seasons', None)
-				if season_isAiring is None:
-					season_isAiring = meta2.get('season_isAiring', None)
+				if not total_seasons: total_seasons = meta2.get('total_seasons', None)
+				if season_isAiring is None: season_isAiring = meta2.get('season_isAiring', None)
 			except:
 				log_utils.error()
 		if not total_seasons: # make request, 3rd fallback
@@ -1409,8 +1359,7 @@ class Sources:
 					total_seasons = [i['number'] for i in total_seasons]
 					season_special = True if 0 in total_seasons else False
 					total_seasons = len(total_seasons)
-					if season_special: 
-						total_seasons = total_seasons - 1
+					if season_special: total_seasons = total_seasons - 1
 			except:
 				log_utils.error()
 		if season_isAiring is None:
@@ -1421,7 +1370,6 @@ class Sources:
 			except:
 				log_utils.error()
 		return total_seasons, season_isAiring
-
 
 	def debrid_abv(self, debrid):
 		try:

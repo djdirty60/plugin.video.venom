@@ -30,12 +30,10 @@ class CheckSettingsFile:
 		except:
 			log_utils.error()
 
-
 class SettingsMonitor(control.monitor_class):
 	def __init__ (self):
 		control.monitor_class.__init__(self)
 		control.log('[ plugin.video.venom ]  Settings Monitor Service Starting...', LOGNOTICE)
-
 
 	def onSettingsChanged(self):
 		# Kodi callback when the addon settings are changed
@@ -43,13 +41,11 @@ class SettingsMonitor(control.monitor_class):
 		control.sleep(50)
 		refreshed = control.make_settings_dict()
 
-
 class SyncMyAccounts:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Sync "My Accounts" Service Starting...', LOGNOTICE)
 		control.syncMyAccounts(silent=True)
 		return control.log('[ plugin.video.venom ]  Finished Sync "My Accounts" Service', LOGNOTICE)
-
 
 class ReuseLanguageInvokerCheck:
 	def run(self):
@@ -83,7 +79,6 @@ class ReuseLanguageInvokerCheck:
 		except:
 			log_utils.error()
 
-
 class AddonCheckUpdate:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Addon checking available updates', LOGNOTICE)
@@ -92,8 +87,7 @@ class AddonCheckUpdate:
 			import requests
 			repo_xml = requests.get('https://raw.githubusercontent.com/123Venom/zips/master/addons.xml')
 			if not repo_xml.status_code == 200:
-				control.log('[ plugin.video.venom ]  Could not connect to remote repo XML: status code = %s' % repo_xml.status_code, LOGNOTICE)
-				return
+				return control.log('[ plugin.video.venom ]  Could not connect to remote repo XML: status code = %s' % repo_xml.status_code, LOGNOTICE)
 			repo_version = re.findall(r'<addon id=\"plugin.video.venom\".+version=\"(\d*.\d*.\d*)\"', repo_xml.text)[0]
 			local_version = control.getVenomVersion()
 			if control.check_version_numbers(local_version, repo_version):
@@ -105,12 +99,10 @@ class AddonCheckUpdate:
 		except:
 			log_utils.error()
 
-
 class LibraryService:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Library Update Service Starting (Update check every 6hrs)...', LOGNOTICE)
 		control.execute('RunPlugin(%s?action=library_service)' % plugin) # library_service contains control.monitor().waitForAbort() while loop every 6hrs
-
 
 class SyncTraktCollection:
 	def run(self):
@@ -119,29 +111,33 @@ class SyncTraktCollection:
 		control.execute('RunPlugin(%s?action=library_moviesToLibrarySilent&url=traktcollection)' % plugin)
 		control.log('[ plugin.video.venom ]  Trakt Collection Sync Complete', LOGNOTICE)
 
-
 class SyncTraktWatched:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Trakt Watched Sync Service Starting (sync check every 15min)...', LOGNOTICE)
 		control.execute('RunPlugin(%s?action=tools_syncTraktWatched)' % plugin) # trakt.sync_watched() contains control.monitor().waitForAbort() while loop every 15min
-
 
 class SyncTraktProgress:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Trakt Progress Sync Service Starting (sync check every 15min)...', LOGNOTICE)
 		control.execute('RunPlugin(%s?action=tools_syncTraktProgress)' % plugin) # trakt.sync_progress() contains control.monitor().waitForAbort() while loop every 15min
 
-
 try:
-	AddonVersion = control.addon('plugin.video.venom').getAddonInfo('version')
-	RepoVersion = control.addon('repository.venom').getAddonInfo('version')
-	log_utils.log('#####   CURRENT VENOM VERSIONS REPORT   #####', level=log_utils.LOGNOTICE)
-	log_utils.log('########   VENOM PLUGIN VERSION: %s   ########' % str(AddonVersion), level=log_utils.LOGNOTICE)
-	log_utils.log('#####   VENOM REPOSITORY VERSION: %s   #######' % str(RepoVersion), level=log_utils.LOGNOTICE)
+	kodiVersion = control.getKodiVersion(full=True)
+	addonVersion = control.addon('plugin.video.venom').getAddonInfo('version')
+	repoVersion = control.addon('repository.venom').getAddonInfo('version')
+	fsVersion = control.addon('script.module.fenomscrapers').getAddonInfo('version')
+	maVersion = control.addon('script.module.myaccounts').getAddonInfo('version')
+	log_utils.log('########   CURRENT VENOM VERSIONS REPORT   ########', level=log_utils.LOGNOTICE)
+	log_utils.log('##   Kodi Version: %s' % str(kodiVersion), level=log_utils.LOGNOTICE)
+	log_utils.log('##   python Version: %s' % str(control.pythonVersion), level=log_utils.LOGNOTICE)
+	log_utils.log('##   plugin.video.venom Version: %s' % str(addonVersion), level=log_utils.LOGNOTICE)
+	log_utils.log('##   repository.venom Version: %s' % str(repoVersion), level=log_utils.LOGNOTICE)
+	log_utils.log('##   script.module.fenomscrapers Version: %s' % str(fsVersion), level=log_utils.LOGNOTICE)
+	log_utils.log('##   script.module.myaccounts Version: %s' % str(maVersion), level=log_utils.LOGNOTICE)
+	log_utils.log('######   VENOM SERVICE ENTERERING KEEP ALIVE   #####', level=log_utils.LOGNOTICE)
 except:
-	log_utils.log('################# CURRENT Venom VERSIONS REPORT ################', level=log_utils.LOGNOTICE)
-	log_utils.log('# ERROR GETTING Venom VERSION - Missing Repo of failed Install #', level=log_utils.LOGNOTICE)
-
+	log_utils.log('##########   CURRENT VENOM VERSIONS REPORT   ##########', level=log_utils.LOGNOTICE)
+	log_utils.log('## ERROR GETTING Venom VERSION - Missing Repo or failed Install ', level=log_utils.LOGNOTICE)
 
 def getTraktCredentialsInfo():
 	username = control.setting('trakt.username').strip()
@@ -149,7 +145,6 @@ def getTraktCredentialsInfo():
 	refresh = control.setting('trakt.refresh')
 	if (username == '' or token == '' or refresh == ''): return False
 	return True
-
 
 def main():
 	while not control.monitor.abortRequested():

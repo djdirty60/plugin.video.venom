@@ -96,7 +96,7 @@ class TVshows:
 		self.tmdb_networks_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1'
 
 
-	def get(self, url, idx=True):
+	def get(self, url, idx=True, create_directory=True):
 		self.list = []
 		try:
 			try: url = getattr(self, url + '_link')
@@ -135,15 +135,13 @@ class TVshows:
 				if idx: self.worker()
 
 			if self.list is None: self.list = []
-			if idx: self.tvshowDirectory(self.list)
+			if idx and create_directory: self.tvshowDirectory(self.list)
 			return self.list
 		except:
 			log_utils.error()
 			if not self.list:
 				control.hide()
-				if self.notifications:
-					control.notification(title=32002, message=33049)
-
+				if self.notifications: control.notification(title=32002, message=33049)
 
 	def getTMDb(self, url, idx=True, cached=True):
 		self.list = []
@@ -169,9 +167,7 @@ class TVshows:
 			log_utils.error()
 			if not self.list:
 				control.hide()
-				if self.notifications:
-					control.notification(title=32002, message=33049)
-
+				if self.notifications: control.notification(title=32002, message=33049)
 
 	def getTVmaze(self, url, idx=True):
 		from resources.lib.indexers import tvmaze
@@ -188,9 +184,7 @@ class TVshows:
 			log_utils.error()
 			if not self.list:
 				control.hide()
-				if self.notifications:
-					control.notification(title=32002, message=33049)
-
+				if self.notifications: control.notification(title=32002, message=33049)
 
 	def sort(self, type='shows'):
 		try:
@@ -222,7 +216,6 @@ class TVshows:
 		except:
 			log_utils.error()
 
-
 	def imdb_sort(self, type='shows'):
 		sort = int(control.setting('sort.%s.type' % type))
 		imdb_sort = 'list_order'
@@ -233,7 +226,6 @@ class TVshows:
 		imdb_sort_order = ',asc' if int(control.setting('sort.%s.order' % type)) == 0 else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
-
 
 	def search(self):
 		navigator.Navigator().addDirectoryItem(32603, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png')
@@ -263,7 +255,6 @@ class TVshows:
 			navigator.Navigator().addDirectoryItem(32605, 'cache_clearSearch', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		navigator.Navigator().endDirectory()
 
-
 	def search_new(self):
 # need fix for when context menu returns here brings keyboard input back up
 		t = control.lang(32010)
@@ -290,11 +281,9 @@ class TVshows:
 			url = '%s?action=tvshowPage&url=%s' % (argv[0], quote_plus(url))
 			control.execute('Container.Update(%s)' % url)
 
-
 	def search_term(self, name):
 		url = self.search_link + quote_plus(name)
 		self.get(url)
-
 
 	def person(self):
 		t = control.lang(32010)
@@ -304,7 +293,6 @@ class TVshows:
 		if not q: return
 		url = self.persons_link + quote_plus(q)
 		self.persons(url)
-
 
 	def genres(self):
 		genres = [
@@ -318,7 +306,6 @@ class TVshows:
 			self.list.append({'name': cleangenre.lang(i[0], self.lang), 'url': self.genre_link % i[1] if i[2] else self.keyword_link % i[1], 'image': 'genres.png', 'icon': 'DefaultGenre.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
-
 
 	def networks(self):
 		networks = tmdb_indexer.TVshows().get_networks()
@@ -334,7 +321,6 @@ class TVshows:
 		self.addDirectory(self.list)
 		return self.list
 
-
 	def languages(self):
 		languages = [
 			('Arabic', 'ar'), ('Bosnian', 'bs'), ('Bulgarian', 'bg'), ('Chinese', 'zh'), ('Croatian', 'hr'), ('Dutch', 'nl'), ('English', 'en'), ('Finnish', 'fi'),
@@ -345,7 +331,6 @@ class TVshows:
 			self.list.append({'name': str(i[0]), 'url': self.language_link % i[1], 'image': 'languages.png', 'icon': 'DefaultAddonLanguage.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
-
 
 	def certifications(self):
 		certificates = [
@@ -360,13 +345,11 @@ class TVshows:
 		self.addDirectory(self.list)
 		return self.list
 
-
 	def certificatesFormat(self, certificates):
 		base = 'US%3A'
 		if not isinstance(certificates, (tuple, list)):
 			certificates = [certificates]
 		return ','.join([base + i.upper() for i in certificates])
-
 
 	def persons(self, url):
 		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
@@ -378,7 +361,6 @@ class TVshows:
 			self.list[i].update({'icon': 'DefaultActor.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
-
 
 	def tvshowsListToLibrary(self, url):
 		url = getattr(self, url + '_link')
@@ -403,7 +385,6 @@ class TVshows:
 		except:
 			log_utils.error()
 			return
-
 
 	def userlists(self):
 		userlists = []
@@ -454,8 +435,7 @@ class TVshows:
 		except: pass
 
 		self.list = []
-		# Filter the user's own lists that were
-		for i in range(len(userlists)):
+		for i in range(len(userlists)): # Filter the user's own lists that were
 			contains = False
 			adapted = userlists[i]['url'].replace('/me/', '/%s/' % self.trakt_user)
 			for j in range(len(self.list)):
@@ -477,7 +457,6 @@ class TVshows:
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
-
 
 	def trakt_list(self, url, user):
 		list = []
@@ -521,6 +500,7 @@ class TVshows:
 				values['originaltitle'] = values['title']
 				values['tvshowtitle'] = values['title']
 				try: values['premiered'] = item.get('first_aired', '')[:10]
+				# try: values['premiered'] = item.get('first_aired', '')
 				except: values['premiered'] = ''
 				values['year'] = str(item.get('year')) if item.get('year') else ''
 				if not values['year']:
@@ -558,7 +538,6 @@ class TVshows:
 		[i.join() for i in threads]
 		return list
 
-
 	def trakt_user_list(self, url, user):
 		list = []
 		try:
@@ -580,19 +559,16 @@ class TVshows:
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
 
-
 	def imdb_list(self, url, isRatinglink=False):
 		list = [] ; items = [] ; dupes = []
 		try:
 			for i in re.findall(r'date\[(\d+)\]', url):
 				url = url.replace('date[%s]' % i, (self.date_time - timedelta(days=int(i))).strftime('%Y-%m-%d'))
-
 			def imdb_watchlist_id(url):
 				return client.parseDOM(client.request(url), 'meta', ret='content', attrs = {'property': 'pageId'})[0]
 			if url == self.imdbwatchlist_link:
 				url = cache.get(imdb_watchlist_id, 8640, url)
 				url = self.imdbwatchlist2_link % url
-
 			result = client.request(url)
 			result = result.replace('\n', ' ')
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
@@ -600,7 +576,6 @@ class TVshows:
 		except:
 			log_utils.error()
 			return
-
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
 			result = result.replace('"class="lister-page-next', '" class="lister-page-next')
@@ -613,29 +588,23 @@ class TVshows:
 			next = client.replaceHTMLCodes(next)
 		except:
 			next = ''
-
 		for item in items:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
 				title = py_tools.ensure_str(title)
-
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
 				year += client.parseDOM(item, 'span', attrs = {'class': 'year_type'})
 				year = re.findall(r'(\d{4})', year[0])[0]
 				if int(year) > int((self.date_time).strftime('%Y')): raise Exception()
-
 				imdb = client.parseDOM(item, 'a', ret='href')[0]
 				imdb = re.findall(r'(tt\d*)', imdb)[0]
-
 				if imdb in dupes: raise Exception()
 				dupes.append(imdb)
-
 				list.append({'title': title, 'tvshowtitle': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '',
 									'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
 			except:
 				log_utils.error()
 		return list
-
 
 	def imdb_person_list(self, url):
 		list = []
@@ -658,14 +627,12 @@ class TVshows:
 				log_utils.error()
 		return list
 
-
 	def imdb_user_list(self, url):
 		list = []
 		try:
 			result = client.request(url)
 			items = client.parseDOM(result, 'li', attrs={'class': 'ipl-zebra-list__item user-list'})
-			# Gaia uses this but breaks the IMDb user list
-			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'})
+			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'}) # Gaia uses this but breaks the IMDb user list
 		except:
 			log_utils.error()
 		for item in items:
@@ -682,7 +649,6 @@ class TVshows:
 				log_utils.error()
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
-
 
 	def worker(self, level=1):
 		try:
@@ -704,7 +670,6 @@ class TVshows:
 			self.list = [i for i in self.list if i.get('tmdb')] # to rid missing tmdb_id's because season list can not load without
 		except:
 			log_utils.error()
-
 
 	def super_info(self, i):
 		try:
@@ -752,7 +717,6 @@ class TVshows:
 		except:
 			log_utils.error()
 
-
 	def tvshowDirectory(self, items, next=True):
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
@@ -760,28 +724,25 @@ class TVshows:
 			control.notification(title=32002, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
-		settingFanart = control.setting('fanart')
+		settingFanart = control.setting('fanart') == 'true'
 		addonPoster = control.addonPoster()
 		addonFanart = control.addonFanart()
 		addonBanner = control.addonBanner()
 		indicators = playcount.getTVShowIndicators(refresh=True)
 		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
 		flatten = control.setting('flatten.tvshows') == 'true'
-
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu = control.lang(32068)
 			unwatchedMenu = control.lang(32069)
 		else:
 			watchedMenu = control.lang(32066)
 			unwatchedMenu = control.lang(32067)
-
 		traktManagerMenu = control.lang(32070)
 		queueMenu = control.lang(32065)
 		showPlaylistMenu = control.lang(35517)
 		clearPlaylistMenu = control.lang(35516)
 		playRandom = control.lang(32535)
 		addToLibrary = control.lang(32551)
-
 		for i in items:
 			try:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
@@ -789,7 +750,6 @@ class TVshows:
 				systitle = quote_plus(title)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
-
 				if unwatchedEnabled: trakt.seasonCount(imdb) # pre-cache season counts for the listed shows
 				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end, remove it.
 				except: pass
@@ -798,12 +758,10 @@ class TVshows:
 				try:
 					if 'tvshowtitle' not in meta: meta.update({'tvshowtitle': title})
 				except: pass
-
 				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
 				landscape = meta.get('landscape')
 				fanart = ''
-				if settingFanart:
-					fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or landscape or addonFanart
+				if settingFanart: fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or landscape or addonFanart
 				thumb = meta.get('thumb') or poster or landscape
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
@@ -813,7 +771,6 @@ class TVshows:
 				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
 				for k in remove_keys: meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
-
 ####-Context Menu and Overlays-####
 				cm = []
 				if self.traktCredentials:
@@ -828,23 +785,21 @@ class TVshows:
 						meta.update({'playcount': 0, 'overlay': 4})
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_TVShow&name=%s&imdb=%s&tvdb=%s&query=5)' % (sysaddon, systitle, imdb, tvdb)))
 				except: pass
+				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=tvshows&url=https://api.trakt.tv/shows/%s/related,return)' % (sysaddon, imdb)))
-				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=season&tvshowtitle=%s&year=%s&imdb=%s&tvdb=%s)' % (sysaddon, systitle, year, imdb, tvdb)))
+				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=season&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, systitle)))
 				cm.append((showPlaylistMenu, 'RunPlugin(%s?action=playlist_Show)' % sysaddon))
 				cm.append((clearPlaylistMenu, 'RunPlugin(%s?action=playlist_Clear)' % sysaddon))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb)))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
-
-				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				if flatten: url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta)
 				else: url = '%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)
-
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', systitle, year, imdb)})
-
-				item = control.item(label=title, offscreen=True)
+				try: item = control.item(label=title, offscreen=True)
+				except: item = control.item(label=title)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				if unwatchedEnabled:
@@ -863,7 +818,6 @@ class TVshows:
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				log_utils.error()
-
 		if next:
 			try:
 				if not items: raise Exception()
@@ -874,7 +828,6 @@ class TVshows:
 				if 'imdb.com' in url and 'start' in url_params:
 					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / self.count) + 1))
 				else: page = '  [I](%s)[/I]' % url_params.get('page')
-
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				u = urlparse(url).netloc.lower()
 				if u in self.imdb_link or u in self.trakt_link:
@@ -883,19 +836,17 @@ class TVshows:
 					url = '%s?action=tmdbTvshowPage&url=%s' % (sysaddon, quote_plus(url))
 				elif u in self.tvmaze_link:
 					url = '%s?action=tvmazeTvshowPage&url=%s' % (sysaddon, quote_plus(url))
-
-				item = control.item(label=nextMenu, offscreen=True)
+				try: item = control.item(label=nextMenu, offscreen=True)
+				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				log_utils.error()
-
 		control.content(syshandle, 'tvshows')
 		control.directory(syshandle, cacheToDisc=True)
 		# control.sleep(500)
 		views.setView('tvshows', {'skin.estuary': 55, 'skin.confluence': 500})
-
 
 	def addDirectory(self, items, queue=False):
 		control.playlist.clear()
@@ -908,21 +859,17 @@ class TVshows:
 		queueMenu = control.lang(32065)
 		playRandom = control.lang(32535)
 		addToLibrary = control.lang(32551)
-
 		for i in items:
 			try:
 				name = i['name']
 				if i['image'].startswith('http'): thumb = i['image']
 				elif artPath: thumb = control.joinPath(artPath, i['image'])
 				else: thumb = addonThumb
-
 				icon = i.get('icon', 0)
 				if not icon: icon = 'DefaultFolder.png'
-
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
-
 				cm = []
 				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=show&url=%s)' % (sysaddon, quote_plus(i['url']))))
 				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
@@ -931,14 +878,13 @@ class TVshows:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowsToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-
-				item = control.item(label=name, offscreen=True)
+				try: item = control.item(label=name, offscreen=True)
+				except: item = control.item(label=name)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				log_utils.error()
-
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)

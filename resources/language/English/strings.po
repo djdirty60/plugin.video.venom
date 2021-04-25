@@ -108,7 +108,7 @@ msgid "Most Popular"
 msgstr ""
 
 msgctxt "#32019"
-msgid ""
+msgid "Upcoming Progress"
 msgstr ""
 
 msgctxt "#32020"
@@ -1636,7 +1636,7 @@ msgid "Hide movies in cinema"
 msgstr ""
 
 msgctxt "#32572"
-msgid ""
+msgid "Trakt Progress Show unaired episodes"
 msgstr ""
 
 msgctxt "#32580"

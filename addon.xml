@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.0.0">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.0.1">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -32,27 +32,28 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v5.0.0 - April 18, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] TVShow meta provider is now switched from TVDb to TMDb
-    throughout the addon.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed disable player artwork under autoplay configuration.[/I]
-[COLOR yellow]--[/COLOR][I] Added new window property to set the playback method chosen
-    in settings.  This now allows the Venom global context menu
-    addon to recognize the playback method on the fly without
-    the need to reload skin, or wait for a widget refresh.[/I]
-[COLOR yellow]--[/COLOR][I] New library setting allows .strm files to be created for TMDB Helper.[/I]
-[COLOR yellow]--[/COLOR][I] Alias title checking of source results has been improved for more
-    alias matches.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed a sorting issue when TVShows were set to "Default" resulting in
-    some item lists being empty.[/I]
-[COLOR yellow]--[/COLOR][I] Revised icon overlay values for Kodi doc changes.[/I]
-[COLOR yellow]--[/COLOR][I] Added new "Remove HDR sources" filter.[/I]
-[COLOR yellow]--[/COLOR][I] Added new "Remove Dolby Vision sources" filter.[/I]
-[COLOR yellow]--[/COLOR][I] Added some new source Indentifiers for "Additional Info" display.[/I]
-[COLOR yellow]--[/COLOR][I] Database handling and speed improvements.[/I]
-[COLOR yellow]--[/COLOR][I] Show packs will no longer scrape seasons that are still airing.[/I]
-[COLOR yellow]--[/COLOR][I] Added "date watched" to item label in Trakt History for movies
-    and episodes.[/I]
+[B][COLOR red]Update - v5.0.1 - April 25, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed "Play Random" failure.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Trakt User list setting wrong key value for "premiered" from
+    json response.[/I]
+[COLOR yellow]--[/COLOR][I] Some tweaks for better resolving of .m2ts...Thank you tikipeter![/I]
+[COLOR yellow]--[/COLOR][I] Improved resolving of pack files for a few obscure episode naming
+    conventions discovered.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed library updates for imported list items.[/I]
+[COLOR yellow]--[/COLOR][I] Library now has it's own setting for "Include Special Episodes (Season 0)".[/I]
+[COLOR yellow]--[/COLOR][I] Library setting to check movie and episode sources before adding to library is
+    removed.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed "Container.Refresh" delay seen in some Trakt Manager functions.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Progress now has it's own setting to show unaired episodes.  See Trakt
+    category setting.[/I]
+[COLOR yellow]--[/COLOR][I] Added new "Upcoming Progress" list to "My TV Shows". [/I]
+[COLOR yellow]--[/COLOR][I] Fixed missing encode issue for Leia that resulted in some dropped episodes.[/I]
+[COLOR yellow]--[/COLOR][I] Added "status" writes to library database for ease of future debugging needs.[/I]
+[COLOR yellow]--[/COLOR][I] Changed Trakt "lastplayed" value to retain timestamp reported from Trakt
+    response.  This now allows more accurate sorting for a
+    given day with the time now factored in.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed fanart setting still passing artwork to skin when disabled.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed "offscreen" issue not available in older than Leia versions.[/I]
 		</news>
 	</extension>
 </addon>

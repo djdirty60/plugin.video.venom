@@ -30,8 +30,7 @@ def get_request(url):
 		control.notification(message=32024)
 		return
 	if '200' in str(response): return response.json()
-	elif 'Retry-After' in response.headers:
-		# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
+	elif 'Retry-After' in response.headers: 	# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
 		throttleTime = response.headers['Retry-After']
 		control.notification(message='TMDB Throttling Applied, Sleeping for %s seconds' % throttleTime)
 		control.sleep((int(throttleTime) + 1) * 1000)
@@ -617,7 +616,7 @@ class TVshows:
 				try: episode_meta['writer'] = ', '.join([w['name'] for w in [y for y in crew if y['job'] == 'Writer']]) # movies also contains "screenplay", "author", "novel". See if any apply for shows
 				except: episode_meta['writer'] = ''
 				episode_meta['tmdb_epID'] = episode['id']
-				episode_meta['title'] = episode['name']
+				episode_meta['title'] = py_tools.ensure_str(episode['name'])
 				episode_meta['plot'] = py_tools.ensure_str(episode.get('overview', '')) if episode.get('overview') else ''
 				episode_meta['code'] = episode['production_code']
 				episode_meta['season'] = episode['season_number']
@@ -745,11 +744,8 @@ class TVshows:
 		for item in seasonEpisodes['episodes']:
 			try:
 				premiered = str(item.get('premiered', '')) if item.get('premiered') else ''
-				if not premiered:
-					unaired_count += 1
-					pass
-				elif int(re.sub(r'[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
-					unaired_count += 1
+				if not premiered: unaired_count += 1
+				elif int(re.sub(r'[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.today_date))): unaired_count += 1
 			except:
 				log_utils.error()
 		return 'true' if unaired_count > 0 else 'false'

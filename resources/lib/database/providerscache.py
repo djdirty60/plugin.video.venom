@@ -27,7 +27,7 @@ def get(function, duration, *args):
 			if _is_cache_valid(cache_result['date'], duration):
 				return result
 
-		fresh_result = repr(function(*args))
+		fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
 		try:  # Sometimes None is returned as a string instead of None type for "fresh_result"
 			invalid = False
 			if not fresh_result: invalid = True

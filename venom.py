@@ -282,14 +282,6 @@ if action and action.startswith('seasons'):
 		art = params.get('art')
 		seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, art)
 
-	# elif action == 'seasonsUserlists':
-		# from resources.lib.indexers import seasons
-		# seasons.Seasons().userlists()
-
-	# elif action == 'seasonsList':
-		# from resources.lib.menus import seasons
-		# seasons.Seasons().seasonList(url)
-
 ####################################################
 #---EPISODES
 ####################################################
@@ -297,7 +289,7 @@ if action == 'playEpisodesList':
 	from json import dumps as jsdumps
 	from resources.lib.menus import episodes
 	meta = params.get('meta')
-	items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode, idx=False)
+	items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode, create_directory=False)
 	control.playlist.clear()
 	for i in items:
 		title = i['title']
@@ -314,7 +306,8 @@ if action == 'playEpisodesList':
 		sysmeta = quote_plus(jsdumps(i))
 		url = 'plugin://plugin.video.venom/?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select="2"' % (
 								systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
-		item = control.item(label=title, offscreen=True)
+		try: item = control.item(label=title, offscreen=True)
+		except: item = control.item(label=title)
 		control.playlist.add(url=url, listitem=item)
 	control.player2().play(control.playlist)
 
@@ -326,6 +319,10 @@ elif action == 'episodes':
 elif action == 'calendar':
 	from resources.lib.menus import episodes
 	episodes.Episodes().calendar(url)
+
+elif action == 'upcomingProgress':
+	from resources.lib.menus import episodes
+	episodes.Episodes().upcoming_progress(url)
 
 elif action == 'calendars':
 	from resources.lib.menus import episodes
@@ -713,45 +710,48 @@ elif action == 'cacheTorrent':
 
 elif action == 'random':
 	rtype = params.get('rtype')
+	xbmc.log('rtype=%s' % rtype, 1)
 	if rtype == 'movie':
 		from resources.lib.menus import movies
-		rlist = movies.Movies().get(url, idx=False)
+		rlist = movies.Movies().get(url, create_directory=False)
+		xbmc.log('movie rlist=%s' % rlist, 1)
+		xbmc.log('url=%s' % url, 1)
 		r = argv[0] + "?action=play"
-
 	elif rtype == 'episode':
 		from resources.lib.menus import episodes
 		meta = params.get('meta')
-		rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, idx=False)
+		rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, create_directory=False)
 		r = argv[0] + "?action=play"
-
 	elif rtype == 'season':
 		from resources.lib.menus import seasons
-		rlist = seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, idx=False)
+		art = params.get('art')
+		rlist = seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, art, create_directory=False)
 		r = argv[0] + "?action=random&rtype=episode"
-
 	elif rtype == 'show':
 		from resources.lib.menus import tvshows
-		rlist = tvshows.TVshows().get(url, idx=False)
+		rlist = tvshows.TVshows().get(url, create_directory=False)
 		r = argv[0] + "?action=random&rtype=season"
 
 	from random import randint
 	from json import dumps as jsdumps
 	try:
 		rand = randint(1,len(rlist))-1
-		for p in ['title', 'year', 'imdb', 'tvdb', 'season', 'episode', 'tvshowtitle', 'premiered', 'select']:
+		for p in ['title', 'year', 'imdb', 'tmdb', 'tvdb', 'season', 'episode', 'tvshowtitle', 'premiered', 'select']:
 			if rtype == "show" and p == "tvshowtitle":
 				try: r += '&' + p + '=' + quote_plus(rlist[rand]['title'])
 				except: pass
 			else:
-				try: r += '&' + p + '=' + quote_plus(rlist[rand][p])
+				try: r += '&' + p + '=' + quote_plus(str(rlist[rand][p]))
 				except: pass
+
+		xbmc.log('r=%s' % r, 1)
 		try: r += '&meta=' + quote_plus(jsdumps(rlist[rand]))
 		except: r += '&meta=' + quote_plus("{}")
 		if rtype == "movie":
-			try: control.notification(title=32536, message=rlist[rand]['title'])
+			try: control.notification(title=32536, message='%s (%s)' % (rlist[rand]['title'], rlist[rand]['year']))
 			except: pass
 		elif rtype == "episode":
-			try: control.notification(title=32536, message=rlist[rand]['tvshowtitle']+" - Season "+rlist[rand]['season']+" - "+rlist[rand]['title'])
+			try: control.notification(title=32536, message='%s - %01dx%02d - %s' % (rlist[rand]['tvshowtitle'], int(rlist[rand]['season']), int(rlist[rand]['episode']), rlist[rand]['title']))
 			except: pass
 		control.execute('RunPlugin(%s)' % r)
 	except:
