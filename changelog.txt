@@ -1,3 +1,6 @@
+[B][COLOR red]Update - v5.0.2 - April 25, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed two typos in recent library module update.[/I]
+
 [B][COLOR red]Update - v5.0.1 - April 25, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed "Play Random" failure.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Trakt User list setting wrong key value for "premiered" from

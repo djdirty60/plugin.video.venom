@@ -325,7 +325,7 @@ class libmovies:
 			control.notification(message=32645)
 		from resources.lib.menus import movies
 		items = movies.Movies().get(url, create_directory=False)
-		if mot items: items = []
+		if not items: items = []
 		total_added = 0
 		for i in items:
 			try:
@@ -379,7 +379,8 @@ class libmovies:
 				items = tmdb.Movies().tmdb_collections_list(url)
 		except:
 			log_utils.error()
-		if not items: if general_notification: return control.notification(title=message, message=33049)
+		if not items:
+			if general_notification: return control.notification(title=message, message=33049)
 		contains = lib_tools().ckKodiSources()
 		total_added = 0
 		for i in items:
@@ -538,7 +539,7 @@ class libtvshows:
 				except:
 					lib = []
 				for i in items:
-					if lib != []: continue
+					if lib != []: continue # this prevents missing eps to get added
 					if control.monitor.abortRequested(): return sysexit()
 					try:
 						if str(i.get('season')) == '0' and self.include_special == 'false': continue
@@ -798,17 +799,15 @@ class libepisodes:
 					if not premiered and self.include_unknown == 'false': continue
 					libtvshows().strmFile(i)
 					files_added += 1
-					if service_notification : control.notification(title=item['tvshowtitle'], message=32678)
+					if service_notification: control.notification(title=item['tvshowtitle'], message=32678)
 				except:
 					log_utils.error()
 		try: dbcur.close() ; dbcon.close()
 		except: pass
-		if files_added == 0 and service_notification : control.notification(message=32109)
+		if files_added == 0 and service_notification: control.notification(message=32109)
 		if self.library_update == 'true' and not control.condVisibility('Library.IsScanningVideo') and files_added > 0:
 			if contains:
-				if service_notification:
-					control.notification(message=32554)
+				if service_notification: control.notification(message=32554)
 				control.sleep(10000)
 				control.execute('UpdateLibrary(video)')
-			elif service_notification:
-				control.notification(message=32103)
+			elif service_notification: control.notification(message=32103)
