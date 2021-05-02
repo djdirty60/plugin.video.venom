@@ -10,7 +10,7 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import quote_plus
 from resources.lib.database import cache, metacache
-from resources.lib.indexers import tmdb as tmdb_indexer
+from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import control
@@ -245,14 +245,13 @@ class tvshows:
 		self.type = type
 		self.lang = control.apiLanguage()['tvdb']
 		self.notifications = notifications
-		self.disable_fanarttv = control.setting('disable.fanarttv')
-
 		self.base_link = 'https://api.tvmaze.com'
 		self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed=cast'
 		# self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed[]=seasons&embed[]=cast' #TVMaze throttles embedding multiple links allot
 		self.tvdb_key = control.setting('tvdb.api.key')
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
+		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 
 	def tvmaze_list(self, url):
 		try:
@@ -360,8 +359,7 @@ class tvshows:
 				# # values['counts'] = tmdb_indexer.TVshows().seasonCountParse(values.get('seasons'))  # this is now parsed from TMDB's original showSeasons call
 				remove_keys = ('seasons',) # pop() keys from showSeasons that are not needed anymore
 				for k in remove_keys: values.pop(k, None)
-				if self.disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values} # DO NOT move this after "values = dict()" below or it becomes the same object and "del meta['item']['next']" removes it from both

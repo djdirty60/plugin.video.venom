@@ -10,9 +10,8 @@ import re
 try: #Py2
 	from urllib import unquote, urlencode
 	from urlparse import parse_qsl, parse_qs, urlparse
-except: #Py3
+except ImportError: #Py3
 	from urllib.parse import unquote, urlencode, parse_qsl, parse_qs, urlparse
-
 from resources.lib.modules import client
 
 

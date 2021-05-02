@@ -23,7 +23,6 @@ def get(title):
 		log_utils.error()
 		return title
 
-
 def normalize(title):
 	try:
 		title = ''.join(c for c in unicodedata.normalize('NFKD', py_tools.ensure_text(py_tools.ensure_str(title))) if unicodedata.category(c) != 'Mn')

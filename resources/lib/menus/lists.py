@@ -309,7 +309,8 @@ class indexer:
 	def tvtuner(self, url):
 		try:
 			preset = re.findall(r'<preset>(.+?)</preset>', url)[0]
-			today = ((datetime.utcnow() - timedelta(hours=5))).strftime('%Y-%m-%d')
+			# today = ((datetime.utcnow() - timedelta(hours=5))).strftime('%Y-%m-%d')
+			today = datetime.now().strftime('%Y-%m-%d')
 			today = int(re.sub(r'[^0-9]', '', str(today)))
 			url, imdb, tvdb, tvshowtitle, year, thumbnail, fanart = re.findall(r'<url>(.+?)</url>', url)[0],
 					re.findall(r'<imdb>(.+?)</imdb>', url)[0], 

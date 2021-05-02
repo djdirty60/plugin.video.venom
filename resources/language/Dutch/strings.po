@@ -1244,124 +1244,152 @@ msgid "Auto Update Service"
 msgstr "Automatische updates"
 
 msgctxt "#32546"
-msgid "Show notifications during update"
-msgstr ""
+msgid "Show service notifications during update"
+msgstr "Servicemeldingen weergeven tijdens update"
 
 msgctxt "#32547"
 msgid "Update library after adding content"
-msgstr ""
+msgstr "Update bibliotheek na het toevoegen van inhoud"
 
 msgctxt "#32548"
 msgid "Avoid creating duplicate content"
-msgstr ""
+msgstr "Vermijd het maken van dubbele inhoud"
 
 msgctxt "#32549"
 msgid "Check movie before adding it"
-msgstr ""
+msgstr "Controleer de film voordat u deze toevoegt"
 
 msgctxt "#32550"
 msgid "Check first episode of season before adding it"
-msgstr ""
+msgstr "Controleer de eerste aflevering van het seizoen voordat u deze toevoegt"
 
 msgctxt "#32551"
 msgid "Add to Library"
-msgstr ""
+msgstr "Toevoegen aan bibliotheek"
 
 msgctxt "#32552"
-msgid "Adding to library..."
-msgstr ""
+msgid "Checking library..."
+msgstr "Bibliotheek controleren ..."
 
 msgctxt "#32553"
-msgid "Updating TV shows..."
-msgstr ""
+msgid "Updating TV Shows In Local Library..."
+msgstr "Tv-programma's in de lokale bibliotheek bijwerken ..."
 
 msgctxt "#32554"
-msgid "Process Complete"
-msgstr ""
+msgid "Adding to Library..."
+msgstr "Toevoegen aan bibliotheek ..."
 
 msgctxt "#32555"
 msgid "Are you sure?"
-msgstr ""
+msgstr "Weet je het zeker?"
 
 msgctxt "#32556"
 msgid "[B]VENOM[/B] : Library"
-msgstr ""
+msgstr "[B] VENOM [/ B]: Bibliotheek"
 
 msgctxt "#32557"
 msgid "[B]LIBRARY[/B] : Settings"
-msgstr ""
+msgstr "[B] BIBLIOTHEEK [/ B]: instellingen"
 
 msgctxt "#32558"
 msgid "[B]VENOM[/B] : Update library..."
-msgstr ""
+msgstr "[B] VENOM [/ B]: Update bibliotheek ..."
 
 msgctxt "#32559"
 msgid "[B]VENOM[/B] : Movie folder..."
-msgstr ""
+msgstr "[B] VENOM [/ B]: Filmmap ..."
 
 msgctxt "#32560"
 msgid "[B]VENOM[/B] : TV folder..."
-msgstr ""
+msgstr "[B] VENOM [/ B]: tv-map ..."
 
 msgctxt "#32561"
 msgid "[B]TRAKT[/B] : Import Collection..."
-msgstr ""
+msgstr "[B] TRAKT [/ B]: Collectie importeren ..."
 
 msgctxt "#32562"
 msgid "[B]TRAKT[/B] : Import Watchlist..."
-msgstr ""
+msgstr "[B] TRAKT [/ B]: Volglijst importeren ..."
 
 msgctxt "#32563"
 msgid "[B]TRAKT[/B] : Import TV Collection..."
-msgstr ""
+msgstr "[B] TRAKT [/ B]: TV-collectie importeren ..."
 
 msgctxt "#32564"
 msgid "[B]TRAKT[/B] : Import TV Watchlist..."
-msgstr ""
+msgstr "[B] TRAKT [/ B]: tv-kijklijst importeren ..."
 
 msgctxt "#32565"
 msgid "Include episodes with unknown air dates"
-msgstr ""
+msgstr "Voeg afleveringen toe met onbekende uitzenddatums"
 
 msgctxt "#32570"
 msgid "Show unaired seasons/episodes"
-msgstr ""
+msgstr "Toon unaired seizoenen / afleveringen"
 
 msgctxt "#32571"
 msgid "Hide movies in cinema"
-msgstr ""
+msgstr "Verberg films in de bioscoop"
 
 msgctxt "#32572"
-msgid "Protected Link. Please enter account credentials in the settings."
+msgid "Trakt Progress Show unaired episodes"
+msgstr "Trakt Progress Show unaired episodes"
+
+msgctxt "#32573"
+msgid "Trakt Upcoming Progress prepend date"
+msgstr "Trakteer aanstaande voortgangsdatum "
+
+msgctxt "#32574"
+msgid ""
+msgstr ""
+
+msgctxt "#32575"
+msgid ""
+msgstr ""
+
+msgctxt "#32576"
+msgid ""
+msgstr ""
+
+msgctxt "#32577"
+msgid ""
+msgstr ""
+
+msgctxt "#32578"
+msgid ""
+msgstr ""
+
+msgctxt "#32579"
+msgid ""
 msgstr ""
 
 msgctxt "#32580"
-msgid "Films/TV Movies"
+msgid ""
 msgstr ""
 
 msgctxt "#32581"
-msgid "Results Limit"
+msgid ""
 msgstr ""
 
 msgctxt "#32582"
-msgid "Personal API keys provide quicker API responses."
+msgid ""
 msgstr ""
 
 msgctxt "#32583"
-msgid "Become a VIP member for many benefits at: https://fanart.tv/vip"
+msgid ""
 msgstr ""
 
 msgctxt "#32584"
 msgid "Sort order for Trakt Watched Progress"
-msgstr ""
+msgstr "Sorteervolgorde voor Trakt Watched Progress"
 
 msgctxt "#32585"
 msgid "Recently aired"
-msgstr ""
+msgstr "Onlangs uitgezonden"
 
 msgctxt "#32586"
 msgid "Recently watched"
-msgstr ""
+msgstr "Onlangs bekeken"
 
 msgctxt "#32587"
 msgid ""
@@ -1369,15 +1397,15 @@ msgstr ""
 
 msgctxt "#32588"
 msgid "Debrid(Hoster) Source Color"
-msgstr ""
+msgstr "Debrid (Hoster) bronkleur"
 
 msgctxt "#32589"
 msgid "[COLOR blue]Blue[/COLOR]"
-msgstr ""
+msgstr "[COLOR blauw] Blauw [/ COLOR]"
 
 msgctxt "#32590"
 msgid "[COLOR red]Red[/COLOR]"
-msgstr ""
+msgstr "[COLOR red] Rood [/ COLOR]"
 
 msgctxt "#32591"
 msgid "[COLOR yellow]Yellow[/COLOR]"

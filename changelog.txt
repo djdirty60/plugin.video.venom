@@ -1,3 +1,28 @@
+[B][COLOR red]Update - v5.0.3 - May 02, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added "item.setProperty ('SpecialSort', 'bottom')" to all Next items for
+    skins supporting a random sort order and keeping the Next
+    indicator at the bottom of the list items.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed "Upcoming Progress" list item not displayed when the premiered
+    date matched your system date.  Now the Trakt air time for
+    the given day is taken into account.  If your system clock is
+    less than the episode air time then the item is now considered
+    unaired and displayed.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed "Progress" list item not displayed when the premiered date
+    matched your system date. Now the Trakt air time for the given
+    day is taken into account. If your system clock is greater than
+    the episode air time then the item is now considered
+    aired and displayed.[/I]
+[COLOR yellow]--[/COLOR][I] Added setting to "prepend premiered date" to Upcoming Episodes".
+    See help file beneath setting in Trakt category for more info[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Search where random phrases may return multiple same title
+    cases.  This occurred  where Trakt id lookup may return similar
+    titles that were in base search request.  This match is now
+    resolved to show the main returned item[/I]
+[COLOR yellow]--[/COLOR][I] Trakt history for Movies and Episodes is now paginated to 40 items
+    per page allowing full advancement to your complete history.
+    The Trakt date with utc timestamp is appended to label.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed ".setProperties()" issue breaking Kodi 17.[/I]
+
 [B][COLOR red]Update - v5.0.2 - April 25, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed two typos in recent library module update.[/I]
 

@@ -28,8 +28,6 @@ url = params.get('url')
 query = params.get('query')
 source = params.get('source')
 
-windowedtrailer = params.get('windowedtrailer')
-windowedtrailer = int(windowedtrailer) if windowedtrailer in ("0","1") else 0
 control.refresh_playAction()
 
 if action is None:
@@ -542,7 +540,8 @@ if action and action.startswith('tools_'):
 		help.get(name)
 
 	elif action == 'tools_LanguageInvoker':
-		control.set_reuselanguageinvoker()
+		from resources.lib.modules import language_invoker
+		language_invoker.set_reuselanguageinvoker()
 
 	elif action == 'tools_toolNavigator':
 		from resources.lib.menus import navigator
@@ -566,22 +565,25 @@ if action and action.startswith('tools_'):
 		views.clearViews()
 
 	elif action == 'tools_cleanSettings':
-		control.clean_settings()
+		from resources.lib.modules import clean_settings
+		clean_settings.clean_settings()
 
 	elif action == 'tools_openMyAccount':
 		from myaccounts import openMASettings
+		from resources.lib.modules import my_accounts
 		openMASettings(query)
 		control.sleep(500)
 		while control.condVisibility('Window.IsVisible(addonsettings)') or control.homeWindow.getProperty('myaccounts.active') == 'true':
 			control.sleep(500)
 		control.sleep(100)
-		control.syncMyAccounts()
+		my_accounts.syncMyAccounts()
 		control.sleep(100)
 		if params.get('opensettings') == 'true':
 			control.openSettings(params.get('query2'), 'plugin.video.venom')
 
 	elif action == 'tools_syncMyAccount':
-		control.syncMyAccounts()
+		from resources.lib.modules import my_accounts
+		my_accounts.syncMyAccounts()
 		if params.get('opensettings') == 'true':
 			control.openSettings(query, 'plugin.video.venom')
 
@@ -683,6 +685,8 @@ elif action == 'alterSources':
 
 elif action == 'trailer':
 	from resources.lib.modules import trailer
+	windowedtrailer = params.get('windowedtrailer')
+	windowedtrailer = int(windowedtrailer) if windowedtrailer in ("0","1") else 0
 	trailer.Trailer().play(type, name, year, url, imdb, windowedtrailer)
 
 elif action == 'showDebridPack':
@@ -807,43 +811,43 @@ if action and action.startswith('library_'):
 		navigator.Navigator().library()
 
 	elif action == 'library_movieToLibrary':
-		from resources.lib.modules import libtools
-		libtools.libmovies().add(name, title, year, imdb, tmdb)
+		from resources.lib.modules import library
+		library.libmovies().add(name, title, year, imdb, tmdb)
 
 	elif action == 'library_moviesToLibrary':
-		from resources.lib.modules import libtools
-		libtools.libmovies().range(url, name)
+		from resources.lib.modules import library
+		library.libmovies().range(url, name)
 
 	elif action == 'library_moviesListToLibrary':
 		from resources.lib.menus import movies
 		movies.Movies().moviesListToLibrary(url)
 
 	elif action == 'library_moviesToLibrarySilent':
-		from resources.lib.modules import libtools
-		libtools.libmovies().silent(url)
+		from resources.lib.modules import library
+		library.libmovies().silent(url)
 
 	elif action == 'library_tvshowToLibrary':
-		from resources.lib.modules import libtools
-		libtools.libtvshows().add(tvshowtitle, year, imdb, tmdb, tvdb)
+		from resources.lib.modules import library
+		library.libtvshows().add(tvshowtitle, year, imdb, tmdb, tvdb)
 
 	elif action == 'library_tvshowsToLibrary':
-		from resources.lib.modules import libtools
-		libtools.libtvshows().range(url, name)
+		from resources.lib.modules import library
+		library.libtvshows().range(url, name)
 
 	elif action == 'library_tvshowsListToLibrary':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().tvshowsListToLibrary(url)
 
 	elif action == 'library_tvshowsToLibrarySilent':
-		from resources.lib.modules import libtools
-		libtools.libtvshows().silent(url)
+		from resources.lib.modules import library
+		library.libtvshows().silent(url)
 
 	elif action == 'library_update':
 		control.notification(message=32085)
-		from resources.lib.modules import libtools
-		libtools.libepisodes().update()
-		libtools.libmovies().list_update()
-		libtools.libtvshows().list_update()
+		from resources.lib.modules import library
+		library.libepisodes().update()
+		library.libmovies().list_update()
+		library.libtvshows().list_update()
 		while True:
 			if control.condVisibility('Library.IsScanningVideo'):
 				control.sleep(3000)
@@ -853,16 +857,16 @@ if action and action.startswith('library_'):
 		control.notification(message=32086)
 
 	elif action == 'library_clean':
-		from resources.lib.modules import libtools
-		libtools.lib_tools().clean()
+		from resources.lib.modules import library
+		library.lib_tools().clean()
 
 	elif action == 'library_setup':
-		from resources.lib.modules import libtools
-		libtools.lib_tools().total_setup()
+		from resources.lib.modules import library
+		library.lib_tools().total_setup()
 
 	elif action == 'library_service':
-		from resources.lib.modules import libtools
-		libtools.lib_tools().service()
+		from resources.lib.modules import library
+		library.lib_tools().service()
 
 ####################################################
 #---Cache

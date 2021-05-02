@@ -11,6 +11,7 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import urlparse
 from resources.lib.database import cache, metacache
+from resources.lib.indexers import fanarttv
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -23,11 +24,10 @@ class Movies:
 		self.count = 40
 		self.list = []
 		self.meta = []
-		self.disable_fanarttv = control.setting('disable.fanarttv')
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
-		self.date_time = datetime.utcnow()
+		self.date_time = datetime.now()
 		self.lang = control.apiLanguage()['trakt']
-
+		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.tmdb_key = control.setting('tmdb.api.key')
 		if not self.tmdb_key:
@@ -175,9 +175,7 @@ class Movies:
 						'fanart': '', 'fanart2': '', 'fanart3': '', 'clearlogo': '', 'clearart': '', 'landscape': '',
 						'metacache': False, 'next': next}
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.tmdb_key, 'item': values}
-
-				if self.disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art:
 						values.update(extended_art)
@@ -361,8 +359,7 @@ class Movies:
 						'writer': writer, 'castandart': castandart, 'plot': plot, 'poster2': '', 'poster3': poster3,
 						'banner': '', 'banner2': '', 'fanart2': '', 'fanart3': fanart3, 'clearlogo': '', 'clearart': '', 'landscape': '',
 						'discart': '', 'mediatype': 'movie', 'trailer': trailer, 'metacache': False}
-			if self.disable_fanarttv != 'true':
-				from resources.lib.indexers import fanarttv
+			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: item.update(extended_art)
 			if not item.get('landscape'): item.update({'landscape': fanart3})
@@ -379,8 +376,6 @@ class tvshows:
 		self.count = 40
 		self.list = []
 		self.meta = []
-		self.disable_fanarttv = control.setting('disable.fanarttv')
-
 		self.lang = control.apiLanguage()['tvdb']
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.utcnow()

@@ -3,7 +3,7 @@
 	Venom Add-on
 """
 
-from datetime import datetime, timedelta # timedelta could be removed
+from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
@@ -14,6 +14,7 @@ except ImportError: #Py3
 from resources.lib.database import cache
 from resources.lib.indexers import tmdb as tmdb_indexer
 from resources.lib.modules import cleangenre
+# from resources.lib.modules import cleanplot
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import playcount
@@ -27,10 +28,10 @@ class Seasons:
 		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.season_special = False
-		self.disable_fanarttv = control.setting('disable.fanarttv')
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
-		self.date_time = datetime.utcnow()
+		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
+
 		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w300'
 		self.trakt_user = control.setting('trakt.user').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
@@ -62,7 +63,6 @@ class Seasons:
 		showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 		if not showSeasons: return
 		if art: art = jsloads(art) # prob better off leaving this as it's own dict so seasonDirectory list builder can just pull that out and pass to .setArt()
-
 		for item in showSeasons['seasons']: # seasons not parsed in tmdb module so ['seasons'] here is direct json response data
 			try:
 				if not self.showspecials and item['season_number'] == 0: continue
@@ -83,13 +83,12 @@ class Seasons:
 						if not self.showunaired: continue
 				except:
 					log_utils.error()
-
 				values['total_episodes'] = item['episode_count']
 				values['season_title'] = item['name']
 				values['plot'] = item['overview'] or showSeasons['plot']
 				try: values['poster'] = self.tmdb_poster_path + item['poster_path']
 				except: values['poster'] = ''
-				if not values['poster'] and art: values['poster'] = art['poster']
+				if not values['poster'] and art: values['poster'] = art['poster'] if 'poster' in art else ''
 				values['season_poster'] = values['poster']
 				values['season'] = str(int(item['season_number']))
 				if art:
@@ -151,8 +150,8 @@ class Seasons:
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				# setting mediatype to "season" causes "Infomation" and "play trailer" to not be available in some skins
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
-				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
-				except: pass
+				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
+				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				# First check thumbs, since they typically contains the seasons poster. The normal poster contains the show poster.
@@ -202,7 +201,8 @@ class Seasons:
 						count = playcount.getSeasonCount(imdb, season, self.season_special) # self.season_special is just a flag to set if a season special exists and we are set to show it
 						if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 					except: pass
-				item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				except: pass #da hell with 17 users
 				item.setProperty('IsPlayable', 'false')
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				try: # Year is the shows year, not the seasons year. Extract year from premier date for InfoLabels to have "season_year".

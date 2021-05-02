@@ -82,9 +82,8 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		string_list.append(string5.replace('<<E>>', str(episode).zfill(2)))
 
 		final_string = '|'.join(string_list)
-		log_utils.log('release_title=%s' % release_title)
-		log_utils.log('final_string=%s' % final_string)
-
+		# log_utils.log('release_title=%s' % release_title)
+		# log_utils.log('final_string=%s' % final_string)
 		reg_pattern = re.compile(final_string)
 		if split:
 			return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]
@@ -119,9 +118,12 @@ def extras_filter():
 	return ['sample', 'extra', 'extras', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'bloopers', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer']
 
 def supported_video_extensions():
-	import xbmc
-	supported_video_extensions = xbmc.getSupportedMedia('video').split('|')
-	return [i for i in supported_video_extensions if i != '' and i != '.zip']
+	try:
+		from xbmc import getSupportedMedia
+		supported_video_extensions = getSupportedMedia('video').split('|')
+		return [i for i in supported_video_extensions if i != '' and i != '.zip']
+	except:
+		log_utils.error()
 
 def getFileType(name_info=None, url=None):
 	try:
@@ -200,3 +202,21 @@ def url_strip(url):
 	except:
 		log_utils.error()
 		return None
+
+def copy2clip(txt):
+	from sys import platform as sys_platform
+	platform = sys_platform
+	if platform == "win32":
+		try:
+			from subprocess import check_call
+			cmd = "echo " + txt.strip() + "|clip"
+			return check_call(cmd, shell=True)
+		except:
+			log_utils.error('Failure to copy to clipboard')
+	elif platform == "linux2":
+		try:
+			from subprocess import Popen, PIPE
+			p = Popen(["xsel", "-pi"], stdin=PIPE)
+			p.communicate(input=txt)
+		except:
+			log_utils.error('Failure to copy to clipboard')

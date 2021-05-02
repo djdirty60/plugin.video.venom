@@ -228,7 +228,7 @@ def get_connection_bookmarks():
 ##################
 def clear_local_bookmarks(): # clear all venom bookmarks from kodi database
 	try:
-		dbcon = db.connect(control.get_video_database_path())
+		dbcon = db.connect(get_video_database_path())
 		dbcur = dbcon.cursor()
 		dbcur.execute('''SELECT * FROM files WHERE strFilename LIKE "%plugin.video.venom%"''')
 		file_ids = [str(i[0]) for i in dbcur.fetchall()]
@@ -242,7 +242,7 @@ def clear_local_bookmarks(): # clear all venom bookmarks from kodi database
 
 def clear_local_bookmark(url): # clear all item specific bookmarks from kodi database
 	try:
-		dbcon = db.connect(control.get_video_database_path())
+		dbcon = db.connect(get_video_database_path())
 		dbcur = dbcon.cursor()
 		dbcur.execute('''SELECT * FROM files WHERE strFilename LIKE "%{}%"'''.format(url))
 		file_ids = [str(i[0]) for i in dbcur.fetchall()]
@@ -254,6 +254,14 @@ def clear_local_bookmark(url): # clear all item specific bookmarks from kodi dat
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
+
+def get_video_database_path():
+	database_path = control.absPath(control.joinPath(control.dataPath, '..', '..', 'Database', ))
+	kodi_version = control.getKodiVersion()
+	if kodi_version == 17: database_path = control.joinPath(database_path, 'MyVideos107.db')
+	elif kodi_version == 18: database_path = control.joinPath(database_path, 'MyVideos116.db')
+	elif kodi_version == 19: database_path = control.joinPath(database_path, 'MyVideos119.db')
+	return database_path
 ##################
 def cache_version_check():
 	try:

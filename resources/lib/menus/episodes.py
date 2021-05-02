@@ -13,8 +13,9 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache
-from resources.lib.indexers import tmdb as tmdb_indexer
+from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
+# from resources.lib.modules import cleanplot
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -34,9 +35,9 @@ class Episodes:
 		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
-		self.disable_fanarttv = control.setting('disable.fanarttv')
-
-		self.date_time = datetime.utcnow()
+		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
+		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
+		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
 		self.trakt_user = control.setting('trakt.user').strip()
@@ -46,10 +47,10 @@ class Episodes:
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000'
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/episodes'
-		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=200'
+		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=40&page=1'
 		self.progress_link = 'https://api.trakt.tv/users/me/watched/shows'
 		self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
-		self.mycalendar_link = 'https://api.trakt.tv/calendars/my/shows/date[30]/31/'
+		self.mycalendar_link = 'https://api.trakt.tv/calendars/my/shows/date[30]/32/'
 		self.traktunfinished_link = 'https://api.trakt.tv/sync/playback/episodes?limit=40'
 
 		self.tvmaze_link = 'https://api.tvmaze.com'
@@ -60,7 +61,6 @@ class Episodes:
 		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
 		self.showspecials = control.setting('tv.specials') == 'true'
 		self.highlight_color = control.getColor(control.setting('highlight.color'))
-
 
 	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, idx=True, create_directory=True):
 		self.list = []
@@ -89,7 +89,6 @@ class Episodes:
 			else: # normal full episode list
 				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 			if self.list is None: self.list = []
-
 			if create_directory: self.episodeDirectory(self.list)
 			return self.list
 		except:
@@ -136,6 +135,7 @@ class Episodes:
 				try:
 					if not self.list: raise Exception()
 					for i in range(len(self.list)):
+						# self.list[i]['traktUpcomingProgress'] = True
 						if 'premiered' not in self.list[i]: self.list[i]['premiered'] = ''
 					self.list = sorted(self.list, key=lambda k: k['premiered'] if k['premiered'] else '3021-01-01') # hack to force unknown premiered dates to bottom of list.
 				except: pass
@@ -153,44 +153,40 @@ class Episodes:
 		try:
 			try: url = getattr(self, url + '_link')
 			except: pass
-			activity = trakt.getActivity()
-
+			isTraktHistory = (url.split('&page=')[0] in self.trakthistory_link)
 			if self.trakt_link in url and url == self.progress_link:
 				direct = control.setting('tvshows.direct') == 'true'
 				try:
-					if activity > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct): raise Exception()
+					if trakt.getActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct): raise Exception()
 					self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct)
 				except:
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct)
 				self.sort(type='progress')
-
 			elif self.trakt_link in url and url == self.mycalendar_link:
 				self.list = cache.get(self.trakt_episodes_list, 0.3, url, self.trakt_user, self.lang)
 				self.sort(type='calendar')
-
-			elif self.trakt_link in url and url == self.trakthistory_link:
-				self.list = cache.get(self.trakt_episodes_list, 0.3, url, self.trakt_user, self.lang)
+			elif isTraktHistory:
+				try:
+					if trakt.getActivity() > cache.timeout(self.trakt_episodes_list, url, self.trakt_user, self.lang): raise Exception()
+					self.list = cache.get(self.trakt_episodes_list, 24, url, self.trakt_user, self.lang)
+				except:
+					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
 				for i in range(len(self.list)): self.list[i]['traktHistory'] = True
 				self.sort(type='progress')
-
 			elif self.trakt_link in url and '/users/' in url:
 				self.list = cache.get(self.trakt_episodes_list, 0.3, url, self.trakt_user, self.lang)
 				self.sort(type='calendar')
-
 			elif self.trakt_link in url: # I don't think this is used anymore
-				log_utils.log('url = %s' % url, __name__)
-				self.list = cache.get(self.trakt_list, 1, url, self.trakt_user, True) # count=True may be broken, check
-
+				self.list = cache.get(self.trakt_list, 1, url, self.trakt_user, True)
 			elif self.tvmaze_link in url and url == self.added_link:
 				urls = [i['url'] for i in self.calendars(idx=False)][:5]
 				self.list = []
 				for url in urls: self.list += cache.get(self.tvmaze_list, 720, url, True)
-
 			elif self.tvmaze_link in url:
 				self.list = cache.get(self.tvmaze_list, 1, url, False)
-
 			if self.list is None: self.list = []
-			self.episodeDirectory(self.list, unfinished=False, next=False)
+			hasNext = True if isTraktHistory else False
+			self.episodeDirectory(self.list, unfinished=False, next=hasNext)
 			return self.list
 		except:
 			log_utils.error()
@@ -383,11 +379,11 @@ class Episodes:
 		for item in result:
 			try:
 				values = {} ; num_1 = 0
-				for i in range(0, len(item['seasons'])):
-					if item['seasons'][i]['number'] > 0: num_1 += len(item['seasons'][i]['episodes'])
-				num_2 = int(item['show']['aired_episodes'])
-				if upcoming: pass
-				elif num_1 >= num_2 and not progress_showunaired: continue
+				if not upcoming and item['show']['status'].lower() == 'ended': # only chk ended cases for all watched otherwise airing today cases get dropped.
+					for i in range(0, len(item['seasons'])):
+						if item['seasons'][i]['number'] > 0: num_1 += len(item['seasons'][i]['episodes'])
+					num_2 = int(item['show']['aired_episodes']) # trakt slow to update "aired_episodes" count on day item airs
+					if num_1 >= num_2: continue
 				season_sort = sorted(item['seasons'][:], key=lambda k: k['number'], reverse=False) # trakt sometimes places season0 at end and episodes out of order. So we sort it to be sure.
 				values['snum'] = season_sort[-1]['number']
 				episode = [x for x in season_sort[-1]['episodes'] if 'number' in x]
@@ -398,7 +394,6 @@ class Episodes:
 				except: values['lastplayed'] = ''
 				values['tvshowtitle'] = py_tools.ensure_str(item['show']['title'])
 				if not values['tvshowtitle']: continue
-				# log_utils.log('lastplayed = %s for tvshowtitle = %s' % (values['lastplayed'], values['tvshowtitle']))
 				ids = item.get('show', {}).get('ids', {})
 				values['imdb'] = str(ids.get('imdb', '')) if ids.get('imdb') else ''
 				values['tmdb'] = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
@@ -453,10 +448,15 @@ class Episodes:
 				for k in remove_keys: values.pop(k, None)
 				values['unaired'] = ''
 				if upcoming:
+					values['traktUpcomingProgress'] = True
 					try:
 						if values['status'].lower() == 'ended': return
 						elif not values['premiered']: values['unaired'] = 'true'
 						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))): values['unaired'] = 'true'
+						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) == int(re.sub(r'[^0-9]', '', str(self.today_date))):
+							time_now = (self.date_time).strftime('%X')
+							if int(re.sub(r'[^0-9]', '', str(values['airtime']))) > int(re.sub(r'[^0-9]', '', str(time_now))[:4]): values['unaired'] = 'true'
+							else: return
 						else: return
 					except:
 						log_utils.error()
@@ -466,23 +466,25 @@ class Episodes:
 						elif not values['premiered']:
 							values['unaired'] = 'true'
 							if not progress_showunaired: return
-							pass
 						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
 							values['unaired'] = 'true'
 							if not progress_showunaired: return
+						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) == int(re.sub(r'[^0-9]', '', str(self.today_date))):
+							time_now = (self.date_time).strftime('%X')
+							if int(re.sub(r'[^0-9]', '', str(values['airtime']))) > int(re.sub(r'[^0-9]', '', str(time_now))[:4]):
+								values['unaired'] = 'true'
+								if not progress_showunaired: return
 					except:
 						log_utils.error()
 				if not direct: values['action'] = 'episodes' # for direct progress scraping
 				values['traktProgress'] = True # for direct progress scraping and multi episode watch counts indicators
 				values['extended'] = True # used to bypass calling "super_info()", super_info() no longer used as of 4-12-21 so this could be removed.
-				if self.disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				self.list.append(values)
 			except:
 				log_utils.error()
-		items = items[:len(items)]
 		threads = []
 		for i in items:
 			threads.append(workers.Thread(items_list, i))
@@ -529,7 +531,7 @@ class Episodes:
 				tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
 				tvdb = str(ids.get('tvdb', '')) if ids.get('tvdb') else ''
 				episodeIDS = item.get('episode').get('ids', {}) # not used anymore
-				premiered = item.get('episode').get('first_aired')
+				premiered = item.get('episode').get('first_aired') #leave timestamp for better sort of the day
 				added = item['episode']['updated_at'] or item.get('show').get('updated_at', '')
 				try: lastplayed = item.get('watched_at', '')
 				except: lastplayed = ''
@@ -569,7 +571,7 @@ class Episodes:
 				itemlist.append(values)
 			except:
 				log_utils.error()
-		itemlist = list(reversed(itemlist))
+		# itemlist = list(reversed(itemlist))
 		return itemlist
 
 	def trakt_episodes_list(self, url, user, lang, direct=True):
@@ -589,11 +591,10 @@ class Episodes:
 				remove_keys = ('episodes',) # pop() keys from seasonEpisodes that are not needed anymore
 				for k in remove_keys: values.pop(k, None)
 				try:
-					art = cache.get(tmdb_indexer.TVshows().get_art, 96, tmdb) # already forget wtf I use this for?
+					art = cache.get(tmdb_indexer.TVshows().get_art, 96, tmdb)
 					values.update(art)
 				except: pass
-				if self.disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				values['extended'] = True # used to bypass calling "super_info()", super_info() no longer used as of 4-12-21 so this could be removed.
@@ -601,7 +602,7 @@ class Episodes:
 				self.list.append(values)
 			except:
 				log_utils.error()
-		items = items[:len(items)]
+		# items = items[:len(items)]
 		threads = []
 		for i in items:
 			threads.append(workers.Thread(items_list, i))
@@ -680,8 +681,7 @@ class Episodes:
 					if not values['thumb']: values['thumb'] = values['poster']
 					values['fanart'] = values['thumb']
 					values['season_poster'] = values['poster']
-					if self.disable_fanarttv != 'true':
-						from resources.lib.indexers import fanarttv
+					if not self.disable_fanarttv:
 						extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 						if extended_art: values.update(extended_art)
 				values['imdb'] = imdb
@@ -697,6 +697,7 @@ class Episodes:
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide()
 			control.notification(title=32326, message=33049)
+		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		if not is_widget: control.playlist.clear()
@@ -717,6 +718,7 @@ class Episodes:
 			try:
 				if '/users/me/history/' in items[0]['next']: multi = True
 			except: pass
+		upcoming_prependDate = control.setting('trakt.UpcomingProgress.prependDate') == 'true'
 		try: sysaction = items[0]['action']
 		except: sysaction = ''
 		multi_unwatchedEnabled = control.setting('multi.unwatched.enabled') == 'true'
@@ -772,8 +774,8 @@ class Episodes:
 				systitle, systvshowtitle, syspremiered = quote_plus(title), quote_plus(tvshowtitle), quote_plus(premiered)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'episode', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
-				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
-				except: pass
+				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
+				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				try: meta.update({'title': i['label']})
@@ -885,11 +887,11 @@ class Episodes:
 							count = playcount.getShowCount(indicators, imdb, tvdb)
 							if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 						except: pass
-				item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				except: pass #da hell with 17 users
 				item.setProperty('IsPlayable', isPlayable)
 				item.setProperty('tvshow.tmdb_id', tmdb)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
-				from resources.lib.modules.player import Bookmarks
 				blabel = tvshowtitle + ' S%02dE%02d' % (int(season), int(episode))
 				resumetime = Bookmarks().get(name=blabel, imdb=imdb, tmdb=tmdb, tvdb=tvdb, season=season, episode=episode, year=str(year), runtime=runtime, ck=True)
 				# item.setProperty('TotalTime', str(meta.get('duration'))) # Adding this property causes the Kodi bookmark CM items to be added
@@ -903,6 +905,12 @@ class Episodes:
 					meta.update({'year': season_year})
 				except: pass
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb})
+				if upcoming_prependDate and i.get('traktUpcomingProgress') is True:
+					try:
+						abrv_date = datetime.strptime(premiered, "%Y-%m-%d").strftime("%b %d")
+						new_title = '[COLOR %s][%s]  [/COLOR]' % (self.highlight_color, abrv_date) + title
+						meta.update({'title': new_title})
+					except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				item.addStreamInfo('video', {'codec': 'h264'})
 				item.addContextMenuItems(cm)
@@ -929,6 +937,7 @@ class Episodes:
 				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
+				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except: pass
 		if multi and multi_unwatchedEnabled: # Show multi episodes as show, in order to display unwatched count if enabled.

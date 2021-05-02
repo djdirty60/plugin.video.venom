@@ -1269,12 +1269,12 @@ msgid "Add to Library"
 msgstr "Zur Bibliothek hinzufügen"
 
 msgctxt "#32552"
-msgid "Adding to library..."
-msgstr "Hinzufügen zur Bibliothek..."
+msgid "Checking library..."
+msgstr "Bibliothek überprüfen ..."
 
 msgctxt "#32553"
-msgid "Updating TV shows..."
-msgstr "Aktualisiere TV-Serien..."
+msgid "Updating TV Shows In Local Library..."
+msgstr "Aktualisieren von TV-Sendungen in der lokalen Bibliothek ..."
 
 msgctxt "#32554"
 msgid "Process Complete"
@@ -1309,8 +1309,8 @@ msgid "[B]TRAKT[/B] : Import Collection..."
 msgstr "[B]TRAKT[/B] : Film-Sammlung importieren..."
 
 msgctxt "#32562"
-msgid "[B]TRAKT[/B] : Import Watchlist..."
-msgstr "[B]TRAKT[/B] : Film-Merkliste importieren..."
+msgid "[B]TRAKT[/B] : Import Movie Watchlist..."
+msgstr "[B] TRAKT [/ B]: Film-Watchlist importieren ..."
 
 msgctxt "#32563"
 msgid "[B]TRAKT[/B] : Import TV Collection..."
@@ -1333,24 +1333,52 @@ msgid "Hide movies in cinema"
 msgstr "Nur Filme älter als 90 Tage anzeigen"
 
 msgctxt "#32572"
-msgid "Protected Link. Please enter account credentials in the settings."
-msgstr "Geschützter Link. Bitte Accountdaten in den Einstellungen eintragen."
+msgid "Trakt Progress Show unaired episodes"
+msgstr "Trakt Progress Unaired Episoden anzeigen"
+
+msgctxt "#32573"
+msgid "Trakt Upcoming Progress prepend date"
+msgstr "Trakt Upcoming Progress Vorabdatum "
+
+msgctxt "#32574"
+msgid ""
+msgstr ""
+
+msgctxt "#32575"
+msgid ""
+msgstr ""
+
+msgctxt "#32576"
+msgid ""
+msgstr ""
+
+msgctxt "#32577"
+msgid ""
+msgstr ""
+
+msgctxt "#32578"
+msgid ""
+msgstr ""
+
+msgctxt "#32579"
+msgid ""
+msgstr ""
 
 msgctxt "#32580"
-msgid "Films/TV Movies"
-msgstr "Neue Releases"
+msgid ""
+msgstr ""
 
 msgctxt "#32581"
-msgid "Results Limit"
-msgstr "Limit für Ergebnisse"
+msgid ""
+msgstr ""
 
 msgctxt "#32582"
-msgid "Personal API keys provide quicker API responses."
-msgstr "Personliche API-Keys verkürzen die Antwortzeiten"
+msgid ""
+msgstr ""
 
 msgctxt "#32583"
-msgid "Become a VIP member for many benefits at: https://fanart.tv/vip"
-msgstr "Werde VIP-Mitglied, genieße viele Vorteile: https://fanart.tv/vip"
+msgid ""
+msgstr ""
 
 msgctxt "#32584"
 msgid "Sort order for Trakt Watched Progress"

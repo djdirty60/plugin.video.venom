@@ -13,8 +13,9 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import quote_plus, parse_qsl, urlparse
 from resources.lib.database import cache, metacache
-from resources.lib.indexers import tmdb as tmdb_indexer
+from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
+# from resources.lib.modules import cleanplot
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -28,13 +29,13 @@ from resources.lib.modules import workers
 class Collections:
 	def __init__(self):
 		self.list = []
-		self.disable_fanarttv = control.setting('disable.fanarttv')
+		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 		self.unairedcolor = control.getColor(control.setting('movie.unaired.identify'))
-		self.date_time = datetime.utcnow()
+		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
+		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 		self.lang = control.apiLanguage()['trakt']
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
-
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.tmdb_key = control.setting('tmdb.api.key')
 		if self.tmdb_key == '' or self.tmdb_key is None:
@@ -690,8 +691,7 @@ class Collections:
 			try: u = urlparse(url).netloc.lower()
 			except: pass
 			if u in self.tmdb_link and '/list/' in url:
-				from resources.lib.indexers import tmdb
-				self.list = cache.get(tmdb.Movies().tmdb_collections_list, 168, url)
+				self.list = cache.get(tmdb_indexer.Movies().tmdb_collections_list, 168, url)
 				for i in range(len(self.list)):
 					if 'premiered' not in self.list[i]: self.list[i]['premiered'] = ''
 				self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=False)
@@ -774,15 +774,16 @@ class Collections:
 				except: tmdb = ''
 			if not tmdb and imdb:
 				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
-				if trakt_ids:
-					tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
+				if trakt_ids: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
 			if not tmdb and not imdb:
-				results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
-				if results:
-					ids = results[0].get('movie').get('ids')
+				log_utils.log('Third fallback attempt to fetch missing ids for movie title: (%s)' % self.list[i]['title'], __name__, log_utils.LOGDEBUG)
+				try:
+					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
+					if results[0]['movie']['title'] != self.list[i]['title'] or results[0]['movie']['year'] != self.list[i]['year']: return
+					ids = results[0].get('movie', {}).get('ids', {})
 					if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
 					if not imdb: imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
-				else: return
+				except: pass
 #################################
 			if not tmdb: return
 			movie_meta = cache.get(tmdb_indexer.Movies().get_movie_meta, 96, tmdb)
@@ -799,8 +800,7 @@ class Collections:
 				plot = trans_item.get('overview') or plot
 			except:
 				log_utils.error()
-			if self.disable_fanarttv != 'true':
-				from resources.lib.indexers import fanarttv
+			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: values.update(extended_art)
 			values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
@@ -814,6 +814,7 @@ class Collections:
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide()
 			control.notification(title=32000, message=33049)
+		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		disable_player_art = control.setting('disable.player.art') == 'true'
 		hosts_mode = control.setting('hosts.mode') 
@@ -850,8 +851,8 @@ class Collections:
 				sysname, systitle = quote_plus(label), quote_plus(title)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
-				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
-				except: pass
+				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
+				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				try: meta.update({'year': int(meta['year'])})
@@ -867,8 +868,8 @@ class Collections:
 				if disable_player_art and hosts_mode == '2': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
 					remove_keys = ('clearart', 'clearlogo', 'discart')
 					for k in remove_keys: meta.pop(k, None)
-				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape,
-								'clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', '')})
+				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape, 'clearlogo': meta.get('clearlogo', ''),
+								'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', ''), 'keyart': meta.get('keyart', '')})
 				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
 				for k in remove_keys: meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
@@ -912,7 +913,6 @@ class Collections:
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb})
 				item.setProperty('IsPlayable', isPlayable)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
-				from resources.lib.modules.player import Bookmarks
 				resumetime = Bookmarks().get(name=label, imdb=imdb, tmdb=tmdb, year=str(year), runtime=runtime, ck=True)
 				# item.setProperty('TotalTime', str(meta['duration'])) # Adding this property causes the Kodi bookmark CM items to be added
 				item.setProperty('ResumeTime', str(resumetime))
@@ -943,6 +943,7 @@ class Collections:
 				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
+				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				log_utils.error()

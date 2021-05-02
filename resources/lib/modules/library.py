@@ -17,6 +17,7 @@ except ImportError: #Py3
 	from urllib.parse import parse_qsl, quote_plus
 from resources.lib.modules import control
 from resources.lib.modules import cleantitle
+from resources.lib.modules import lib_tools
 from resources.lib.modules import log_utils
 from resources.lib.modules import py_tools
 
@@ -125,16 +126,12 @@ class lib_tools:
 				paths = []
 				movie_LibraryFolder = control.joinPath(control.transPath(control.setting('library.movie')), '')
 				special_movie_LibraryFolder = control.joinPath(control.setting('library.movie'), '')
-
 				paths.append(movie_LibraryFolder)
 				paths.append(special_movie_LibraryFolder)
-
 				tvShows_LibraryFolder = control.joinPath(control.transPath(control.setting('library.tv')),'')
 				speical_tvShows_LibraryFolder = control.joinPath(control.setting('library.tv'),'')
-
 				paths.append(tvShows_LibraryFolder)
 				paths.append(speical_tvShows_LibraryFolder)
-
 			paths = [i.rstrip('/').rstrip('\\') for i in paths]
 			result = control.jsonrpc('{"jsonrpc": "2.0", "method": "Files.GetSources", "params": {"media" : "video"}, "id": 1}')
 			result = py_tools.ensure_text(result, errors='ignore')
@@ -145,7 +142,6 @@ class lib_tools:
 					break
 		except:
 			log_utils.error()
-
 		if not contains:
 			try:
 				global folder_setup
@@ -235,8 +231,10 @@ class libmovies:
 	def auto_movie_setup(self):
 		try:
 			control.makeFile(self.library_folder)
+			# icon = control.joinPath(control.artPath(), 'libmovies.png')
 			source_content = "('%s','movies','metadata.themoviedb.org','',2147483647,1,'<settings version=\"2\"><setting id=\"certprefix\" default=\"true\">Rated </setting><setting id=\"fanart\">true</setting><setting id=\"imdbanyway\">true</setting><setting id=\"keeporiginaltitle\" default=\"true\">false</setting><setting id=\"language\" default=\"true\">en</setting><setting id=\"RatingS\" default=\"true\">TMDb</setting><setting id=\"tmdbcertcountry\" default=\"true\">us</setting><setting id=\"trailer\">true</setting></settings>',0,0,NULL,NULL)" % self.library_folder
-			control.add_source('Venom Movies', self.library_folder, source_content, 'DefaultMovies.png')
+			# control.add_source('Venom Movies', self.library_folder, source_content, icon)
+			lib_tools.add_source('Venom Movies', self.library_folder, source_content, 'DefaultMovies.png')
 		except:
 			log_utils.error()
 
@@ -444,14 +442,14 @@ class libtvshows:
 	def auto_tv_setup(self):
 		try:
 			control.makeFile(self.library_folder)
-			icon = control.joinPath(control.artPath(), 'libtv.png')
-			icon = 'DefaultTVShows.png'
+			# icon = control.joinPath(control.artPath(), 'libtv.png')
 			source_name = 'Venom TV Shows'
 			# TVDb scraper
 			source_content = "('%s','tvshows','metadata.tvdb.com','',0,0,'<settings version=\"2\"><setting id=\"absolutenumber\" default=\"true\">false</setting><setting id=\"alsoimdb\">true</setting><setting id=\"dvdorder\" default=\"true\">false</setting><setting id=\"fallback\">true</setting><setting id=\"fallbacklanguage\">es</setting><setting id=\"fanart\">true</setting><setting id=\"language\" default=\"true\">en</setting><setting id=\"RatingS\" default=\"true\">TheTVDB</setting><setting id=\"usefallbacklanguage1\">true</setting></settings>',0,0,NULL,NULL)" % self.library_folder
 			# TMDb scraper
 			# source_content = "('%s','tvshows','metadata.tvshows.themoviedb.org','',0,0,'<settings version=\"2\"><setting id=\"alsoimdb\" default=\"true\">false</setting><setting id=\"certprefix\" default=\"true\"></setting><setting id=\"fallback\">true</setting><setting id=\"fanarttvart\">true</setting><setting id=\"keeporiginaltitle\" default=\"true\">false</setting><setting id=\"language\" default=\"true\">en</setting><setting id=\"RatingS\" default=\"true\">Themoviedb</setting><setting id=\"tmdbart\">true</setting><setting id=\"tmdbcertcountry\" default=\"true\">us</setting></settings>',0,0,NULL,NULL)" % self.library_folder
-			control.add_source(source_name, self.library_folder, source_content, icon)
+			# control.add_source(source_name, self.library_folder, source_content, icon)
+			lib_tools.add_source(source_name, self.library_folder, source_content, 'DefaultTVShows.png')
 		except:
 			log_utils.error()
 
@@ -748,7 +746,7 @@ class libepisodes:
 		files_added = 0
 		# __init__ doesn't get called from services so self.date never gets updated and new episodes are not added to the library
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
-		self.date_time = datetime.utcnow()
+		self.date_time = datetime.now()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
 		else: self.date = (self.date_time - timedelta(hours=24)).strftime('%Y%m%d')
 		for item in items:

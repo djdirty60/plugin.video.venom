@@ -17,9 +17,7 @@ except ImportError: #Py3
 try: from sqlite3 import dbapi2 as database
 except ImportError: from pysqlite2 import dbapi2 as database
 from resources.lib.database import metacache, providerscache
-from resources.lib.debrid import alldebrid
-from resources.lib.debrid import premiumize
-from resources.lib.debrid import realdebrid
+from resources.lib.debrid import alldebrid, premiumize, realdebrid
 from resources.lib.modules import cleantitle
 from resources.lib.modules import control
 from resources.lib.modules import debrid
@@ -1095,7 +1093,7 @@ class Sources:
 				list += [('[COLOR %s]seeders:[/COLOR]  %s' % (self.highlight_color, source.get('seeders')), ' ')]
 			select = control.selectDialog([i[0] for i in list], 'Source Info')
 			if any(x in list[select][0] for x in ['Copy url To Clipboard', 'Copy name To Clipboard', 'Copy hash To Clipboard']):
-				control.copy2clip(list[select - 1][1])
+				source_utils.copy2clip(list[select - 1][1])
 			return
 		except:
 			log_utils.error('Error sourceInfo: ' )
@@ -1139,7 +1137,7 @@ class Sources:
 		self.sourceDict = fs_sources()
 		# add cloud scrapers to sourceDict
 
-		from resources.lib.modules import premium_hosters
+		from resources.lib.debrid import premium_hosters
 		self.debrid_resolvers = debrid.debrid_resolvers()
 		def cache_prDict():
 			try:

@@ -13,7 +13,6 @@ from resources.lib.modules import dom_parser
 from resources.lib.modules import log_utils
 from resources.lib.modules import py_tools
 from resources.lib.modules import workers
-
 try: #Py2
 	import cookielib
 	from cStringIO import StringIO
@@ -290,11 +289,9 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 		else:
 			if close is True: response.close()
 			return result
-
 	except:
 		log_utils.error('Request-Error url=(%s)' % url)
 		return None
-
 
 def _basic_request(url, headers=None, post=None, timeout='30', limit=None):
 	try:
@@ -306,7 +303,6 @@ def _basic_request(url, headers=None, post=None, timeout='30', limit=None):
 		return _get_result(response, limit)
 	except:
 		log_utils.error()
-
 
 def _add_request_header(_request, headers):
 	try:
@@ -325,7 +321,6 @@ def _add_request_header(_request, headers):
 	except:
 		log_utils.error()
 
-
 def _get_result(response, limit=None):
 	try:
 		if limit == '0': result = response.read(224 * 1024)
@@ -338,7 +333,6 @@ def _get_result(response, limit=None):
 	except:
 		log_utils.error()
 
-
 def parseDOM(html, name='', attrs=None, ret=False):
 	try:
 		if attrs:
@@ -350,11 +344,9 @@ def parseDOM(html, name='', attrs=None, ret=False):
 	except:
 		log_utils.error()
 
-
 def replaceHTMLCodes(txt):
 	# Some HTML entities are encoded twice. Decode double.
 	return _replaceHTMLCodes(_replaceHTMLCodes(txt))
-
 
 def _replaceHTMLCodes(txt):
 	try:
@@ -376,11 +368,9 @@ def _replaceHTMLCodes(txt):
 		log_utils.error()
 		return txt
 
-
 def cleanHTML(txt):
 	txt = re.sub(r'<.+?>|</.+?>|\n', '', txt)
 	return _replaceHTMLCodes(_replaceHTMLCodes(txt))
-
 
 def randomagent():
 # (my pc) Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0
@@ -400,12 +390,10 @@ def randomagent():
 		feature=random.choice(FEATURES),
 		br_ver=random.choice(BR_VERS[index]))
 
-
 def agent():
 	return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36' # works on glodls
 	# return 'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko' # fails for glodls, (compatible, MSIE) removed
 	#return 'Mozilla/5.0 (Windows NT 6.2; Win64; x64; Trident/7.0; rv:11.0) like Gecko' # works on glodls
-
 
 class cfcookie:
 	def __init__(self):

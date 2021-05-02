@@ -3,8 +3,7 @@
 	Venom Add-on
 """
 
-from resources.lib.modules import control
-from resources.lib.modules import log_utils
+from resources.lib.modules import control, log_utils, my_accounts
 
 window = control.homeWindow
 plugin = 'plugin://plugin.video.venom/'
@@ -44,7 +43,7 @@ class SettingsMonitor(control.monitor_class):
 class SyncMyAccounts:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Sync "My Accounts" Service Starting...', LOGNOTICE)
-		control.syncMyAccounts(silent=True)
+		my_accounts.syncMyAccounts(silent=True)
 		return control.log('[ plugin.video.venom ]  Finished Sync "My Accounts" Service', LOGNOTICE)
 
 class ReuseLanguageInvokerCheck:
@@ -53,6 +52,7 @@ class ReuseLanguageInvokerCheck:
 		control.log('[ plugin.video.venom ]  ReuseLanguageInvokerCheck Service Starting...', LOGNOTICE)
 		try:
 			import xml.etree.ElementTree as ET
+			from resources.lib.modules.language_invoker import gen_file_hash
 			addon_xml = control.joinPath(control.addonPath('plugin.video.venom'), 'addon.xml')
 			tree = ET.parse(addon_xml)
 			root = tree.getroot()
@@ -67,9 +67,9 @@ class ReuseLanguageInvokerCheck:
 			control.okDialog(message='%s\n%s' % (control.lang(33023), control.lang(33020)))
 			for item in root.iter('reuselanguageinvoker'):
 				item.text = current_addon_setting
-				hash_start = control.gen_file_hash(addon_xml)
+				hash_start = gen_file_hash(addon_xml)
 				tree.write(addon_xml)
-				hash_end = control.gen_file_hash(addon_xml)
+				hash_end = gen_file_hash(addon_xml)
 				control.log('[ plugin.video.venom ]  ReuseLanguageInvokerCheck Service Finished', LOGNOTICE)
 				if hash_start != hash_end:
 					current_profile = control.infoLabel('system.profilename')
@@ -90,7 +90,18 @@ class AddonCheckUpdate:
 				return control.log('[ plugin.video.venom ]  Could not connect to remote repo XML: status code = %s' % repo_xml.status_code, LOGNOTICE)
 			repo_version = re.findall(r'<addon id=\"plugin.video.venom\".+version=\"(\d*.\d*.\d*)\"', repo_xml.text)[0]
 			local_version = control.getVenomVersion()
-			if control.check_version_numbers(local_version, repo_version):
+			def check_version_numbers(current, new): # Compares version numbers and return True if github version is newer
+				current = current.split('.')
+				new = new.split('.')
+				step = 0
+				for i in current:
+					if int(new[step]) > int(i): return True
+					if int(i) > int(new[step]): return False
+					if int(i) == int(new[step]):
+						step += 1
+						continue
+				return False
+			if check_version_numbers(local_version, repo_version):
 				while control.condVisibility('Library.IsScanningVideo'):
 					control.sleep(10000)
 				control.log('[ plugin.video.venom ]  A newer version is available. Installed Version: v%s, Repo Version: v%s' % (local_version, repo_version), LOGNOTICE)

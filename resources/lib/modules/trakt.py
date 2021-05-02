@@ -901,20 +901,20 @@ def SearchEpisode(title, season, episode, full=True):
 
 def getGenre(content, type, type_id):
 	try:
-		r = '/search/%s/%s?type=%s&extended=full' % (type, type_id, content)
-		r = cache.get(getTraktAsJson, 168, r)
-		r = r[0].get(content, {}).get('genres', [])
-		return r
+		url = '/search/%s/%s?type=%s&extended=full' % (type, type_id, content)
+		result = cache.get(getTraktAsJson, 168, url)
+		if not result: return []
+		return result[0].get(content, {}).get('genres', [])
 	except:
 		log_utils.error()
 		return []
 
 def IdLookup(id_type, id, type): # ("id_type" can be trakt , imdb , tmdb , tvdb) (type can be one of "movie , show , episode , person , list")
 	try:
-		r = '/search/%s/%s?type=%s' % (id_type, id, type)
-		r = cache.get(getTraktAsJson, 168, r)
-		if not r: return None
-		return r[0].get(type).get('ids')
+		url = '/search/%s/%s?type=%s' % (id_type, id, type)
+		result = cache.get(getTraktAsJson, 168, url)
+		if not result: return None
+		return result[0].get(type).get('ids')
 	except:
 		log_utils.error()
 		return None

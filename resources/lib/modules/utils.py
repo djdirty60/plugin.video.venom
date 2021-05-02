@@ -26,7 +26,6 @@ def byteify(data, ignore_dicts=False):
 		return dict([(byteify(key, ignore_dicts=True), byteify(value, ignore_dicts=True)) for key, value in py_tools.iteritems(data)])
 	return data
 
-
 def title_key(title):
 	try:
 		if not title: title = ''

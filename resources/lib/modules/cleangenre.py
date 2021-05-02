@@ -3,7 +3,6 @@
 	Venom Add-on
 """
 
-
 def lang(i, lang):
 	if lang == 'bg':
 		i = i.replace('Action', u'\u0415\u043a\u0448\u044a\u043d')

@@ -1639,6 +1639,34 @@ msgctxt "#32572"
 msgid "Trakt Progress Show unaired episodes"
 msgstr ""
 
+msgctxt "#32573"
+msgid "Trakt Upcoming Progress prepend date"
+msgstr ""
+
+msgctxt "#32574"
+msgid ""
+msgstr ""
+
+msgctxt "#32575"
+msgid ""
+msgstr ""
+
+msgctxt "#32576"
+msgid ""
+msgstr ""
+
+msgctxt "#32577"
+msgid ""
+msgstr ""
+
+msgctxt "#32578"
+msgid ""
+msgstr ""
+
+msgctxt "#32579"
+msgid ""
+msgstr ""
+
 msgctxt "#32580"
 msgid ""
 msgstr ""

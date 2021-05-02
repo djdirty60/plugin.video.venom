@@ -7,19 +7,18 @@ from datetime import datetime
 import re
 import requests
 from resources.lib.database import cache, metacache
+from resources.lib.indexers import fanarttv
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import py_tools
 from resources.lib.modules import workers
-
 API_key = control.setting('tmdb.api.key')
 if not API_key: API_key = '3320855e65a9758297fec4f7c9717698'
-
-disable_fanarttv = control.setting('disable.fanarttv')
 base_link = 'https://api.themoviedb.org/3/'
 tmdb_networks = base_link + 'discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1' % (API_key, '%s')
 poster_path = 'https://image.tmdb.org/t/p/w300'
 fanart_path = 'https://image.tmdb.org/t/p/w1280'
+
 
 def get_request(url):
 	try:
@@ -82,6 +81,7 @@ class Movies:
 	def __init__(self):
 		self.list = []
 		self.meta = []
+		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 		self.lang = control.apiLanguage()['tmdb']
 		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
 ###                                                                  other "append_to_response" options                     external_ids,images,content_ratings
@@ -125,8 +125,7 @@ class Movies:
 				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				values.update(movie_meta)
 				imdb = values['imdb']
-				if disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
@@ -188,8 +187,7 @@ class Movies:
 				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				values.update(movie_meta)
 				imdb = values['imdb']
-				if disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
@@ -239,6 +237,7 @@ class Movies:
 # budget
 			meta['genre'] = []
 			for x in result['genres']: meta['genre'].append(x.get('name'))
+			if not meta['genre']: meta['genre'] = 'NA'
 # homepage
 			meta['tmdb'] = str(result.get('id', '')) if result.get('id') else ''
 			meta['imdb'] = str(result.get('imdb_id', '')) if result.get('imdb_id') else ''
@@ -359,13 +358,15 @@ class TVshows:
 	def __init__(self):
 		self.list = []
 		self.meta = []
+		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 		self.lang = control.apiLanguage()['tmdb']
 		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
 		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
 		self.tvdb_key = control.setting('tvdb.api.key')
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
-		self.date_time = datetime.utcnow()
+		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
+		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
 	def tmdb_list(self, url):
@@ -403,8 +404,7 @@ class TVshows:
 				values.update(showSeasons_meta)
 				imdb = values['imdb']
 				tvdb = values['tvdb']
-				if disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
@@ -466,8 +466,7 @@ class TVshows:
 				values.update(showSeasons_meta)
 				imdb = values['imdb']
 				tvdb = values['tvdb']
-				if disable_fanarttv != 'true':
-					from resources.lib.indexers import fanarttv
+				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
@@ -517,7 +516,7 @@ class TVshows:
 			meta['premiered'] = str(result.get('first_air_date', '')) if result.get('first_air_date') else ''
 			try: meta['year'] = meta['premiered'][:4]
 			except: meta['year'] = ''
-			meta['genre'] = ' / '.join([x['name'] for x in result.get('genres', {})]) or ''
+			meta['genre'] = ' / '.join([x['name'] for x in result.get('genres', {})]) or 'NA'
 			meta['tmdb'] = tmdb
 			meta['in_production'] = result.get('in_production') # do not use for "season_isAiring", this is show wide and "season_isAiring" is season specific for season pack scraping.
 			meta['last_air_date'] = result.get('last_air_date', '')

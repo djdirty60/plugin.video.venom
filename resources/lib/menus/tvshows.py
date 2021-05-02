@@ -12,10 +12,11 @@ try: #Py2
 	from urlparse import parse_qsl, urlparse, urlsplit
 except ImportError: #Py3
 	from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
-from resources.lib.menus import navigator
 from resources.lib.database import cache, metacache
-from resources.lib.indexers import tmdb as tmdb_indexer
+from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
+from resources.lib.menus import navigator
 from resources.lib.modules import cleangenre
+# from resources.lib.modules import cleanplot
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -35,9 +36,9 @@ class TVshows:
 		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
-		self.disable_fanarttv = control.setting('disable.fanarttv')
+		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
-		self.date_time = datetime.utcnow()
+		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
 		self.tvdb_key = control.setting('tvdb.api.key')
@@ -103,7 +104,6 @@ class TVshows:
 			except: pass
 			try: u = urlparse(url).netloc.lower()
 			except: pass
-
 			if u in self.trakt_link and '/users/' in url:
 				try:
 					if '/users/me/' not in url: raise Exception()
@@ -111,29 +111,23 @@ class TVshows:
 					self.list = cache.get(self.trakt_list, 720, url, self.trakt_user)
 				except:
 					self.list = cache.get(self.trakt_list, 0, url, self.trakt_user)
-
+				if idx: self.worker()
 				if url == self.traktwatchlist_link: self.sort(type='shows.watchlist')
 				else: self.sort()
-				if idx: self.worker()
-
 			elif u in self.trakt_link and self.search_link in url:
 				self.list = cache.get(self.trakt_list, 1, url, self.trakt_user)
 				if idx: self.worker(level=0)
-
 			elif u in self.trakt_link:
 				self.list = cache.get(self.trakt_list, 24, url, self.trakt_user)
 				if idx: self.worker()
-
 			elif u in self.imdb_link and ('/user/' in url or '/list/' in url):
 				isRatinglink=True if self.imdbratings_link in url else False
 				self.list = cache.get(self.imdb_list, 0, url, isRatinglink)
 				if idx: self.worker()
 				# self.sort() # I switched this to request sorting for imdb
-
 			elif u in self.imdb_link:
 				self.list = cache.get(self.imdb_list, 96, url)
 				if idx: self.worker()
-
 			if self.list is None: self.list = []
 			if idx and create_directory: self.tvshowDirectory(self.list)
 			return self.list
@@ -150,16 +144,11 @@ class TVshows:
 			except: pass
 			try: u = urlparse(url).netloc.lower()
 			except: pass
-
 			if u in self.tmdb_link and '/list/' in url:
-				from resources.lib.indexers import tmdb
-				self.list = cache.get(tmdb.TVshows().tmdb_collections_list, 0, url)
-
+				self.list = cache.get(tmdb_indexer.TVshows().tmdb_collections_list, 0, url)
 			elif u in self.tmdb_link and not '/list/' in url:
-				from resources.lib.indexers import tmdb
 				duration = 168 if cached else 0
-				self.list = cache.get(tmdb.TVshows().tmdb_list, duration, url)
-
+				self.list = cache.get(tmdb_indexer.TVshows().tmdb_list, duration, url)
 			if self.list is None: self.list = []
 			if idx: self.tvshowDirectory(self.list)
 			return self.list
@@ -229,10 +218,8 @@ class TVshows:
 
 	def search(self):
 		navigator.Navigator().addDirectoryItem(32603, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png')
-		try:
-			from sqlite3 import dbapi2 as database
-		except:
-			from pysqlite2 import dbapi2 as database
+		try: from sqlite3 import dbapi2 as database
+		except ImportError: from pysqlite2 import dbapi2 as database
 		try:
 			dbcon = database.connect(control.searchFile)
 			dbcur = dbcon.cursor()
@@ -367,11 +354,8 @@ class TVshows:
 		u = urlparse(url).netloc.lower()
 		try:
 			control.hide()
-			if u in self.tmdb_link:
-				from resources.lib.indexers import tmdb
-				items = tmdb.userlists(url)
-			elif u in self.trakt_link:
-				items = self.trakt_user_list(url, self.trakt_user)
+			if u in self.tmdb_link: items = tmdb_indexer.userlists(url)
+			elif u in self.trakt_link: items = self.trakt_user_list(url, self.trakt_user)
 			items = [(i['name'], i['url']) for i in items]
 			message = 32663
 			if 'themoviedb' in url: message = 32681
@@ -380,8 +364,8 @@ class TVshows:
 			if select == -1: return
 			link = items[select][1]
 			link = link.split('&sort_by')[0]
-			from resources.lib.modules import libtools
-			libtools.libtvshows().range(link, list_name)
+			from resources.lib.modules import library
+			library.libtvshows().range(link, list_name)
 		except:
 			log_utils.error()
 			return
@@ -427,8 +411,7 @@ class TVshows:
 		try:
 			if self.tmdb_session_id == '': raise Exception()
 			self.list = []
-			from resources.lib.indexers import tmdb
-			lists = cache.get(tmdb.userlists, 0, self.tmdb_userlists_link)
+			lists = cache.get(tmdb_indexer.userlists, 0, self.tmdb_userlists_link)
 			for i in range(len(lists)):
 				lists[i].update({'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
 			userlists += lists
@@ -507,7 +490,7 @@ class TVshows:
 					try: values['year'] = str(values['premiered'][:4])
 					except: values['year'] = ''
 				ids = item.get('ids', {})
-				values['imdb'] = ids.get('imdb', '')
+				values['imdb'] = str(ids.get('imdb', '')) if ids.get('imdb', '') else ''
 				values['tmdb'] = str(ids.get('tmdb')) if ids.get('tmdb', '') else ''
 				values['tvdb'] = str(ids.get('tvdb')) if ids.get('tvdb', '') else ''
 				if values['tvdb'] in dupes: return
@@ -515,6 +498,7 @@ class TVshows:
 				values['studio'] = item.get('network')
 				values['genre'] = []
 				for x in item['genres']: values['genre'].append(x.title())
+				if not values['genre']: values['genre'] = 'NA'
 				values['duration'] = int(item.get('runtime') * 60) if item.get('runtime') else ''
 				values['total_episodes'] = item.get('aired_episodes', '')
 				values['mpaa'] = item.get('certification', '')
@@ -676,24 +660,31 @@ class TVshows:
 			if self.list[i]['metacache']: return
 			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '') ; tvdb = self.list[i].get('tvdb', '')
 #### -- Missing id's lookup -- ####
+			trakt_ids = None
+			if (not tmdb or not tvdb) and imdb: trakt_ids = trakt.IdLookup('imdb', imdb, 'show')
+			if (not tmdb or not imdb) and tvdb: trakt_ids = trakt.IdLookup('tvdb', tvdb, 'show')
+			if trakt_ids:
+				if not imdb: imdb = str(trakt_ids.get('imdb', '')) if trakt_ids.get('imdb') else ''
+				if not tmdb: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
+				if not tvdb: tvdb = str(trakt_ids.get('tvdb', '')) if trakt_ids.get('tvdb') else ''
 			if not tmdb and (imdb or tvdb):
 				try:
 					result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not imdb or not tmdb or not tvdb:
+				log_utils.log('Third fallback attempt to fetch missing ids for tvshowtitle: (%s)' % self.list[i]['title'], __name__, log_utils.LOGDEBUG)
 				try:
-					trakt_ids = trakt.SearchTVShow(quote_plus(self.list[i]['title']), self.list[i]['year'], full=False)
-					if not trakt_ids: raise Exception
-					ids = trakt_ids[0].get('show', {}).get('ids', {})
+					results = trakt.SearchTVShow(quote_plus(self.list[i]['title']), self.list[i]['year'], full=False)
+					if results[0]['show']['title'].lower() != self.list[i]['title'].lower() or int(results[0]['show']['year']) != int(self.list[i]['year']): return # Trakt has "THEM" and "Them" twice for same show, use .lower()
+					ids = results[0].get('show', {}).get('ids', {})
 					if not imdb: imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
 					if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
 					if not tvdb: tvdb = str(ids.get('tvdb', '')) if ids.get('tvdb') else ''
-				except:
-					log_utils.error()
+				except: pass
 #################################
 			if not tmdb:
-				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % self.list[i]['title'], __name__, log_utils.LOGDEBUG) # log TMDb does not have show
+				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % self.list[i]['title'], __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 				return
 			showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 			if not showSeasons: return
@@ -706,8 +697,7 @@ class TVshows:
 			# values['counts'] = tmdb_indexer.TVshows().seasonCountParse(values.get('seasons')) # this is now inside the meta from TMDB modules's showSeasons
 			# remove_keys = ('seasons',) # pop() keys from showSeasons that are not needed anymore
 			# for k in remove_keys: values.pop(k, None)
-			if self.disable_fanarttv != 'true':
-				from resources.lib.indexers import fanarttv
+			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 				if extended_art: values.update(extended_art)
 			values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
@@ -751,8 +741,8 @@ class TVshows:
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				if unwatchedEnabled: trakt.seasonCount(imdb) # pre-cache season counts for the listed shows
-				try: meta['plot'] = control.cleanPlot(meta['plot']) # Some plots have a link at the end, remove it.
-				except: pass
+				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end, remove it.
+				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				try:
@@ -807,7 +797,8 @@ class TVshows:
 						count = playcount.getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
 						if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 					except: pass
-				item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				except: pass #da hell with 17 users
 				item.setProperty('IsPlayable', 'false')
 				item.setProperty('tmdb_id', str(tmdb))
 				if is_widget: item.setProperty('isVenom_widget', 'true')
@@ -840,6 +831,7 @@ class TVshows:
 				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
+				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				log_utils.error()
