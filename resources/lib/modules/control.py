@@ -106,8 +106,7 @@ def settings_fallback(id):
 	return {id: xbmcaddon.Addon().getSetting(id)}
 
 def setSetting(id, value):
-	from xbmcaddon import Addon
-	Addon().setSetting(id, value)
+	xbmcaddon.Addon().setSetting(id, value)
 
 def make_settings_dict(): # service runs upon a setting change
 	try:
@@ -122,7 +121,6 @@ def make_settings_dict(): # service runs upon a setting change
 			dict_item = {setting_id: setting_value}
 			settings_dict.update(dict_item)
 		homeWindow.setProperty('venom_settings', jsdumps(settings_dict))
-		# log('settings_dict = %s' % settings_dict, 2)
 		refresh_playAction()
 		return settings_dict
 	except:
@@ -146,8 +144,7 @@ def openSettings(query=None, id=addonInfo('id')):
 
 def lang(language_id):
 	text = getLangString(language_id)
-	if getKodiVersion() < 19:
-		text = text.encode('utf-8', 'replace')
+	if getKodiVersion() < 19: text = text.encode('utf-8', 'replace')
 	return str(text)
 
 def sleep(time):  # Modified `sleep`(in milli secs) that honors a user exit request
@@ -171,7 +168,6 @@ def addonId():
 def addonName():
 	return addonInfo('name')
 
-# addonPath = transPath(addonInfo('path'))
 def addonPath(addon):
 	try: addonID = xbmcaddon.Addon(addon)
 	except: addonID = None
@@ -183,7 +179,6 @@ def addonPath(addon):
 def artPath():
 	theme = appearance()
 	return joinPath(xbmcaddon.Addon('plugin.video.venom').getAddonInfo('path'), 'resources', 'artwork', theme)
-	# return joinPath(addonPath('plugin.video.venom'), 'resources', 'artwork', theme)
 
 def appearance():
 	appearance = setting('appearance.1').lower()
@@ -208,17 +203,17 @@ def addonPoster():
 	if not (art is None and theme in ['-', '']): return joinPath(art, 'poster.png')
 	return 'DefaultVideo.png'
 
-def addonBanner():
-	theme = appearance()
-	art = artPath()
-	if not (art is None and theme in ['-', '']): return joinPath(art, 'banner.png')
-	return 'DefaultVideo.png'
-
 def addonFanart():
 	theme = appearance()
 	art = artPath()
 	if not (art is None and theme in ['-', '']): return joinPath(art, 'fanart.jpg')
 	return addonInfo('fanart')
+
+def addonBanner():
+	theme = appearance()
+	art = artPath()
+	if not (art is None and theme in ['-', '']): return joinPath(art, 'banner.png')
+	return 'DefaultVideo.png'
 
 def addonNext():
 	theme = appearance()

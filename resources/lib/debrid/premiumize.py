@@ -242,9 +242,7 @@ class Premiumize:
 		control.busy()
 		extensions = supported_video_extensions()
 		transfer_id = self.create_transfer(magnet_url)
-		if not transfer_id:
-			control.hide()
-			return
+		if not transfer_id: 	return control.hide()
 		if not transfer_id['status'] == 'success': return _return_failed()
 		transfer_id = transfer_id['id']
 		transfer_info = _transfer_info(transfer_id)
@@ -415,8 +413,6 @@ class Premiumize:
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': pm_icon, 'poster': pm_icon, 'thumb': pm_icon, 'fanart': addonFanart, 'banner': pm_icon})
 				item.setInfo(type='video', infoLabels='')
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 			except:
 				log_utils.error()
@@ -487,8 +483,6 @@ class Premiumize:
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': pm_icon, 'poster': pm_icon, 'thumb': pm_icon, 'fanart': addonFanart, 'banner': pm_icon})
 				item.setInfo(type='video', infoLabels='')
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 			except:
 				log_utils.error()

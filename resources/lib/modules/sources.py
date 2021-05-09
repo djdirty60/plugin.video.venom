@@ -217,8 +217,6 @@ class Sources:
 				try: item = control.item(label=label, offscreen=True)
 				except: item = control.item(label=label)
 				item.setArt({'icon': thumb, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				item.addContextMenuItems(cm)
 				# item.setProperty('IsPlayable', 'true') # test
 				item.setProperty('IsPlayable', 'false')

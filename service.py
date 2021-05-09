@@ -89,7 +89,7 @@ class AddonCheckUpdate:
 			if not repo_xml.status_code == 200:
 				return control.log('[ plugin.video.venom ]  Could not connect to remote repo XML: status code = %s' % repo_xml.status_code, LOGNOTICE)
 			repo_version = re.findall(r'<addon id=\"plugin.video.venom\".+version=\"(\d*.\d*.\d*)\"', repo_xml.text)[0]
-			local_version = control.getVenomVersion()
+			local_version = control.getVenomVersion()[:5] # 5 char max so pre-releases do try to compare more chars than github version
 			def check_version_numbers(current, new): # Compares version numbers and return True if github version is newer
 				current = current.split('.')
 				new = new.split('.')
@@ -107,6 +107,22 @@ class AddonCheckUpdate:
 				control.log('[ plugin.video.venom ]  A newer version is available. Installed Version: v%s, Repo Version: v%s' % (local_version, repo_version), LOGNOTICE)
 				control.notification(message=control.lang(35523) % repo_version)
 			return control.log('[ plugin.video.venom ]  Addon update check complete', LOGNOTICE)
+		except:
+			log_utils.error()
+
+class VersionIsUpdateCheck:
+	def run(self):
+		try:
+			from resources.lib.database import cache
+			isUpdate = 'false'
+			if cache.update_cache_version(): isUpdate = 'true'
+			if isUpdate == 'true':
+				control.homeWindow.setProperty('venom.updated', 'true')
+				curVersion = control.getVenomVersion()
+				clear_db_version = '5.0.4' # set to desired version to force any db clearing needed
+				if curVersion == clear_db_version:
+					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
+				control.log('[ plugin.video.venom ]  Plugin updated to v%s' % curVersion, LOGNOTICE)
 		except:
 			log_utils.error()
 
@@ -172,6 +188,7 @@ def main():
 			LibraryService().run()
 		if control.setting('general.checkAddonUpdates') == 'true':
 			AddonCheckUpdate().run()
+		VersionIsUpdateCheck().run()
 		if getTraktCredentialsInfo():
 			if control.setting('indicators.alt') == '1':
 				syncWatched = True

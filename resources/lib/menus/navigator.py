@@ -418,10 +418,7 @@ class Navigator:
 
 	def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True, isPlayable=False, isSearch=False, table=''):
 		sysaddon = argv[0] ; syshandle = int(argv[1])
-		try:
-			if isinstance(name, int): name = control.lang(name)
-		except:
-			log_utils.error()
+		if isinstance(name, int): name = control.lang(name)
 		url = '%s?action=%s' % (sysaddon, query) if isAction else query
 		thumb = control.joinPath(artPath, thumb) if artPath else icon
 		if not icon.startswith('Default'): icon = control.joinPath(artPath, icon)

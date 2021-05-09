@@ -14,14 +14,13 @@ except ImportError: #Py3
 	from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
-from resources.lib.menus import navigator
 from resources.lib.modules import cleangenre
-# from resources.lib.modules import cleanplot
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import playcount
 from resources.lib.modules import py_tools
+from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 from resources.lib.modules import workers
@@ -30,14 +29,11 @@ from resources.lib.modules import workers
 class Movies:
 	def __init__(self, type='movie', notifications=True):
 		self.list = []
-		self.count = int(control.setting('page.item.limit'))
+		self.count = control.setting('page.item.limit')
 		self.type = type
 		self.notifications = notifications
-		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
-		self.three_month_date = (self.date_time - timedelta(days=90)).strftime('%Y-%m-%d')
-		self.year_date = (self.date_time - timedelta(days=365)).strftime('%Y-%m-%d')
 		self.hidecinema = control.setting('hidecinema') == 'true'
 
 		self.trakt_user = control.setting('trakt.user').strip()
@@ -65,53 +61,51 @@ class Movies:
 		self.imdb_link = 'https://www.imdb.com'
 		self.persons_link = 'https://www.imdb.com/search/name?count=100&name='
 		self.personlist_link = 'https://www.imdb.com/search/name?count=100&gender=male,female'
-		self.person_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&role=%s&sort=year,desc&count=%d&start=1' % ('%s', self.count)
-		self.keyword_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&keywords=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-		self.oscars_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_winners&sort=year,desc&count=%d&start=1' % self.count
-		self.oscarsnominees_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_nominees&sort=year,desc&count=%d&start=1' % self.count
-		self.theaters_link = 'https://www.imdb.com/search/title?title_type=feature&num_votes=500,&release_date=%s,%s&languages=en&sort=release_date,desc&count=%s&start=1' % (self.three_month_date, self.today_date, str(self.count))
-		self.year_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&year=%s,%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', '%s', self.count)
+		self.person_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&role=%s&sort=year,desc&count=%s&start=1' % ('%s', self.count)
+		self.keyword_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&keywords=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
+		self.oscars_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_winners&sort=year,desc&count=%s&start=1' % self.count
+		self.oscarsnominees_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_nominees&sort=year,desc&count=%s&start=1' % self.count
+		self.theaters_link = 'https://www.imdb.com/search/title?title_type=feature&num_votes=500,&release_date=date[90],date[0]&languages=en&sort=release_date,desc&count=%s&start=1' % self.count
+		self.year_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&year=%s,%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', '%s', self.count)
 		if self.hidecinema:
-			self.hidecinema_rollback = int(control.setting('hidecinema.rollback')) * 30
-			self.hidecinema_date = (self.date_time - timedelta(days=self.hidecinema_rollback)).strftime('%Y-%m')
-			self.mostpopular_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&groups=top_1000&release_date=,%s&sort=moviemeter,asc&count=%d&start=1' % (self.hidecinema_date, self.count )
-			self.mostvoted_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&release_date=,%s&sort=num_votes,desc&count=%d&start=1' % (self.hidecinema_date, self.count )
-			self.featured_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&release_date=,%s&sort=moviemeter,asc&count=%d&start=1' % (self.hidecinema_date, self.count )
-			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,%s&genres=%s&sort=moviemeter,asc&count=%d&start=1' % (self.hidecinema_date, '%s', self.count)
-			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&release_date=,%s&count=%d&start=1' % ('%s', self.hidecinema_date, self.count)
-			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&sort=moviemeter,asc&release_date=,%s&count=%d&start=1' % ('%s', self.hidecinema_date, self.count)
-			self.imdbboxoffice_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&sort=boxoffice_gross_us,desc&release_date=,%s&count=%d&start=1' % (self.hidecinema_date, self.count)
+			hidecinema_rollback = str(int(control.setting('hidecinema.rollback')) * 30)
+			self.mostpopular_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&groups=top_1000&release_date=,date[%s]&sort=moviemeter,asc&count=%s&start=1' % (hidecinema_rollback, self.count )
+			self.mostvoted_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&release_date=,date[%s]&sort=num_votes,desc&count=%s&start=1' % (hidecinema_rollback, self.count )
+			self.featured_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&release_date=,date[%s]&sort=moviemeter,asc&count=%s&start=1' % (hidecinema_rollback, self.count )
+			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,date[%s]&genres=%s&sort=moviemeter,asc&count=%s&start=1' % (hidecinema_rollback, '%s', self.count)
+			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&release_date=,date[%s]&count=%s&start=1' % ('%s', hidecinema_rollback, self.count)
+			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&sort=moviemeter,asc&release_date=,date[%s]&count=%s&start=1' % ('%s', hidecinema_rollback, self.count)
+			self.imdbboxoffice_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&sort=boxoffice_gross_us,desc&release_date=,date[%s]&count=%s&start=1' % (hidecinema_rollback, self.count)
 		else:
-			self.mostpopular_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&groups=top_1000&sort=moviemeter,asc&count=%d&start=1' % self.count
-			self.mostvoted_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&sort=num_votes,desc&count=%d&start=1' % self.count
-			self.featured_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&sort=moviemeter,asc&count=%d&start=1' % self.count
-			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,date[0]&genres=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-			self.imdbboxoffice_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&sort=boxoffice_gross_us,desc&count=%d&start=1' % self.count
-		self.added_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&languages=en&num_votes=500,&production_status=released&release_date=%s,%s&sort=release_date,desc&count=%d&start=1' % (self.year_date, self.today_date, self.count)
+			self.mostpopular_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&groups=top_1000&sort=moviemeter,asc&count=%s&start=1' % self.count
+			self.mostvoted_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&sort=num_votes,desc&count=%s&start=1' % self.count
+			self.featured_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&sort=moviemeter,asc&count=%s&start=1' % self.count
+			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,date[0]&genres=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
+			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
+			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
+			self.imdbboxoffice_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&sort=boxoffice_gross_us,desc&count=%s&start=1' % self.count
 		self.imdbwatchlist_link = 'https://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user # only used to get users watchlist ID
 		self.imdbwatchlist2_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=movie,short,video,tvShort,tvMovie,tvSpecial&start=1' % ('%s', self.imdb_sort(type='movies.watchlist'))
 		self.imdblists_link = 'https://www.imdb.com/user/ur%s/lists?tab=all&sort=mdfd&order=desc&filter=titles' % self.imdb_user
 		self.imdblist_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=movie,short,video,tvShort,tvMovie,tvSpecial&start=1' % ('%s', self.imdb_sort())
 		self.imdbratings_link = 'https://www.imdb.com/user/ur%s/ratings?sort=your_rating,desc&mode=detail&start=1' % self.imdb_user # IMDb ratings does not take title_type so filter is in imdb_list() function
-		self.anime_link = 'https://www.imdb.com/search/keyword?keywords=anime&title_type=movie,tvMovie&sort=moviemeter,asc&count=%d&start=1' % self.count
+		self.anime_link = 'https://www.imdb.com/search/keyword?keywords=anime&title_type=movie,tvMovie&sort=moviemeter,asc&count=%s&start=1' % self.count
+
 		self.trakt_link = 'https://api.trakt.tv'
-		self.search_link = 'https://api.trakt.tv/search/movie?limit=%d&page=1&query=' % self.count
-		self.traktlistsearch_link = 'https://api.trakt.tv/search/list?limit=%d&page=1&query=' % self.count
+		self.search_link = 'https://api.trakt.tv/search/movie?limit=%s&page=1&query=' % self.count
+		self.traktlistsearch_link = 'https://api.trakt.tv/search/list?limit=%s&page=1&query=' % self.count
 		self.traktlist_link = 'https://api.trakt.tv/users/%s/lists/%s/items/movies'
 		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000'
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/movies'
 		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/movies' # api collection does not support pagination atm
-		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/movies?limit=40&page=1'
+		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/movies?limit=%s&page=1' % self.count
 		self.traktunfinished_link = 'https://api.trakt.tv/sync/playback/movies?limit=40'
-		self.traktanticipated_link = 'https://api.trakt.tv/movies/anticipated?limit=%d&page=1' % self.count 
-		self.trakttrending_link = 'https://api.trakt.tv/movies/trending?limit=%d&page=1' % self.count
+		self.traktanticipated_link = 'https://api.trakt.tv/movies/anticipated?limit=%s&page=1' % self.count 
+		self.trakttrending_link = 'https://api.trakt.tv/movies/trending?limit=%s&page=1' % self.count
 		self.traktboxoffice_link = 'https://api.trakt.tv/movies/boxoffice'
-		self.traktpopular_link = 'https://api.trakt.tv/movies/popular?limit=%d&page=1' % self.count
+		self.traktpopular_link = 'https://api.trakt.tv/movies/popular?limit=%s&page=1' % self.count
 		self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/movies?limit=40'
-
 
 	def get(self, url, idx=True, create_directory=True):
 		self.list = []
@@ -255,6 +249,7 @@ class Movies:
 		return sort_string
 
 	def search(self):
+		from resources.lib.menus import navigator
 		navigator.Navigator().addDirectoryItem(32603, 'movieSearchnew', 'search.png', 'DefaultAddonsSearch.png')
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
@@ -525,8 +520,7 @@ class Movies:
 				values['fanart'] = ''
 				try: values['trailer'] = control.trailer % item['trailer'].split('v=')[1]
 				except: values['trailer'] = ''
-				remove_keys = ('released', 'ids', 'genres', 'runtime', 'certification', 'overview', 'comment_count', 'network') # pop() keys that are not needed anymore
-				for k in remove_keys: values.pop(k, None)
+				for k in ('released', 'ids', 'genres', 'runtime', 'certification', 'overview', 'comment_count', 'network'): values.pop(k, None) # pop() keys that are not needed anymore
 				list.append(values)
 			except:
 				log_utils.error()
@@ -560,7 +554,7 @@ class Movies:
 		list = []
 		try:
 			for i in re.findall(r'date\[(\d+)\]', url):
-				url = url.replace('date[%s]' % i, (self.date_time - timedelta(days = int(i))).strftime('%Y-%m-%d'))
+				url = url.replace('date[%s]' % i, (self.date_time - timedelta(days=int(i))).strftime('%Y-%m-%d'))
 			def imdb_watchlist_id(url):
 				return client.parseDOM(client.request(url), 'meta', ret='content', attrs = {'property': 'pageId'})[0]
 			if url == self.imdbwatchlist_link:
@@ -720,17 +714,14 @@ class Movies:
 
 	def movieDirectory(self, items, unfinished=False, next=True):
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide()
-			control.notification(title=32001, message=33049)
+			control.hide() ; control.notification(title=32001, message=33049)
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		disable_player_art = control.setting('disable.player.art') == 'true'
 		hosts_mode = control.setting('hosts.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
-		addonPoster = control.addonPoster()
-		addonFanart = control.addonFanart()
-		addonBanner = control.addonBanner()
+		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		indicators = playcount.getMovieIndicators(refresh=True)
 		isPlayable = 'false'
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
@@ -738,11 +729,9 @@ class Movies:
 		if hosts_mode == '2': playbackMenu = control.lang(32063)
 		else: playbackMenu = control.lang(32064)
 		if trakt.getTraktIndicatorsInfo():
-			watchedMenu = control.lang(32068)
-			unwatchedMenu = control.lang(32069)
+			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
 		else:
-			watchedMenu = control.lang(32066)
-			unwatchedMenu = control.lang(32067)
+			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		playlistManagerMenu = control.lang(35522)
 		queueMenu = control.lang(32065)
 		traktManagerMenu = control.lang(32070)
@@ -759,16 +748,15 @@ class Movies:
 						labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
 				if i.get('traktHistory') is True:
-					try: labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(i.get('lastplayed', '')))
+					try:
+						air_time = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
+						if air_time[12] == '0': air_time = air_time[:12] + '' + air_time[13:]
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_time)
 					except: pass
 				sysname, systitle = quote_plus(label), quote_plus(title)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
-				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
-				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
-				except: pass
-				try: meta.update({'year': int(meta['year'])})
 				except: pass
 				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
 				fanart = ''
@@ -779,12 +767,10 @@ class Movies:
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
 				if disable_player_art and hosts_mode == '2': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
-					remove_keys = ('clearart', 'clearlogo', 'discart')
-					for k in remove_keys: meta.pop(k, None)
+					for k in ('clearart', 'clearlogo', 'discart'): meta.pop(k, None)
 				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape, 'clearlogo': meta.get('clearlogo', ''),
 								'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', ''), 'keyart': meta.get('keyart', '')})
-				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
-				for k in remove_keys: meta.pop(k, None)
+				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
 ####-Context Menu and Overlays-####
 				cm = []
@@ -793,9 +779,6 @@ class Movies:
 				try:
 					overlay = int(playcount.getMovieOverlay(indicators, imdb))
 					watched = (overlay == 5)
-					# try: # Skip marked as watched for the unfinished list.
-						# if unfinished and watched and not i['progress'] is None: continue
-					# except: pass
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 1, 'overlay': 5})
@@ -836,7 +819,6 @@ class Movies:
 					item.setProperty('PercentPlayed', str(watched_percent))
 				except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-				item.addStreamInfo('video', {'codec': 'h264'})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
@@ -849,7 +831,7 @@ class Movies:
 				nextMenu = control.lang(32053)
 				url_params = dict(parse_qsl(urlsplit(url).query))
 				if 'imdb.com' in url and 'start' in url_params:
-					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / self.count) + 1))
+					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / int(self.count)) + 1))
 				else:
 					page = '  [I](%s)[/I]' % url_params.get('page')
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
@@ -860,7 +842,7 @@ class Movies:
 					url = '%s?action=tmdbmoviePage&url=%s' % (sysaddon, quote_plus(url))
 				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
-				item.setProperty('IsPlayable', 'top')
+				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -873,14 +855,11 @@ class Movies:
 
 	def addDirectory(self, items, queue=False):
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide()
-			control.notification(title=32001, message=33049)
+			control.hide() ; control.notification(title=32001, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
-		queueMenu = control.lang(32065)
-		playRandom = control.lang(32535)
-		addToLibrary = control.lang(32551)
+		queueMenu, playRandom, addToLibrary = control.lang(32065), control.lang(32535), control.lang(32551)
 		for i in items:
 			try:
 				name = i['name']

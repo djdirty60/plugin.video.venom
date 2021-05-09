@@ -57,9 +57,7 @@ def trakt_list(self, url, user):
 			except: pass
 		if len(items) == 0:
 			items = result
-	except:
-		return
-
+	except: return
 	try:
 		q = dict(parse_qsl(urlsplit(url).query))
 		if not int(q['limit']) == len(items): raise Exception()
@@ -69,7 +67,6 @@ def trakt_list(self, url, user):
 		next = next.encode('utf-8')
 	except:
 		next = ''
-
 	for item in items:
 		try:
 			title = item.get('title')
@@ -99,7 +96,6 @@ def trakt_list(self, url, user):
 			plot = item.get('overview')
 			# tagline = item.get('tagline', '')
 			tagline = ''
-
 			self.list.append({'title': title, 'originaltitle': title, 'year': year, 'premiered': premiered, 'genre': genre, 'duration': duration,
 										'rating': rating, 'votes': votes, 'mpaa': mpaa, 'plot': plot, 'tagline': tagline, 'imdb': imdb, 'tmdb': tmdb,
 										'tvdb': '', 'poster': '', 'fanart': '', 'next': next, 'progress': progress})
@@ -107,23 +103,19 @@ def trakt_list(self, url, user):
 			pass
 	return self.list
 
-
 def trakt_user_list(self, url, user):
 	try:
 		result = trakt.getTrakt(url)
 		items = jsloads(result)
 	except: pass
-
 	for item in items:
 		try:
 			try: name = item['list']['name']
 			except: name = item['name']
 			name = client.replaceHTMLCodes(name)
-
 			try: url = (trakt.slug(item['list']['user']['username']), item['list']['ids']['slug'])
 			except: url = ('me', item['ids']['slug'])
 			url = self.traktlist_link % url
-
 			self.list.append({'name': name, 'url': url, 'context': url})
 		except:
 			pass

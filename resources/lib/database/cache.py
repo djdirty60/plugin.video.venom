@@ -28,8 +28,13 @@ def get(function, duration, *args):
 				return result
 
 		fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
+
+		if cache_result and result == ['1'] and fresh_result == '[]': # fix for syncSeason mark unwatched of Season1
+			remove(function, *args)
+			return []
+
+		invalid = False
 		try:  # Sometimes None is returned as a string instead of None type for "fresh_result"
-			invalid = False
 			if not fresh_result: invalid = True
 			elif fresh_result == 'None' or fresh_result == '' or fresh_result == '[]' or fresh_result == '{}': invalid = True
 			elif len(fresh_result) == 0: invalid = True
@@ -96,6 +101,20 @@ def cache_insert(key, value):
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
+
+def remove(function, *args):
+	try:
+		key = _hash_function(function, args)
+		key_exists = cache_get(key)
+		if key_exists:
+			dbcon = get_connection()
+			dbcur = get_connection_cursor(dbcon)
+			dbcur.execute('''DELETE FROM cache WHERE key=?''', (key,))
+			dbcur.connection.commit()
+	except:
+		log_utils.error()
+	try: dbcur.close() ; dbcon.close()
+	except: pass
 
 def _hash_function(function_instance, *args):
 	return _get_function_name(function_instance) + _generate_md5(args)
@@ -263,21 +282,24 @@ def get_video_database_path():
 	elif kodi_version == 19: database_path = control.joinPath(database_path, 'MyVideos119.db')
 	return database_path
 ##################
-def cache_version_check():
+
+def clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=False, clr_search=False, clr_bookmarks=False):
 	try:
-		if _find_cache_version():
-			# cache_clear_all()
-			from resources.lib.database import providerscache, metacache
+		if clr_providers:
+			from resources.lib.database import providerscache
 			providerscache.cache_clear_providers()
+		if clr_metacache:
+			from resources.lib.database import metacache
 			metacache.cache_clear_meta()
-			cache_clear()
-			cache_clear_search()
-			cache_clear_bookmarks()
-			control.notification(message=32057)
+		if clr_cache: cache_clear()
+		if clr_search: cache_clear_search()
+		if clr_bookmarks: cache_clear_bookmarks()
+		# control.notification(message=32057)
+		control.notification(message='Venom version update complete')
 	except:
 		log_utils.error()
 
-def _find_cache_version():
+def update_cache_version():
 	versionFile = control.joinPath(control.dataPath, 'cache.v')
 	try:
 		if not control.existsPath(versionFile):
@@ -299,3 +321,18 @@ def _find_cache_version():
 	except:
 		log_utils.error()
 		return False
+
+def get_cache_version():
+	versionFile = control.joinPath(control.dataPath, 'cache.v')
+	try:
+		if not control.existsPath(versionFile):
+			f = open(versionFile, 'w')
+			f.close()
+	except:
+		log_utils.log('Venom Addon Data Path Does not Exist. Creating Folder....', __name__, log_utils.LOGDEBUG)
+		ad_folder = control.transPath('special://profile/addon_data/plugin.video.venom')
+		control.makeDirs(ad_folder)
+	try:
+		with open(versionFile, 'r') as fh: oldVersion = fh.read()
+	except: oldVersion = '0'
+	return oldVersion

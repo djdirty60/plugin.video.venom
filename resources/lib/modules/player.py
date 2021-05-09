@@ -83,8 +83,7 @@ class Player(xbmc.Player):
 			item = control.item(path=url)
 			item.setUniqueIDs(self.ids)
 			if control.setting('disable.player.art') == 'true':
-				remove_keys = ('clearart', 'clearlogo', 'discart')
-				for k in remove_keys: meta.pop(k, None)
+				for k in ('clearart', 'clearlogo', 'discart'): meta.pop(k, None)
 			if self.media_type == 'episode':
 				if control.setting('disable.player.art') == 'true':
 					item.setArt({'thumb': thumb, 'tvshow.poster': season_poster, 'season.poster': season_poster, 'tvshow.fanart': fanart})

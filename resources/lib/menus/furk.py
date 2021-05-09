@@ -12,7 +12,6 @@ except ImportError: #Py3
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules.source_utils import supported_video_extensions
-
 accepted_extensions = tuple(supported_video_extensions())
 
 
@@ -113,10 +112,8 @@ class Furk:
 			k.doModal()
 			q = k.getText() if k.isConfirmed() else None
 			if not q: return
-			try:
-				from sqlite3 import dbapi2 as database
-			except:
-				from pysqlite2 import dbapi2 as database
+			try: from sqlite3 import dbapi2 as database
+			except: from pysqlite2 import dbapi2 as database
 			try:
 				dbcon = database.connect(control.searchFile)
 				dbcur = dbcon.cursor()
@@ -132,7 +129,6 @@ class Furk:
 			else:
 				url = '%s?action=furkMetaSearch&url=%s' % (argv[0], quote_plus(url))
 				control.execute('Container.Update(%s)' % url)
-
 
 	def furk_meta_search(self, url):
 		if self.api_key == '': return ''
@@ -170,18 +166,13 @@ class Furk:
 		self.endDirectory()
 		return ''
 
-
 	def addDirectoryItem(self, name, query, thumb, icon, isAction=True):
-		try:
-			if isinstance(name, int): name = control.lang(name)
-		except:
-			log_utils.error()
+		if isinstance(name, int): name = control.lang(name)
 		url = '%s?action=%s' % (argv[0], query) if isAction else query
 		try: item = control.item(label=name, offscreen=True)
 		except: item = control.item(label=name)
 		item.setArt({'icon': thumb, 'poster': thumb, 'thumb': thumb})
 		control.addItem(handle=argv[1], url=url, listitem=item)
-
 
 	def endDirectory(self):
 		syshandle = int(argv[1])

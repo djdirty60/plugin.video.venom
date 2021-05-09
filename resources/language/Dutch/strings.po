@@ -408,8 +408,8 @@ msgid "Menu"
 msgstr "Menu"
 
 msgctxt "#32320"
-msgid ""
-msgstr ""
+msgid "Auth Revoked"
+msgstr "Auth ingetrokken"
 
 msgctxt "#32321"
 msgid "Featured"

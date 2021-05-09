@@ -15,7 +15,6 @@ except ImportError: #Py3
 from resources.lib.database import cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
-# from resources.lib.modules import cleanplot
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -29,14 +28,13 @@ from resources.lib.modules import workers
 
 class Episodes:
 	def __init__(self, type='show', notifications=True):
-		self.count = int(control.setting('page.item.limit'))
+		self.count = control.setting('page.item.limit')
 		self.list = []
 		self.threads = []
 		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
 		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
-		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
@@ -47,7 +45,7 @@ class Episodes:
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000'
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/episodes'
-		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=40&page=1'
+		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=%s&page=1' % self.count
 		self.progress_link = 'https://api.trakt.tv/users/me/watched/shows'
 		self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
 		self.mycalendar_link = 'https://api.trakt.tv/calendars/my/shows/date[30]/32/'
@@ -111,7 +109,6 @@ class Episodes:
 					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
 				if self.list is None: self.list = []
 				self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
-				# self.list = sorted(self.list, key=lambda i: control.datetime_workaround(i['paused_at'][:19], format="%Y-%m-%dT%H:%M:%S", date_only=False), reverse=True)
 				self.episodeDirectory(self.list, unfinished=True, next=False)
 				return self.list
 		except:
@@ -135,9 +132,9 @@ class Episodes:
 				try:
 					if not self.list: raise Exception()
 					for i in range(len(self.list)):
-						# self.list[i]['traktUpcomingProgress'] = True
 						if 'premiered' not in self.list[i]: self.list[i]['premiered'] = ''
-					self.list = sorted(self.list, key=lambda k: k['premiered'] if k['premiered'] else '3021-01-01') # hack to force unknown premiered dates to bottom of list.
+						if 'airtime' not in self.list[i]: self.list[i]['airtime'] = ''
+					self.list = sorted(self.list, key=lambda k: (k['premiered'] if k['premiered'] else '3021-01-01', k['airtime'])) # "3021" date hack to force unknown premiered dates to bottom of list
 				except: pass
 			if self.list is None: self.list = []
 			self.episodeDirectory(self.list, unfinished=False, next=False)
@@ -268,9 +265,7 @@ class Episodes:
 			except:
 				userlists += cache.get(self.trakt_user_list, 0, self.traktlikedlists_link, self.trakt_user)
 		except: pass
-
 		self.list = []
-
 		for i in range(len(userlists)): # Filter the user's own lists that were
 			contains = False
 			adapted = userlists[i]['url'].replace('/me/', '/%s/' % self.trakt_user)
@@ -340,8 +335,7 @@ class Episodes:
 				values['clearart'] = showSeasons.get('clearart')
 				values['landscape'] = showSeasons.get('landscape')
 				values['extended'] = True # used to bypass calling "super_info()", super_info() no longer used as of 4-12-21 so this could be removed.
-				remove_keys = ('episodes',) # pop() keys from seasonEpisodes that are not needed anymore
-				for k in remove_keys: values.pop(k, None)
+				for k in ('episodes',): values.pop(k, None) # pop() keys from seasonEpisodes that are not needed anymore
 				list.append(values)
 			except:
 				log_utils.error()
@@ -444,8 +438,7 @@ class Episodes:
 				values.update(showSeasons)
 				values.update(seasonEpisodes)
 				values.update(episode_meta)
-				remove_keys = ('seasons', 'episodes', 'snum', 'enum') # pop() keys from showSeasons and seasonEpisodes that are not needed anymore
-				for k in remove_keys: values.pop(k, None)
+				for k in ('seasons', 'episodes', 'snum', 'enum'): values.pop(k, None) # pop() keys from showSeasons and seasonEpisodes that are not needed anymore
 				values['unaired'] = ''
 				if upcoming:
 					values['traktUpcomingProgress'] = True
@@ -571,7 +564,6 @@ class Episodes:
 				itemlist.append(values)
 			except:
 				log_utils.error()
-		# itemlist = list(reversed(itemlist))
 		return itemlist
 
 	def trakt_episodes_list(self, url, user, lang, direct=True):
@@ -588,8 +580,7 @@ class Episodes:
 				# if not episode_meta['plot']: episode_meta['plot'] = values['plot'] # some plots missing for eps so use season level plot
 				values.update(seasonEpisodes)
 				values.update(episode_meta)
-				remove_keys = ('episodes',) # pop() keys from seasonEpisodes that are not needed anymore
-				for k in remove_keys: values.pop(k, None)
+				for k in ('episodes',): values.pop(k, None) # pop() keys from seasonEpisodes that are not needed anymore
 				try:
 					art = cache.get(tmdb_indexer.TVshows().get_art, 96, tmdb)
 					values.update(art)
@@ -602,7 +593,6 @@ class Episodes:
 				self.list.append(values)
 			except:
 				log_utils.error()
-		# items = items[:len(items)]
 		threads = []
 		for i in items:
 			threads.append(workers.Thread(items_list, i))
@@ -695,16 +685,13 @@ class Episodes:
 
 	def episodeDirectory(self, items, unfinished=False, next=True):
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide()
-			control.notification(title=32326, message=33049)
+			control.hide() ; control.notification(title=32326, message=33049)
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		if not is_widget: control.playlist.clear()
 		settingFanart = control.setting('fanart') == 'true'
-		addonPoster = control.addonPoster()
-		addonFanart = control.addonFanart()
-		addonBanner = control.addonBanner()
+		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		try: traktProgress = False if 'traktProgress' not in items[0] else True
 		except: traktProgress = False
 		if traktProgress and control.setting('tvshows.direct') == 'false': progressMenu = control.lang(32015)
@@ -713,8 +700,7 @@ class Episodes:
 		else:
 			try: multi = [i['tvshowtitle'] for i in items]
 			except: multi = []
-			multi = len([x for y, x in enumerate(multi) if x not in multi[:y]])
-			multi = True if multi > 1 else False
+			multi = True if len([x for y, x in enumerate(multi) if x not in multi[:y]]) > 1 else False
 			try:
 				if '/users/me/history/' in items[0]['next']: multi = True
 			except: pass
@@ -734,26 +720,18 @@ class Episodes:
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
 		elif enable_upnext or hosts_mode != '1': isPlayable = 'true'
 		if airEnabled == 'true':
-			airZone = control.setting('tvshows.air.zone')
-			airLocation = control.setting('tvshows.air.location')
-			airFormat = control.setting('tvshows.air.format')
-			airFormatDay = control.setting('tvshows.air.day')
-			airFormatTime = control.setting('tvshows.air.time')
-			airBold = control.setting('tvshows.air.bold')
+			airZone, airLocation = control.setting('tvshows.air.zone'), control.setting('tvshows.air.location')
+			airFormat, airFormatDay = control.setting('tvshows.air.format'), control.setting('tvshows.air.day')
+			airFormatTime, airBold = control.setting('tvshows.air.time'), control.setting('tvshows.air.bold')
 			airLabel = control.lang(35032)
 		if hosts_mode == '2' or enable_upnext: playbackMenu = control.lang(32063)
 		else: playbackMenu = control.lang(32064)
 		if trakt.getTraktIndicatorsInfo():
-			watchedMenu = control.lang(32068)
-			unwatchedMenu = control.lang(32069)
+			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
 		else:
-			watchedMenu = control.lang(32066)
-			unwatchedMenu = control.lang(32067)
-		traktManagerMenu = control.lang(32070)
-		playlistManagerMenu = control.lang(35522)
-		queueMenu = control.lang(32065)
-		tvshowBrowserMenu = control.lang(32071)
-		addToLibrary = control.lang(32551)
+			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
+		traktManagerMenu, playlistManagerMenu, queueMenu = control.lang(32070), control.lang(35522), control.lang(32065)
+		tvshowBrowserMenu, addToLibrary = control.lang(32071), control.lang(32551)
 		for i in items:
 			try:
 				tvshowtitle, title, imdb, tmdb, tvdb = i.get('tvshowtitle'), i.get('title'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', '')
@@ -769,20 +747,29 @@ class Episodes:
 					if i['unaired'] == 'true': labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
 				if i.get('traktHistory') is True:
-					try: labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(i.get('lastplayed', '')))
+					try:
+						air_datetime = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
+						if air_datetime[12] == '0': air_datetime = air_datetime[:12] + '' + air_datetime[13:]
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
+					except: pass
+				if upcoming_prependDate and i.get('traktUpcomingProgress') is True:
+					try:
+						if premiered and i.get('airtime'): combined='%sT%s' % (premiered, i.get('airtime', ''))
+						else: raise Exception()
+						air_datetime = tools.Time.convert(stringTime=combined, zoneFrom=i.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%b %d %I:%M %p')
+						if air_datetime[7] == '0': air_datetime = air_datetime[:7] + '' + air_datetime[8:]
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
 					except: pass
 				systitle, systvshowtitle, syspremiered = quote_plus(title), quote_plus(tvshowtitle), quote_plus(premiered)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'episode', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
-				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
-				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				try: meta.update({'title': i['label']})
 				except: pass
 				if airEnabled == 'true':
 					air = [] ; airday = None ; airtime = None
-					if 'airday' in meta and not meta['airday'] is None and meta['airday'] != '':
+					if 'airday' in meta and not meta['airday'] is None and meta['airday'] != '': 
 						airday = meta['airday']
 					if 'airtime' in meta and not meta['airtime'] is None and meta['airtime'] != '':
 						airtime = meta['airtime']
@@ -794,11 +781,8 @@ class Episodes:
 							elif airFormatTime == '2': formatOutput = '%I:%M %p'
 							else: formatOutput = '%H:%M'
 							abbreviate = airFormatDay == '1'
-							airtime = tools.Time.convert(stringTime=airtime, stringDay=airday, zoneFrom=meta['airzone'],
-														zoneTo=zoneTo, abbreviate=abbreviate, formatOutput=formatOutput)
-							if airday:
-								airday = airtime[1]
-								airtime = airtime[0]
+							airtime = tools.Time.convert(stringTime=airtime, stringDay=airday, zoneFrom=meta['airzone'], zoneTo=zoneTo, abbreviate=abbreviate, formatOutput=formatOutput)
+							if airday: airday, airtime = airtime[1], airtime[0]
 					if airday: air.append(airday)
 					if airtime: air.append(airtime)
 					if len(air) > 0:
@@ -821,24 +805,18 @@ class Episodes:
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
 				if disable_player_art and (hosts_mode == '2' or enable_upnext): # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
-					remove_keys = ('clearart', 'clearlogo')
-					for k in remove_keys: meta.pop(k, None)
-				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon,
-									'thumb': thumb, 'banner': banner, 'clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'landscape': landscape})
-				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
-				for k in remove_keys: meta.pop(k, None)
+					for k in ('clearart', 'clearlogo'): meta.pop(k, None)
+				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb,
+								'banner': banner, 'clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'landscape': landscape})
+				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
 ####-Context Menu and Overlays-####
 				cm = []
 				if self.traktCredentials:
-					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s)' % (
-										sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
+					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
 				try:
 					overlay = int(playcount.getEpisodeOverlay(indicators, imdb, tvdb, season, episode))
 					watched = (overlay == 5)
-					# # Skip episodes marked as watched for the unfinished and onDeck lists. 4-1-221, not used anymore as user could rewatch and episode and have a NEW progress
-					# try: if unfinished and watched and not i['progress'] is None: continue
-					# except: pass
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 5})
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=4)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
@@ -876,7 +854,6 @@ class Episodes:
 ####################################
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', syslabelProgress, year, imdb)})
-
 				try: item = control.item(label=labelProgress, offscreen=True)
 				except: item = control.item(label=labelProgress)
 				if 'castandart' in i: item.setCast(i['castandart'])
@@ -886,9 +863,8 @@ class Episodes:
 						try:
 							count = playcount.getShowCount(indicators, imdb, tvdb)
 							if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
+							else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('counts', {}).get(str(season)))}) # temp use TMDb's season-episode count for threads not finished....next load counts will update with trakt data
 						except: pass
-				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
-				except: pass #da hell with 17 users
 				item.setProperty('IsPlayable', isPlayable)
 				item.setProperty('tvshow.tmdb_id', tmdb)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
@@ -907,12 +883,16 @@ class Episodes:
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb})
 				if upcoming_prependDate and i.get('traktUpcomingProgress') is True:
 					try:
-						abrv_date = datetime.strptime(premiered, "%Y-%m-%d").strftime("%b %d")
-						new_title = '[COLOR %s][%s]  [/COLOR]' % (self.highlight_color, abrv_date) + title
+						if premiered and meta.get('airtime'): combined='%sT%s' % (premiered, meta.get('airtime', ''))
+						else: raise Exception()
+						air_datetime = tools.Time.convert(stringTime=combined, zoneFrom=meta.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%b %d %I:%M %p')
+						if air_datetime[7] == '0': air_datetime = air_datetime[:7] + '' + air_datetime[8:]
+						new_title = '[COLOR %s][%s]  [/COLOR]' % (self.highlight_color, air_datetime) + title
 						meta.update({'title': new_title})
 					except: pass
+				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
+				except: pass #da hell with 17 users
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-				item.addStreamInfo('video', {'codec': 'h264'})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 				if playlistcreate: control.playlist.add(url=url, listitem=item)
@@ -927,7 +907,7 @@ class Episodes:
 				url_params = dict(parse_qsl(url))
 				if 'imdb.com' in url:
 					start = int(url_params.get('start'))
-					page = '  [I](%s)[/I]' % str(((start - 1) / self.count) + 1)
+					page = '  [I](%s)[/I]' % str(((start - 1) / int(self.count)) + 1)
 				else:
 					page = url_params.get('page')
 					page = '  [I](%s)[/I]' % page
@@ -936,6 +916,7 @@ class Episodes:
 				try: item = control.item(label=nextMenu, offscreen=True)
 				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
+				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -951,8 +932,7 @@ class Episodes:
 
 	def addDirectory(self, items, queue=False):
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide()
-			control.notification(title=32326, message=33049)
+			control.hide() ; control.notification(title=32326, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()

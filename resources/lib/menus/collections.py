@@ -15,7 +15,6 @@ except ImportError: #Py3
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
-# from resources.lib.modules import cleanplot
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -29,9 +28,9 @@ from resources.lib.modules import workers
 class Collections:
 	def __init__(self):
 		self.list = []
+		self.count = control.setting('page.item.limit')
 		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 		self.unairedcolor = control.getColor(control.setting('movie.unaired.identify'))
-		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 		self.lang = control.apiLanguage()['trakt']
@@ -812,17 +811,14 @@ class Collections:
 
 	def movieDirectory(self, items, next=True):
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide()
-			control.notification(title=32000, message=33049)
+			control.hide() ; control.notification(title=32000, message=33049)
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		disable_player_art = control.setting('disable.player.art') == 'true'
 		hosts_mode = control.setting('hosts.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
-		addonPoster = control.addonPoster()
-		addonFanart = control.addonFanart()
-		addonBanner = control.addonBanner()
+		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		indicators = playcount.getMovieIndicators()
 		isPlayable = 'false'
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
@@ -830,15 +826,11 @@ class Collections:
 		if hosts_mode == '2': playbackMenu = control.lang(32063)
 		else: playbackMenu = control.lang(32064)
 		if trakt.getTraktIndicatorsInfo():
-			watchedMenu = control.lang(32068)
-			unwatchedMenu = control.lang(32069)
+			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
 		else:
-			watchedMenu = control.lang(32066)
-			unwatchedMenu = control.lang(32067)
-		playlistManagerMenu = control.lang(35522)
-		queueMenu = control.lang(32065)
-		traktManagerMenu = control.lang(32070)
-		addToLibrary = control.lang(32551)
+			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
+		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
+		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -851,11 +843,7 @@ class Collections:
 				sysname, systitle = quote_plus(label), quote_plus(title)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
-				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end remove it.
-				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
-				except: pass
-				try: meta.update({'year': int(meta['year'])})
 				except: pass
 				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
 				fanart = ''
@@ -866,12 +854,10 @@ class Collections:
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
 				if disable_player_art and hosts_mode == '2': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
-					remove_keys = ('clearart', 'clearlogo', 'discart')
-					for k in remove_keys: meta.pop(k, None)
+					for k in ('clearart', 'clearlogo', 'discart'): meta.pop(k, None)
 				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape, 'clearlogo': meta.get('clearlogo', ''),
 								'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', ''), 'keyart': meta.get('keyart', '')})
-				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
-				for k in remove_keys: meta.pop(k, None)
+				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
 ####-Context Menu and Overlays-####
 				cm = []
@@ -921,7 +907,6 @@ class Collections:
 					item.setProperty('percentplayed', str(watched_percent))
 				except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-				item.addStreamInfo('video', {'codec': 'h264'})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
@@ -934,7 +919,7 @@ class Collections:
 				nextMenu = control.lang(32053)
 				url_params = dict(parse_qsl(url))
 				if 'imdb.com' in url and 'start' in url_params:
-					page = '  [I](%s)[/I]' % str(((int(url_params.get('start')) - 1) / self.count) + 1)
+					page = '  [I](%s)[/I]' % str(((int(url_params.get('start')) - 1) / int(self.count)) + 1)
 				else:
 					page = '  [I](%s)[/I]' % url_params.get('page')
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
@@ -942,6 +927,7 @@ class Collections:
 				try: item = control.item(label=nextMenu, offscreen=True)
 				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
+				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -953,10 +939,7 @@ class Collections:
 		views.setView('movies', {'skin.estuary': 55, 'skin.confluence': 500})
 
 	def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True):
-		try:
-			if isinstance(name, int): name = control.lang(name)
-		except:
-			log_utils.error()
+		if isinstance(name, int): name = control.lang(name)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		artPath = control.artPath()
 		thumb = control.joinPath(artPath, thumb) if artPath else icon
@@ -967,6 +950,7 @@ class Collections:
 		cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 		try: item = control.item(label=name, offscreen=True)
 		except: item = control.item(label=name)
+		item.setProperty('IsPlayable', 'false')
 		item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 		item.addContextMenuItems(cm)
 		control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)

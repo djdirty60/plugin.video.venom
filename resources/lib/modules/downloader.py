@@ -16,20 +16,14 @@ from resources.lib.modules import log_utils
 
 
 def download(name, image, url, meta_name=None):
-	if not url:
-		control.hide()
-		return
+	if not url: return control.hide()
 	try:
 		file_format = control.setting('downloads.file.format')
-
 		try: headers = dict(parse_qsl(url.rsplit('|', 1)[1]))
 		except: headers = dict('')
-
 		url = url.split('|')[0]
-
 		try: transname = name.translate(None, '\/:*?"<>|').strip('.')
 		except: transname = name.translate(name.maketrans('', '', '\/:*?"<>|')).strip('.')  # maketrans() is in string module for py2
-
 		ext_list = ['.mp4', '.mkv', '.flv', '.avi', '.mpg']
 		for i in ext_list: transname = transname.rstrip(i)
 		if meta_name:
@@ -41,7 +35,6 @@ def download(name, image, url, meta_name=None):
 		else:
 			try: content = re.search(r'(.+?)(?:|\.| - |-|.-.|\s)(?:S|s|\s|\.)(\d{1,2})(?!\d)(?:|\.| - |-|.-.|x|\s)(?:E|e|\s|.)([0-2]{1}[0-9]{1})(?!\w)', name.replace('\'', '')).groups()
 			except: content = ()
-
 		levels =['../../../..', '../../..', '../..', '..']
 		if len(content) == 0:
 			dest = control.setting('movie.download.path')
@@ -122,20 +115,16 @@ def doDownload(url, dest, title, image, headers):
 	resp = getResponse(url, headers, 0)
 	if not resp:
 		control.hide()
-		control.okDialog(title, dest + 'Download failed: No response from server')
-		return
+		return control.okDialog(title, dest + 'Download failed: No response from server')
 	try: content = int(resp.headers['Content-Length'])
 	except: content = 0
 	try: resumable = 'bytes' in resp.headers['Accept-Ranges'].lower()
 	except: resumable = False
 	if content < 1:
 		control.hide()
-		control.okDialog(title, file + 'Unknown filesize: Unable to download')
-		return
+		return control.okDialog(title, file + 'Unknown filesize: Unable to download')
 	size = 1024 * 1024
-	# mb = content / (1024 * 1024)
 	gb = str(round(content / float(1073741824), 2))
-
 	if content < size:
 		size = content
 	total = 0
@@ -145,22 +134,16 @@ def doDownload(url, dest, title, image, headers):
 	resume = 0
 	sleep = 0
 	control.hide()
-	# if control.yesnoDialog('Name to save:[CR]%s[CR]File Size: %sGB[CR]Continue with download?' % (file, gb), '', '', 'Confirm Download', 'Confirm',  'Cancel') == 1:
-	if control.yesnoDialog('File Size: %sGB[CR]Path: %s[CR]Continue with download?' % (gb, dest), '', '', 'Confirm Download', 'Confirm',  'Cancel') == 1:
-		return
-
+	if control.yesnoDialog('File Size: %sGB[CR]Path: %s[CR]Continue with download?' % (gb, dest), '', '', 'Confirm Download', 'Confirm',  'Cancel') == 1: return
 	f = control.openFile(dest, 'w')
 	chunk  = None
 	chunks = []
-
 	import xbmcgui
 	while True:
 		downloaded = total
-		for c in chunks:
-			downloaded += len(c)
+		for c in chunks: downloaded += len(c)
 		percent = min(100 * downloaded / content, 100)
 		if percent >= notify:
-			# control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message=dest, icon=image, time=10000)
 			control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message='', icon=image, time=3000) #xbmcgui.Dialog().notification() auto scroll time to complete supercedes allowed "time=" to run in Silvo, removed dest
 			notify += 20
 		chunk = None
@@ -168,8 +151,7 @@ def doDownload(url, dest, title, image, headers):
 		try:
 			chunk  = resp.read(size)
 			if not chunk:
-				if percent < 99:
-					error = True
+				if percent < 99: error = True
 				else:
 					while len(chunks) > 0:
 						c = chunks.pop(0)
@@ -193,7 +175,6 @@ def doDownload(url, dest, title, image, headers):
 			if errno == 11001: # 'getaddrinfo failed'
 				errors = 10 #force resume
 				sleep  = 30
-
 		if chunk:
 			errors = 0
 			chunks.append(chunk)
@@ -202,27 +183,22 @@ def doDownload(url, dest, title, image, headers):
 				f.write(c)
 				total += len(c)
 				del c
-
 		if error:
 			errors += 1
 			count  += 1
 			control.sleep(sleep*1000)
-
 		if (resumable and errors > 0) or errors >= 10:
-			if (not resumable and resume >= 50) or resume >= 500:
-				#Give up!
+			if (not resumable and resume >= 50) or resume >= 500: # Give up!
 				log_utils.log('Download Canceled: %s - too many errors whilst downloading' % (dest), level=log_utils.LOGWARNING)
 				return done(title, dest, False)
 			resume += 1
 			errors  = 0
 			if resumable:
 				chunks  = []
-				#create new response
-				resp = getResponse(url, headers, total)
+				resp = getResponse(url, headers, total) # create new response
 			else: pass
 
-def titlecase(string):
-	# not perfect but close enough
+def titlecase(string): # not perfect but close enough
 	try:
 		articles = ['a', 'an', 'the', 'vs', 'v']
 		word_list = re.split(' ', string)

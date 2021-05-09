@@ -26,8 +26,7 @@ def get_request(url):
 		except requests.exceptions.SSLError:
 			response = requests.get(url, verify=False)
 	except requests.exceptions.ConnectionError:
-		control.notification(message=32024)
-		return
+		return control.notification(message=32024)
 	if '200' in str(response): return response.json()
 	elif 'Retry-After' in response.headers: 	# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
 		throttleTime = response.headers['Retry-After']
@@ -365,7 +364,6 @@ class TVshows:
 		self.tvdb_key = control.setting('tvdb.api.key')
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
-		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
@@ -520,12 +518,12 @@ class TVshows:
 			meta['tmdb'] = tmdb
 			meta['in_production'] = result.get('in_production') # do not use for "season_isAiring", this is show wide and "season_isAiring" is season specific for season pack scraping.
 			meta['last_air_date'] = result.get('last_air_date', '')
-			# meta['last_episode_to_air'] = 
+			meta['last_episode_to_air'] = result.get('last_episode_to_air', '')
 			meta['tvshowtitle'] = py_tools.ensure_str(result.get('name'))
-			# meta['next_episode_to_air'] = 
+			# meta['next_episode_to_air'] = results.get('next_episode_to_air', '')
 			try: meta['studio'] = result.get('networks', {})[0].get('name')
 			except: meta['studio'] = ''
-			meta['total_episodes'] = result.get('number_of_episodes')
+			meta['total_episodes'] = result.get('number_of_episodes') # counts aired eps
 			meta['total_seasons'] = result.get('number_of_seasons')
 			try: meta['origin_country'] = result.get('origin_country')[0]
 			except: meta['origin_country'] = ''
@@ -535,9 +533,15 @@ class TVshows:
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result['poster_path'] else ''
 			meta['seasons'] = result.get('seasons')
-			meta['counts'] = self.seasonCountParse(meta['seasons']) # check on performance hit
-			meta['spoken_languages'] = result.get('spoken_languages')
 			meta['status'] = result.get('status')
+			# meta['counts'] = self.seasonCountParse(meta['seasons']) # check on performance hit
+			meta['counts'] = dict(sorted({(str(i['season_number']), i['episode_count']) for i in meta['seasons']}, key=lambda k: int(k[0])))
+			if meta['status'].lower in ('ended', 'canceled'):
+				meta['total_aired_episodes'] = result.get('number_of_episodes')
+			else:
+				meta['total_aired_episodes'] = self.airedEpisodesParse(meta['seasons'], meta['last_episode_to_air'])
+				# meta['total_aired_episodes'] = sum([i['episode_count'] for i in meta['seasons'] if i['season_number'] < meta['last_episode_to_air']['season_number'] and i['season_number'] != 0]) + meta['last_episode_to_air']['episode_number']
+			meta['spoken_languages'] = result.get('spoken_languages')
 			meta['tagline'] = result.get('tagline', '')
 			meta['type'] = result.get('type')
 			meta['rating'] = result.get('vote_average', '')
@@ -736,6 +740,17 @@ class TVshows:
 			counts[season] = s.get('episode_count')
 		return counts
 
+	def airedEpisodesParse(self, seasons, last_aired):
+		if not seasons or not last_aired: return
+		lastaired_season = last_aired.get('season_number', '')
+		total_aired_episodes = 0
+		for s in seasons:
+			if any(value == s.get('season_number') for value in (0, lastaired_season)): continue
+			if s.get('season_number') > lastaired_season: continue
+			total_aired_episodes += s.get('episode_count', 0)
+		total_aired_episodes += last_aired.get('episode_number', 0)
+		return total_aired_episodes
+
 	def get_season_isAiring(self, tmdb, season): # for pack scraping to skip if season is still airing
 		if not tmdb or not season: return None
 		seasonEpisodes = cache.get(self.get_seasonEpisodes_meta, 96, tmdb, season) # "status" not available this level so must iterate all eps
@@ -871,8 +886,7 @@ class Auth:
 	def create_session_id(self):
 		try:
 			if control.setting('tmdb.username') == '' or control.setting('tmdb.password') == '':
-				control.notification(message='TMDb Account info missing', icon='ERROR')
-				return
+				return control.notification(message='TMDb Account info missing', icon='ERROR')
 			url = self.auth_base_link + '/token/new?api_key=%s' % API_key
 			result = requests.get(url).json()
 			token = result.get('request_token')

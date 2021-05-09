@@ -4,7 +4,7 @@
 """
 
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime
 from hashlib import md5
 from json import loads as jsloads
 import random
@@ -34,7 +34,6 @@ class indexer:
 	def __init__(self):
 		self.list = [] ; self.hash = []
 
-
 	def root(self):
 		try:
 			regex.clear()
@@ -45,7 +44,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_porn(self):
 		try:
@@ -58,7 +56,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_kids(self):
 		try:
 			regex.clear()
@@ -69,7 +66,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_kids1(self):
 		try:
@@ -82,7 +78,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_kids_random(self):
 		try:
 			regex.clear()
@@ -93,7 +88,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_kids_dis1(self):
 		try:
@@ -106,7 +100,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_iptv_usa(self):
 		try:
 			regex.clear()
@@ -117,7 +110,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_iptv_uk(self):
 		try:
@@ -130,7 +122,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_iptv_world(self):
 		try:
 			regex.clear()
@@ -141,7 +132,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_iptv_cctv(self):
 		try:
@@ -154,7 +144,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_test(self):
 		try:
 			regex.clear()
@@ -165,7 +154,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_247movies(self):
 		try:
@@ -178,7 +166,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_247tv(self):
 		try:
 			regex.clear()
@@ -189,7 +176,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_4k(self):
 		try:
@@ -202,7 +188,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_1click(self):
 		try:
 			regex.clear()
@@ -213,7 +198,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def root_1clickcollections(self):
 		try:
@@ -226,7 +210,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def root_porn1(self):
 		try:
 			regex.clear()
@@ -238,7 +221,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def get(self, url):
 		try:
 			self.list = self.it_list(url)
@@ -248,7 +230,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def getq(self, url):
 		try:
 			self.list = self.it_list(url)
@@ -257,7 +238,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def getx(self, url, worker=False):
 		try:
@@ -271,7 +251,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def developer(self):
 		try:
 			url = control.joinPath(control.dataPath, 'testings.xml')
@@ -282,7 +261,6 @@ class indexer:
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def youtube(self, url, action):
 		try:
@@ -309,7 +287,6 @@ class indexer:
 	def tvtuner(self, url):
 		try:
 			preset = re.findall(r'<preset>(.+?)</preset>', url)[0]
-			# today = ((datetime.utcnow() - timedelta(hours=5))).strftime('%Y-%m-%d')
 			today = datetime.now().strftime('%Y-%m-%d')
 			today = int(re.sub(r'[^0-9]', '', str(today)))
 			url, imdb, tvdb, tvshowtitle, year, thumbnail, fanart = re.findall(r'<url>(.+?)</url>', url)[0],
@@ -324,23 +301,19 @@ class indexer:
 			tvm ='https://api.tvmaze.com/shows/%s/episodes' % str(jsloads(tvm).get('id'))
 			items = jsloads(client.request(tvm))
 			items = [(str(i.get('season')), str(i.get('number')), i.get('name').strip(), i.get('airdate')) for i in items]
-
 			if preset == 'tvtuner':
 				choice = random.choice(items)
 				items = items[items.index(choice):] + items[:items.index(choice)]
 				items = items[:100]
-
 			result = ''
 			for i in items:
 				try:
 					if int(re.sub(r'[^0-9]', '', str(i[3]))) > today: raise Exception()
 					result += '<item><title> %01dx%02d . %s</title><meta><content>episode</content><imdb>%s</imdb><tvdb>%s</tvdb><tvshowtitle>%s</tvshowtitle><year>%s</year><title>%s</title><premiered>%s</premiered><season>%01d</season><episode>%01d</episode></meta><link><sublink>search</sublink><sublink>searchsd</sublink></link><thumbnail>%s</thumbnail><fanart>%s</fanart></item>' % (int(i[0]), int(i[1]), i[2], imdb, tvdb, tvshowtitle, year, i[2], i[3], int(i[0]), int(i[1]), thumbnail, fanart)
 				except: pass
-
 			result = re.sub(r'[^\x00-\x7F]+', ' ', result)
 			if preset == 'tvtuner': result = result.replace('<sublink>searchsd</sublink>', '')
 			self.list = self.it_list('', result=result)
-
 			if preset == 'tvtuner':
 				self.addDirectory(self.list, queue=True)
 			else:
@@ -348,7 +321,6 @@ class indexer:
 				self.addDirectory(self.list)
 		except:
 			log_utils.error()
-
 
 	def search(self, url):
 		try:
@@ -360,11 +332,9 @@ class indexer:
 				if '|SECTION|' in url: mark = url.split('|SECTION|')[0]
 				self.list = [{'name': 30702, 'url': url, 'action': 'addSearch'}]
 				self.list += [{'name': 30703, 'action': 'delSearch'}]
-
 			try:
 				def search(): return
 				query = cache.get(search, 600000000, table='rel_srch')
-
 				for url in query:
 					if mark != False:
 						if mark in url:
@@ -376,12 +346,10 @@ class indexer:
 							try: self.list += [{'name': '%s...' % url, 'url': url, 'action': 'addSearch'}]
 							except: pass
 			except: pass
-
 			self.addDirectory(self.list)
 			return self.list
 		except:
 			log_utils.error()
-
 
 	def delSearch(self):
 		try:
@@ -389,7 +357,6 @@ class indexer:
 			control.refresh()
 		except:
 			log_utils.error()
-
 
 	def addSearch(self, url):
 			try:
@@ -405,9 +372,7 @@ class indexer:
 				else: 
 					section = 0
 			except: section = 0
-
 			link = 'https://t2k-repository.ml/IT/IT/tRmKGjTbr/xmls/clowns.xml'
-
 			if skip == 0:
 				if section == 1:
 					keyboard = control.keyboard('', control.lang(30702))
@@ -421,29 +386,22 @@ class indexer:
 						keyboard.doModal()
 						if not (keyboard.isConfirmed()): return
 						url = keyboard.getText()
-
 			if (url is None or url == ''): return
-
 			if section == 1: input = keep
 			else: input = url
 			def search(): return [input]
 			query = cache.get(search, 600000000, table='rel_srch')
-
 			def search(): return [x for y,x in enumerate((query + [input])) if x not in (query + [input])[:y]]
 			cache.get(search, 0, table='rel_srch')
-
 			links = client.request(link)
 			links = re.findall(r'<link>(.+?)</link>', links)
 			if section == 0: links = [i for i in links if str(i).startswith('http')]
 			else: links = [i for i in links if str(i).startswith('http') and matcher.lower() in str(i).lower()]
-
 			self.list = [] ; threads = []
 			for link in links: threads.append(workers.Thread(self.it_list, link))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
-
 			self.list = [i for i in self.list if url.lower() in i['name'].lower()]
-
 			for i in self.list:
 				try:
 					name = ''
@@ -451,10 +409,8 @@ class indexer:
 					name += i['name']
 					i.update({'name' : name})
 				except: pass
-
 			for i in self.list: i.update({'content': 'videos'})
 			self.addDirectory(self.list)
-
 
 	def it_list(self, url, result=None):
 		try:
@@ -463,29 +419,23 @@ class indexer:
 				result = re.compile(r'#EXTINF:.+?\,(.+?)\n(.+?)\n', re.M | re.S).findall(result)
 				result = [r'<item><title>%s</title><link>%s</link></item>' % (i[0], i[1]) for i in result]
 				result = ''.join(result)
-
 			try: r = base64.b64decode(result)
 			except: r = ''
 			if '</link>' in r: result = r
-
 			result = str(result)
 			info = result.split('<item>')[0].split('<dir>')[0]
-
 			try: vip = re.findall(r'<poster>(.+?)</poster>', info)[0]
 			except: vip = '0'
 			try: image = re.findall(r'<thumbnail>(.+?)</thumbnail>', info)[0]
 			except: image = '0'
 			try: fanart = re.findall(r'<fanart>(.+?)</fanart>', info)[0]
 			except: fanart = '0'
-
 			api_data = client.request(base64.b64decode('aHR0cDovL3RleHR1cGxvYWRlci5jb20vZHI3NmcvcmF3'), timeout='5')
 			tmdb_api = re.compile(r'<api>(.+?)</api>').findall(api_data)[0]
-
 			items = re.compile(r'((?:<item>.+?</item>|<dir>.+?</dir>|<plugin>.+?</plugin>|<info>.+?</info>|<name>[^<]+</name><link>[^<]+</link><thumbnail>[^<]+</thumbnail><mode>[^<]+</mode>|<name>[^<]+</name><link>[^<]+</link><thumbnail>[^<]+</thumbnail><date>[^<]+</date>))', re.M | re.S).findall(result)
 		except:
 			log_utils.error()
 			return
-
 		for item in items:
 			try:
 				regdata = re.compile(r'(<regex>.+?</regex>)', re.M | re.S).findall(item)
@@ -684,7 +634,6 @@ class indexer:
 		regex.insert(self.hash)
 		return self.list
 
-
 	def worker(self):
 		if not control.setting('metadata') == 'true': return
 		self.imdb_info_link = 'https://www.omdbapi.com/?i=%s&plot=full&r=json'
@@ -718,7 +667,6 @@ class indexer:
 
 		if self.meta:
 			metacache.insert(self.meta)
-
 
 	def movie_info(self, i):
 		try:
@@ -811,7 +759,6 @@ class indexer:
 		except:
 			log_utils.error()
 
-
 	def tv_info(self, i):
 		try:
 			if self.list[i]['metacache'] is True: raise Exception()
@@ -835,25 +782,21 @@ class indexer:
 
 			year = item['premiered']
 			year = re.findall(r'(\d{4})', year)[0]
-			# year = year.encode('utf-8')
 			if not year == '0': self.list[i].update({'year': year})
 
 			try: imdb = item['externals']['imdb']
 			except: imdb = '0'
 			if imdb == '' or imdb is None: imdb = '0'
-			# imdb = imdb.encode('utf-8')
 			if self.list[i]['imdb'] == '0' and not imdb == '0': self.list[i].update({'imdb': imdb})
 
 			try: studio = item['network']['name']
 			except: studio = '0'
 			if studio == '' or studio is None: studio = '0'
-			# studio = studio.encode('utf-8')
 			if not studio == '0': self.list[i].update({'studio': studio})
 
 			genre = item['genres']
 			if genre == '' or genre is None or genre == []: genre = '0'
 			genre = ' / '.join(genre)
-			# genre = genre.encode('utf-8')
 			if not genre == '0': self.list[i].update({'genre': genre})
 
 			try: duration = str(item['runtime'])
@@ -861,24 +804,19 @@ class indexer:
 			if duration == '' or duration is None: duration = '0'
 			try: duration = str(int(duration) * 60)
 			except: pass
-			# duration = duration.encode('utf-8')
 			if not duration == '0': self.list[i].update({'duration': duration})
 
 			rating = str(item['rating']['average'])
 			if rating == '' or rating is None: rating = '0'
-			# rating = rating.encode('utf-8')
 			if not rating == '0': self.list[i].update({'rating': rating})
 
 			plot = item['summary']
 			if not plot: plot = '0'
 			plot = re.sub(r'\n|<.+?>|</.+?>|.+?#\d*:', '', plot)
-			# plot = plot.encode('utf-8')
 			if not plot == '0': self.list[i].update({'plot': plot})
-
 			self.meta.append({'imdb': imdb, 'tmdb': '0', 'tvdb': tvdb, 'lang': self.lang, 'item': {'tvshowtitle': tvshowtitle, 'year': year, 'code': imdb, 'imdb': imdb, 'tvdb': tvdb, 'studio': studio, 'genre': genre, 'duration': duration, 'rating': rating, 'plot': plot}})
 		except:
 			log_utils.error()
-
 
 	def addDirectory(self, items, queue=False):
 		if items is None or len(items) == 0: return
@@ -899,13 +837,11 @@ class indexer:
 		elif 'episodes' in mode: mode = 'episodes'
 		elif 'videos' in mode: mode = 'videos'
 		else: mode = 'addons'
-
 		for i in items:
 			try: 
 				try: name = control.lang(int(i['name']))
 				except: name = i['name']
 				if name == '': name = i['name']
-
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
@@ -988,12 +924,11 @@ class indexer:
 
 		try:
 			i = items[0]
-			if i['next'] == '':
-				raise Exception()
+			if i['next'] == '': raise Exception()
 
-				# nextMenu = control.lang(32053)
-				# page = '  [I](%s)[/I]' % str(url.split('&page=', 1)[1])
-				# nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
+			# nextMenu = control.lang(32053)
+			# page = '  [I](%s)[/I]' % str(url.split('&page=', 1)[1])
+			# nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 
 			url = '%s?action=%s&url=%s' % (sysaddon, i['nextaction'], quote_plus(i['next']))
 			try: item = control.item(label=control.lang(30500), offscreen=True)
@@ -1008,7 +943,6 @@ class indexer:
 		if mode in ['movies', 'tvshows', 'seasons', 'episodes']:
 			views.setView(mode, {'skin.estuary': 55})
 
-
 class resolver:
 	def browser(self, url):
 		try:
@@ -1017,7 +951,6 @@ class resolver:
 			control.execute('RunPlugin(plugin://plugin.program.chrome.launcher/?url=%s&mode=showSite&stopPlayback=no)' % quote_plus(url))
 		except:
 			log_utils.error()
-
 
 	def link(self, url):
 		try:
@@ -1032,7 +965,6 @@ class resolver:
 		except:
 			log_utils.error()
 
-
 	def get(self, url):
 		try:
 			items = re.compile(r'<sublink(?:\s+name=|)(?:\'|\"|)(.*?)(?:\'|\"|)>(.+?)</sublink>').findall(url)
@@ -1044,7 +976,6 @@ class resolver:
 			else: return items[select][1]
 		except:
 			log_utils.error()
-
 
 	def f4m(self, url, name):
 			try:
@@ -1080,7 +1011,6 @@ class resolver:
 			except:
 				log_utils.error()
 
-
 	def process(self, url, direct=True):
 		try:
 			if not any(i in url for i in ['.jpg', '.png', '.gif']): raise Exception()
@@ -1097,7 +1027,6 @@ class resolver:
 			except: return
 		except:
 			log_utils.error()
-
 		try:
 			r, x = re.findall(r'(.+?)\|regex=(.+?)$', url)[0]
 			x = regex.fetch(x)
@@ -1106,20 +1035,17 @@ class resolver:
 			u = regex.resolve(r)
 			if not u is None: url = u
 		except: pass
-
 		try:
 			if not url.startswith('rtmp'): raise Exception()
 			if len(re.compile(r'\s*timeout=(\d*)').findall(url)) == 0: url += ' timeout=10'
 			return url
 		except: pass
-
 		try:
 			if not any(i in url for i in ['.m3u8', '.f4m', '.ts']): raise Exception()
 			ext = url.split('?')[0].split('&')[0].split('|')[0].rsplit('.')[-1].replace('/', '').lower()
 			if not ext in ['m3u8', 'f4m', 'ts']: raise Exception()
 			return url
 		except: pass
-
 		try:
 			preset = re.findall(r'<preset>(.+?)</preset>', url)[0]
 			if not 'search' in preset: raise Exception()
@@ -1129,16 +1055,13 @@ class resolver:
 																							re.findall(r'<premiered>(.+?)</premiered>', url)[0], re.findall(r'<season>(.+?)</season>', url)[0],
 																							re.findall(r'<episode>(.+?)</episode>', url)[0]
 			except: tvdb = tvshowtitle = premiered = season = episode = None
-
 			direct = False
 			quality = 'HD' if not preset == 'searchsd' else 'SD'
-
 			from resources.lib.modules import sources
 			u = sources.Sources().getSources(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, quality)
 			if u: return u
 		except:
 			log_utils.error()
-
 		try:
 			from resources.lib.modules import sources
 			u = sources.Sources().getURISource(url)
@@ -1146,38 +1069,32 @@ class resolver:
 			if not u: raise Exception()
 			return u
 		except: pass
-
 		try:
 			if '.google.com' not in url: raise Exception()
 			from resources.lib.modules import directstream
 			u = directstream.google(url)[0]['url']
 			return u
 		except: pass
-
 		try:
 			if not 'filmon.com/' in url: raise Exception()
 			from resources.lib.modules import filmon
 			u = filmon.resolve(url)
 			return u
 		except: pass
-
 		try:
 			try: headers = dict(parse_qsl(url.rsplit('|', 1)[1]))
 			except: headers = dict('')
 			if not url.startswith('http'): raise Exception()
 			result = client.request(url.split('|')[0], headers=headers, output='headers', timeout='20')
 			if 'Content-Type' in result and not 'html' in result['Content-Type']: raise Exception()
-
 			import liveresolver
 			if liveresolver.isValid(url) is True: direct = False
 			u = liveresolver.resolve(url)
-
 			if not u is None:
 				try: dialog.close()
 				except: pass
 				return u
 		except: pass
-
 		try:
 # resolveURL dependency has been removed
 			import resolveurl
@@ -1193,28 +1110,22 @@ class player(xbmc.Player):
 	def __init__ (self):
 		xbmc.Player.__init__(self)
 
-
 	def play(self, url, content=None):
 		try:
 			base = url
 			url = resolver().get(url)
 			if not url: return
-
 			control.execute('ActivateWindow(busydialog)')
 			url = resolver().process(url)
 			control.execute('Dialog.Close(busydialog)')
-
 			if not url: return control.notification(message=30705)
-
 			meta = {}
 			for i in ['title', 'originaltitle', 'tvshowtitle', 'year', 'season', 'episode', 'genre', 'rating', 'votes', 'director', 'writer', 'plot', 'tagline']:
 				try: meta[i] = control.infoLabel('listitem.%s' % i)
 				except: pass
 			meta = dict((k, v) for k, v in control.iteritems(meta) if v in not None and v != '')
-
 			if not 'title' in meta: meta['title'] = control.infoLabel('listitem.label')
 			icon = control.infoLabel('listitem.icon')
-
 			self.name = meta['title'] ; self.year = meta['year'] if 'year' in meta else '0'
 			self.getbookmark = True if (content == 'movies' or content == 'episodes') else False
 			self.offset = bookmarks().get(self.name, self.year)
@@ -1227,7 +1138,6 @@ class player(xbmc.Player):
 			item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'thumb': icon,})
 			item.setInfo(type='video', infoLabels = meta)
-			item.addStreamInfo('video', {'codec': 'h264'})
 			control.addItem(handle=int(argv[1]), url=url, listitem=item, isFolder=False)
 			# control.player.play(url, item)
 			control.resolve(handle=int(argv[1]), succeeded=True, listitem=item)
@@ -1244,17 +1154,14 @@ class player(xbmc.Player):
 			control.sleep(5000)
 		except: pass
 
-
 	def onPlayBackStarted(self):
 		control.execute('Dialog.Close(all,true)')
 		if self.getbookmark is True and not self.offset == '0':
 			self.seekTime(float(self.offset))
 
-
 	def onPlayBackStopped(self):
 		if self.getbookmark is True:
 			bookmarks().reset(self.currentTime, self.totalTime, self.name, self.year)
-
 
 	def onPlayBackEnded(self):
 		self.onPlayBackStopped()
@@ -1275,21 +1182,17 @@ class bookmarks:
 			match = dbcur.execute("SELECT * FROM bookmark WHERE idFile = '%s'" % idFile).fetchone()
 			if match: self.offset = str(match[1])
 			if self.offset == '0': raise Exception()
-
 			minutes, seconds = divmod(float(self.offset), 60) ; hours, minutes = divmod(minutes, 60)
 			label = '%02d:%02d:%02d' % (hours, minutes, seconds)
 			label = (control.lang(32502) % label)
-
 			try: yes = control.dialog.contextmenu([label, control.lang(32501)])
 			except: yes = control.yesnoDialog(label, '', '', str(name), control.lang(32503), control.lang(32501))
 			if yes: self.offset = '0'
-
 			return self.offset
 		except:
 			return offset
 		finally:
 			dbcur.close() ; dbcon.close()
-
 
 	def reset(self, currentTime, totalTime, name, year='0'):
 		try:

@@ -24,7 +24,6 @@ class Movies:
 		self.count = 40
 		self.list = []
 		self.meta = []
-		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.now()
 		self.lang = control.apiLanguage()['trakt']
 		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
@@ -377,15 +376,12 @@ class tvshows:
 		self.list = []
 		self.meta = []
 		self.lang = control.apiLanguage()['tvdb']
-		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.utcnow()
-
 		self.fanart_tv_user = control.setting('fanart.tv.user')
 		if not self.fanart_tv_user:
 			self.fanart_tv_user = 'cf0ebcc2f7b824bd04cf3a318f15c17d'
 		self.user = self.fanart_tv_user + str('')
 		self.tvdb_key = control.setting('tvdb.api.key')
-
 		# self.tvdb_info_link = 'https://thetvdb.com/api/%s/series/%s/%s.xml' % (self.tvdb_key.decode('base64'), '%s', self.lang)
 		self.tvdb_info_link = 'https://thetvdb.com/api/%s/series/%s/%s.xml' % (self.tvdb_key, '%s', self.lang)
 		self.tvdb_by_imdb = 'https://thetvdb.com/api/GetSeriesByRemoteID.php?imdbid=%s'

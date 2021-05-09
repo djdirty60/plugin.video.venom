@@ -64,7 +64,7 @@ class AllDebrid:
 					log_utils.log('AllDebrid: %s' % response.get('error').get('message'), __name__, log_utils.LOGWARNING)
 					return None
 		except requests.exceptions.ConnectionError:
-			control.notification(message='Failed to connect to AllDebrid', icon=ad_icon)
+			if self.server_notifications: control.notification(message='Failed to connect to AllDebrid', icon=ad_icon)
 			log_utils.log('Failed to connect to AllDebrid', __name__, log_utils.LOGWARNING)
 		except BaseException:
 			log_utils.error()
@@ -230,8 +230,7 @@ class AllDebrid:
 				if response and 'message' in response:
 					if self.server_notifications: control.notification(message=response.get('message'), icon=ad_icon)
 					log_utils.log('AllDebrid: %s' % response.get('message'), __name__, log_utils.LOGDEBUG)
-					control.refresh()
-					return
+					return control.refresh()
 		except:
 			log_utils.error()
 
@@ -276,8 +275,6 @@ class AllDebrid:
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': ad_icon, 'poster': ad_icon, 'thumb': ad_icon, 'fanart': addonFanart, 'banner': ad_icon})
 				item.setInfo(type='video', infoLabels='')
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 			except:
 				log_utils.error()
@@ -303,8 +300,6 @@ class AllDebrid:
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': ad_icon, 'poster': ad_icon, 'thumb': ad_icon, 'fanart': addonFanart, 'banner': ad_icon})
 				item.setInfo(type='video', infoLabels='')
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				log_utils.error()
@@ -336,8 +331,6 @@ class AllDebrid:
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': ad_icon, 'poster': ad_icon, 'thumb': ad_icon, 'fanart': addonFanart, 'banner': ad_icon})
 				item.setInfo(type='video', infoLabels='')
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
 				log_utils.error()

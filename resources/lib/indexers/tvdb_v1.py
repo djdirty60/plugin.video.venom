@@ -3,7 +3,7 @@
 	Venom Add-on
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 # import time
 import re
 import requests # seems faster than urlli2.urlopen
@@ -39,7 +39,6 @@ by_imdb = '%s/api/GetSeriesByRemoteID.php?imdbid=%s' % (baseUrl, '%s')
 by_seriesname = '%s/api/GetSeries.php?seriesname=%s' % (baseUrl, '%s')
 imageUrl = '%s/banners/' % baseUrl
 tvdb_poster = '%s/banners/_cache/' % baseUrl
-# date_time = (datetime.utcnow() - timedelta(hours=5))
 date_time = datetime.now()
 today_date = (date_time).strftime('%Y-%m-%d')
 showunaired = control.setting('showunaired') or 'true'

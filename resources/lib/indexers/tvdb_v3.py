@@ -31,17 +31,14 @@ class TVDBAPI:
 		self.baseImageUrl = 'https://www.thetvdb.com/banners/'
 		self.threads = []
 		self.fanartart = {}
-
 		if self.jwToken is not '':
 			self.headers['Authorization'] = 'Bearer %s' % self.jwToken
 		else:
 			self.newToken()
 			self.headers['Authorization'] = 'Bearer %s' % self.jwToken
 
-
 	def post_request(self, url, postData):
 		return cache.get(self._post_request, 12, url, postData)
-
 
 	def _post_request(self, url, postData):
 		postData = jsdumps(postData)
@@ -54,7 +51,6 @@ class TVDBAPI:
 		response = jsloads(response)
 		return response
 
-
 	def get_request(self, url):
 		url = self.baseUrl + url
 		response = requests.get(url, headers=self.headers).text
@@ -65,12 +61,10 @@ class TVDBAPI:
 		response = jsloads(response)
 		return response
 
-
 	def renewToken(self):
 		url = self.baseUrl + 'refresh_token'
 		response = requests.post(url, headers=self.headers)
 		response = jsloads(response.text)
-
 		if 'Error' in response:
 			self.newToken(True)
 		else:
@@ -78,7 +72,6 @@ class TVDBAPI:
 			control.setSetting('tvdb.jw', self.jwToken)
 			control.setSetting('tvdb.expiry', str(time() + (24 * (60 * 60))))
 		return
-
 
 	def newToken(self, ignore_lock=False):
 		url = self.baseUrl + "login"
@@ -96,7 +89,6 @@ class TVDBAPI:
 		control.setSetting('tvdb.expiry', str(time() + (24 * (60 * 60))))
 		return response
 
-
 	def getShowArt(self, tvdbID, keyType, number):
 		try:
 			url = 'series/{}/images/query?keyType={}'.format(tvdbID, keyType)
@@ -105,16 +97,13 @@ class TVDBAPI:
 		except:
 			pass
 
-
 	def _extract_art(self, response, dict_name, number):
 		images = [(self.baseImageUrl + x['fileName'],
 				x['ratingsInfo']['average'] if x['ratingsInfo']['count'] >= 5 else 5 + (
 							x['ratingsInfo']['average'] - 5) * sin(x['ratingsInfo']['count'] / pi))
 				for x in response if x['languageId'] == 7]
 		images = sorted(images, key=lambda x: int(x[1]), reverse=True)
-
-        counter = 0
-        for i in images[:number]:
-            self.art[dict_name if counter == 0 else '{}{}'.format(dict_name, counter)] = i[0]
-            counter = counter + 1
-
+		counter = 0
+		for i in images[:number]:
+			self.art[dict_name if counter == 0 else '{}{}'.format(dict_name, counter)] = i[0]
+			counter = counter + 1

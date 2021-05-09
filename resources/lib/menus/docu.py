@@ -118,8 +118,7 @@ class documentary:
 		content = r.json()
 		if content.get('error') is not None:
 			Error = (content['error']['title'])
-			xbmc.executebuiltin('XBMC.Notification(Info:,'+ Error +' ,5000)')
-			return
+			return xbmc.executebuiltin('XBMC.Notification(Info:,'+ Error +' ,5000)')
 		else:
 			cc = content['qualities']
 			cc = cc.items()

@@ -91,8 +91,6 @@ def playlistAdd(name, url, meta, art):
 	item.setArt(art)
 	item.setProperty('IsPlayable', 'true')
 	item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-	video_streaminfo = {'codec': 'h264'}
-	item.addStreamInfo('video', video_streaminfo)
 	cm = []
 	item.addContextMenuItems(cm)
 	playlist().add(url=url, listitem=item)

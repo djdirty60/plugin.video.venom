@@ -39,7 +39,6 @@ class Trailer:
 			item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'thumb': icon,})
 			item.setInfo(type='video', infoLabels={'title': title})
-			item.addStreamInfo('video', {'codec': 'h264'})
 			control.addItem(handle=int(argv[1]), url=url, listitem=item, isFolder=False)
 			control.refresh()
 			control.resolve(handle=int(argv[1]), succeeded=True, listitem=item)

@@ -47,7 +47,7 @@ class Time(object):
 		return 'Etc/GMT%+d' % offsetHour
 
 	@classmethod
-	def convert(self, stringTime, stringDay = None, abbreviate = False, formatInput = FormatTimeShort, formatOutput = None, zoneFrom = ZoneUtc, zoneTo = ZoneLocal):
+	def convert(self, stringTime, stringDay=None, abbreviate=False, formatInput=FormatTimeShort, formatOutput=None, zoneFrom=ZoneUtc, zoneTo=ZoneLocal):
 		result = ''
 		try:
 			# If only time is given, the date will be set to 1900-01-01 and there are conversion problems if this goes down to 1899.
@@ -76,7 +76,7 @@ class Time(object):
 				elif stringDay.startswith('sat'): weekday = 5
 				else: weekday = 6
 				weekdayCurrent = datetime.datetime.now().weekday()
-				timeobject += datetime.timedelta(days = weekday) - datetime.timedelta(days = weekdayCurrent)
+				timeobject += datetime.timedelta(days = weekday) - datetime.timedelta(days=weekdayCurrent)
 
 			timeobject = zoneFrom.localize(timeobject)
 			timeobject = timeobject.astimezone(zoneTo)

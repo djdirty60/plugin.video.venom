@@ -210,7 +210,6 @@ originals_view_all = [
 			('Hulu', '/shows?Show[webChannel_id]=2&page=1', 'https://i.imgur.com/gvHOZgC.png'),
 			('Netflix', '/shows?Show[webChannel_id]=1&page=1', 'https://i.postimg.cc/c4vHp9wV/netflix.png')]
 
-
 # API calls are rate limited to allow at least 20 calls every 10 seconds per IP address
 def get_request(url):
 	try:
@@ -219,8 +218,7 @@ def get_request(url):
 		except requests.exceptions.SSLError:
 			response = requests.get(url, verify=False)
 	except requests.exceptions.ConnectionError:
-		control.notification(message=32024)
-		return
+		return control.notification(message=32024)
 	if '200' in str(response):
 		return response.json()
 	elif 'Retry-After' in response.headers:
@@ -247,7 +245,6 @@ class tvshows:
 		self.notifications = notifications
 		self.base_link = 'https://api.tvmaze.com'
 		self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed=cast'
-		# self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed[]=seasons&embed[]=cast' #TVMaze throttles embedding multiple links allot
 		self.tvdb_key = control.setting('tvdb.api.key')
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
@@ -271,7 +268,6 @@ class tvshows:
 				last = client.parseDOM(result, 'li', attrs = {'class': 'last disabled'})
 				if last != []: next = ''
 			items = [client.parseDOM(i, 'a', ret='href') for i in items]
-			# log_utils.log('Network url=%s: items=%s' % (url, items))
 			items = [i[0] for i in items if len(i) > 0]
 			items = [re.findall(r'/(\d+)/', i) for i in items] #https://www.tvmaze.com/networks/645/tlc pulls tvmaze_id from link
 			items = [i[0] for i in items if len(i) > 0]
@@ -356,9 +352,7 @@ class tvshows:
 				if not values.get('imdb'): values['imdb'] = imdb
 				if not values.get('tmdb'): values['tmdb'] = tmdb
 				if not values.get('tvdb'): values['tvdb'] = tvdb
-				# # values['counts'] = tmdb_indexer.TVshows().seasonCountParse(values.get('seasons'))  # this is now parsed from TMDB's original showSeasons call
-				remove_keys = ('seasons',) # pop() keys from showSeasons that are not needed anymore
-				for k in remove_keys: values.pop(k, None)
+				for k in ('seasons',): values.pop(k, None) # pop() keys from showSeasons that are not needed anymore
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)

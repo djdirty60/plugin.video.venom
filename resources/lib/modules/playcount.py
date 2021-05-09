@@ -116,8 +116,7 @@ def getEpisodeOverlay(indicators, imdb, tvdb, season, episode):
 		return '4'
 
 # def getShowCount(indicators, imdb, tvdb, limit=False):
-	# if not imdb.startswith('tt'):
-		# return None
+	# if not imdb.startswith('tt'): return None
 	# try:
 		# if traktIndicators:
 			# result = trakt.showCount(imdb)
@@ -149,7 +148,7 @@ def getShowCount(indicators, imdb, tvdb):
 						unwatched = total - watched
 						return {'total': total, 'watched': watched, 'unwatched': unwatched}
 			else:
-				result = trakt.showCount(imdb)
+				result = trakt.showCount(imdb) # TMDb has `total_episodes` now so return None for unwatched shows and use that
 				return result
 		else:
 			return None # this code below for metahandler does not aply here nor does the addon offer a means to return such counts

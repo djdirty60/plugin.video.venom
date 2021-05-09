@@ -66,11 +66,8 @@ def google(url, ref=None):
 			result = re.search(r'feedPreload:\s*(.*}]}})},', result, re.S).group(1)
 			result = jsloads(result)['feed']['entry']
 
-			if len(result) > 1:
-				result = [i for i in result if str(id) in i['link'][0]['href']][0]
-
-			elif len(result) == 1:
-				result = result[0]
+			if len(result) > 1: result = [i for i in result if str(id) in i['link'][0]['href']][0]
+			elif len(result) == 1: result = result[0]
 
 			result = result['media']['content']
 			result = [i['url'] for i in result if 'video' in i['type']]
@@ -94,20 +91,15 @@ def google(url, ref=None):
 		for i in url:
 			i.pop('height', None)
 			i.update({'url': i['url'] + '|%s' % urlencode(headers)})
-		if not url:
-			return
+		if not url: return
 		return url
-	except:
-		return
-
+	except: return
 
 def googletag(url, append_height=False):
 	quality = re.compile(r'itag=(\d*)').findall(url)
 	quality += re.compile(r'=m(\d*)$').findall(url)
-
 	try: quality = quality[0]
 	except: return []
-
 	itag_map = {'151': {'quality': 'SD', 'height': 72}, '212': {'quality': 'SD', 'height': 480}, '313': {'quality': '4K', 'height': 2160},
 					'242': {'quality': 'SD', 'height': 240}, '315': {'quality': '4K', 'height': 2160}, '219': {'quality': 'SD', 'height': 480},
 					'133': {'quality': 'SD', 'height': 240}, '271': {'quality': '1440p', 'height': 1440}, '272': {'quality': '4K', 'height': 2160},
@@ -129,16 +121,13 @@ def googletag(url, append_height=False):
 					'132': {'quality': 'SD', 'height': 240}, '18': {'quality': 'SD', 'height': 360}, '37': {'quality': '1080p', 'height': 1080},
 					'35': {'quality': 'SD', 'height': 480}, '34': {'quality': 'SD', 'height': 360}, '298': {'quality': 'HD', 'height': 720},
 					'299': {'quality': '1080p', 'height': 1080}, '169': {'quality': 'HD', 'height': 720}}
-
 	if quality in itag_map:
 		quality = itag_map[quality]
 		if append_height:
 			return [{'quality': quality['quality'], 'height': quality['height'], 'url': url}]
 		else:
 			return [{'quality': quality['quality'], 'url': url}]
-	else:
-		return []
-
+	else: return []
 
 def googlepass(url):
 	try:
@@ -152,23 +141,18 @@ def googlepass(url):
 			url = url.replace('https://', 'http://')
 		if headers: url += '|%s' % urlencode(headers)
 		return url
-	except:
-		return
-
+	except: return
 
 def vk(url):
 	try:
 		query = parse_qs(urlparse(url).query)
-		try:
-			oid, video_id = query['oid'][0], query['id'][0]
-		except:
-			oid, video_id = re.findall(r'\/video(.*)_(.*)', url)[0]
+		try: oid, video_id = query['oid'][0], query['id'][0]
+		except: oid, video_id = re.findall(r'\/video(.*)_(.*)', url)[0]
 		sources_url = 'http://vk.com/al_video.php?act=show_inline&al=1&video=%s_%s' % (oid, video_id)
 		html = client.request(sources_url)
 		html = re.sub(r'[^\x00-\x7F]+', ' ', html)
 		sources = re.findall(r'(\d+)x\d+.+?(http.+?\.m3u8.+?)n', html)
-		if not sources:
-			sources = re.findall(r'"url(\d+)"\s*:\s*"(.+?)"', html)
+		if not sources: sources = re.findall(r'"url(\d+)"\s*:\s*"(.+?)"', html)
 		sources = [(i[0], i[1].replace('\\', '')) for i in sources]
 		sources = dict(sources)
 		url = []
@@ -188,7 +172,6 @@ def vk(url):
 	except:
 		return
 
-
 def odnoklassniki(url):
 	try:
 		media_id = re.compile(r'//.+?/.+?/([\w]+)').findall(url)[0]
@@ -207,7 +190,6 @@ def odnoklassniki(url):
 	except:
 		return
 
-
 def cldmailru(url):
 	try:
 		v = url.split('public')[-1]
@@ -219,7 +201,6 @@ def cldmailru(url):
 		return url
 	except:
 		return
-
 
 def yandex(url):
 	try:

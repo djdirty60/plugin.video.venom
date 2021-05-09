@@ -8,9 +8,7 @@ from resources.lib.modules import control, log_utils
 
 
 def set_reuselanguageinvoker():
-	if control.getKodiVersion() < 18:
-		control.notification(message=32116)
-		return
+	if control.getKodiVersion() < 18: return control.notification(message=32116)
 	try:
 		addon_xml = control.joinPath(control.addonPath('plugin.video.venom'), 'addon.xml')
 		tree = ET.parse(addon_xml)

@@ -14,9 +14,7 @@ except ImportError: #Py3
 	from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
-from resources.lib.menus import navigator
 from resources.lib.modules import cleangenre
-# from resources.lib.modules import cleanplot
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -29,7 +27,7 @@ from resources.lib.modules import workers
 
 class TVshows:
 	def __init__(self, type='show', notifications=True):
-		self.count = int(control.setting('page.item.limit'))
+		self.count = control.setting('page.item.limit')
 		self.list = []
 		self.meta = []
 		self.threads = []
@@ -37,7 +35,6 @@ class TVshows:
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
 		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
-		# self.date_time = (datetime.utcnow() - timedelta(hours=5))
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
@@ -48,36 +45,35 @@ class TVshows:
 		self.imdb_link = 'https://www.imdb.com'
 		self.persons_link = 'https://www.imdb.com/search/name?count=100&name='
 		self.personlist_link = 'https://www.imdb.com/search/name?count=100&gender=male,female'
-		self.popular_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&release_date=,date[0]&sort=moviemeter,asc&count=%d&start=1' % self.count
-		self.airing_link = 'https://www.imdb.com/search/title?title_type=tv_episode&release_date=date[1],date[0]&sort=moviemeter,asc&count=%d&start=1' % self.count
-		self.active_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=10,&production_status=active&sort=moviemeter,asc&count=%d&start=1' % self.count
-		self.premiere_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&languages=en&num_votes=10,&release_date=date[60],date[0]&sort=release_date,desc&count=%d&start=1' % self.count
-		self.rating_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=5000,&release_date=,date[0]&sort=user_rating,desc&count=%d&start=1' % self.count
-		self.views_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&release_date=,date[0]&sort=num_votes,desc&count=%d&start=1' % self.count
-		self.person_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&role=%s&sort=year,desc&count=%d&start=1' % ('%s', self.count)
-		self.genre_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&genres=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-		self.keyword_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&keywords=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-		self.language_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-		self.certification_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&certificates=%s&sort=moviemeter,asc&count=%d&start=1' % ('%s', self.count)
-
+		self.popular_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&release_date=,date[0]&sort=moviemeter,asc&count=%s&start=1' % self.count
+		self.airing_link = 'https://www.imdb.com/search/title?title_type=tv_episode&release_date=date[1],date[0]&sort=moviemeter,asc&count=%s&start=1' % self.count
+		self.active_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=10,&production_status=active&sort=moviemeter,asc&count=%s&start=1' % self.count
+		self.premiere_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&languages=en&num_votes=10,&release_date=date[60],date[0]&sort=release_date,desc&count=%s&start=1' % self.count
+		self.rating_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=5000,&release_date=,date[0]&sort=user_rating,desc&count=%s&start=1' % self.count
+		self.views_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&release_date=,date[0]&sort=num_votes,desc&count=%s&start=1' % self.count
+		self.person_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&role=%s&sort=year,desc&count=%s&start=1' % ('%s', self.count)
+		self.genre_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&genres=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
+		self.keyword_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&keywords=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
+		self.language_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
+		self.certification_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&certificates=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.count)
 		self.imdbwatchlist_link = 'https://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user # only used to get users watchlist ID
 		self.imdbwatchlist2_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=tvSeries,tvMiniSeries&start=1' % ('%s', self.imdb_sort(type='shows.watchlist'))
 		self.imdblists_link = 'https://www.imdb.com/user/ur%s/lists?tab=all&sort=mdfd&order=desc&filter=titles' % self.imdb_user
 		self.imdblist_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=tvSeries,tvMiniSeries&start=1' % ('%s', self.imdb_sort())
 		self.imdbratings_link = 'https://www.imdb.com/user/ur%s/ratings?sort=your_rating,desc&mode=detail&start=1' % self.imdb_user # IMDb ratings does not take title_type so filter in imdb_list() function
-		self.anime_link = 'https://www.imdb.com/search/keyword?keywords=anime&title_type=tvSeries,miniSeries&sort=moviemeter,asc&count=%d&start=1' % self.count
+		self.anime_link = 'https://www.imdb.com/search/keyword?keywords=anime&title_type=tvSeries,miniSeries&sort=moviemeter,asc&count=%s&start=1' % self.count
 
 		self.trakt_user = control.setting('trakt.user').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.trakt_link = 'https://api.trakt.tv'
-		self.search_link = 'https://api.trakt.tv/search/show?limit=%d&page=1&query=' % self.count
+		self.search_link = 'https://api.trakt.tv/search/show?limit=%s&page=1&query=' % self.count
 		self.traktlist_link = 'https://api.trakt.tv/users/%s/lists/%s/items/shows'
 		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000'
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/shows'
 		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/shows'
-		self.trakttrending_link = 'https://api.trakt.tv/shows/trending?page=1&limit=%d' % self.count
-		self.traktpopular_link = 'https://api.trakt.tv/shows/popular?page=1&limit=%d' % self.count
+		self.trakttrending_link = 'https://api.trakt.tv/shows/trending?page=1&limit=%s' % self.count
+		self.traktpopular_link = 'https://api.trakt.tv/shows/popular?page=1&limit=%s' % self.count
 		self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/shows?limit=40'
 
 		self.tvmaze_link = 'https://www.tvmaze.com'
@@ -95,7 +91,6 @@ class TVshows:
 		self.tmdb_ontheair_link = 'https://api.themoviedb.org/3/tv/on_the_air?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_airingtoday_link = 'https://api.themoviedb.org/3/tv/airing_today?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_networks_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1'
-
 
 	def get(self, url, idx=True, create_directory=True):
 		self.list = []
@@ -124,7 +119,7 @@ class TVshows:
 				isRatinglink=True if self.imdbratings_link in url else False
 				self.list = cache.get(self.imdb_list, 0, url, isRatinglink)
 				if idx: self.worker()
-				# self.sort() # I switched this to request sorting for imdb
+				# self.sort() # switched to request sorting for imdb
 			elif u in self.imdb_link:
 				self.list = cache.get(self.imdb_list, 96, url)
 				if idx: self.worker()
@@ -190,7 +185,6 @@ class TVshows:
 				elif attribute == 4:
 					for i in range(len(self.list)):
 						if 'premiered' not in self.list[i]: self.list[i]['premiered'] = ''
-					# self.list = sorted(self.list, key=lambda k: k['year'], reverse=reverse)
 					self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=reverse)
 				elif attribute == 5:
 					for i in range(len(self.list)):
@@ -217,19 +211,20 @@ class TVshows:
 		return sort_string
 
 	def search(self):
+		from resources.lib.menus import navigator
 		navigator.Navigator().addDirectoryItem(32603, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png')
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
 		try:
 			dbcon = database.connect(control.searchFile)
 			dbcur = dbcon.cursor()
-			dbcur.executescript("CREATE TABLE IF NOT EXISTS tvshow (ID Integer PRIMARY KEY AUTOINCREMENT, term);")
-			dbcur.execute("SELECT * FROM tvshow ORDER BY ID DESC")
+			dbcur.executescript('''CREATE TABLE IF NOT EXISTS tvshow (ID Integer PRIMARY KEY AUTOINCREMENT, term);''')
+			dbcur.execute('''SELECT * FROM tvshow ORDER BY ID DESC''')
 			dbcur.connection.commit()
 			lst = []
 			delete_option = False
 			for (id, term) in dbcur.fetchall():
-				term = py_tools.ensure_str(term) # new
+				term = py_tools.ensure_str(term)
 				if term not in str(lst):
 					delete_option = True
 					navigator.Navigator().addDirectoryItem(term, 'tvSearchterm&name=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='tvshow')
@@ -254,8 +249,8 @@ class TVshows:
 		try:
 			dbcon = database.connect(control.searchFile)
 			dbcur = dbcon.cursor()
-			dbcur.execute("INSERT INTO tvshow VALUES (?,?)", (None, q))
-			# dbcur.execute("INSERT INTO movies VALUES (?,?)", (None, py_tools.ensure_text(q))) # ensure_text?, search of BRÜNO not saved to db in 18?
+			dbcur.execute('''INSERT INTO tvshow VALUES (?,?)''', (None, q))
+			# dbcur.execute('''INSERT INTO movies VALUES (?,?)''', (None, py_tools.ensure_text(q))) # ensure_text?, search of BRÜNO not saved to db in 18?
 			dbcur.connection.commit()
 		except:
 			log_utils.error()
@@ -511,8 +506,7 @@ class TVshows:
 				values['airday'] = airs['day']
 				values['airtime'] = airs['time']
 				values['airzone'] = airs['timezone']
-				remove_keys = ('first_aired', 'ids', 'genres', 'runtime', 'certification', 'overview', 'aired_episodes', 'comment_count', 'network', 'airs') # pop() keys that are not needed anymore
-				for k in remove_keys: values.pop(k, None)
+				for k in ('first_aired', 'ids', 'genres', 'runtime', 'certification', 'overview', 'aired_episodes', 'comment_count', 'network', 'airs'): values.pop(k, None) # pop() keys that are not needed anymore
 				list.append(values)
 			except:
 				log_utils.error()
@@ -694,8 +688,7 @@ class TVshows:
 			if not values.get('imdb'): values['imdb'] = imdb
 			if not values.get('tmdb'): values['tmdb'] = tmdb
 			if not values.get('tvdb'): values['tvdb'] = tvdb
-			# values['counts'] = tmdb_indexer.TVshows().seasonCountParse(values.get('seasons')) # this is now inside the meta from TMDB modules's showSeasons
-			# remove_keys = ('seasons',) # pop() keys from showSeasons that are not needed anymore
+			# remove_keys = ('seasons',) # pop() # 4-19-21, this is now needed to pass for "flatten" do not pop
 			# for k in remove_keys: values.pop(k, None)
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
@@ -710,29 +703,21 @@ class TVshows:
 	def tvshowDirectory(self, items, next=True):
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide()
-			control.notification(title=32002, message=33049)
+			control.hide() ; control.notification(title=32002, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
-		addonPoster = control.addonPoster()
-		addonFanart = control.addonFanart()
-		addonBanner = control.addonBanner()
+		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		indicators = playcount.getTVShowIndicators(refresh=True)
 		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
 		flatten = control.setting('flatten.tvshows') == 'true'
 		if trakt.getTraktIndicatorsInfo():
-			watchedMenu = control.lang(32068)
-			unwatchedMenu = control.lang(32069)
+			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
 		else:
-			watchedMenu = control.lang(32066)
-			unwatchedMenu = control.lang(32067)
-		traktManagerMenu = control.lang(32070)
-		queueMenu = control.lang(32065)
-		showPlaylistMenu = control.lang(35517)
-		clearPlaylistMenu = control.lang(35516)
-		playRandom = control.lang(32535)
-		addToLibrary = control.lang(32551)
+			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
+		traktManagerMenu, queueMenu = control.lang(32070), control.lang(32065)
+		showPlaylistMenu, clearPlaylistMenu = control.lang(35517), control.lang(35516)
+		playRandom, addToLibrary = control.lang(32535), control.lang(32551)
 		for i in items:
 			try:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
@@ -741,8 +726,6 @@ class TVshows:
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				if unwatchedEnabled: trakt.seasonCount(imdb) # pre-cache season counts for the listed shows
-				# try: meta['plot'] = cleanplot.cleanPlot(meta['plot']) # Some plots have a link at the end, remove it.
-				# except: pass
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				try:
@@ -756,10 +739,9 @@ class TVshows:
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				art.update({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster, 'fanart': fanart, 'icon': icon,
-									'thumb': thumb, 'banner': banner, 'clearlogo': meta.get('clearlogo'), 'clearart': meta.get('clearart'), 'landscape': landscape})
-				remove_keys = ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer')
-				for k in remove_keys: meta.pop(k, None)
+				art.update({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb,
+								'banner': banner, 'clearlogo': meta.get('clearlogo'), 'clearart': meta.get('clearart'), 'landscape': landscape})
+				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
 ####-Context Menu and Overlays-####
 				cm = []
@@ -796,15 +778,15 @@ class TVshows:
 					try: 
 						count = playcount.getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
 						if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
+						else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
 					except: pass
-				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 				except: pass #da hell with 17 users
 				item.setProperty('IsPlayable', 'false')
 				item.setProperty('tmdb_id', str(tmdb))
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb})
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-				item.addStreamInfo('video', {'codec': 'h264'})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
@@ -817,7 +799,7 @@ class TVshows:
 				nextMenu = control.lang(32053)
 				url_params = dict(parse_qsl(urlsplit(url).query))
 				if 'imdb.com' in url and 'start' in url_params:
-					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / self.count) + 1))
+					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / int(self.count)) + 1))
 				else: page = '  [I](%s)[/I]' % url_params.get('page')
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				u = urlparse(url).netloc.lower()
@@ -830,6 +812,7 @@ class TVshows:
 				try: item = control.item(label=nextMenu, offscreen=True)
 				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
+				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -843,14 +826,11 @@ class TVshows:
 	def addDirectory(self, items, queue=False):
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide()
-			control.notification(title=32002, message=33049)
+			control.hide() ; control.notification(title=32002, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
-		queueMenu = control.lang(32065)
-		playRandom = control.lang(32535)
-		addToLibrary = control.lang(32551)
+		queueMenu, playRandom, addToLibrary = control.lang(32065), control.lang(32535), control.lang(32551)
 		for i in items:
 			try:
 				name = i['name']

@@ -32,16 +32,12 @@ control.refresh_playAction()
 
 if action is None:
 	from resources.lib.menus import navigator
-	from resources.lib.database import cache
-	run = control.setting('first.info')
-	if run == '': run = 'true' #clean install scenerio
-	if cache._find_cache_version(): run = 'true'
-	if run == 'true':
+	isUpdate = control.homeWindow.getProperty('venom.updated')
+	if isUpdate == 'true':
 		control.execute('RunPlugin(plugin://plugin.video.venom/?action=tools_cleanSettings)')
+		control.homeWindow.clearProperty('venom.updated')
 		from resources.lib.modules import changelog
 		changelog.get()
-		control.setSetting(id='first.info', value='false')
-	cache.cache_version_check()
 	navigator.Navigator().root()
 
 ####################################################
@@ -735,7 +731,6 @@ elif action == 'random':
 		from resources.lib.menus import tvshows
 		rlist = tvshows.TVshows().get(url, create_directory=False)
 		r = argv[0] + "?action=random&rtype=season"
-
 	from random import randint
 	from json import dumps as jsdumps
 	try:
@@ -747,8 +742,6 @@ elif action == 'random':
 			else:
 				try: r += '&' + p + '=' + quote_plus(str(rlist[rand][p]))
 				except: pass
-
-		xbmc.log('r=%s' % r, 1)
 		try: r += '&meta=' + quote_plus(jsdumps(rlist[rand]))
 		except: r += '&meta=' + quote_plus("{}")
 		if rtype == "movie":

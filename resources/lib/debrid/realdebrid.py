@@ -57,7 +57,7 @@ class RealDebrid:
 			original_url = url
 			url = rest_base_url + url
 			if self.token == '':
-				log_utils.log('No Real-Debrid Token Found', __name__, log_utils.LOGWARNING)
+				log_utils.log('No Real-Debrid Token Found', level=log_utils.LOGWARNING)
 				return None
 			# if not fail_check: # with fail_check=True new token does not get added
 			if '?' not in url:
@@ -67,7 +67,7 @@ class RealDebrid:
 			response = requests.get(url, timeout=30)
 			if 'Temporarily Down For Maintenance' in response.text:
 				if self.server_notifications: control.notification(message='Real-Debrid Temporarily Down For Maintenance', icon=rd_icon)
-				log_utils.log('Real-Debrid Temporarily Down For Maintenance', __name__, log_utils.LOGWARNING)
+				log_utils.log('Real-Debrid Temporarily Down For Maintenance', level=log_utils.LOGWARNING)
 				return None
 			else: response = response.json()
 			if any(value in str(response) for value in ['bad_token', 'Bad Request']):
@@ -84,7 +84,7 @@ class RealDebrid:
 			original_url = url
 			url = rest_base_url + url
 			if self.token == '':
-				log_utils.log('No Real Debrid Token Found', __name__, log_utils.LOGWARNING)
+				log_utils.log('No Real Debrid Token Found', level=log_utils.LOGWARNING)
 				return None
 			if '?' not in url:
 				url += "?auth_token=%s" % self.token
@@ -94,7 +94,7 @@ class RealDebrid:
 			if '[204]' in str(response): return None
 			if 'Temporarily Down For Maintenance' in response.text:
 				if self.server_notifications: control.notification(message='Real-Debrid Temporarily Down For Maintenance', icon=rd_icon)
-				log_utils.log('Real-Debrid Temporarily Down For Maintenance', __name__, log_utils.LOGWARNING)
+				log_utils.log('Real-Debrid Temporarily Down For Maintenance', level=log_utils.LOGWARNING)
 				return None
 			else: response = response.json()
 			if any(value in str(response) for value in ['bad_token', 'Bad Request']):
@@ -104,7 +104,7 @@ class RealDebrid:
 				message = response.get('error')
 				if message == 'action_already_done': return None
 				if self.server_notifications: control.notification(message=message, icon=rd_icon)
-				log_utils.log('Real-Debrid Error:  %s' % message, __name__, log_utils.LOGWARNING)
+				log_utils.log('Real-Debrid Error:  %s' % message, log_utils.LOGWARNING)
 				return None
 			return response
 		except:
@@ -139,11 +139,9 @@ class RealDebrid:
 		control.progressDialog.update(-1,
 				control.lang(32513) % 'https://real-debrid.com/device',
 				control.lang(32514) % response['user_code'])
-
 		self.auth_timeout = int(response['expires_in'])
 		self.auth_step = int(response['interval'])
 		self.device_code = response['device_code']
-
 		while self.secret == '':
 			if control.progressDialog.iscanceled():
 				control.progressDialog.close()
@@ -255,8 +253,6 @@ class RealDebrid:
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
 				item.setInfo(type='video', infoLabels='')
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
 				log_utils.error()
@@ -325,8 +321,6 @@ class RealDebrid:
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
 				item.setInfo(type='video', infoLabels='')
-				video_streaminfo = {'codec': 'h264'}
-				item.addStreamInfo('video', video_streaminfo)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
 				log_utils.error()
@@ -726,12 +720,18 @@ class RealDebrid:
 			self.client_ID = control.setting('realdebrid.client_id')
 			self.secret = control.setting('realdebrid.secret')
 			self.device_code = control.setting('realdebrid.refresh')
-			log_utils.log('Refreshing Expired Real Debrid Token: |%s|%s|' % (self.client_ID, self.device_code), __name__, log_utils.LOGDEBUG)
-			if not self.get_token():
-				self.reset_authorization() # empty all auth settings to force a re-auth on next use
-				log_utils.log('Unable to Refresh Real Debrid Token', __name__, log_utils.LOGDEBUG)
+			if not self.client_ID or not self.secret or not self.device_code: return False # avoid if previous refresh attempt revoked accnt, loops twice.
+			log_utils.log('Refreshing Expired Real Debrid Token: | %s | %s |' % (self.client_ID, self.device_code), level=log_utils.LOGDEBUG)
+			success, error = self.get_token()
+			if not success:
+				if not 'Temporarily Down For Maintenance' in error:
+					if any(value == error.get('error_code') for value in [9, 12, 13, 14]):
+						self.reset_authorization() # empty all auth settings to force a re-auth on next use
+						if self.server_notifications: control.notification(message='Real-Debrid Auth revoked due to:  %s' % error.get('error'), icon=rd_icon)
+				log_utils.log('Unable to Refresh Real Debrid Token: %s' % error.get('error'), level=log_utils.LOGWARNING)
+				return False
 			else:
-				log_utils.log('Real Debrid Token Successfully Refreshed', __name__, log_utils.LOGDEBUG)
+				log_utils.log('Real Debrid Token Successfully Refreshed', level=log_utils.LOGDEBUG)
 				return True
 		except:
 			log_utils.error()
@@ -741,10 +741,25 @@ class RealDebrid:
 		try:
 			url = oauth_base_url + 'token'
 			postData = {'client_id': self.client_ID, 'client_secret': self.secret, 'code': self.device_code, 'grant_type': 'http://oauth.net/grant_type/device/1.0'}
-			response = requests.post(url, data=postData).json()
-			# log_utils.log('Authorizing Real Debrid Result: |%s|' % response, __name__, log_utils.LOGDEBUG)
+			response = requests.post(url, data=postData)
+			# log_utils.log('Authorizing Real Debrid Result: | %s |' % response, level=log_utils.LOGDEBUG)
+
+			if '[204]' in str(response): return False, str(response)
+			if 'Temporarily Down For Maintenance' in response.text:
+				if self.server_notifications: control.notification(message='Real-Debrid Temporarily Down For Maintenance', icon=rd_icon)
+				log_utils.log('Real-Debrid Temporarily Down For Maintenance', level=log_utils.LOGWARNING)
+				return False, response.text
+			else: response = response.json()
+
+			if 'error' in str(response):
+				log_utils.log('response=%s' % str(response), __name__)
+				message = response.get('error')
+				if self.server_notifications: control.notification(message=message, icon=rd_icon)
+				log_utils.log('Real-Debrid Error:  %s' % message, level=log_utils.LOGWARNING)
+				return False, response
+
 			self.token = response['access_token']
-			control.sleep(1500)
+			control.sleep(500)
 			account_info = self.account_info()
 			username = account_info['username']
 			control.setSetting('realdebrid.username', username)
@@ -753,10 +768,10 @@ class RealDebrid:
 			control.setSetting('realdebrid.token', self.token)
 			control.addon('script.module.myaccounts').setSetting('realdebrid.token', self.token)
 			control.setSetting('realdebrid.refresh', response['refresh_token'])
-			return True
+			return True, None
 		except:
 			log_utils.error('Real Debrid Authorization Failed : ')
-			return False
+			return False, None
 
 	def reset_authorization(self):
 		try:
@@ -765,6 +780,7 @@ class RealDebrid:
 			control.setSetting('realdebrid.token', '')
 			control.setSetting('realdebrid.refresh', '')
 			control.setSetting('realdebrid.username', '')
+			control.dialog.ok(control.lang(40058), control.lang(32320))
 		except:
 			log_utils.error()
 
