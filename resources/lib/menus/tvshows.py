@@ -578,8 +578,7 @@ class TVshows:
 				imdb = re.findall(r'(tt\d*)', imdb)[0]
 				if imdb in dupes: raise Exception()
 				dupes.append(imdb)
-				list.append({'title': title, 'tvshowtitle': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '',
-									'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
+				list.append({'title': title, 'tvshowtitle': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '', 'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
 			except:
 				log_utils.error()
 		return list
@@ -718,6 +717,7 @@ class TVshows:
 		traktManagerMenu, queueMenu = control.lang(32070), control.lang(32065)
 		showPlaylistMenu, clearPlaylistMenu = control.lang(35517), control.lang(35516)
 		playRandom, addToLibrary = control.lang(32535), control.lang(32551)
+		nextMenu = control.lang(32053)
 		for i in items:
 			try:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
@@ -777,11 +777,13 @@ class TVshows:
 				if unwatchedEnabled:
 					try: 
 						count = playcount.getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
-						if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
-						else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
+						if count:
+							item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
+							item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
+						else:
+							item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
+							item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 					except: pass
-				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
-				except: pass #da hell with 17 users
 				item.setProperty('IsPlayable', 'false')
 				item.setProperty('tmdb_id', str(tmdb))
 				if is_widget: item.setProperty('isVenom_widget', 'true')
@@ -796,7 +798,6 @@ class TVshows:
 				if not items: raise Exception()
 				url = items[0]['next']
 				if not url: raise Exception()
-				nextMenu = control.lang(32053)
 				url_params = dict(parse_qsl(urlsplit(url).query))
 				if 'imdb.com' in url and 'start' in url_params:
 					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / int(self.count)) + 1))

@@ -137,7 +137,7 @@ class Seasons:
 				systitle = quote_plus(title)
 				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
 				# setting mediatype to "season" causes "Infomation" and "play trailer" to not be available in some skins
-				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'season', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
+				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				# First check thumbs, since they typically contains the seasons poster. The normal poster contains the show poster.

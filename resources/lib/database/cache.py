@@ -29,9 +29,10 @@ def get(function, duration, *args):
 
 		fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
 
-		if cache_result and result == ['1'] and fresh_result == '[]': # fix for syncSeason mark unwatched of Season1
-			remove(function, *args)
-			return []
+		if cache_result and len(result) == 1 and fresh_result == '[]': # fix for syncSeason mark unwatched season when it's the last item reamining
+			if result[0].isdigit():
+				remove(function, *args)
+				return []
 
 		invalid = False
 		try:  # Sometimes None is returned as a string instead of None type for "fresh_result"

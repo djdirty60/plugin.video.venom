@@ -732,10 +732,9 @@ class Movies:
 			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
 		else:
 			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
-		playlistManagerMenu = control.lang(35522)
-		queueMenu = control.lang(32065)
-		traktManagerMenu = control.lang(32070)
-		addToLibrary = control.lang(32551)
+		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
+		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
+		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -800,7 +799,7 @@ class Movies:
 					cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
-				cm.append((control.lang(32611), 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
+				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
 				if trailer: meta.update({'trailer': trailer})
@@ -828,7 +827,6 @@ class Movies:
 				if not items: raise Exception()
 				url = items[0]['next']
 				if not url: raise Exception()
-				nextMenu = control.lang(32053)
 				url_params = dict(parse_qsl(urlsplit(url).query))
 				if 'imdb.com' in url and 'start' in url_params:
 					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / int(self.count)) + 1))

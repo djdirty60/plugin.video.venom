@@ -11,7 +11,6 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import quote_plus, unquote
 from resources.lib.database import cache
-from resources.lib.modules import cleantitle
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import workers
@@ -100,7 +99,7 @@ class RealDebrid:
 			if any(value in str(response) for value in ['bad_token', 'Bad Request']):
 				self.refresh_token()
 				response = self._post(original_url, data)
-			elif 'error' in str(response):
+			elif 'error' in response:
 				message = response.get('error')
 				if message == 'action_already_done': return None
 				if self.server_notifications: control.notification(message=message, icon=rd_icon)
@@ -187,17 +186,14 @@ class RealDebrid:
 			if not torrent_files: return
 			# torrent_files = [i for i in torrent_files if i['status'] == 'downloaded']
 			folder_str, deleteMenu = control.lang(40046).upper(), control.lang(40050)
-
 			for count, item in enumerate(torrent_files, 1):
 				try:
 					cm = []
 					isFolder = True if item['status'] == 'downloaded' else False
-
 					status = '[COLOR %s]%s[/COLOR]' % (control.getColor(control.setting('highlight.color')), item['status'].capitalize())
 					folder_name = control.strip_non_ascii_and_unprintable(item['filename'])
 					label = '%02d | [B]%s[/B] - %s | [B]%s[/B] | [I]%s [/I]' % (count, status, str(item['progress']) + '%', folder_str, folder_name)
 					url = '%s?action=rd_BrowseUserTorrents&id=%s' % (sysaddon, item['id']) if isFolder else None
-
 					cm.append((deleteMenu % 'Torrent', 'RunPlugin(%s?action=rd_DeleteUserTorrent&id=%s&name=%s)' %
 							(sysaddon, item['id'], quote_plus(folder_name))))
 					item = control.item(label=label)
@@ -239,16 +235,13 @@ class RealDebrid:
 				if url_link.startswith('/'): url_link = 'http' + url_link
 				name = item['path']
 				if name.startswith('/'): name = name.split('/')[-1]
-
 				size = float(int(item['bytes'])) / 1073741824
 				label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, size, name)
 				url = '%s?action=playURL&url=%s&caller=realdebrid&type=unrestrict' % (sysaddon, url_link)
-
 				cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=realdebrid&type=unrestrict)' %
 							(sysaddon, quote_plus(name), quote_plus(rd_icon), url_link)))
 				cm.append((deleteMenu % 'Torrent', 'RunPlugin(%s?action=rd_DeleteUserTorrent&id=%s&name=%s)' %
 							(sysaddon, item['id'], quote_plus(name))))
-
 				item = control.item(label=label)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
@@ -292,31 +285,25 @@ class RealDebrid:
 			sysaddon, syshandle = argv[0], int(argv[1])
 			my_downloads, pages = self.downloads(page)
 		except: my_downloads = None
-
 		if not my_downloads: return
 		extensions = supported_video_extensions()
 		my_downloads = [i for i in my_downloads if i['download'].lower().endswith(tuple(extensions))]
 		downloadMenu, deleteMenu = control.lang(40048), control.lang(40050)
-
 		for count, item in enumerate(my_downloads, 1):
 			if page > 1: count += (page-1) * 50
 			try: 
 				cm = []
 				try: datetime_object = datetime.strptime(item['generated'], FormatDateTime).date()
 				except TypeError: datetime_object = datetime(*(time.strptime(item['generated'], FormatDateTime)[0:6])).date()
-
 				name = control.strip_non_ascii_and_unprintable(item['filename'])
 				size = float(int(item['filesize'])) / 1073741824
 				label = '%02d | %.2f GB | %s  | [I]%s [/I]' % (count, size, datetime_object, name)
-
 				url_link = item['download']
 				url = '%s?action=playURL&url=%s' % (sysaddon, url_link)
 				cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=realdebrid)' %
 								(sysaddon, quote_plus(name), quote_plus(rd_icon), url_link)))
-
 				cm.append((deleteMenu % 'File', 'RunPlugin(%s?action=rd_DeleteDownload&id=%s&name=%s)' %
 								(sysaddon, item['id'], name)))
-
 				item = control.item(label=label)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
@@ -324,7 +311,6 @@ class RealDebrid:
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
 				log_utils.error()
-
 		if page < pages:
 			page += 1
 			next = True
@@ -391,16 +377,19 @@ class RealDebrid:
 			extras_filtering_list = extras_filter()
 			info_hash = info_hash.lower()
 			torrent_files = self._get(check_cache_url + '/' + info_hash)
+			# log_utils.log('torrent_files=%s' % torrent_files, __name__)
 			if not info_hash in torrent_files: return None
 			torrent_id = self.add_magnet(magnet_url) # add_magent() returns id
+			# log_utils.log('torrent_id=%s' % torrent_id, __name__)
 			torrent_files = torrent_files[info_hash]['rd']
+			# log_utils.log('torrent_files=%s' % torrent_files, __name__)
 			torrent_files = [item for item in torrent_files if self.video_only(item, extensions)]
-			# log_utils.log('torrent_files=%s' % torrent_files)
-
+			# log_utils.log('torrent_files=%s' % torrent_files, __name__)
 			if not season:
 				m2ts_check = self.m2ts_check(torrent_files)
 				if m2ts_check:
 					m2ts_key, torrent_files = self.m2ts_key_value(torrent_files) 
+				# log_utils.log('m2ts_check=%s' % m2ts_check)
 			for item in torrent_files:
 				try:
 					correct_file_check = False
@@ -409,14 +398,16 @@ class RealDebrid:
 						for value in item_values:
 							correct_file_check = seas_ep_filter(season, episode, value)
 							# log_utils.log('correct_file_check=%s' % correct_file_check)
-
 							if correct_file_check: break
 						if not correct_file_check: continue
 					elif not m2ts_check:
-						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '')).lower()
+						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
+						# log_utils.log('compare_title=%s' % compare_title)
 						for value in item_values:
-							filename = re.sub(r'[^A-Za-z0-9]+', '.', value.replace('\'', '')).lower()
-							if any(x in filename for x in extras_filtering_list): continue
+							filename = re.sub(r'[^A-Za-z0-9]+', '.', value.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
+							# log_utils.log('filename=%s' % filename)
+							filename_info = filename.replace(compare_title, '') 
+							if any(x in filename_info for x in extras_filtering_list): continue
 							correct_file_check = re.search(compare_title, filename)
 							if correct_file_check: break
 						if not correct_file_check: continue
@@ -425,6 +416,7 @@ class RealDebrid:
 					torrent_keys = ','.join(torrent_keys)
 					self.add_torrent_select(torrent_id, torrent_keys)
 					torrent_info = self.torrent_info(torrent_id)
+					# log_utils.log('torrent_info=%s' % torrent_info, __name__)
 					if 'error' in torrent_info: continue
 					selected_files = [(idx, i) for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
 					if season:
@@ -437,27 +429,31 @@ class RealDebrid:
 								correct_files.append(value[1])
 								break
 						if len(correct_files) == 0: continue
-						# episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace("\'", '')).lower()
-						episode_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace("\'", '')).lower()
+						episode_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace("\'", '').replace('&', 'and').replace('%', '.percent')).lower()
 						for i in correct_files:
 							compare_link = seas_ep_filter(season, episode, i['path'], split=True)
 							# log_utils.log('compare_link=%s' % compare_link)
 							compare_link = re.sub(episode_title, '', compare_link)
+							# log_utils.log('compare_link=%s' % compare_link)
 							if any(x in compare_link for x in extras_filtering_list): continue
 							else:
 								match = True
 								break
 						if match:
 							index = [i[0] for i in selected_files if i[1]['path'] == correct_files[0]['path']][0]
+							# log_utils.log('index=%s' % index)
 							break
 					elif m2ts_check:
 						match, index = True, [i[0] for i in selected_files if i[1]['id'] == m2ts_key][0]
 					else:
 						match = False
-						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '')).lower()
+						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
+						# log_utils.log('compare_title=%s' % compare_title)
 						for value in selected_files:
-							filename = re.sub(r'[^A-Za-z0-9]+', '.', value[1]['path'].replace('\'', '')).lower()
-							if any(x in filename for x in extras_filtering_list): continue
+							filename = re.sub(r'[^A-Za-z0-9]+', '.', value[1]['path'].replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
+							# log_utils.log('filename=%s' % filename)
+							filename_info = filename.replace(compare_title, '') 
+							if any(x in filename_info for x in extras_filtering_list): continue
 							match = re.search(compare_title, filename)
 							if match:
 								index = value[0]
@@ -467,6 +463,7 @@ class RealDebrid:
 					log_utils.error()
 			if match:
 				rd_link = torrent_info['links'][index]
+				# log_utils.log('rd_link=%s' % rd_link, __name__)
 				file_url = self.unrestrict_link(rd_link)
 				if file_url.endswith('rar'): file_url = None
 				if not any(file_url.lower().endswith(x) for x in extensions): file_url = None
@@ -751,8 +748,7 @@ class RealDebrid:
 				return False, response.text
 			else: response = response.json()
 
-			if 'error' in str(response):
-				log_utils.log('response=%s' % str(response), __name__)
+			if 'error' in response:
 				message = response.get('error')
 				if self.server_notifications: control.notification(message=message, icon=rd_icon)
 				log_utils.log('Real-Debrid Error:  %s' % message, level=log_utils.LOGWARNING)

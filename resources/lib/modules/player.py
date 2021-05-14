@@ -139,7 +139,7 @@ class Player(xbmc.Player):
 			if 'mediatype' not in meta:
 				meta.update({'mediatype': 'movie'})
 			if 'duration' not in meta:
-				meta.update({'duration': meta.get('runtime') / 60}) # this doesn't make sense
+				meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
 					try: meta[k] = str(' / '.join([i for i in v]))
@@ -168,7 +168,7 @@ class Player(xbmc.Player):
 			if 'mediatype' not in meta:
 				meta.update({'mediatype': 'episode'})
 			if 'duration' not in meta:
-				meta.update({'duration': meta.get('runtime') / 60}) # this doesn't make sense
+				meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
 					try: meta[k] = str(' / '.join([i for i in v]))
@@ -515,12 +515,12 @@ class Subtitles:
 class Bookmarks:
 	def get(self, name, imdb=None, tmdb=None, tvdb=None, season=None, episode=None, year='0', runtime=None, ck=False):
 		offset = '0'
-		if not runtime or runtime == 'None': return offset # TMDB sometimes return None as string
 		scrobbble = 'Local Bookmark'
 		if control.setting('bookmarks') != 'true': return offset
 		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
+			scrobbble = 'Trakt Scrobble'
 			try:
-				scrobbble = 'Trakt Scrobble'
+				if not runtime or runtime == 'None': return offset # TMDB sometimes return None as string. duration pulled from kodi library if missing from meta
 				from resources.lib.database import traktsync
 				progress = float(traktsync.fetch_bookmarks(imdb, tmdb, tvdb, season, episode))
 				offset = float(progress / 100) * int(float(runtime)) # runtime vs. media_length can differ resulting in 10-30sec difference using Trakt scrobble, meta providers report runtime in full minutes
@@ -570,7 +570,7 @@ class Bookmarks:
 			dbcon = database.connect(control.bookmarksFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmark (idFile TEXT, timeInSeconds TEXT, Name TEXT, year TEXT, UNIQUE(idFile));''')
-			years = [str(year), str(int(year)+1), str(int(year)-1)]
+			years = [str(year), str(int(year) + 1), str(int(year) - 1)]
 			dbcur.execute('''DELETE FROM bookmark WHERE Name="%s" AND year IN (%s)''' % (name, ','.join(i for i in years))) #helps fix random cases where trakt and imdb, or tvdb, differ by a year for eps
 			if seekable:
 				dbcur.execute('''INSERT INTO bookmark Values (?, ?, ?, ?)''', (idFile, timeInSeconds, name, year))

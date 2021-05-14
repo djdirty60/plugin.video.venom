@@ -832,11 +832,15 @@ class Sources:
 		log_dupes = control.setting('remove.duplicates.logging') == 'false'
 		for i in self.sources:
 			a = i['url'].lower()
+			larger = False
 			for sublist in filter:
 				try:
 					b = sublist['url'].lower()
 					if 'magnet:' in a:
 						if i['hash'].lower() in b:
+							if len(sublist['name']) > len(i['name']): # keep matching hash with longer name, possible more file info.
+								larger = True
+								break
 							filter.remove(sublist)
 							if log_dupes: log_utils.log('Removing %s - %s (DUPLICATE TORRENT) ALREADY IN :: %s' % (sublist['provider'], b, i['provider']), level=log_utils.LOGDEBUG)
 							break
@@ -846,7 +850,8 @@ class Sources:
 						break
 				except:
 					log_utils.error('Error filter_dupes: ')
-			filter.append(i)
+			if not larger: #sublist['name'] len() was larger so do not append
+				filter.append(i)
 		header = control.homeWindow.getProperty(self.labelProperty)
 		control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
 		log_utils.log('Removed %s duplicate sources for (%s) from list' % (len(self.sources) - len(filter), control.homeWindow.getProperty(self.labelProperty)), level=log_utils.LOGDEBUG)
@@ -1098,7 +1103,7 @@ class Sources:
 
 	def errorForSources(self):
 		try:
-			control.sleep(200) # added 5/14
+			control.sleep(200)
 			control.hide()
 			if self.url == 'close://': control.notification(message=32400)
 			else: control.notification(message=32401)
@@ -1265,16 +1270,14 @@ class Sources:
 		def base32_to_hex(hash):
 			from base64 import b32decode
 			from resources.lib.modules import py_tools
-			log_utils.log('base32 hash: %s' % hash, __name__, log_utils.LOGDEBUG)
+			log_utils.log('RD base32 hash: %s' % hash, __name__, log_utils.LOGDEBUG)
 			if py_tools.isPY3: hex = b32decode(hash).hex()
 			else: hex = b32decode(hash).encode('hex') 
-			log_utils.log('base32_to_hex: %s' % hex, __name__, log_utils.LOGDEBUG)
+			log_utils.log('RD base32_to_hex: %s' % hex, __name__, log_utils.LOGDEBUG)
 			return hex
 		try:
 			hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
 			cached = realdebrid.RealDebrid().check_cache_list(hashList)
-			# log_utils.log('hashList = %s' % len(hashList), __name__, log_utils.LOGDEBUG)
-			# log_utils.log('cached = %s' % len(cached), __name__, log_utils.LOGDEBUG)
 			if not cached: return None
 			for i in torrent_List:
 				if 'rd' not in cached.get(i['hash'].lower(), {}):

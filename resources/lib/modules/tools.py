@@ -76,7 +76,7 @@ class Time(object):
 				elif stringDay.startswith('sat'): weekday = 5
 				else: weekday = 6
 				weekdayCurrent = datetime.datetime.now().weekday()
-				timeobject += datetime.timedelta(days = weekday) - datetime.timedelta(days=weekdayCurrent)
+				timeobject += datetime.timedelta(days=weekday) - datetime.timedelta(days=weekdayCurrent)
 
 			timeobject = zoneFrom.localize(timeobject)
 			timeobject = timeobject.astimezone(zoneTo)

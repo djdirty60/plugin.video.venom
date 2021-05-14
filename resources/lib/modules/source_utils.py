@@ -115,7 +115,7 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		# return None
 
 def extras_filter():
-	return ['sample', 'extra', 'extras', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'bloopers', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer']
+	return ['sample', 'extra', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer']
 
 def supported_video_extensions():
 	try:

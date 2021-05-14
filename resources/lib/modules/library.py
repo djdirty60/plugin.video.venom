@@ -433,7 +433,6 @@ class libtvshows:
 		self.dupe_chk = control.setting('library.check') or 'true'
 		self.include_special = control.setting('library.include_special') or 'true'
 		self.include_unknown = control.setting('library.include_unknown') or 'true'
-		# self.date_time = (datetime.utcnow() - timedelta(hours = 5))
 		self.date_time = datetime.utcnow()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
 		else: self.date = (self.date_time - timedelta(hours = 24)).strftime('%Y%m%d')
@@ -537,7 +536,7 @@ class libtvshows:
 				except:
 					lib = []
 				for i in items:
-					if lib != []: continue # this prevents missing eps to get added
+					if lib != []: continue # this prevents missing eps to get added if item is aded back
 					if control.monitor.abortRequested(): return sysexit()
 					try:
 						if str(i.get('season')) == '0' and self.include_special == 'false': continue
@@ -680,7 +679,6 @@ class libepisodes:
 		self.library_update = control.setting('library.update') or 'true'
 		self.include_special = control.setting('library.include_special') or 'true'
 		self.include_unknown = control.setting('library.include_unknown') or 'true'
-		# self.date_time = (datetime.utcnow() - timedelta(hours = 5))
 		self.date_time = datetime.utcnow()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
 		else: self.date = (self.date_time - timedelta(hours = 24)).strftime('%Y%m%d')
@@ -771,7 +769,7 @@ class libepisodes:
 				# if not status or any(value in status for value in ['continuing', 'returning series']): raise Exception() # only write db entry for completed(Ended) shows
 				if status == 'ended':
 					dbcur.execute('''INSERT INTO tvshows Values (?, ?)''', (item['tvdb'], repr(it)))
-				dbcur.connection.commit()
+					dbcur.connection.commit()
 			except:
 				log_utils.error()
 			try:

@@ -732,6 +732,7 @@ class Episodes:
 			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		traktManagerMenu, playlistManagerMenu, queueMenu = control.lang(32070), control.lang(35522), control.lang(32065)
 		tvshowBrowserMenu, addToLibrary = control.lang(32071), control.lang(32551)
+		clearSourcesMenu = control.lang(32611)
 		for i in items:
 			try:
 				tvshowtitle, title, imdb, tmdb, tvdb = i.get('tvshowtitle'), i.get('title'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', '')
@@ -848,7 +849,7 @@ class Episodes:
 						cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
 											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb)))
-				cm.append((control.lang(32611), 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
+				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				# cm.append(('PlayAll', 'RunPlugin(%s?action=playAll)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
@@ -861,9 +862,13 @@ class Episodes:
 				if multi and multi_unwatchedEnabled:
 					if 'ForceAirEnabled' not in i:
 						try:
-							count = playcount.getShowCount(indicators, imdb, tvdb)
-							if count: item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
-							else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('counts', {}).get(str(season)))}) # temp use TMDb's season-episode count for threads not finished....next load counts will update with trakt data
+							count = playcount.getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
+							if count:
+								item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
+								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
+							else:
+								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
+								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 						except: pass
 				item.setProperty('IsPlayable', isPlayable)
 				item.setProperty('tvshow.tmdb_id', tmdb)
@@ -890,8 +895,6 @@ class Episodes:
 						new_title = '[COLOR %s][%s]  [/COLOR]' % (self.highlight_color, air_datetime) + title
 						meta.update({'title': new_title})
 					except: pass
-				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
-				except: pass #da hell with 17 users
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)

@@ -281,7 +281,6 @@ class Premiumize:
 		control.hide()
 		return True
 
-
 	def check_cache_item(self, media_id):
 		try:
 			media_id = media_id.encode('ascii', errors='ignore').decode('ascii', errors='ignore')
@@ -301,7 +300,6 @@ class Premiumize:
 		except:
 			log_utils.error()
 		return False
-
 
 	def check_cache_list(self, hashList):
 		try:
