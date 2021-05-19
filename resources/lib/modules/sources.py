@@ -218,8 +218,8 @@ class Sources:
 				except: item = control.item(label=label)
 				item.setArt({'icon': thumb, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
 				item.addContextMenuItems(cm)
-				# item.setProperty('IsPlayable', 'true') # test
-				item.setProperty('IsPlayable', 'false')
+				item.setProperty('IsPlayable', 'true') # test
+				# item.setProperty('IsPlayable', 'false')
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				control.addItem(handle=syshandle, url=sysurl, listitem=item, isFolder=False)
 			except:
@@ -341,13 +341,11 @@ class Sources:
 		if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
 		sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
 		sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
-
 		aliases = []
 		try:
 			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
 			aliases = meta.get('aliases', [])
 		except: pass
-
 		threads = []
 		if content == 'movie':
 			trakt_aliases = self.getAliasTitles(imdb, content)
@@ -402,7 +400,6 @@ class Sources:
 				try:
 					if progressDialog.isFinished(): break
 				except: pass
-
 				if pre_emp == 'true':
 					if pre_emp_res == '0':
 						if (source_4k) >= pre_emp_limit: break
@@ -414,7 +411,6 @@ class Sources:
 						if (source_sd) >= pre_emp_limit: break
 					else:
 						if (source_sd) >= pre_emp_limit: break
-
 				if quality == '0':
 					source_4k = len([e for e in self.scraper_sources if e['quality'] == '4K'])
 					source_1080 = len([e for e in self.scraper_sources if e['quality'] == '1080p'])
@@ -436,7 +432,6 @@ class Sources:
 				source_720_label = total_format % ('red', source_720) if source_720 == 0 else total_format % (sdc, source_720)
 				source_sd_label = total_format % ('red', source_sd) if source_sd == 0 else total_format % (sdc, source_sd)
 				source_total_label = total_format % ('red', total) if total == 0 else total_format % (sdc, total)
-
 				try:
 					info = [sourcelabelDict[x.getName()] for x in threads if x.is_alive() == True]
 					line1 = pdiag_format % (source_4k_label, source_1080_label, source_720_label, source_sd_label)
@@ -449,7 +444,6 @@ class Sources:
 					percent = int((current_progress / float(timeout)) * 100)
 					if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1 + '[CR]' + line2 + '[CR]' + line3)
 					else: progressDialog.update(max(1, percent), line1 + '  ' + string3 % str(len(info)))
-					# if len(info) == 0: break
 					if end_time < current_time: break
 				except:
 					log_utils.error()
@@ -684,12 +678,13 @@ class Sources:
 			self.sources = [i for i in self.sources if i not in filter]
 		if control.setting('remove.dolby.vision') == 'true':
 			self.sources = [i for i in self.sources if not any(value in i.get('name_info', '') for value in source_utils.DOLBY_VISION)]
-		if control.setting('remove.CamSd.sources') == 'true':
-			if any(i for i in self.sources if any(value in i['quality'] for value in ['4K', '1080p', '720p'])): #only remove CAM and SD if better quality does exist
-				self.sources = [i for i in self.sources if not any(value in i['quality'] for value in ['CAM', 'SD'])]
+		if control.setting('remove.cam.sources') == 'true':
+			self.sources = [i for i in self.sources if i['quality'] != 'CAM']
+		if control.setting('remove.sd.sources') == 'true':
+			if any(i for i in self.sources if any(value in i['quality'] for value in ['4K', '1080p', '720p'])): #only remove SD if better quality does exist
+				self.sources = [i for i in self.sources if i['quality'] != 'SD']
 		if control.setting('remove.3D.sources') == 'true':
-			self.sources = [i for i in self.sources if '3D' not in i.get('info', '')]
-
+			self.sources = [i for i in self.sources if '3D' not in i.get('info', '')] # scrapers write 3D to info
 		local = [i for i in self.sources if 'local' in i and i['local'] is True] # for library and videoscraper (skips cache check)
 		self.sources = [i for i in self.sources if not i in local]
 		direct = [i for i in self.sources if i['direct'] == True] # acct scrapers (skips cache check)
@@ -786,12 +781,10 @@ class Sources:
 				size = self.sources[i]['info'].split('|', 1)[0]
 				if any(value in size for value in ['HEVC', '3D']): size = ''
 			except: size = ''
-
 			u = self.sources[i]['url']
 			q = self.sources[i]['quality']
 			p = self.sources[i]['provider'].upper()
 			s = self.sources[i]['source'].upper().rsplit('.', 1)[0]
-
 			if 'debrid' in self.sources[i]: d = self.debrid_abv(self.sources[i]['debrid'])
 			else: d = self.sources[i]['debrid'] = ''
 			if d:
@@ -805,7 +798,6 @@ class Sources:
 					color = prem_color
 					sec_color = line2_color
 			else: sec_color = line2_color
-
 			if d != '':
 				if size: line1 = '[COLOR %s]%02d  |  [B]%s[/B]  |  %s  |  %s  |  %s  |  [B]%s[/B][/COLOR]' % (color, int(i + 1), q, d, p, s, size)
 				else: line1 = '[COLOR %s]%02d  |  [B]%s[/B]  |  %s  |  %s  |  %s[/COLOR]' % (color, int(i + 1), q, d, p, s)
@@ -813,16 +805,13 @@ class Sources:
 				if size: line1 = '%02d  |  [B]%s[/B]  |  %s  |  %s  |  [B]%s[/B]' % (int(i + 1), q, p, s, size)
 				else: line1 = '%02d  |  [B]%s[/B]  |  %s  |  %s' % (int(i + 1), q, p, s)
 			line1_len = len(line1)-20
-
 			if t != '': line2 = '\n       [COLOR %s][I]%s[/I][/COLOR]' % (sec_color, t)
 			else: line2 = ''
 			line2_len = len(line2)
-
 			if line2_len > line1_len:
 				adjust = line2_len - line1_len
 				line1 = line1.ljust(line1_len+30+adjust)
 			label = line1 + line2
-
 			self.sources[i]['label'] = label
 		control.hide()
 		return self.sources
@@ -1116,7 +1105,6 @@ class Sources:
 			t = trakt.getMovieAliases(imdb) if content == 'movie' else trakt.getTVShowAliases(imdb)
 			if not t: return []
 			t = [i for i in t if i.get('country', '').lower() in ['en', '', 'us', 'uk', 'gb']]
-			# return jsdumps(t)
 			return t
 		except:
 			log_utils.error()

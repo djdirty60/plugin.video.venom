@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.0.5">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.0.6">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -32,15 +32,13 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v5.0.5 - May 14, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed RD failed resolving issue when &quot;&amp;&quot; or &quot;%&quot; exists in meta title.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed RD failed resolving issue when &quot;error&quot; existed in the meta title.
-    Thanks noizex!! [/I]
-[COLOR yellow]--[/COLOR][I] Change duplicate source removal that upon hash match will keep
-    the match with longer title portion of the magnet.  This
-    results in reassuring the kept source is the one
-    containing more file info.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed episode count when unwatched counts for multi list is enabled.[/I]
+[B][COLOR red]Update - v5.0.6 - May 19, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Cam and SD filtering now has their own separate setting. SD
+    quality will only be removed when setting is in use if better
+    quality does in fact exist.[/I]
+[COLOR yellow]--[/COLOR][I] Source playback will now strictly use "setResolvedURL" for playback
+    method due to changes in Matrix 19.1[/I]
+[COLOR yellow]--[/COLOR][I] Venom now uses a router method call from plugin default for speed.[/I]
 		</news>
 	</extension>
 </addon>

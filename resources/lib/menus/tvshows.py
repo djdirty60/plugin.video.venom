@@ -75,9 +75,7 @@ class TVshows:
 		self.trakttrending_link = 'https://api.trakt.tv/shows/trending?page=1&limit=%s' % self.count
 		self.traktpopular_link = 'https://api.trakt.tv/shows/popular?page=1&limit=%s' % self.count
 		self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/shows?limit=40'
-
 		self.tvmaze_link = 'https://www.tvmaze.com'
-
 		self.tmdb_key = control.setting('tmdb.api.key')
 		if self.tmdb_key == '' or self.tmdb_key is None:
 			self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
@@ -216,6 +214,7 @@ class TVshows:
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
 		try:
+			if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
 			dbcon = database.connect(control.searchFile)
 			dbcur = dbcon.cursor()
 			dbcur.executescript('''CREATE TABLE IF NOT EXISTS tvshow (ID Integer PRIMARY KEY AUTOINCREMENT, term);''')
@@ -402,7 +401,6 @@ class TVshows:
 				lists[i].update({'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
 			userlists += lists
 		except: pass
-
 		try:
 			if self.tmdb_session_id == '': raise Exception()
 			self.list = []
@@ -411,7 +409,6 @@ class TVshows:
 				lists[i].update({'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
 			userlists += lists
 		except: pass
-
 		self.list = []
 		for i in range(len(userlists)): # Filter the user's own lists that were
 			contains = False
@@ -422,7 +419,6 @@ class TVshows:
 					break
 			if not contains:
 				self.list.append(userlists[i])
-
 		if self.tmdb_session_id != '': # TMDb Favorites
 			self.list.insert(0, {'name': control.lang(32026), 'url': self.tmdb_favorites_link, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
 		if self.tmdb_session_id != '': # TMDb Watchlist
@@ -451,7 +447,7 @@ class TVshows:
 			for i in result:
 				try:
 					show = i['show']
-					show['added'] = i.get('listed_at') # for watchlist
+					show['added'] = i.get('listed_at')
 					show['paused_at'] = i.get('paused_at', '')
 					try: show['progress'] = max(0, min(1, i['progress'] / 100.0))
 					except: show['progress'] = ''
@@ -478,7 +474,6 @@ class TVshows:
 				values['originaltitle'] = values['title']
 				values['tvshowtitle'] = values['title']
 				try: values['premiered'] = item.get('first_aired', '')[:10]
-				# try: values['premiered'] = item.get('first_aired', '')
 				except: values['premiered'] = ''
 				values['year'] = str(item.get('year')) if item.get('year') else ''
 				if not values['year']:
@@ -609,7 +604,7 @@ class TVshows:
 		try:
 			result = client.request(url)
 			items = client.parseDOM(result, 'li', attrs={'class': 'ipl-zebra-list__item user-list'})
-			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'}) # Gaia uses this but breaks the IMDb user list
+			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'}) # breaks the IMDb user list
 		except:
 			log_utils.error()
 		for item in items:
@@ -687,8 +682,6 @@ class TVshows:
 			if not values.get('imdb'): values['imdb'] = imdb
 			if not values.get('tmdb'): values['tmdb'] = tmdb
 			if not values.get('tvdb'): values['tvdb'] = tvdb
-			# remove_keys = ('seasons',) # pop() # 4-19-21, this is now needed to pass for "flatten" do not pop
-			# for k in remove_keys: values.pop(k, None)
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 				if extended_art: values.update(extended_art)

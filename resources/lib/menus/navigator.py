@@ -4,17 +4,17 @@
 """
 
 from sys import argv, exit as sysexit
-from resources.lib.modules import control
-from resources.lib.modules import log_utils
-from resources.lib.modules import trakt
 try: #Py2
 	from urllib import quote_plus
 except ImportError:  #Py3
 	from urllib.parse import quote_plus
+from resources.lib.modules import control
+from resources.lib.modules import log_utils
+from resources.lib.modules.trakt import getTraktCredentialsInfo, getTraktIndicatorsInfo
 
 artPath = control.artPath()
-traktCredentials = trakt.getTraktCredentialsInfo()
-traktIndicators = trakt.getTraktIndicatorsInfo()
+traktCredentials = getTraktCredentialsInfo()
+traktIndicators = getTraktIndicatorsInfo()
 imdbCredentials = control.setting('imdb.user') != ''
 tmdbSessionID = control.setting('tmdb.session_id') != ''
 indexLabels = control.setting('index.labels') == 'true'
@@ -336,7 +336,7 @@ class Navigator:
 					metacache.cache_clear_meta()
 					cache.cache_clear()
 					cache.cache_clear_search()
-					cache.cache_clear_bookmarks()
+					# cache.cache_clear_bookmarks()
 					return True
 				except:
 					log_utils.error()

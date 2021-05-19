@@ -254,10 +254,11 @@ class Movies:
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
 		try:
+			if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
 			dbcon = database.connect(control.searchFile)
 			dbcur = dbcon.cursor()
-			dbcur.executescript("CREATE TABLE IF NOT EXISTS movies (ID Integer PRIMARY KEY AUTOINCREMENT, term);")
-			dbcur.execute("SELECT * FROM movies ORDER BY ID DESC")
+			dbcur.executescript('''CREATE TABLE IF NOT EXISTS movies (ID Integer PRIMARY KEY AUTOINCREMENT, term);''')
+			dbcur.execute('''SELECT * FROM movies ORDER BY ID DESC''')
 			dbcur.connection.commit()
 			lst = []
 			delete_option = False
@@ -287,8 +288,8 @@ class Movies:
 		try:
 			dbcon = database.connect(control.searchFile)
 			dbcur = dbcon.cursor()
-			dbcur.execute("INSERT INTO movies VALUES (?,?)", (None, q))
-			# dbcur.execute("INSERT INTO movies VALUES (?,?)", (None, py_tools.ensure_text(q))) # ensure_text?, search of BRÜNO not saved to db in 18?
+			dbcur.execute('''INSERT INTO movies VALUES (?,?)''', (None, q))
+			# dbcur.execute('''INSERT INTO movies VALUES (?,?)''', (None, py_tools.ensure_text(q))) # ensure_text?, search of BRÜNO not saved to db in 18?
 			dbcur.connection.commit()
 		except:
 			log_utils.error()
@@ -623,7 +624,7 @@ class Movies:
 		try:
 			result = client.request(url)
 			items = client.parseDOM(result, 'li', attrs={'class': 'ipl-zebra-list__item user-list'})
-			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'}) # Gaia uses this but breaks the IMDb user list
+			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'}) # breaks the IMDb user list
 		except:
 			log_utils.error()
 		for item in items:
@@ -781,8 +782,7 @@ class Movies:
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 1, 'overlay': 5})
-						# lastplayed = trakt.watchedMoviesTime(imdb)
-						# meta.update({'lastplayed': lastplayed})
+						# meta.update({'lastplayed': trakt.watchedMoviesTime(imdb)})
 					else:
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=5)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 0, 'overlay': 4})
@@ -793,10 +793,7 @@ class Movies:
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-				if hosts_mode == '1':
-					cm.append(('Rescrape Item', 'RunPlugin(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
-				elif hosts_mode != '1':
-					cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+				cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))

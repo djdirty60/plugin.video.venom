@@ -39,6 +39,8 @@ class SettingsMonitor(control.monitor_class):
 		window.clearProperty('venom_settings')
 		control.sleep(50)
 		refreshed = control.make_settings_dict()
+		control.refresh_playAction()
+
 
 class SyncMyAccounts:
 	def run(self):

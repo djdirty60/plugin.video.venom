@@ -170,7 +170,8 @@
 		<setting id="remove.dolby.vision" type="bool" label="32388" default="false" />
 		<setting id="remove.hevc" type="bool" label="32363" default="false" />
 		<setting id="remove.hdr" type="bool" label="32389" default="false" />
-		<setting id="remove.CamSd.sources" type="bool" label="32050" default="false" />
+		<setting id="remove.cam.sources" type="bool" label="Remove CAM sources" default="false" />
+		<setting id="remove.sd.sources" type="bool" label="Remove SD sources (only if better quality exists)" default="false" />
 		<setting id="remove.3D.sources" type="bool" label="32051" default="true" />
 		<setting id="torrent.min.seeders" type="slider" label="32638" default="1" range="1,100" option="int" visible="false" /> <!-- Hard coded by Fenomscrapers so not visible for now-->
 		<setting id="torrent.remove.uncached" type="bool" label="Remove uncached torrents" default="true" />

@@ -189,7 +189,7 @@ class Seasons:
 						else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('counts', {}).get(str(season), ''))}) # temp use TMDb's season-episode count for threads not finished....next load counts will update with trakt data
 					except: pass
 				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
-				except: pass #da hell with 17 users
+				except: pass
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				try: # Year is the shows year, not the seasons year. Extract year from premier date for InfoLabels to have "season_year".
 					season_year = re.findall(r'(\d{4})', i.get('premiered', ''))[0]

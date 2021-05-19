@@ -55,7 +55,6 @@ class Player(xbmc.Player):
 			self.tmdb = tmdb if tmdb is not None else ''
 			self.tvdb = tvdb if tvdb is not None else ''
 			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
-
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
 			self.imdb_user = control.setting('imdb.user').replace('ur', '')
 			self.tmdb_key = control.setting('tmdb.api.key')
@@ -92,15 +91,9 @@ class Player(xbmc.Player):
 			else:
 				if control.setting('disable.player.art') == 'true': item.setArt({'thumb': thumb, 'poster': poster, 'fanart': fanart})
 				else: item.setArt({'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
-
 			if 'castandart' in meta: item.setCast(meta.get('castandart', ''))
 			item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-			if 'plugin' not in control.infoLabel('Container.PluginName') or select != '1':
-				control.busy()
-				control.resolve(int(argv[1]), True, item)
-			elif select == '1':
-				control.busy()
-				control.player.play(url, item)
+			control.resolve(int(argv[1]), True, item)
 			control.homeWindow.setProperty('script.trakt.ids', jsdumps(self.ids))
 			self.keepAlive()
 			control.homeWindow.clearProperty('script.trakt.ids')
@@ -254,7 +247,7 @@ class Player(xbmc.Player):
 				xbmc.sleep(1000)
 				continue
 		control.homeWindow.clearProperty(pname)
-		# self.onPlayBackEnded()
+		# self.onPlayBackEnded() # check, seems kodi may at times not issue callback
 
 	def start_playback(self):
 		try:
@@ -402,7 +395,6 @@ class Player(xbmc.Player):
 		current_episode["rating"] = current_info.get('rating', '')
 		current_episode["firstaired"] = current_info.get('premiered', '')
 		current_episode["runtime"] = current_info.get('duration', '')
-		# log_utils.log('current_episode = %s' % current_episode, __name__, log_utils.LOGDEBUG)
 
 		current_position = control.playlist.getposition()
 		next_url = control.playlist[current_position + 1].getPath()

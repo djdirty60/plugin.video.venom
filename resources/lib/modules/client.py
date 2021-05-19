@@ -36,7 +36,6 @@ if py_tools.isPY2:
 	def bytes(b, encoding="ascii"):
 		return _str(b)
 
-
 def request(url, close=True, redirect=True, error=False, proxy=None, post=None, headers=None, mobile=False, XHR=False, limit=None,
 					referer=None, cookie=None, compression=True, output='', timeout='30', verifySsl=True, flare=True, ignoreErrors=None, as_bytes=False):
 	try:
@@ -101,23 +100,17 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 
 		try: headers.update(headers)
 		except: headers = {}
-
 		if 'User-Agent' in headers: pass
 		elif mobile is not True: headers['User-Agent'] = cache.get(randomagent, 12)
 		else: headers['User-Agent'] = 'Apple-iPhone/701.341'
-
 		if 'Referer' in headers: pass
 		elif referer is not None: headers['Referer'] = referer
-
 		if 'Accept-Language' not in headers:
 			headers['Accept-Language'] = 'en-US'
-
 		if 'X-Requested-With' in headers: pass
 		elif XHR: headers['X-Requested-With'] = 'XMLHttpRequest'
-
 		if 'Cookie' in headers: pass
 		elif cookie: headers['Cookie'] = cookie
-
 		if 'Accept-Encoding' in headers: pass
 		elif compression and limit is None: headers['Accept-Encoding'] = 'gzip'
 
@@ -215,17 +208,14 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			except: pass
 			if close is True: response.close()
 			return result
-
 		elif output == 'geturl':
 			result = response.geturl()
 			if close is True: response.close()
 			return result
-
 		elif output == 'headers':
 			result = response.headers
 			if close is True: response.close()
 			return result
-
 		elif output == 'chunk':
 			try: content = int(response.headers['Content-Length'])
 			except: content = (2049 * 1024)
@@ -234,21 +224,17 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			except: result = response # testing
 			if close is True: response.close()
 			return result
-
 		elif output == 'file_size':
 			try: content = int(response.headers['Content-Length'])
 			except: content = '0'
 			if close is True: response.close()
 			return content
-
 		if flare != 'cloudflare':
 			if limit == '0': result = response.read(224 * 1024)
 			elif limit is not None: result = response.read(int(limit) * 1024)
 			else: result = response.read(5242880)
-
 		try: encoding = response.headers["Content-Encoding"]
 		except: encoding = None
-
 		if encoding == 'gzip': result = gzip.GzipFile(fileobj=StringIO(result)).read()
 		if not as_bytes:
 			result = py_tools.ensure_text(result, errors='ignore')
@@ -271,7 +257,6 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			ua = headers['User-Agent']
 			headers['Cookie'] = cache.get(bfcookie().get, 168, netloc, ua, timeout)
 			result = _basic_request(url, headers=headers, post=post, timeout=timeout, limit=limit)
-
 		if output == 'extended':
 			try:
 				response_headers = dict([(item[0].title(), item[1]) for item in list(response.info().items())]) # behaves differently 18 to 19. 18 I had 3 "Set-Cookie:" it combined all 3 values into 1 key. In 19 only the last keys value was present.
@@ -395,6 +380,7 @@ def agent():
 	# return 'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko' # fails for glodls, (compatible, MSIE) removed
 	#return 'Mozilla/5.0 (Windows NT 6.2; Win64; x64; Trident/7.0; rv:11.0) like Gecko' # works on glodls
 
+
 class cfcookie:
 	def __init__(self):
 		self.cookie = None
@@ -444,7 +430,6 @@ class cfcookie:
 			handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
 			opener = urllib2.build_opener(*handlers)
 			opener = urllib2.install_opener(opener)
-
 			try:
 				req = urllib2.Request(query)
 				_add_request_header(req, headers)
