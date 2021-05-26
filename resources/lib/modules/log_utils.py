@@ -7,17 +7,16 @@ from datetime import datetime
 import inspect
 import unicodedata
 import xbmc
-from resources.lib.modules import control
+from resources.lib.modules.control import getKodiVersion, transPath, setting as getSetting, lang, joinPath, existsPath
 from resources.lib.modules import py_tools
 
-# # only prints when venom logging set to "Debug" (LOGINFO ads to list if Leia(18))
-LOGDEBUG = xbmc.LOGDEBUG #0
+LOGDEBUG = xbmc.LOGDEBUG #0  only prints when venom logging set to "Debug" (LOGINFO ads to list if Leia(18))
 # ###--from here down methods print when Venom logging set to "Normal".
 LOGINFO = xbmc.LOGINFO #1 (doesn't print unless Venom logging set to "Debug" in Leia(18))
-LOGNOTICE = xbmc.LOGNOTICE if control.getKodiVersion() < 19 else xbmc.LOGINFO #(2 in 18, deprecated in 19 use LOGINFO(1))
+LOGNOTICE = xbmc.LOGNOTICE if getKodiVersion() < 19 else xbmc.LOGINFO #(2 in 18, deprecated in 19 use LOGINFO(1))
 LOGWARNING = xbmc.LOGWARNING #(3 in 18, 2 in 19)
 LOGERROR = xbmc.LOGERROR #(4 in 18, 3 in 19)
-LOGSEVERE = xbmc.LOGSEVERE if control.getKodiVersion() < 19 else xbmc.LOGFATAL #(5 in 18, deprecated in 19 use LOGFATAL(4))
+LOGSEVERE = xbmc.LOGSEVERE if getKodiVersion() < 19 else xbmc.LOGFATAL #(5 in 18, deprecated in 19 use LOGFATAL(4))
 LOGFATAL = xbmc.LOGFATAL #(6 in 18, 4 in 19)
 LOGNONE = xbmc.LOGNONE #(7 in 18, 5 in 19)-not used but listed for int value
 if py_tools.isPY2:
@@ -26,16 +25,16 @@ if py_tools.isPY2:
 else:
 	debug_list = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL']
 DEBUGPREFIX = '[COLOR red][ Venom: %s ][/COLOR]'
-LOGPATH = control.transPath('special://logpath/')
+LOGPATH = transPath('special://logpath/')
 
 
 def log(msg, caller=None, level=LOGNOTICE):
-	debug_enabled = control.setting('debug.enabled') == 'true'
+	debug_enabled = getSetting('debug.enabled') == 'true'
 	if not debug_enabled: return
-	debug_level = control.setting('debug.level')
+	debug_level = getSetting('debug.level')
 	if level == LOGDEBUG and debug_level != '1': return
-	debug_location = control.setting('debug.location')
-	if isinstance(msg, int): msg = control.lang(msg) # for strings.po translations
+	debug_location = getSetting('debug.location')
+	if isinstance(msg, int): msg = lang(msg) # for strings.po translations
 	try:
 		if py_tools.isPY3:
 			if not msg.isprintable(): # ex. "\n" is not a printable character so returns False on those sort of cases
@@ -57,8 +56,8 @@ def log(msg, caller=None, level=LOGNOTICE):
 			msg = 'From func name: %s.%s() Line # :%s\n                       msg : %s' % (caller[0], caller[1], caller[2], msg)
 
 		if debug_location == '1':
-			log_file = control.joinPath(LOGPATH, 'venom.log')
-			if not control.existsPath(log_file):
+			log_file = joinPath(LOGPATH, 'venom.log')
+			if not existsPath(log_file):
 				f = open(log_file, 'w')
 				f.close()
 			with open(log_file, 'a', encoding='utf-8') as f:

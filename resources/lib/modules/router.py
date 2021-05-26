@@ -263,32 +263,6 @@ def router(params):
 	####################################################
 	#---EPISODES
 	####################################################
-	elif action == 'playEpisodesList':
-		from json import dumps as jsdumps
-		from resources.lib.menus import episodes
-		meta = params.get('meta')
-		items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode, create_directory=False)
-		control.playlist.clear()
-		for i in items:
-			title = i['title']
-			systitle = quote_plus(title)
-			year = i['year']
-			imdb = i['imdb']
-			tmdb = i['tmdb']
-			tvdb = i['tvdb']
-			season = i['season']
-			episode = i['episode']
-			tvshowtitle = i['tvshowtitle']
-			systvshowtitle = quote_plus(tvshowtitle)
-			premiered = i['premiered']
-			sysmeta = quote_plus(jsdumps(i))
-			url = 'plugin://plugin.video.venom/?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select="2"' % (
-									systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
-			try: item = control.item(label=title, offscreen=True)
-			except: item = control.item(label=title)
-			control.playlist.add(url=url, listitem=item)
-		control.player2().play(control.playlist)
-
 	elif action == 'episodes':
 		from resources.lib.menus import episodes
 		meta = params.get('meta')
@@ -572,115 +546,118 @@ def router(params):
 	####################################################
 	#---Play
 	####################################################
-	elif action == 'play':
+	elif action and action.startswith('play_'):
+		if action == 'play_Item':
+			from resources.lib.modules import sources
+			premiered = params.get('premiered')
+			meta = params.get('meta')
+			select = params.get('select')
+			rescrape = params.get('rescrape')
+			sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
+
+		elif action == 'play_All': # context menu works same as "Play from Here"
+			control.player2().play(control.playlist) 
+
+		elif action == 'play_URL':
+			caller = params.get('caller')
+			if caller == 'realdebrid':
+				from resources.lib.debrid import realdebrid
+				if type == 'unrestrict': control.player.play(realdebrid.RealDebrid().unrestrict_link(url.replace(' ', '%20')))
+				else: control.player.play(url.replace(' ', '%20'))
+			elif caller == 'alldebrid':
+				from resources.lib.debrid import alldebrid
+				if type == 'unrestrict': control.player.play(alldebrid.AllDebrid().unrestrict_link(url.replace(' ', '%20')))
+				else: control.player.play(url.replace(' ', '%20'))
+			else: control.player.play(url.replace(' ', '%20'))
+
+		elif action == 'play_SourceItem':
+			from resources.lib.modules import sources
+			sources.Sources().playItem(title, source)
+
+		elif action == 'play_EpisodesList': # global context option
+			from json import dumps as jsdumps
+			from resources.lib.menus import episodes
+			meta = params.get('meta')
+			items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode, create_directory=False)
+			control.playlist.clear()
+			for i in items:
+				title = i['title']
+				systitle = quote_plus(title)
+				year = i['year']
+				imdb = i['imdb']
+				tmdb = i['tmdb']
+				tvdb = i['tvdb']
+				season = i['season']
+				episode = i['episode']
+				tvshowtitle = i['tvshowtitle']
+				systvshowtitle = quote_plus(tvshowtitle)
+				premiered = i['premiered']
+				sysmeta = quote_plus(jsdumps(i))
+				url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select="2"' % (
+										systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
+				try: item = control.item(label=title, offscreen=True)
+				except: item = control.item(label=title)
+				control.playlist.add(url=url, listitem=item)
+			control.player2().play(control.playlist)
+
+		elif action == 'play_Trailer':
+			from resources.lib.modules import trailer
+			windowedtrailer = params.get('windowedtrailer')
+			windowedtrailer = int(windowedtrailer) if windowedtrailer in ("0","1") else 0
+			trailer.Trailer().play(type, name, year, url, imdb, windowedtrailer)
+
+		elif action == 'play_Random':
+			rtype = params.get('rtype')
+			if rtype == 'movie':
+				from resources.lib.menus import movies
+				rlist = movies.Movies().get(url, create_directory=False)
+				xbmc.log('movie rlist=%s' % rlist, 1)
+				xbmc.log('url=%s' % url, 1)
+				r = 'plugin://plugin.video.venom/?action=play_Item'
+			elif rtype == 'episode':
+				from resources.lib.menus import episodes
+				meta = params.get('meta')
+				rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, create_directory=False)
+				r = 'plugin://plugin.video.venom/?action=play_Item'
+			elif rtype == 'season':
+				from resources.lib.menus import seasons
+				art = params.get('art')
+				rlist = seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, art, create_directory=False)
+				r = 'plugin://plugin.video.venom/?action=play_Random&rtype=episode'
+			elif rtype == 'show':
+				from resources.lib.menus import tvshows
+				rlist = tvshows.TVshows().get(url, create_directory=False)
+				r = 'plugin://plugin.video.venom/?action=play_Random&rtype=season'
+			from random import randint
+			from json import dumps as jsdumps
+			try:
+				rand = randint(1,len(rlist))-1
+				for p in ['title', 'year', 'imdb', 'tmdb', 'tvdb', 'season', 'episode', 'tvshowtitle', 'premiered', 'select']:
+					if rtype == "show" and p == "tvshowtitle":
+						try: r += '&' + p + '=' + quote_plus(rlist[rand]['title'])
+						except: pass
+					else:
+						try: r += '&' + p + '=' + quote_plus(str(rlist[rand][p]))
+						except: pass
+				try: r += '&meta=' + quote_plus(jsdumps(rlist[rand]))
+				except: r += '&meta=' + quote_plus("{}")
+				if rtype == "movie":
+					try: control.notification(title=32536, message='%s (%s)' % (rlist[rand]['title'], rlist[rand]['year']))
+					except: pass
+				elif rtype == "episode":
+					try: control.notification(title=32536, message='%s - %01dx%02d - %s' % (rlist[rand]['tvshowtitle'], int(rlist[rand]['season']), int(rlist[rand]['episode']), rlist[rand]['title']))
+					except: pass
+				control.execute('RunPlugin(%s)' % r)
+			except:
+				control.notification(message=32537)
+
+	elif action == 'play': # for support of old style .strm library files
 		from resources.lib.modules import sources
 		premiered = params.get('premiered')
 		meta = params.get('meta')
 		select = params.get('select')
 		rescrape = params.get('rescrape')
 		sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
-
-	elif action == 'playAll':
-		control.player2().play(control.playlist) # context menu works same as "Play from Here"
-
-	elif action == 'playURL':
-		caller = params.get('caller')
-		if caller == 'realdebrid':
-			from resources.lib.debrid import realdebrid
-			if type == 'unrestrict': control.player.play(realdebrid.RealDebrid().unrestrict_link(url.replace(' ', '%20')))
-			else: control.player.play(url.replace(' ', '%20'))
-		elif caller == 'alldebrid':
-			from resources.lib.debrid import alldebrid
-			if type == 'unrestrict': control.player.play(alldebrid.AllDebrid().unrestrict_link(url.replace(' ', '%20')))
-			else: control.player.play(url.replace(' ', '%20'))
-		else: control.player.play(url.replace(' ', '%20'))
-
-	elif action == 'playItem':
-		from resources.lib.modules import sources
-		sources.Sources().playItem(title, source)
-
-	elif action == 'addItem':
-		from resources.lib.modules import sources
-		sources.Sources().addItem(title)
-
-	elif action == 'alterSources':
-		from resources.lib.modules import sources
-		meta = params.get('meta')
-		sources.Sources().alterSources(url, meta)
-
-	elif action == 'trailer':
-		from resources.lib.modules import trailer
-		windowedtrailer = params.get('windowedtrailer')
-		windowedtrailer = int(windowedtrailer) if windowedtrailer in ("0","1") else 0
-		trailer.Trailer().play(type, name, year, url, imdb, windowedtrailer)
-
-	elif action == 'showDebridPack':
-		from resources.lib.modules.sources import Sources
-		caller = params.get('caller')
-		Sources().debridPackDialog(caller, name, url, source)
-
-	elif action == 'sourceInfo':
-		from resources.lib.modules.sources import Sources
-		Sources().sourceInfo(source)
-
-	elif action == 'cacheTorrent':
-		caller = params.get('caller')
-		pack = True if type == 'pack' else False
-		if caller == 'RD':
-			from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
-		elif caller == 'PM':
-			from resources.lib.debrid.premiumize import Premiumize as debrid_function
-		elif caller == 'AD':
-			from resources.lib.debrid.alldebrid import AllDebrid as debrid_function
-		success = debrid_function().add_uncached_torrent(url, pack=pack)
-		if success:
-			from resources.lib.modules import sources
-			sources.Sources().playItem(title, source)
-
-	elif action == 'random':
-		rtype = params.get('rtype')
-		if rtype == 'movie':
-			from resources.lib.menus import movies
-			rlist = movies.Movies().get(url, create_directory=False)
-			xbmc.log('movie rlist=%s' % rlist, 1)
-			xbmc.log('url=%s' % url, 1)
-			r = 'plugin://plugin.video.venom/?action=play'
-		elif rtype == 'episode':
-			from resources.lib.menus import episodes
-			meta = params.get('meta')
-			rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, create_directory=False)
-			r = 'plugin://plugin.video.venom/?action=play'
-		elif rtype == 'season':
-			from resources.lib.menus import seasons
-			art = params.get('art')
-			rlist = seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, art, create_directory=False)
-			r = 'plugin://plugin.video.venom/?action=random&rtype=episode'
-		elif rtype == 'show':
-			from resources.lib.menus import tvshows
-			rlist = tvshows.TVshows().get(url, create_directory=False)
-			r = 'plugin://plugin.video.venom/?action=random&rtype=season'
-		from random import randint
-		from json import dumps as jsdumps
-		try:
-			rand = randint(1,len(rlist))-1
-			for p in ['title', 'year', 'imdb', 'tmdb', 'tvdb', 'season', 'episode', 'tvshowtitle', 'premiered', 'select']:
-				if rtype == "show" and p == "tvshowtitle":
-					try: r += '&' + p + '=' + quote_plus(rlist[rand]['title'])
-					except: pass
-				else:
-					try: r += '&' + p + '=' + quote_plus(str(rlist[rand][p]))
-					except: pass
-			try: r += '&meta=' + quote_plus(jsdumps(rlist[rand]))
-			except: r += '&meta=' + quote_plus("{}")
-			if rtype == "movie":
-				try: control.notification(title=32536, message='%s (%s)' % (rlist[rand]['title'], rlist[rand]['year']))
-				except: pass
-			elif rtype == "episode":
-				try: control.notification(title=32536, message='%s - %01dx%02d - %s' % (rlist[rand]['tvshowtitle'], int(rlist[rand]['season']), int(rlist[rand]['episode']), rlist[rand]['title']))
-				except: pass
-			control.execute('RunPlugin(%s)' % r)
-		except:
-			control.notification(message=32537)
 
 	####################################################
 	#---Playlist
@@ -715,6 +692,41 @@ def router(params):
 		elif action == 'playcount_TVShow':
 			from resources.lib.modules import playcount
 			playcount.tvshows(name, imdb, tvdb, season, query)
+
+	####################################################
+	#---Source Actions
+	####################################################
+	elif action == 'addItem':
+		from resources.lib.modules import sources
+		sources.Sources().addItem(title)
+
+	elif action == 'alterSources':
+		from resources.lib.modules import sources
+		meta = params.get('meta')
+		sources.Sources().alterSources(url, meta)
+
+	elif action == 'showDebridPack':
+		from resources.lib.modules.sources import Sources
+		caller = params.get('caller')
+		Sources().debridPackDialog(caller, name, url, source)
+
+	elif action == 'sourceInfo':
+		from resources.lib.modules.sources import Sources
+		Sources().sourceInfo(source)
+
+	elif action == 'cacheTorrent':
+		caller = params.get('caller')
+		pack = True if type == 'pack' else False
+		if caller == 'RD':
+			from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
+		elif caller == 'PM':
+			from resources.lib.debrid.premiumize import Premiumize as debrid_function
+		elif caller == 'AD':
+			from resources.lib.debrid.alldebrid import AllDebrid as debrid_function
+		success = debrid_function().add_uncached_torrent(url, pack=pack)
+		if success:
+			from resources.lib.modules import sources
+			sources.Sources().playItem(title, source)
 
 	####################################################
 	#---Library Actions

@@ -9,7 +9,6 @@ try: #Py2
 except ImportError:  #Py3
 	from urllib.parse import quote_plus
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
 from resources.lib.modules.trakt import getTraktCredentialsInfo, getTraktIndicatorsInfo
 
 artPath = control.artPath()
@@ -316,6 +315,7 @@ class Navigator:
 			from resources.lib.modules import views
 			views.setView(content, {})
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
 
@@ -339,11 +339,13 @@ class Navigator:
 					# cache.cache_clear_bookmarks()
 					return True
 				except:
+					from resources.lib.modules import log_utils
 					log_utils.error()
 			if cache_clear_all():
 				control.notification(message=32089)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def clearCacheProviders(self):
@@ -354,6 +356,7 @@ class Navigator:
 			if providerscache.cache_clear_providers(): control.notification(message=32090)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def clearCacheMeta(self):
@@ -364,6 +367,7 @@ class Navigator:
 			if metacache.cache_clear_meta(): control.notification(message=32091)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def clearCache(self):
@@ -374,6 +378,7 @@ class Navigator:
 			if cache.cache_clear(): control.notification(message=32092)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def clearCacheSearch(self):
@@ -384,6 +389,7 @@ class Navigator:
 			if cache.cache_clear_search(): control.notification(message=32093)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def clearCacheSearchPhrase(self, table, name):
@@ -394,6 +400,7 @@ class Navigator:
 			if cache.cache_clear_SearchPhrase(table, name): control.notification(message=32094)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def clearBookmarks(self):
@@ -404,6 +411,7 @@ class Navigator:
 			if cache.cache_clear_bookmarks(): control.notification(message=32100)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def clearBookmark(self, name, year):
@@ -414,6 +422,7 @@ class Navigator:
 			if cache.cache_clear_bookmark(name, year): control.notification(title=name, message=32102)
 			else: control.notification(message=33586)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True, isPlayable=False, isSearch=False, table=''):

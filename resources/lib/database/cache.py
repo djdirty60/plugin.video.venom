@@ -10,7 +10,6 @@ from time import time
 try: from sqlite3 import dbapi2 as db
 except ImportError: from pysqlite2 import dbapi2 as db
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
 
 
 def get(function, duration, *args):
@@ -48,6 +47,7 @@ def get(function, duration, *args):
 			cache_insert(key, fresh_result)
 			return literal_eval(fresh_result)
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 
@@ -62,6 +62,7 @@ def timeout(function, *args):
 		result = cache_get(key)
 		return int(result['date']) if result else 0
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return 0
 
@@ -71,6 +72,7 @@ def cache_existing(function, *args):
 		if cache_result: return literal_eval(cache_result['value'])
 		else: return None
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 
@@ -83,6 +85,7 @@ def cache_get(key):
 		results = dbcur.execute('''SELECT * FROM cache WHERE key=?''', (key,)).fetchone()
 		return results
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 	finally:
@@ -99,6 +102,7 @@ def cache_insert(key, value):
 			dbcur.execute('''INSERT INTO cache Values (?, ?, ?)''', (key, value, now))
 		dbcur.connection.commit()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -113,6 +117,7 @@ def remove(function, *args):
 			dbcur.execute('''DELETE FROM cache WHERE key=?''', (key,))
 			dbcur.connection.commit()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	try: dbcur.close() ; dbcon.close()
 	except: pass
@@ -138,6 +143,7 @@ def cache_clear():
 			dbcur.execute('''VACUUM''')
 			dbcur.connection.commit()
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 	try: dbcur.close() ; dbcon.close()
 	except: pass
@@ -173,6 +179,7 @@ def cache_clear_search():
 			control.refresh()
 			cleared = True
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		cleared = False
 	finally:
@@ -189,6 +196,7 @@ def cache_clear_SearchPhrase(table, key):
 		control.refresh()
 		cleared = True
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		cleared = False
 	finally:
@@ -211,6 +219,7 @@ def cache_clear_bookmarks():
 		dbcur.connection.commit()
 		cleared = True
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		cleared = False
 	finally:
@@ -234,6 +243,7 @@ def cache_clear_bookmark(name, year='0'):
 		control.trigger_widget_refresh()
 		cleared = True
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		cleared = False
 	finally:
@@ -256,6 +266,7 @@ def clear_local_bookmarks(): # clear all venom bookmarks from kodi database
 			dbcur.execute('''DELETE FROM {} WHERE idFile IN ({})'''.format(table, ','.join(file_ids)))
 		dbcur.connection.commit()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -271,6 +282,7 @@ def clear_local_bookmark(url): # clear all item specific bookmarks from kodi dat
 			dbcur.execute('''DELETE FROM {} WHERE idFile IN ({})'''.format(table, ','.join(file_ids)))
 		dbcur.connection.commit()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -295,9 +307,9 @@ def clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=
 		if clr_cache: cache_clear()
 		if clr_search: cache_clear_search()
 		if clr_bookmarks: cache_clear_bookmarks()
-		# control.notification(message=32057)
 		control.notification(message='Venom version update complete')
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 
 def update_cache_version():
@@ -307,6 +319,7 @@ def update_cache_version():
 			f = open(versionFile, 'w')
 			f.close()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.log('Venom Addon Data Path Does not Exist. Creating Folder....', __name__, log_utils.LOGDEBUG)
 		ad_folder = control.transPath('special://profile/addon_data/plugin.video.venom')
 		control.makeDirs(ad_folder)
@@ -320,6 +333,7 @@ def update_cache_version():
 			return True
 		else: return False
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return False
 
@@ -330,6 +344,7 @@ def get_cache_version():
 			f = open(versionFile, 'w')
 			f.close()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.log('Venom Addon Data Path Does not Exist. Creating Folder....', __name__, log_utils.LOGDEBUG)
 		ad_folder = control.transPath('special://profile/addon_data/plugin.video.venom')
 		control.makeDirs(ad_folder)

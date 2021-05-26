@@ -8,11 +8,10 @@ import re
 import requests
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import fanarttv
-from resources.lib.modules import control
-from resources.lib.modules import log_utils
+from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, iteritems, trailer as control_trailer, yesnoDialog
 from resources.lib.modules import py_tools
 from resources.lib.modules import workers
-API_key = control.setting('tmdb.api.key')
+API_key = getSetting('tmdb.api.key')
 if not API_key: API_key = '3320855e65a9758297fec4f7c9717698'
 base_link = 'https://api.themoviedb.org/3/'
 tmdb_networks = base_link + 'discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1' % (API_key, '%s')
@@ -26,17 +25,18 @@ def get_request(url):
 		except requests.exceptions.SSLError:
 			response = requests.get(url, verify=False)
 	except requests.exceptions.ConnectionError:
-		return control.notification(message=32024)
+		return notification(message=32024)
 	if '200' in str(response): return response.json()
 	elif 'Retry-After' in response.headers: 	# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
 		throttleTime = response.headers['Retry-After']
-		control.notification(message='TMDB Throttling Applied, Sleeping for %s seconds' % throttleTime)
-		control.sleep((int(throttleTime) + 1) * 1000)
+		notification(message='TMDB Throttling Applied, Sleeping for %s seconds' % throttleTime)
+		sleep((int(throttleTime) + 1) * 1000)
 		return get_request(url)
 	else:
+		if getSetting('debug.level') != '1': return None
+		from resources.lib.modules import log_utils
 		log_utils.log('Get request failed to TMDB URL: %s\n                       msg : TMDB Response: %s' %
 			(url, response.text), __name__, log_utils.LOGDEBUG)
-		return None
 
 def userlists(url):
 	try:
@@ -66,12 +66,12 @@ def popular_people():
 	return item
 
 def tmdb_sort():
-	sort = int(control.setting('sort.movies.type'))
+	sort = int(getSetting('sort.movies.type'))
 	tmdb_sort = 'original_order'
 	if sort == 1: tmdb_sort = 'title'
 	if sort in [2, 3]: tmdb_sort = 'vote_average'
 	if sort in [4, 5, 6]: tmdb_sort = 'release_date'
-	tmdb_sort_order = '.asc' if int(control.setting('sort.movies.order')) == 0 else '.desc'
+	tmdb_sort_order = '.asc' if int(getSetting('sort.movies.order')) == 0 else '.desc'
 	sort_string = tmdb_sort + tmdb_sort_order
 	return sort_string
 
@@ -80,8 +80,8 @@ class Movies:
 	def __init__(self):
 		self.list = []
 		self.meta = []
-		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
-		self.lang = control.apiLanguage()['tmdb']
+		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
+		self.lang = apiLanguage()['tmdb']
 		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
 ###                                                                  other "append_to_response" options                     external_ids,images,content_ratings
 		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', API_key)
@@ -113,6 +113,7 @@ class Movies:
 				values['metacache'] = False
 				self.list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		def items_list(i):
@@ -120,18 +121,18 @@ class Movies:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				# movie_meta = self.get_movie_meta(tmdb)
 				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
@@ -175,6 +176,7 @@ class Movies:
 				values['metacache'] = False 
 				self.list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		def items_list(i):
@@ -182,18 +184,18 @@ class Movies:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				# movie_meta = self.get_movie_meta(tmdb)
 				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
@@ -216,6 +218,7 @@ class Movies:
 			if not result:
 				if imdb: result = cache.get(get_request, 96, self.movie_link % imdb)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -226,6 +229,7 @@ class Movies:
 			if not result: return
 			meta = {}
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return None
 		try:
@@ -280,12 +284,13 @@ class Movies:
 			except: meta['mpaa'] = ''
 			try:
 				trailer = [x for x in result['videos']['results'] if x['site'] == 'YouTube' and x['type'] in ('Trailer', 'Teaser')][0]['key']
-				meta['trailer'] = control.trailer % trailer
+				meta['trailer'] = control_trailer % trailer
 			except: meta['trailer'] = ''
 			# make aliases match what trakt returns in sources module for title checking scrape results
 			try: meta['aliases'] = [{'title': x['title'], 'country': x['iso_3166_1'].lower()} for x in result.get('alternative_titles', {}).get('titles') if x.get('iso_3166_1').lower() in ('us', 'uk', 'gb')]
 			except: meta['aliases'] = []
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return meta
 
@@ -293,7 +298,6 @@ class Movies:
 		if not tmdb: return None
 		url = self.art_link % tmdb
 		art3 = get_request(url)
-		# art3 = cache.get(get_request, 96, url)
 		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
@@ -316,6 +320,7 @@ class Movies:
 				ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 			ret_img = [x[0] for x in ret_img][0]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return None
 		return ret_img
@@ -336,6 +341,7 @@ class Movies:
 				if imdb: result = cache.get(get_request, 96, self.external_ids % imdb)
 			return result
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -349,6 +355,7 @@ class Movies:
 				try: result = cache.get(get_request, 96, url)['movie_results'][0]
 				except: return None
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -357,12 +364,12 @@ class TVshows:
 	def __init__(self):
 		self.list = []
 		self.meta = []
-		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
-		self.lang = control.apiLanguage()['tmdb']
+		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
+		self.lang = apiLanguage()['tmdb']
 		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
 		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
-		self.tvdb_key = control.setting('tvdb.api.key')
-		self.imdb_user = control.setting('imdb.user').replace('ur', '')
+		self.tvdb_key = getSetting('tvdb.api.key')
+		self.imdb_user = getSetting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
@@ -390,6 +397,7 @@ class TVshows:
 				values['metacache'] = False 
 				self.list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		def items_list(i):
@@ -397,7 +405,6 @@ class TVshows:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				# showSeasons_meta =self.get_showSeasons_meta(tmdb)
 				showSeasons_meta = cache.get(self.get_showSeasons_meta, 96, tmdb)
 				values.update(showSeasons_meta)
 				imdb = values['imdb']
@@ -405,11 +412,12 @@ class TVshows:
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
@@ -452,6 +460,7 @@ class TVshows:
 				values['metacache'] = False 
 				self.list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		def items_list(i):
@@ -459,7 +468,6 @@ class TVshows:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				# showSeasons_meta =self.get_showSeasons_meta(tmdb)
 				showSeasons_meta = cache.get(self.get_showSeasons_meta, 96, tmdb)
 				values.update(showSeasons_meta)
 				imdb = values['imdb']
@@ -467,11 +475,12 @@ class TVshows:
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
@@ -492,8 +501,8 @@ class TVshows:
 			result = None
 			url = self.show_link % tmdb
 			result = get_request(url)
-			# result = cache.get(get_request, 96, url)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -504,6 +513,7 @@ class TVshows:
 			if not result: return
 			meta = {}
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return None
 		try:
@@ -569,10 +579,11 @@ class TVshows:
 			except: meta['aliases'] = []
 			try:
 				meta['trailer'] = [x for x in result['videos']['results'] if x['site'] == 'YouTube' and x['type'] in ('Trailer', 'Teaser')][0]['key']
-				meta['trailer'] = control.trailer % meta['trailer']
+				meta['trailer'] = control_trailer % meta['trailer']
 			except: meta['trailer'] = ''
 			# meta['banner'] = '' # not available from TMDb
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return meta
 
@@ -582,8 +593,8 @@ class TVshows:
 			result = None
 			url = '%s%s' % (base_link, 'tv/%s/season/%s?api_key=%s&language=%s,en-US&append_to_response=credits' % (tmdb, season, API_key, self.lang))
 			result = get_request(url)
-			# result = cache.get(get_request, 96, url)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -595,6 +606,7 @@ class TVshows:
 			if not result: return
 			meta = {}
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return None
 		try:
@@ -643,6 +655,7 @@ class TVshows:
 			# meta['banner'] = '' # not available from TMDb
 			meta['episodes'] = episodes
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return meta
 
@@ -652,8 +665,8 @@ class TVshows:
 			result = None
 			url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, episode, API_key, self.lang))
 			result = get_request(url)
-			# result = cache.get(get_request, 96, url)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -661,7 +674,6 @@ class TVshows:
 		if not tmdb: return None
 		url = self.art_link % tmdb
 		art3 = get_request(url)
-		# art3 = cache.get(get_request, 96, url)
 		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
@@ -684,6 +696,7 @@ class TVshows:
 				ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 			ret_img = [x[0] for x in ret_img][0]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return None
 		return ret_img
@@ -693,9 +706,9 @@ class TVshows:
 		try:
 			result = None
 			url = base_link + 'tv/%s/credits?api_key=%s' % (tmdb, API_key)
-			# result = get_request(url)
 			result = cache.get(get_request, 96, url)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -704,9 +717,9 @@ class TVshows:
 		try:
 			result = None
 			url = base_link + 'tv/%s/external_ids?api_key=%s' % (tmdb, API_key)
-			# result = get_request(url)
 			result = cache.get(get_request, 96, url)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -724,6 +737,7 @@ class TVshows:
 				try: result = cache.get(get_request, 96, url)['tv_results'][0]
 				except: return None
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return result
 
@@ -761,6 +775,7 @@ class TVshows:
 				if not premiered: unaired_count += 1
 				elif int(re.sub(r'[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.today_date))): unaired_count += 1
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return 'true' if unaired_count > 0 else 'false'
 
@@ -885,14 +900,15 @@ class Auth:
 
 	def create_session_id(self):
 		try:
-			if control.setting('tmdb.username') == '' or control.setting('tmdb.password') == '':
-				return control.notification(message='TMDb Account info missing', icon='ERROR')
+			from resources.lib.modules.control import setSetting
+			if getSetting('tmdb.username') == '' or getSetting('tmdb.password') == '':
+				return notification(message='TMDb Account info missing', icon='ERROR')
 			url = self.auth_base_link + '/token/new?api_key=%s' % API_key
 			result = requests.get(url).json()
 			token = result.get('request_token')
 			url2 = self.auth_base_link + '/token/validate_with_login?api_key=%s' % API_key
-			post2 = {"username": "%s" % control.setting('tmdb.username'),
-							"password": "%s" % control.setting('tmdb.password'),
+			post2 = {"username": "%s" % getSetting('tmdb.username'),
+							"password": "%s" % getSetting('tmdb.password'),
 							"request_token": "%s" % token}
 			result2 = requests.post(url2, data=post2).json()
 			url3 = self.auth_base_link + '/session/new?api_key=%s' % API_key
@@ -901,24 +917,27 @@ class Auth:
 			if result3.get('success') is True:
 				session_id = result3.get('session_id')
 				msg = '%s' % ('username =' + username + '[CR]password =' + password + '[CR]token = ' + token + '[CR]confirm?')
-				if control.yesnoDialog(msg, '', ''):
-					control.setSetting('tmdb.session_id', session_id)
-					control.notification(message='TMDb Successfully Authorized')
+				if yesnoDialog(msg, '', ''):
+					setSetting('tmdb.session_id', session_id)
+					notification(message='TMDb Successfully Authorized')
 				else:
-					control.notification(message='TMDb Authorization Cancelled')
+					notification(message='TMDb Authorization Cancelled')
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def revoke_session_id(self):
 		try:
-			if control.setting('tmdb.session_id') == '': return
+			from resources.lib.modules.control import setSetting
+			if getSetting('tmdb.session_id') == '': return
 			url = self.auth_base_link + '/session?api_key=%s' % API_key
-			post = {"session_id": "%s" % control.setting('tmdb.session_id')}
+			post = {"session_id": "%s" % getSetting('tmdb.session_id')}
 			result = requests.delete(url, data=post).json()
 			if result.get('success') is True:
-				control.setSetting('tmdb.session_id', '')
-				control.notification(message='TMDb session_id successfully deleted')
+				setSetting('tmdb.session_id', '')
+				notification(message='TMDb session_id successfully deleted')
 			else:
-				control.notification(message='TMDb session_id deletion FAILED', icon='ERROR')
+				notification(message='TMDb session_id deletion FAILED', icon='ERROR')
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()

@@ -6,7 +6,6 @@
 try: from sqlite3 import dbapi2 as db
 except: from pysqlite2 import dbapi2 as db
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
 
 
 def clearViews():
@@ -23,6 +22,7 @@ def clearViews():
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS views (skin TEXT, view_type TEXT, view_id TEXT, UNIQUE(skin, view_type));''')
 			dbcur.connection.commit()
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
@@ -34,6 +34,7 @@ def clearViews():
 			dbcur.execute('''DELETE FROM view WHERE path LIKE "plugin://plugin.video.venom/%"''')
 			dbcur.connection.commit()
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
@@ -41,6 +42,7 @@ def clearViews():
 		skinIcon = control.addon(skin).getAddonInfo('icon')
 		control.notification(title=skinName, message=32087, icon=skinIcon)
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 
 def addView(content):
@@ -59,6 +61,7 @@ def addView(content):
 		skinIcon = control.addon(skin).getAddonInfo('icon')
 		control.notification(title=skinName, message=viewName, icon=skinIcon)
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -80,6 +83,7 @@ def setView(content, viewDict=None):
 					if skin not in viewDict: return
 					else: return control.execute('Container.SetViewMode(%s)' % str(viewDict[skin]))
 				except:
+					from resources.lib.modules import log_utils
 					log_utils.error()
 					return
 			finally:

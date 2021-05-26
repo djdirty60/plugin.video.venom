@@ -17,8 +17,7 @@ from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
-from resources.lib.modules import playcount
+from resources.lib.modules.playcount import getTVShowIndicators, getTVShowOverlay, getShowCount
 from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
@@ -125,6 +124,7 @@ class TVshows:
 			if idx and create_directory: self.tvshowDirectory(self.list)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -146,6 +146,7 @@ class TVshows:
 			if idx: self.tvshowDirectory(self.list)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -163,6 +164,7 @@ class TVshows:
 			if idx: self.tvshowDirectory(self.list)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -195,6 +197,7 @@ class TVshows:
 			elif reverse:
 				self.list = list(reversed(self.list))
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def imdb_sort(self, type='shows'):
@@ -229,6 +232,7 @@ class TVshows:
 					navigator.Navigator().addDirectoryItem(term, 'tvSearchterm&name=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='tvshow')
 					lst += [(term)]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
@@ -252,6 +256,7 @@ class TVshows:
 			# dbcur.execute('''INSERT INTO movies VALUES (?,?)''', (None, py_tools.ensure_text(q))) # ensure_text?, search of BRÜNO not saved to db in 18?
 			dbcur.connection.commit()
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
@@ -361,6 +366,7 @@ class TVshows:
 			from resources.lib.modules import library
 			library.libtvshows().range(link, list_name)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
 
@@ -456,6 +462,7 @@ class TVshows:
 				except: pass
 			if len(items) == 0: items = result
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
 		try:
@@ -504,6 +511,7 @@ class TVshows:
 				for k in ('first_aired', 'ids', 'genres', 'runtime', 'certification', 'overview', 'aired_episodes', 'comment_count', 'network', 'airs'): values.pop(k, None) # pop() keys that are not needed anymore
 				list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		threads = []
 		for item in items: threads.append(workers.Thread(items_list, item))
@@ -517,6 +525,7 @@ class TVshows:
 			result = trakt.getTrakt(url)
 			items = jsloads(result)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		for item in items:
 			try:
@@ -528,6 +537,7 @@ class TVshows:
 				url = self.traktlist_link % url
 				list.append({'name': name, 'url': url, 'context': url})
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
@@ -547,6 +557,7 @@ class TVshows:
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
 		try:
@@ -575,6 +586,7 @@ class TVshows:
 				dupes.append(imdb)
 				list.append({'title': title, 'tvshowtitle': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '', 'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return list
 
@@ -596,6 +608,7 @@ class TVshows:
 				image = client.replaceHTMLCodes(image)
 				list.append({'name': name, 'url': url, 'image': image})
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return list
 
@@ -606,6 +619,7 @@ class TVshows:
 			items = client.parseDOM(result, 'li', attrs={'class': 'ipl-zebra-list__item user-list'})
 			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'}) # breaks the IMDb user list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		for item in items:
 			try:
@@ -618,6 +632,7 @@ class TVshows:
 				url = client.replaceHTMLCodes(url)
 				list.append({'name': name, 'url': url, 'context': url})
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
@@ -641,6 +656,7 @@ class TVshows:
 				metacache.insert(self.meta)
 			self.list = [i for i in self.list if i.get('tmdb')] # to rid missing tmdb_id's because season list can not load without
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def super_info(self, i):
@@ -661,7 +677,6 @@ class TVshows:
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not imdb or not tmdb or not tvdb:
-				log_utils.log('Third fallback attempt to fetch missing ids for tvshowtitle: (%s)' % self.list[i]['title'], __name__, log_utils.LOGDEBUG)
 				try:
 					results = trakt.SearchTVShow(quote_plus(self.list[i]['title']), self.list[i]['year'], full=False)
 					if results[0]['show']['title'].lower() != self.list[i]['title'].lower() or int(results[0]['show']['year']) != int(self.list[i]['year']): return # Trakt has "THEM" and "Them" twice for same show, use .lower()
@@ -672,8 +687,9 @@ class TVshows:
 				except: pass
 #################################
 			if not tmdb:
+				if control.setting('debug.level') != '1': return
+				from resources.lib.modules import log_utils
 				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % self.list[i]['title'], __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-				return
 			showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 			if not showSeasons: return
 			values = {}
@@ -690,6 +706,7 @@ class TVshows:
 			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def tvshowDirectory(self, items, next=True):
@@ -700,7 +717,7 @@ class TVshows:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		indicators = playcount.getTVShowIndicators(refresh=True)
+		indicators = getTVShowIndicators(refresh=True)
 		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
 		flatten = control.setting('flatten.tvshows') == 'true'
 		if trakt.getTraktIndicatorsInfo():
@@ -732,8 +749,8 @@ class TVshows:
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				art.update({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb,
-								'banner': banner, 'clearlogo': meta.get('clearlogo'), 'clearart': meta.get('clearart'), 'landscape': landscape})
+				art.update({'poster': poster, 'tvshow.poster': poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb, 'banner': banner, 'clearlogo': meta.get('clearlogo', ''),
+						'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': landscape})
 				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
 ####-Context Menu and Overlays-####
@@ -741,7 +758,7 @@ class TVshows:
 				if self.traktCredentials:
 					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s)' % (sysaddon, systitle, imdb, tvdb)))
 				try:
-					overlay = int(playcount.getTVShowOverlay(indicators, imdb, tvdb))
+					overlay = int(getTVShowOverlay(indicators, imdb, tvdb))
 					watched = (overlay == 5)
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 5})
@@ -752,7 +769,7 @@ class TVshows:
 				except: pass
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=tvshows&url=https://api.trakt.tv/shows/%s/related,return)' % (sysaddon, imdb)))
-				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=season&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)))
+				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=season&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, systitle)))
 				cm.append((showPlaylistMenu, 'RunPlugin(%s?action=playlist_Show)' % sysaddon))
 				cm.append((clearPlaylistMenu, 'RunPlugin(%s?action=playlist_Clear)' % sysaddon))
@@ -762,14 +779,14 @@ class TVshows:
 				if flatten: url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta)
 				else: url = '%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)
 				if trailer: meta.update({'trailer': trailer})
-				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', systitle, year, imdb)})
+				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', systitle, year, imdb)})
 				try: item = control.item(label=title, offscreen=True)
 				except: item = control.item(label=title)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				if unwatchedEnabled:
 					try: 
-						count = playcount.getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
+						count = getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
 						if count:
 							item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 							item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
@@ -785,6 +802,7 @@ class TVshows:
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		if next:
 			try:
@@ -811,6 +829,7 @@ class TVshows:
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.content(syshandle, 'tvshows')
 		control.directory(syshandle, cacheToDisc=True)
@@ -837,7 +856,7 @@ class TVshows:
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
 				cm = []
-				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=show&url=%s)' % (sysaddon, quote_plus(i['url']))))
+				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=show&url=%s)' % (sysaddon, quote_plus(i['url']))))
 				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 				try:
 					if control.setting('library.service.update') == 'true':
@@ -851,6 +870,7 @@ class TVshows:
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)

@@ -4,7 +4,6 @@
 """
 
 import time, datetime, calendar
-from resources.lib.modules import log_utils
 from resources.lib.externals import pytz
 
 
@@ -90,5 +89,6 @@ class Time(object):
 				return (stringTime, stringDay)
 			else: return stringTime
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return stringTime

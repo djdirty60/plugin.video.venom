@@ -7,8 +7,7 @@ from datetime import datetime
 try: from sqlite3 import dbapi2 as db
 except ImportError: from pysqlite2 import dbapi2 as db
 from resources.lib.modules import cleandate
-from resources.lib.modules import control
-from resources.lib.modules import log_utils
+from resources.lib.modules.control import existsPath, dataPath, makeFile, traktSyncFile
 
 
 def fetch_bookmarks(imdb, tmdb='', tvdb='', season=None, episode=None):
@@ -42,6 +41,7 @@ def fetch_bookmarks(imdb, tmdb='', tvdb='', season=None, episode=None):
 					progress = match[5]
 				except: pass
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -71,6 +71,7 @@ def insert_bookmarks(items, new_scrobble=False):
 		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_paused_at', timestamp))
 		dbcur.connection.commit()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -100,6 +101,7 @@ def delete_bookmark(items):
 				dbcur.connection.commit()
 			except: pass
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -116,14 +118,15 @@ def last_paused_at():
 			else: dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_paused_at', '1970-01-01T20:00:00.000Z'))
 		else: dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
 	return last_paused
 
 def get_connection():
-	if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
-	dbcon = db.connect(control.traktSyncFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
+	if not existsPath(dataPath): makeFile(dataPath)
+	dbcon = db.connect(traktSyncFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
 	# dbcon.row_factory = _dict_factory
 	return dbcon
 

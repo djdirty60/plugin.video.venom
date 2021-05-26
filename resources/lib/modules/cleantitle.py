@@ -5,7 +5,6 @@
 
 import re
 import unicodedata
-from resources.lib.modules import log_utils
 from resources.lib.modules import py_tools
 
 
@@ -20,6 +19,7 @@ def get(title):
 		title = re.sub(r'\n|([\[({].+?[})\]])|\s(vs[.]?|v[.])\s|([:;–\-"\',!_\.\?~])|\s', '', title) # removes bracketed content
 		return title
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return title
 
@@ -28,5 +28,6 @@ def normalize(title):
 		title = ''.join(c for c in unicodedata.normalize('NFKD', py_tools.ensure_text(py_tools.ensure_str(title))) if unicodedata.category(c) != 'Mn')
 		return str(title)
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return title

@@ -3,15 +3,20 @@
 	Venom Add-on
 """
 
-from resources.lib.modules import control
+from resources.lib.modules.control import addonPath, addonId, getVenomVersion, joinPath
+from resources.lib.windows.textviewer import TextViewerXML
 
-venom_path = control.addonPath(control.addonId())
-venom_version = control.getVenomVersion()
-changelogfile = control.joinPath(venom_path, 'changelog.txt')
+venom_path = addonPath(addonId())
+venom_version = getVenomVersion()
+changelogfile = joinPath(venom_path, 'changelog.txt')
 
 
 def get():
 	r = open(changelogfile)
 	text = r.read()
 	r.close()
-	control.dialog.textviewer('[COLOR red]Venom[/COLOR] -  v%s - ChangeLog' % venom_version, text)
+
+	heading = '[B]Venom -  v%s - ChangeLog[/B]' % venom_version
+	windows = TextViewerXML('textviewer.xml', venom_path, heading=heading, text=text)
+	windows.run()
+	del windows

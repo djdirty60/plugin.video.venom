@@ -4,7 +4,7 @@
 """
 
 import xml.etree.ElementTree as ET
-from resources.lib.modules import control, log_utils
+from resources.lib.modules import control
 
 
 def clean_settings():
@@ -65,5 +65,6 @@ def clean_settings():
 			control.sleep(200)
 			control.notification(title=addon_name, message=control.lang(32084).format(str(len(removed_settings))))
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			control.notification(title=addon_name, message=32115)

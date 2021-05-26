@@ -1,1 +1,4 @@
-If this option is enabled uncached torrents will be removed from the returned list of sources.  If there are no remaining cached torrent sources to disaply you will be presented with a YesNo dialog to confirm if you'd like to review the list of uncached torrents to cache yourself.
+
+If this option is enabled uncached torrents will be removed from the returned list of sources.  If there
+are no remaining cached torrent sources to display you will be presented with a YesNo dialog to
+confirm if you'd like to review the list of uncached torrents to cache yourself.

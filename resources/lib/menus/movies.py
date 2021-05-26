@@ -17,8 +17,7 @@ from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
-from resources.lib.modules import playcount
+from resources.lib.modules.playcount import getMovieIndicators, getMovieOverlay
 from resources.lib.modules import py_tools
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
@@ -147,6 +146,7 @@ class Movies:
 			if idx and create_directory: self.movieDirectory(self.list)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -169,6 +169,7 @@ class Movies:
 			if idx: self.movieDirectory(self.list)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -193,6 +194,7 @@ class Movies:
 				self.movieDirectory(self.list, unfinished=True, next=False)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -225,6 +227,7 @@ class Movies:
 			elif reverse:
 				self.list = list(reversed(self.list))
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def imdb_sort(self, type='movies'):
@@ -269,6 +272,7 @@ class Movies:
 					navigator.Navigator().addDirectoryItem(term, 'movieSearchterm&name=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='movies')
 					lst += [(term)]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
@@ -292,6 +296,7 @@ class Movies:
 			# dbcur.execute('''INSERT INTO movies VALUES (?,?)''', (None, py_tools.ensure_text(q))) # ensure_text?, search of BRÜNO not saved to db in 18?
 			dbcur.connection.commit()
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
@@ -394,6 +399,7 @@ class Movies:
 			from resources.lib.modules import library
 			library.libmovies().range(link, list_name)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
 
@@ -482,6 +488,7 @@ class Movies:
 				except: pass
 			if len(items) == 0: items = result
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
 		try:
@@ -524,6 +531,7 @@ class Movies:
 				for k in ('released', 'ids', 'genres', 'runtime', 'certification', 'overview', 'comment_count', 'network'): values.pop(k, None) # pop() keys that are not needed anymore
 				list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		threads = []
 		for item in items: threads.append(workers.Thread(items_list, item))
@@ -536,6 +544,7 @@ class Movies:
 			result = trakt.getTrakt(url)
 			items = jsloads(result)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		for item in items:
 			try:
@@ -547,6 +556,7 @@ class Movies:
 				url = self.traktlist_link % url
 				self.list.append({'name': name, 'url': url, 'context': url})
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return self.list
@@ -566,6 +576,7 @@ class Movies:
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
 		next = ''
@@ -595,6 +606,7 @@ class Movies:
 				if show or 'Episode:' in item: raise Exception() # Some lists contain TV shows.
 				list.append({'title': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '', 'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return list
 
@@ -616,6 +628,7 @@ class Movies:
 				image = client.replaceHTMLCodes(image)
 				self.list.append({'name': name, 'url': url, 'image': image})
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return self.list
 
@@ -626,6 +639,7 @@ class Movies:
 			items = client.parseDOM(result, 'li', attrs={'class': 'ipl-zebra-list__item user-list'})
 			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'}) # breaks the IMDb user list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		for item in items:
 			try:
@@ -638,6 +652,7 @@ class Movies:
 				url = client.replaceHTMLCodes(url)
 				list.append({'name': name, 'url': url, 'context': url})
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
@@ -661,6 +676,7 @@ class Movies:
 				metacache.insert(self.meta)
 			self.list = [i for i in self.list if i.get('tmdb')]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def super_info(self, i):
@@ -677,7 +693,6 @@ class Movies:
 				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
 				if trakt_ids: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
 			if not tmdb and not imdb:
-				log_utils.log('Third fallback attempt to fetch missing ids for movie title: (%s)' % self.list[i]['title'], __name__, log_utils.LOGDEBUG)
 				try:
 					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
 					if results[0]['movie']['title'] != self.list[i]['title'] or results[0]['movie']['year'] != self.list[i]['year']: return
@@ -702,6 +717,7 @@ class Movies:
 				title = trans_item.get('title') or title
 				plot = trans_item.get('overview') or plot
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
@@ -711,6 +727,7 @@ class Movies:
 			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def movieDirectory(self, items, unfinished=False, next=True):
@@ -723,7 +740,7 @@ class Movies:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		indicators = playcount.getMovieIndicators(refresh=True)
+		indicators = getMovieIndicators(refresh=True)
 		isPlayable = 'false'
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
 		elif hosts_mode != '1': isPlayable = 'true'
@@ -777,7 +794,7 @@ class Movies:
 				if self.traktCredentials:
 					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s)' % (sysaddon, sysname, imdb)))
 				try:
-					overlay = int(playcount.getMovieOverlay(indicators, imdb))
+					overlay = int(getMovieOverlay(indicators, imdb))
 					watched = (overlay == 5)
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
@@ -788,19 +805,19 @@ class Movies:
 						meta.update({'playcount': 0, 'overlay': 4})
 				except: pass
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
-				url = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
+				url = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
 				sysurl = quote_plus(url)
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-				cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+				cm.append(('Rescrape Item', 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
 				if trailer: meta.update({'trailer': trailer})
-				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
+				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
 				item = control.item(label=labelProgress, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
@@ -818,6 +835,7 @@ class Movies:
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		if next:
 			try:
@@ -842,6 +860,7 @@ class Movies:
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.content(syshandle, 'movies')
 		control.directory(syshandle, cacheToDisc=True)
@@ -867,7 +886,7 @@ class Movies:
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
 				cm = []
-				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=movie&url=%s)' % (sysaddon, quote_plus(i['url']))))
+				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=movie&url=%s)' % (sysaddon, quote_plus(i['url']))))
 				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 				try:
 					if control.setting('library.service.update') == 'true':
@@ -880,6 +899,7 @@ class Movies:
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)

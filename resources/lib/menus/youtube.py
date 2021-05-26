@@ -4,8 +4,7 @@
 """
 
 from sys import argv
-from resources.lib.modules import control
-from resources.lib.modules import log_utils
+from resources.lib.modules.control import directory as endOfDirectory
 from resources.lib.modules import youtube_menu
 
 
@@ -28,6 +27,7 @@ class yt_index:  # initializes as musicvids, functions can override based on act
 			self.default_icon = self.default_icon % (self.base_url)
 			self.default_fanart = self.default_fanart % (self.base_url)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def root(self, action):
@@ -52,6 +52,7 @@ class yt_index:  # initializes as musicvids, functions can override based on act
 					youtube_menu.youtube_menu().addSectionItem(name, self.default_icon, self.default_fanart)
 			self.endDirectory()
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def get(self, action, subid):
@@ -77,7 +78,8 @@ class yt_index:  # initializes as musicvids, functions can override based on act
 					youtube_menu.youtube_menu().addSectionItem(name, self.default_icon, self.default_fanart)
 			self.endDirectory()
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def endDirectory(self):
-		control.directory(int(argv[1]), cacheToDisc=True)
+		endOfDirectory(int(argv[1]), cacheToDisc=True)

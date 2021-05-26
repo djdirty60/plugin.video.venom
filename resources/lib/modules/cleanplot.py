@@ -8,13 +8,11 @@ from re import match as re_match
 
 def cleanPlot(plot):
 	if not plot: return
-	# import re
 	try:
 		index = plot.rfind('See full summary')
 		if index == -1: index = plot.rfind("It's publicly available on")
 		if index >= 0: plot = plot[:index]
 		plot = plot.strip()
-		# if re.match(r'[a-zA-Z\d]$', plot): plot += ' ...'
 		if re_match(r'[a-zA-Z\d]$', plot): plot += ' ...'
 		return plot
 	except:

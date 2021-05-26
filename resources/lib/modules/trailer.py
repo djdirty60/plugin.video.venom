@@ -4,7 +4,7 @@
 """
 
 from json import loads as jsloads
-import random
+from random import choice
 import re
 from sys import argv
 try: #Py2
@@ -13,14 +13,13 @@ except ImportError: #Py3
 	from urllib.parse import quote_plus
 from resources.lib.modules import client
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
 
 
 class Trailer:
 	def __init__(self):
 		self.base_link = 'https://www.youtube.com'
 		self.ytkey_link = control.addon('plugin.video.youtube').getSetting('youtube.api.key')
-		self.rckey_link = random.choice(['AIzaSyA0LiS7G-KlrlfmREcCAXjyGqa_h_zfrSE', 'AIzaSyBOXZVC-xzrdXSAmau5UM3rG7rc8eFIuFw'])
+		self.rckey_link = choice(['AIzaSyA0LiS7G-KlrlfmREcCAXjyGqa_h_zfrSE', 'AIzaSyBOXZVC-xzrdXSAmau5UM3rG7rc8eFIuFw'])
 		if self.ytkey_link != '': self.key_link = '&key=%s' % self.ytkey_link
 		else: self.key_link = '&key=%s' % self.rckey_link
 		self.search_link = 'https://www.googleapis.com/youtube/v3/search?part=id&type=video&maxResults=5&q=%s' + self.key_link
@@ -48,6 +47,7 @@ class Trailer:
 					control.sleep(1000)
 				control.execute("Dialog.Close(%s, true)" % control.getCurrentDialogId)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def worker(self, type, name, year, url, imdb):
@@ -74,6 +74,7 @@ class Trailer:
 			result = client.request(url, error=True)
 			if not result: return
 			if 'error' in result:
+				from resources.lib.modules import log_utils
 				items = jsloads(result).get('error', []).get('errors', [])
 				log_utils.log('message = %s' % str(items[0].get('message')), __name__, log_utils.LOGDEBUG)
 				items = self.trakt_trailer(type, name, year, imdb)
@@ -84,8 +85,8 @@ class Trailer:
 				url = self.resolve(vid_id)
 				if url: return url
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
-			return
 
 	def trakt_trailer(self, type, name, year, imdb):
 		try:
@@ -97,6 +98,7 @@ class Trailer:
 			trailer_id = item.get('trailer').split('v=')
 			trailer_id = [trailer_id[1]]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		return trailer_id
 
@@ -112,5 +114,5 @@ class Trailer:
 			url = 'plugin://plugin.video.youtube/play/?video_id=%s' % id
 			return url
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
-			return

@@ -9,8 +9,7 @@ from re import sub as re_sub
 from time import time
 try: from sqlite3 import dbapi2 as db
 except ImportError: from pysqlite2 import dbapi2 as db
-from resources.lib.modules import control
-from resources.lib.modules import log_utils
+from resources.lib.modules.control import existsPath, dataPath, makeFile, providercacheFile
 
 
 def get(function, duration, *args):
@@ -42,6 +41,7 @@ def get(function, duration, *args):
 			cache_insert(key, fresh_result)
 			return literal_eval(fresh_result)
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 
@@ -54,6 +54,7 @@ def cache_get(key):
 		results = dbcur.execute('''SELECT * FROM cache WHERE key=?''', (key,)).fetchone()
 		return results
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 	finally:
@@ -70,6 +71,7 @@ def cache_insert(key, value):
 			dbcur.execute('''INSERT INTO cache Values (?, ?, ?)''', (key, value, now))
 		dbcur.connection.commit()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
@@ -84,6 +86,7 @@ def remove(function, *args):
 			dbcur.execute('''DELETE FROM cache WHERE key=?''', (key,))
 			dbcur.connection.commit()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 	try: dbcur.close() ; dbcon.close()
 	except: pass
@@ -99,6 +102,7 @@ def cache_clear_providers():
 			dbcur.connection.commit()
 			cleared = True
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		cleared = False
 	finally:
@@ -106,8 +110,8 @@ def cache_clear_providers():
 	return cleared
 
 def get_connection():
-	if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
-	dbcon = db.connect(control.providercacheFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
+	if not existsPath(dataPath): makeFile(dataPath)
+	dbcon = db.connect(providercacheFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
 	dbcon.row_factory = _dict_factory
 	return dbcon
 

@@ -17,8 +17,7 @@ from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
-from resources.lib.modules import playcount
+from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverlay, getShowCount
 from resources.lib.modules import py_tools
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
@@ -79,6 +78,7 @@ class Episodes:
 					[i.join() for i in threads]
 					self.list = sorted(all_episodes, key=lambda k: (k['season'], k['episode']), reverse=False)
 				except: 
+					from resources.lib.modules import log_utils
 					log_utils.error()
 			elif season and episode: # for "trakt progress-non direct progress scrape" setting
 				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
@@ -90,6 +90,7 @@ class Episodes:
 			if create_directory: self.episodeDirectory(self.list)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -112,6 +113,7 @@ class Episodes:
 				self.episodeDirectory(self.list, unfinished=True, next=False)
 				return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -140,6 +142,7 @@ class Episodes:
 			self.episodeDirectory(self.list, unfinished=False, next=False)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -186,6 +189,7 @@ class Episodes:
 			self.episodeDirectory(self.list, unfinished=False, next=hasNext)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
@@ -218,6 +222,7 @@ class Episodes:
 			elif reverse:
 				self.list = list(reversed(self.list))
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def calendars(self, idx=True):
@@ -287,8 +292,9 @@ class Episodes:
 				result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
 				tmdb = str(result.get('id')) if result.get('id') else ''
 			except:
+				if control.setting('debug.level') != '1': return
+				from resources.lib.modules import log_utils
 				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % tvshowtitle, __name__, log_utils.LOGDEBUG) # log TMDb does not have show
-				return
 		seasonEpisodes = cache.get(tmdb_indexer.TVshows().get_seasonEpisodes_meta, 96, tmdb, season)
 		if not seasonEpisodes: return
 		if not isinstance(meta, dict): showSeasons = jsloads(meta)
@@ -327,6 +333,7 @@ class Episodes:
 						unaired_count += 1
 						if not self.showunaired: continue
 				except:
+					from resources.lib.modules import log_utils
 					log_utils.error()
 				values['fanart'] = showSeasons.get('fanart')
 				values['icon'] = showSeasons.get('icon')
@@ -338,6 +345,7 @@ class Episodes:
 				for k in ('episodes',): values.pop(k, None) # pop() keys from seasonEpisodes that are not needed anymore
 				list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		for i in range(0, len(list)): list[i].update({'season_isAiring': 'true' if unaired_count >0 else 'false'}) # update for if "season_isAiring", needed for season pack scraping
 		return list
@@ -347,6 +355,7 @@ class Episodes:
 			result = trakt.getTrakt(url)
 			items = jsloads(result)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		for item in items:
 			try:
@@ -358,6 +367,7 @@ class Episodes:
 				url = self.traktlist_link % url
 				self.list.append({'name': name, 'url': url})
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return self.list
@@ -408,6 +418,7 @@ class Episodes:
 			result = [str(i['show']['ids']['tvdb']) for i in result]
 			items = [i for i in items if i['tvdb'] not in result] # removes hidden progress items
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			pass
 
@@ -419,6 +430,7 @@ class Episodes:
 					result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
 					values['tmdb'] = str(result.get('id', '')) if result.get('id') else ''
 				except:
+					from resources.lib.modules import log_utils
 					log_utils.log('tvshowtitle: (%s) missing tmdb_id' % i['tvshowtitle'], __name__, log_utils.LOGDEBUG) # log TMDb does not have show
 					return
 			try:
@@ -452,6 +464,7 @@ class Episodes:
 							else: return
 						else: return
 					except:
+						from resources.lib.modules import log_utils
 						log_utils.error()
 				else:
 					try:
@@ -468,6 +481,7 @@ class Episodes:
 								values['unaired'] = 'true'
 								if not progress_showunaired: return
 					except:
+						from resources.lib.modules import log_utils
 						log_utils.error()
 				if not direct: values['action'] = 'episodes' # for direct progress scraping
 				values['traktProgress'] = True # for direct progress scraping and multi episode watch counts indicators
@@ -477,6 +491,7 @@ class Episodes:
 					if extended_art: values.update(extended_art)
 				self.list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		threads = []
 		for i in items:
@@ -563,6 +578,7 @@ class Episodes:
 				except: pass
 				itemlist.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return itemlist
 
@@ -592,6 +608,7 @@ class Episodes:
 				if not direct: values['action'] = 'episodes'
 				self.list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		threads = []
 		for i in items:
@@ -679,8 +696,8 @@ class Episodes:
 				values['tvdb'] = tvdb
 				items.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
-		# items = sorted(items, key=lambda k: k['airtime'], reverse=False)
 		return items
 
 	def episodeDirectory(self, items, unfinished=False, next=True):
@@ -714,7 +731,7 @@ class Episodes:
 		except: airEnabled = 'false'
 		hosts_mode = control.setting('hosts.mode')
 		enable_upnext = control.setting('enable.upnext') == 'true'
-		indicators = playcount.getTVShowIndicators(refresh=True)
+		indicators = getTVShowIndicators(refresh=True)
 		isFolder = False if sysaction != 'episodes' else True
 		isPlayable = 'false'
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
@@ -807,8 +824,8 @@ class Episodes:
 				art = {}
 				if disable_player_art and (hosts_mode == '2' or enable_upnext): # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
 					for k in ('clearart', 'clearlogo'): meta.pop(k, None)
-				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb,
-								'banner': banner, 'clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'landscape': landscape})
+				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb, 'banner': banner,
+						'clearlogo': meta.get('clearlogo', ''), 'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': thumb})
 				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
 ####-Context Menu and Overlays-####
@@ -816,7 +833,7 @@ class Episodes:
 				if self.traktCredentials:
 					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
 				try:
-					overlay = int(playcount.getEpisodeOverlay(indicators, imdb, tvdb, season, episode))
+					overlay = int(getEpisodeOverlay(indicators, imdb, tvdb, season, episode))
 					watched = (overlay == 5)
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 5})
@@ -826,14 +843,14 @@ class Episodes:
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=5)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
 				except: pass
 				sysmeta, sysart, syslabelProgress = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art)), quote_plus(labelProgress)
-				url = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s' % (
+				url = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s' % (
 										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)
 				sysurl = quote_plus(url)
-				Folderurl = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode)
+				Folderurl = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s&art=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode, sysart)
 				if isFolder:
 					if traktProgress:
 						cm.append((progressMenu, 'PlayMedia(%s)' % url))
-					url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode)
+					url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s&art=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode, sysart)
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, syslabelProgress, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, syslabelProgress)))
 				if multi:
@@ -841,15 +858,15 @@ class Episodes:
 				if not isFolder:
 					if traktProgress: cm.append((progressMenu, 'Container.Update(%s)' % Folderurl))
 					cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-					cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+					cm.append(('Rescrape Item', 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
 										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
-				# cm.append(('PlayAll', 'RunPlugin(%s?action=playAll)' % sysaddon))
+				# cm.append(('PlayAll', 'RunPlugin(%s?action=play_All)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
 				if trailer: meta.update({'trailer': trailer})
-				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', syslabelProgress, year, imdb)})
+				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', syslabelProgress, year, imdb)})
 				try: item = control.item(label=labelProgress, offscreen=True)
 				except: item = control.item(label=labelProgress)
 				if 'castandart' in i: item.setCast(i['castandart'])
@@ -857,7 +874,7 @@ class Episodes:
 				if multi and multi_unwatchedEnabled:
 					if 'ForceAirEnabled' not in i:
 						try:
-							count = playcount.getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
+							count = getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
 							if count:
 								item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
@@ -895,6 +912,7 @@ class Episodes:
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 				if playlistcreate: control.playlist.add(url=url, listitem=item)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		if next:
 			try:
@@ -956,6 +974,7 @@ class Episodes:
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)

@@ -988,7 +988,7 @@ msgid ""
 msgstr ""
 
 msgctxt "#32398"
-msgid ""
+msgid "Resolving Canceled"
 msgstr ""
 
 msgctxt "#32399"
@@ -996,7 +996,7 @@ msgid "Error with Debrid Pack"
 msgstr ""
 
 msgctxt "#32400"
-msgid "Sources Cancelled"
+msgid "Sources Canceled"
 msgstr ""
 
 msgctxt "#32401"
@@ -3514,7 +3514,7 @@ msgid "Converting MAGNET..."
 msgstr ""
 
 msgctxt "#40014"
-msgid "Progress Dialog Cancelled"
+msgid "Progress Dialog Canceled"
 msgstr ""
 
 msgctxt "#40015"

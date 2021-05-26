@@ -399,7 +399,7 @@ class Premiumize:
 					size = item['size']
 					display_size = float(int(size)) / 1073741824
 					label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, display_size, name)
-					url = '%s?action=playURL&url=%s' % (sysaddon, url_link)
+					url = '%s?action=play_URL&url=%s' % (sysaddon, url_link)
 					cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=premiumize)' %
 								(sysaddon, quote_plus(name), quote_plus(pm_icon), url_link)))
 				cm.append((renameMenu % type.capitalize(), 'RunPlugin(%s?action=pm_Rename&type=%s&id=%s&name=%s)' %
@@ -471,7 +471,7 @@ class Premiumize:
 					size = details['size']
 					display_size = float(int(size)) / 1073741824
 					label = '%02d | %s%% | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, str(progress), file_str, display_size, name)
-					url = '%s?action=playURL&url=%s' % (sysaddon, url_link)
+					url = '%s?action=play_URL&url=%s' % (sysaddon, url_link)
 					cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=premiumize)' %
 								(sysaddon, quote_plus(name), quote_plus(pm_icon), url_link)))
 
@@ -529,51 +529,3 @@ class Premiumize:
 				if response.get('status') == 'success': control.refresh()
 		except:
 			log_utils.error()
-
-# # from resolveURL
-	# def get_all_hosters(self):
-		# try:
-			# response = self._get(list_services_path_url)
-			# if not response:
-				# return None
-			# aliases = response.get('aliases', {})
-			# patterns = response.get('regexpatterns', {})
-			# tldlist = []
-			# for tlds in aliases.values():
-				# for tld in tlds:
-					# tldlist.append(tld)
-			# if self.get_setting('torrents') == 'true':
-				# tldlist.extend([u'torrent', u'magnet'])
-			# regex_list = []
-			# for regexes in patterns.values():
-				# for regex in regexes:
-					# try:
-						# regex_list.append(re.compile(regex))
-					# except:
-						# log_utils.log('Throwing out bad Premiumize regex: %s' % regex, __name__, log_utils.LOGDEBUG)
-			# log_utils.log('Premiumize.me patterns: %s regex: (%d) hosts: %s' % (patterns, len(regex_list), tldlist), __name__, log_utils.LOGDEBUG)
-			# return tldlist, regex_list
-		# except Exception as e:
-			# log_utils.log('Error getting Premiumize hosts: %s' % e, __name__, log_utils.LOGDEBUG)
-		# return [], []
-
-# # from resolveURL
-	# def valid_url(self, url, host):
-		# if url and self.get_setting('torrents') == 'true':
-			# url_lc = url.lower()
-			# if url_lc.endswith('.torrent') or url_lc.startswith('magnet:'):
-				# return True
-		# if not self.patterns or not self.hosts:
-			# self.hosts, self.patterns = self.get_all_hosters()
-		# if url:
-			# if not url.endswith('/'):
-				# url += '/'
-			# for pattern in self.patterns:
-				# if pattern.findall(url):
-					# return True
-		# elif host:
-			# if host.startswith('www.'):
-				# host = host.replace('www.', '')
-			# if any(host in item for item in self.hosts):
-				# return True
-		# return False

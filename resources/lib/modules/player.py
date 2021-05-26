@@ -337,7 +337,7 @@ class Player(xbmc.Player):
 			# control.refresh()
 			# control.sleep(500)
 		# control.playlist.clear()
-		control.trigger_widget_refresh()
+		# control.trigger_widget_refresh() # skinshortcuts handles widget refresh
 		xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGNOTICE)
 
 	def onPlayBackEnded(self):
@@ -347,7 +347,7 @@ class Player(xbmc.Player):
 		# if control.setting('crefresh') == 'true':
 			# control.refresh()
 			# control.sleep(500)
-		control.trigger_widget_refresh()
+		# control.trigger_widget_refresh() # skinshortcuts handles widget refresh
 		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', LOGNOTICE)
 
 	def onPlayBackError(self):

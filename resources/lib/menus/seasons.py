@@ -15,8 +15,7 @@ from resources.lib.database import cache
 from resources.lib.indexers import tmdb as tmdb_indexer
 from resources.lib.modules import cleangenre
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
-from resources.lib.modules import playcount
+from resources.lib.modules.playcount import getSeasonIndicators, getSeasonOverlay, getSeasonCount
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 
@@ -56,8 +55,9 @@ class Seasons:
 				result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
 				tmdb = str(result.get('id')) if result else ''
 			except:
+				if control.setting('debug.level') != '1': return
+				from resources.lib.modules import log_utils
 				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % tvshowtitle, __name__, log_utils.LOGDEBUG) # log TMDb does not have show
-				return
 		showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 		if not showSeasons: return
 		if art: art = jsloads(art) # prob better off leaving this as it's own dict so seasonDirectory list builder can just pull that out and pass to .setArt()
@@ -80,6 +80,7 @@ class Seasons:
 						values['unaired'] = 'true'
 						if not self.showunaired: continue
 				except:
+					from resources.lib.modules import log_utils
 					log_utils.error()
 				values['total_episodes'] = item['episode_count'] # will be total for the specific season only
 				values['season_title'] = item['name']
@@ -100,6 +101,7 @@ class Seasons:
 				for k in ('seasons',): values.pop(k, None) # pop() keys from showSeasons that are not needed anymore
 				self.list.append(values)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return self.list
 
@@ -110,7 +112,7 @@ class Seasons:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		try: indicators = playcount.getSeasonIndicators(items[0]['imdb'], refresh=True)
+		try: indicators = getSeasonIndicators(items[0]['imdb'], refresh=True)
 		except: indicators = None
 		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
 		if trakt.getTraktIndicatorsInfo():
@@ -150,8 +152,8 @@ class Seasons:
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb,
-								'banner': banner, 'clearlogo': meta.get('clearlogo'), 'clearart': meta.get('clearart'), 'landscape': landscape})
+				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb, 'banner': banner,
+						'clearlogo': meta.get('clearlogo', ''), 'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': landscape})
 				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3'): meta.pop(k, None)
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
 ####-Context Menu and Overlays-####
@@ -159,7 +161,7 @@ class Seasons:
 				if self.traktCredentials:
 					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s)' % (sysaddon, systitle, imdb, tvdb, season)))
 				try:
-					overlay = int(playcount.getSeasonOverlay(indicators, imdb, tvdb, season))
+					overlay = int(getSeasonOverlay(indicators, imdb, tvdb, season))
 					watched = (overlay == 5)
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 5})
@@ -169,7 +171,7 @@ class Seasons:
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_TVShow&name=%s&imdb=%s&tvdb=%s&season=%s&query=5)' % (sysaddon, systitle, imdb, tvdb, season)))
 				except: pass
 				sysmeta = quote_plus(jsdumps(meta))
-				cm.append((playRandom, 'RunPlugin(%s?action=random&rtype=episode&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta, season)))
+				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=episode&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta, season)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, systitle)))
 				cm.append((showPlaylistMenu, 'RunPlugin(%s?action=playlist_Show)' % sysaddon))
 				cm.append((clearPlaylistMenu, 'RunPlugin(%s?action=playlist_Clear)' % sysaddon))
@@ -183,7 +185,7 @@ class Seasons:
 				item.setArt(art)
 				if unwatchedEnabled:
 					try:
-						count = playcount.getSeasonCount(imdb, season, self.season_special) # self.season_special is just a flag to set if a season special exists and we are set to show it
+						count = getSeasonCount(imdb, season, self.season_special) # self.season_special is just a flag to set if a season special exists and we are set to show it
 						if count:
 							item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 						else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('counts', {}).get(str(season), ''))}) # temp use TMDb's season-episode count for threads not finished....next load counts will update with trakt data
@@ -201,6 +203,7 @@ class Seasons:
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		try: control.property(syshandle, 'showplot', items[0]['plot'])
 		except: pass

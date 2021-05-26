@@ -188,7 +188,7 @@ class Sources:
 			try:
 				label = str(items[i]['label'])
 				syssource = quote_plus(jsdumps([items[i]]))
-				sysurl = '%s?action=playItem&title=%s&source=%s' % (sysaddon, systitle, syssource)
+				sysurl = '%s?action=play_SourceItem&title=%s&source=%s' % (sysaddon, systitle, syssource)
 				cm = []
 				link_type = 'pack' if 'package' in items[i] else 'single'
 				isCached = True if re.match(r'^cached.*torrent', items[i]['source']) else False
@@ -264,7 +264,6 @@ class Sources:
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
 			progressDialog.create(header, '')
 
-			block = None
 			for i in range(len(items)):
 				try:
 					label = re.sub(r' {2,}', ' ', str(items[i]['label']))
@@ -274,50 +273,35 @@ class Sources:
 						progressDialog.update(int((100 / float(len(items))) * i), label)
 					except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
 
-					if items[i]['source'] == block: raise Exception()
 					w = workers.Thread(self.sourcesResolve, items[i])
 					w.start()
 
-					if 'torrent' in items[i].get('source'): offset = float('inf')
-					else: offset = 0
-					m = ''
-					for x in range(3600):
+					for x in range(40):
 						try:
 							if control.monitor.abortRequested(): return sysexit()
-							if progressDialog.iscanceled(): return progressDialog.close()
+							if progressDialog.iscanceled():
+								control.notification(message=32398)
+								control.cancelPlayback()
+								progressDialog.close()
+								del progressDialog
+								return
 						except: pass
-						k = control.condVisibility('Window.IsActive(virtualkeyboard)')
-						if k: m += '1' ; m = m[-1]
-						if (not w.is_alive() or x > 30 + offset) and not k: break
-						k = control.condVisibility('Window.IsActive(yesnoDialog)')
-						if k: m += '1' ; m = m[-1]
-						if (not w.is_alive() or x > 30 + offset) and not k: break
-						sleep(0.5)
-					for x in range(30):
-						try:
-							if control.monitor.abortRequested(): return sysexit()
-							if progressDialog.iscanceled(): return progressDialog.close()
-						except: pass
-						if m == '': break
 						if not w.is_alive(): break
 						sleep(0.5)
-					if w.is_alive(): block = items[i]['source']
+
 					if not self.url: raise Exception()
 					if not any(x in self.url.lower() for x in self.extensions):
 						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
 						raise Exception()
-
 					try: progressDialog.close()
 					except: pass
 					del progressDialog
-
-					control.execute('Dialog.Close(virtualkeyboard)')
-					control.execute('Dialog.Close(yesnoDialog)')
 					from resources.lib.modules import player
 					player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta, select='1')
 					return self.url
 				except:
 					log_utils.error()
+
 			try: progressDialog.close()
 			except: pass
 			del progressDialog
@@ -396,9 +380,6 @@ class Sources:
 				if control.monitor.abortRequested(): return sysexit()
 				try:
 					if progressDialog.iscanceled(): break
-				except: pass
-				try:
-					if progressDialog.isFinished(): break
 				except: pass
 				if pre_emp == 'true':
 					if pre_emp_res == '0':
@@ -846,6 +827,97 @@ class Sources:
 		log_utils.log('Removed %s duplicate sources for (%s) from list' % (len(self.sources) - len(filter), control.homeWindow.getProperty(self.labelProperty)), level=log_utils.LOGDEBUG)
 		return filter
 
+	def sourcesDialog(self, items):
+		try:
+			labels = [i['label'] for i in items]
+			select = control.selectDialog(labels)
+			if select == -1: return 'close://'
+			next = [y for x, y in enumerate(items) if x >= select]
+			prev = [y for x, y in enumerate(items) if x < select][::-1]
+			items = [items[select]]
+			items = [i for i in items + next + prev][:40]
+			header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
+			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
+			progressDialog.create(header, '')
+
+			for i in range(len(items)):
+				try:
+					label = re.sub(r' {2,}', ' ', str(items[i]['label']))
+					label = re.sub(r'\n', '', label)
+					try:
+						if progressDialog.iscanceled(): break
+						progressDialog.update(int((100 / float(len(items))) * i), label)
+					except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
+
+					w = workers.Thread(self.sourcesResolve, items[i])
+					w.start()
+
+					for x in range(40):
+						try:
+							if control.monitor.abortRequested(): return sysexit()
+							if progressDialog.iscanceled():
+								control.notification(message=32398)
+								control.cancelPlayback()
+								progressDialog.close()
+								del progressDialog
+								return
+						except: pass
+						if not w.is_alive(): break
+						sleep(0.5)
+
+					if not self.url: raise Exception()
+					if not any(x in self.url.lower() for x in self.extensions):
+						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
+						raise Exception()
+					try: progressDialog.close()
+					except: pass
+					del progressDialog
+					return self.url
+				except:
+					log_utils.error()
+
+			try: progressDialog.close()
+			except: pass
+			del progressDialog
+		except:
+			log_utils.error('Error sourcesDialog: ')
+			try: progressDialog.close()
+			except: pass
+			del progressDialog
+
+	def sourcesAutoPlay(self, items):
+		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p', 'HD']]
+		u = None
+		header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
+		try:
+			# if control.setting('progress.dialog') == '0': progressDialog = control.progressDialog
+			# else: progressDialog = control.progressDialogBG
+			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
+
+			progressDialog.create(header, '')
+		except: pass
+
+		for i in range(len(items)):
+			label = re.sub(r' {2,}', ' ', str(items[i]['label']))
+			label = re.sub(r'\n', '', label)
+			try:
+				if progressDialog.iscanceled(): break
+				progressDialog.update(int((100 / float(len(items))) * i), label)
+			except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
+			try:
+				if control.monitor.abortRequested(): return sysexit()
+				url = self.sourcesResolve(items[i])
+				if not any(x in url.lower() for x in self.extensions):
+					log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
+					raise Exception()
+				if not u: u = url
+				if url: break
+			except: pass
+		try: progressDialog.close()
+		except: pass
+		del progressDialog
+		return u
+
 	def sourcesResolve(self, item):
 		url = item['url']
 		self.url = None
@@ -897,121 +969,6 @@ class Sources:
 				except:
 					log_utils.error()
 					return
-
-	def sourcesDialog(self, items):
-		try:
-			labels = [i['label'] for i in items]
-			select = control.selectDialog(labels)
-			if select == -1: return 'close://'
-			next = [y for x, y in enumerate(items) if x >= select]
-			prev = [y for x, y in enumerate(items) if x < select][::-1]
-			items = [items[select]]
-			items = [i for i in items + next + prev][:40]
-			header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
-			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
-			progressDialog.create(header, '')
-
-			block = None
-			control.hide()
-			for i in range(len(items)):
-				try:
-					if items[i]['source'] == block: raise Exception()
-					w = workers.Thread(self.sourcesResolve, items[i])
-					w.start()
-					label = re.sub(r' {2,}', ' ', str(items[i]['label']))
-					label = re.sub(r'\n', '', label)
-					try:
-						if progressDialog.iscanceled(): break
-						progressDialog.update(int((100 / float(len(items))) * i), label)
-					except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
-
-					if 'torrent' in items[i].get('source'): offset = float('inf')
-					else: offset = 0
-					m = ''
-					for x in range(3600):
-						try:
-							if control.monitor.abortRequested():
-								control.notification(message=32400)
-								return sysexit()
-							if progressDialog.iscanceled():
-								control.notification(message=32400)
-								return progressDialog.close()
-						except: pass
-
-						k = control.condVisibility('Window.IsActive(virtualkeyboard)')
-						if k: m += '1' ; m = m[-1]
-						if (not w.is_alive() or x > 30 + offset) and not k: break
-						k = control.condVisibility('Window.IsActive(yesnoDialog)')
-						if k: m += '1' ; m = m[-1]
-						if (not w.is_alive() or x > 30 + offset) and not k: break
-						sleep(0.5)
-					for x in range(30):
-						try:
-							if control.monitor.abortRequested():
-								control.notification(message=32400)
-								return sysexit()
-							if progressDialog.iscanceled():
-								control.notification(message=32400)
-								return progressDialog.close()
-						except: pass
-
-						if m == '': break
-						if not w.is_alive(): break
-						sleep(0.5)
-					if w.is_alive(): block = items[i]['source']
-					if not self.url: raise Exception()
-					if not any(x in self.url.lower() for x in self.extensions):
-						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
-						raise Exception()
-
-					try: progressDialog.close()
-					except: pass
-					del progressDialog
-					control.execute('Dialog.Close(virtualkeyboard)')
-					control.execute('Dialog.Close(yesnoDialog)')
-					return self.url
-				except:
-					log_utils.error()
-
-			try: progressDialog.close()
-			except: pass
-			del progressDialog
-		except:
-			log_utils.error('Error sourcesDialog: ')
-			try: progressDialog.close()
-			except: pass
-			del progressDialog
-
-	def sourcesAutoPlay(self, items):
-		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p', 'HD']]
-		u = None
-		header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
-		try:
-			if control.setting('progress.dialog') == '0': progressDialog = control.progressDialog
-			else: progressDialog = control.progressDialogBG
-			progressDialog.create(header, '')
-		except: pass
-
-		for i in range(len(items)):
-			label = re.sub(r' {2,}', ' ', str(items[i]['label']))
-			label = re.sub(r'\n', '', label)
-			try:
-				if progressDialog.iscanceled(): break
-				progressDialog.update(int((100 / float(len(items))) * i), label)
-			except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
-			try:
-				if control.monitor.abortRequested(): return sysexit()
-				url = self.sourcesResolve(items[i])
-				if not any(x in url.lower() for x in self.extensions):
-					log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
-					raise Exception()
-				if not u: u = url
-				if url: break
-			except: pass
-		try: progressDialog.close()
-		except: pass
-		del progressDialog
-		return u
 
 	def debridPackDialog(self, provider, name, magnet_url, info_hash):
 		try:

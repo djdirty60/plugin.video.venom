@@ -323,7 +323,7 @@ class AllDebrid:
 				size = item['size']
 				display_size = float(int(size)) / 1073741824
 				label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, display_size, name)
-				if status_code == 4: url = '%s?action=playURL&url=%s&caller=alldebrid&type=unrestrict' % (sysaddon, url_link)
+				if status_code == 4: url = '%s?action=play_URL&url=%s&caller=alldebrid&type=unrestrict' % (sysaddon, url_link)
 				else: url = ''
 				cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=alldebrid)' %
 								(sysaddon, quote_plus(name), quote_plus(ad_icon), url_link)))
@@ -469,71 +469,3 @@ class AllDebrid:
 		except:
 			log_utils.error()
 		return hosts_dict
-
-# # from resolveURL
-	# def get_all_hosters(self):
-		# hosters = []
-		# url = '{0}/user/hosts?agent={1}&apikey={2}'.format(api_url, urllib_parse.quote_plus(AGENT), self.get_setting('token'))
-		# try:
-			# result = self.net.http_GET(url, headers=self.headers).content
-			# js_data = jsloads(result)
-			# if js_data.get('status', False) == "success":
-				# js_data = js_data.get('data')
-				# regexes = [value.get('regexp') for _, value in js_data.get('hosts', {}).items()
-						   # if value.get('status', False)]
-				# hosters = [re.compile(regex) for regex in regexes]
-				# logger.log_debug('AllDebrid hosters : {0}'.format(len(hosters)))
-				# regexes = [value.get('regexp') for _, value in js_data.get('streams', {}).items()]
-				# streamers = []
-				# for regex in regexes:
-					# try:
-						# streamers.append(re.compile(regex))
-					# except:
-						# pass
-				# logger.log_debug('AllDebrid Streamers : {0}'.format(len(streamers)))
-				# hosters.extend(streamers)
-				# logger.log_debug('AllDebrid Total hosters : {0}'.format(len(hosters)))
-			# else:
-				# logger.log_error('Error getting AD Hosters')
-		# except Exception as e:
-			# log_utils.log('Error getting AD hosts: %s' % e, __name__, log_utils.LOGDEBUG)
-		# return hosters
-
-# # from resolveURL
-	# def get_hosts(self):
-		# hosts = []
-		# url = '{0}/hosts/domains?agent={1}&apikey={2}'.format(api_url, urllib_parse.quote_plus(AGENT), self.get_setting('token'))
-		# try:
-			# js_result = self.net.http_GET(url, headers=self.headers).content
-			# js_data = jsloads(js_result)
-			# if js_data.get('status', False) == "success":
-				# # hosts = [host.replace('www.', '') for host in js_data.get('hosts', [])]
-				# hosts = js_data.get('data').get('hosts')
-				# hosts.extend(js_data.get('data').get('streams'))
-				# if self.get_setting('torrents') == 'true':
-					# hosts.extend(['torrent', 'magnet'])
-				# logger.log_debug('AllDebrid hosts : {0}'.format(hosts))
-			# else:
-				# logger.log_error('Error getting AD Hosts')
-		# except Exception as e:
-			# log_utils.log('Error getting AD hosts: %s' % e, __name__, log_utils.LOGDEBUG)
-		# return hosts
-
-# # from resolveURL
-	# def valid_url(self, url, host):
-		# logger.log_debug('in valid_url {0} : {1}'.format(url, host))
-		# if url:
-			# if url.lower().startswith('magnet:') and self.get_setting('torrents') == 'true':
-				# return True
-			# if self.hosters is None:
-				# self.hosters = self.get_all_hosters()
-			# for regexp in self.hosters:
-				# if re.search(regexp, url):
-					# logger.log_debug('AllDebrid Match found')
-					# return True
-		# elif host:
-			# if self.hosts is None:
-				# self.hosts = self.get_hosts()
-			# if any(host in item for item in self.hosts):
-				# return True
-		# return False

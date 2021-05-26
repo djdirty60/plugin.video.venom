@@ -10,7 +10,6 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import quote_plus
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
 from resources.lib.modules.source_utils import supported_video_extensions
 accepted_extensions = tuple(supported_video_extensions())
 
@@ -45,13 +44,13 @@ class Furk:
 			p = self.session.get(url).json()
 			files = p['files']
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return ''
 
 		for i in files:
 			# id = i['id']
 			# log_utils.log('id = %s' % id, __name__, log_utils.LOGDEBUG)
-
 			# test = self.base_link + self.tfile_link % (self.api_key, id)
 			# log_utils.log('test = %s' % test, __name__, log_utils.LOGDEBUG)
 			# test2 = s.get(test).json()
@@ -71,6 +70,7 @@ class Furk:
 					self.addDirectoryItem(name , url_dl, thumb, '', False)
 				else: pass
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		self.endDirectory()
 		return ''
@@ -97,6 +97,7 @@ class Furk:
 					navigator.Navigator().addDirectoryItem(term, 'furkMetaSearch&url=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='furk')
 					lst += [(term)]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
@@ -120,6 +121,7 @@ class Furk:
 				dbcur.execute("INSERT INTO furk VALUES (?,?)", (None, q))
 				dbcur.connection.commit()
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 			finally:
 				dbcur.close() ; dbcon.close()
@@ -139,6 +141,7 @@ class Furk:
 			p = self.session.get(url).json()
 			files = p['files']
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 			return ''
 
@@ -161,6 +164,7 @@ class Furk:
 					# self.addDirectoryItem(i['name'].encode('utf-8'), i['url_dl'], '', '')
 					continue
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.hide()
 		self.endDirectory()

@@ -3,9 +3,9 @@
 	Venom Add-on
 """
 
-import binascii
+from binascii import b2a_hex
 from json import loads as jsloads
-import os
+from os import urandom
 import re
 try: #Py2
 	from urllib import unquote, urlencode
@@ -209,7 +209,7 @@ def yandex(url):
 		r = re.sub(r'[^\x00-\x7F]+', ' ', r)
 		sk = re.findall(r'"sk"\s*:\s*"([^"]+)', r)[0]
 		idstring = re.findall(r'"id"\s*:\s*"([^"]+)', r)[0]
-		idclient = binascii.b2a_hex(os.urandom(16))
+		idclient = b2a_hex(urandom(16))
 		post = {'idClient': idclient, 'version': '3.9.2', 'sk': sk, '_model.0': 'do-get-resource-url', 'id.0': idstring}
 		post = urlencode(post)
 		r = client.request('https://yadi.sk/models/?_m=do-get-resource-url', post=post, cookie=cookie)

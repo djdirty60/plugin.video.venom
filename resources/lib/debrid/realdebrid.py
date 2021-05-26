@@ -237,7 +237,7 @@ class RealDebrid:
 				if name.startswith('/'): name = name.split('/')[-1]
 				size = float(int(item['bytes'])) / 1073741824
 				label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, size, name)
-				url = '%s?action=playURL&url=%s&caller=realdebrid&type=unrestrict' % (sysaddon, url_link)
+				url = '%s?action=play_URL&url=%s&caller=realdebrid&type=unrestrict' % (sysaddon, url_link)
 				cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=realdebrid&type=unrestrict)' %
 							(sysaddon, quote_plus(name), quote_plus(rd_icon), url_link)))
 				cm.append((deleteMenu % 'Torrent', 'RunPlugin(%s?action=rd_DeleteUserTorrent&id=%s&name=%s)' %
@@ -299,7 +299,7 @@ class RealDebrid:
 				size = float(int(item['filesize'])) / 1073741824
 				label = '%02d | %.2f GB | %s  | [I]%s [/I]' % (count, size, datetime_object, name)
 				url_link = item['download']
-				url = '%s?action=playURL&url=%s' % (sysaddon, url_link)
+				url = '%s?action=play_URL&url=%s' % (sysaddon, url_link)
 				cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=realdebrid)' %
 								(sysaddon, quote_plus(name), quote_plus(rd_icon), url_link)))
 				cm.append((deleteMenu % 'File', 'RunPlugin(%s?action=rd_DeleteDownload&id=%s&name=%s)' %
@@ -740,7 +740,6 @@ class RealDebrid:
 			postData = {'client_id': self.client_ID, 'client_secret': self.secret, 'code': self.device_code, 'grant_type': 'http://oauth.net/grant_type/device/1.0'}
 			response = requests.post(url, data=postData)
 			# log_utils.log('Authorizing Real Debrid Result: | %s |' % response, level=log_utils.LOGDEBUG)
-
 			if '[204]' in str(response): return False, str(response)
 			if 'Temporarily Down For Maintenance' in response.text:
 				if self.server_notifications: control.notification(message='Real-Debrid Temporarily Down For Maintenance', icon=rd_icon)
@@ -779,38 +778,3 @@ class RealDebrid:
 			control.dialog.ok(control.lang(40058), control.lang(32320))
 		except:
 			log_utils.error()
-
-# from resolveURL
-	# def get_all_hosters(self):
-		# hosters = []
-		# try:
-			# url = '%s/%s' % (rest_base_url, hosts_regexes_path)
-			# js_result = json.loads(self.net.http_GET(url, headers=self.headers).content)
-			# regexes = [regex[1:-1].replace(r'\/', '/').rstrip('\\') for regex in js_result]
-			# logger.log_debug('RealDebrid hosters : %s' % regexes)
-			# hosters = [re.compile(regex, re.I) for regex in regexes]
-		# except:
-			# log_utils.error('Error getting RD regexes : ')
-		# return hosters
-
-# from resolveURL
-	# def valid_url(self, url, host):
-		# # logger.log_debug('in valid_url %s : %s' % (url, host))
-		# if url:
-			# if url.lower().startswith('magnet:') and self.get_setting('torrents') == 'true':
-				# return True
-			# if self.hosters is None:
-				# self.hosters = self.get_all_hosters()
-			# for host in self.hosters:
-				# # logger.log_debug('RealDebrid checking host : %s' %str(host))
-				# if re.search(host, url):
-					# logger.log_debug('RealDebrid Match found')
-					# return True
-		# elif host:
-			# if self.hosts is None:
-				# self.hosts = self.get_hosts()
-			# if host.startswith('www.'):
-				# host = host.replace('www.', '')
-			# if any(host in item for item in self.hosts):
-				# return True
-		# return False

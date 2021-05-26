@@ -417,7 +417,7 @@ class libmovies:
 			if control.setting('library.strm.use_tmdbhelper') == 'true':
 				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=movie&islocal=True&tmdb_id=%s' % tmdb
 			else:
-				content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s' % (argv[0], systitle, year, imdb, tmdb)
+				content = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s' % (argv[0], systitle, year, imdb, tmdb)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			lib_tools.create_folder(folder)
 			lib_tools.write_file(control.joinPath(folder, lib_tools.legal_filename(transtitle) + '.' + year + '.strm'), content)
@@ -660,7 +660,7 @@ class libtvshows:
 				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&islocal=True&tmdb_id=%s&season=%s&episode=%s&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&tvshowtitle=%s&premiered=%s' % (
 							tmdb, season, episode, systitle, year, imdb, tmdb, tvdb, systvshowtitle, syspremiered)
 			else:
-				content = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
+				content = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
 							argv[0], systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			if not control.isfilePath(control.joinPath(folder, 'tvshow.nfo')):
@@ -681,7 +681,7 @@ class libepisodes:
 		self.include_unknown = control.setting('library.include_unknown') or 'true'
 		self.date_time = datetime.utcnow()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
-		else: self.date = (self.date_time - timedelta(hours = 24)).strftime('%Y%m%d')
+		else: self.date = (self.date_time - timedelta(hours=24)).strftime('%Y%m%d')
 
 	def update(self):
 		# if control.setting('library.service.update') == 'false': control.notification(message=32106)
@@ -790,8 +790,10 @@ class libepisodes:
 				if control.monitor.abortRequested(): return sysexit()
 				try:
 					if str(i.get('season')) == '0' and self.include_special == 'false': continue
-					premiered = i.get('premiered', '')
-					if not premiered and self.include_unknown == 'false': continue
+					premiered = i.get('premiered', '') if i.get('premiered') else ''
+					if not premiered:
+						if self.include_unknown == 'false': continue
+					elif int(re.sub('[^0-9]', '', str(premiered))) > int(re.sub(r'[^0-9]', '', str(self.date))): continue
 					libtvshows().strmFile(i)
 					files_added += 1
 					if service_notification: control.notification(title=item['tvshowtitle'], message=32678)

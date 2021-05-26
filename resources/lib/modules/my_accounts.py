@@ -4,7 +4,7 @@
 """
 
 import myaccounts
-from resources.lib.modules import control, log_utils
+from resources.lib.modules import control
 
 def syncMyAccounts(silent=False):
 	try:
@@ -58,4 +58,5 @@ def syncMyAccounts(silent=False):
 				control.setSetting('furk.api', fu_acct.get('api_key'))
 		if not silent: control.notification(message=32114)
 	except:
-			log_utils.error()
+		from resources.lib.modules import log_utils
+		log_utils.error()

@@ -4,7 +4,7 @@
 """
 
 import xml.etree.ElementTree as ET
-from resources.lib.modules import control, log_utils
+from resources.lib.modules import control
 
 
 def set_reuselanguageinvoker():
@@ -33,6 +33,7 @@ def set_reuselanguageinvoker():
 			current_profile = control.infoLabel('system.profilename')
 			control.execute('LoadProfile(%s)' % current_profile)
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 
 def gen_file_hash(file):
@@ -44,4 +45,5 @@ def gen_file_hash(file):
 			md5_hash.update(buf)
 			return md5_hash.hexdigest()
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()

@@ -8,7 +8,6 @@ try: #Py2
 	from urllib import unquote, unquote_plus
 except ImportError: #Py3
 	from urllib.parse import unquote, unquote_plus
-from resources.lib.modules import log_utils
 
 HDR = ['.hdr.', 'hdr10', 'hdr.10', '2160p.bluray.remux', 'uhd.bluray.2160p', '2160p.uhd.bluray', '2160p.bluray.hevc.truehd', '2160p.remux']
 CODEC_H265 = ['hevc', 'h265', 'h.265', 'x265', 'x.265']
@@ -82,14 +81,13 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		string_list.append(string5.replace('<<E>>', str(episode).zfill(2)))
 
 		final_string = '|'.join(string_list)
-		# log_utils.log('release_title=%s' % release_title)
-		# log_utils.log('final_string=%s' % final_string)
 		reg_pattern = re.compile(final_string)
 		if split:
 			return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]
 		else:
 			return bool(re.search(reg_pattern, release_title))
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 
@@ -104,13 +102,13 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		# string3 = r'(?:s|season|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|x|)(?:e|ep|episode|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|x|$)' % (season, episode)
 		# string_list = [string1, string2, string3]
 		# final_string = '|'.join(string_list)
-		# # log_utils.log('final_string = %s' % str(final_string), __name__, log_utils.LOGDEBUG)
 		# reg_pattern = re.compile(final_string)
 		# if split:
 			# return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]
 		# else:
 			# return bool(re.search(reg_pattern, release_title))
 	# except:
+		# from resources.lib.modules import log_utils
 		# log_utils.error()
 		# return None
 
@@ -123,6 +121,7 @@ def supported_video_extensions():
 		supported_video_extensions = getSupportedMedia('video').split('|')
 		return [i for i in supported_video_extensions if i != '' and i != '.zip']
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 
 def getFileType(name_info=None, url=None):
@@ -185,6 +184,7 @@ def getFileType(name_info=None, url=None):
 		type = type.rstrip('/')
 		return type
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return ''
 
@@ -200,6 +200,7 @@ def url_strip(url):
 		if fmt == '': return None
 		else: return '.%s' % fmt
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 
@@ -212,6 +213,7 @@ def copy2clip(txt):
 			cmd = "echo " + txt.strip() + "|clip"
 			return check_call(cmd, shell=True)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error('Failure to copy to clipboard')
 	elif platform == "linux2":
 		try:
@@ -219,4 +221,5 @@ def copy2clip(txt):
 			p = Popen(["xsel", "-pi"], stdin=PIPE)
 			p.communicate(input=txt)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error('Failure to copy to clipboard')

@@ -7,11 +7,12 @@ try: #PY2
 	from urllib.request import urlopen, Request
 except ImportError: # PY3
 	from urllib2 import urlopen, Request
-from resources.lib.modules import control
+from resources.lib.modules.control import addonPath, addonId, joinPath
+from resources.lib.windows.textviewer import TextViewerXML
 
-venom_path = control.addonPath(control.addonId())
+venom_path = addonPath(addonId())
 news_file = 'https://raw.githubusercontent.com/123Venom/zips/master/plugin.video.venom/newsinfo.txt'
-local_news = control.joinPath(venom_path, 'newsinfo.txt')
+local_news = joinPath(venom_path, 'newsinfo.txt')
 
 
 def news():
@@ -24,7 +25,7 @@ def news():
 			text_file.write(message)
 			text_file.close()
 			compfile = message
-	showText('[B][COLOR red]News and Info[/COLOR][/B]', compfile)
+	showText('[B]News and Info[/B]', compfile)
 
 def open_news_url(url):
 	req = Request(url)
@@ -36,7 +37,9 @@ def open_news_url(url):
 
 def news_local():
 	compfile = open(local_news).read()
-	showText('[B][COLOR red]News and Info[/COLOR][/B', compfile)
+	showText('[B]News and Info[/B]', compfile)
 
 def showText(heading, text):
-	return control.dialog.textviewer(heading, text)
+	windows = TextViewerXML('textviewer.xml', venom_path, heading=heading, text=text)
+	windows.run()
+	del windows

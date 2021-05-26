@@ -17,8 +17,7 @@ from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
-from resources.lib.modules import log_utils
-from resources.lib.modules import playcount
+from resources.lib.modules.playcount import getMovieIndicators, getMovieOverlay
 from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
@@ -701,6 +700,7 @@ class Collections:
 			self.movieDirectory(self.list)
 			return self.list
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def imdb_list(self, url, isRatinglink=False):
@@ -737,6 +737,7 @@ class Collections:
 				imdb = re.findall(r'(tt\d*)', imdb)[0]
 				list.append({'title': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '', 'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		return list
 
@@ -759,6 +760,7 @@ class Collections:
 				metacache.insert(self.meta)
 			self.list = [i for i in self.list if i.get('tmdb')]
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def super_imdb_info(self, i):
@@ -775,7 +777,6 @@ class Collections:
 				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
 				if trakt_ids: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
 			if not tmdb and not imdb:
-				log_utils.log('Third fallback attempt to fetch missing ids for movie title: (%s)' % self.list[i]['title'], __name__, log_utils.LOGDEBUG)
 				try:
 					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
 					if results[0]['movie']['title'] != self.list[i]['title'] or results[0]['movie']['year'] != self.list[i]['year']: return
@@ -798,6 +799,7 @@ class Collections:
 				title = trans_item.get('title') or title
 				plot = trans_item.get('overview') or plot
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
@@ -807,6 +809,7 @@ class Collections:
 			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def movieDirectory(self, items, next=True):
@@ -819,7 +822,7 @@ class Collections:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		indicators = playcount.getMovieIndicators()
+		indicators = getMovieIndicators()
 		isPlayable = 'false'
 		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
 		elif hosts_mode != '1': isPlayable = 'true'
@@ -865,7 +868,7 @@ class Collections:
 				if self.traktCredentials:
 					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s)' % (sysaddon, sysname, imdb)))
 				try:
-					overlay = int(playcount.getMovieOverlay(indicators, imdb))
+					overlay = int(getMovieOverlay(indicators, imdb))
 					watched = (overlay == 5)
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
@@ -876,19 +879,19 @@ class Collections:
 						meta.update({'playcount': 0, 'overlay': 4})
 				except: pass
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
-				url = '%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
+				url = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
 				sysurl = quote_plus(url)
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-				cm.append(('Rescrape Item', 'PlayMedia(%s?action=play&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+				cm.append(('Rescrape Item', 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
 				if trailer: meta.update({'trailer': trailer})
-				else: meta.update({'trailer': '%s?action=trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
+				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
 				try: item = control.item(label=label, offscreen=True)
 				except: item = control.item(label=label)
 				if 'castandart' in i: item.setCast(i['castandart'])
@@ -907,6 +910,7 @@ class Collections:
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		if next:
 			try:
@@ -928,6 +932,7 @@ class Collections:
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
+				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.content(syshandle, 'movies')
 		control.directory(syshandle, cacheToDisc=True)

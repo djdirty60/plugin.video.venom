@@ -638,47 +638,47 @@ msgstr ""
 
 msgctxt "#32379"
 msgid "Allowed Shows"
-msgstr ""
+msgstr "Zulässige Shows"
 
 msgctxt "#32380"
 msgid "Airing"
-msgstr ""
+msgstr "Lüftung"
 
 msgctxt "#32381"
 msgid "Ended"
-msgstr ""
+msgstr "Beendet"
 
 msgctxt "#32382"
 msgid "Documentary"
-msgstr ""
+msgstr "Dokumentarfilm"
 
 msgctxt "#32383"
 msgid "Talk-Show"
-msgstr ""
+msgstr "Talkshow""
 
 msgctxt "#32384"
 msgid "Airing/Ended"
-msgstr ""
+msgstr "Lüften / Beendet"
 
 msgctxt "#32385"
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
 msgctxt "#32386"
 msgid "Scraper Progress Dialog"
-msgstr ""
+msgstr "Scraper-Fortschrittsdialog"
 
 msgctxt "#32387"
 msgid "Sources Select"
-msgstr ""
+msgstr "Quellen auswählen"
 
 msgctxt "#32388"
 msgid "Remove Dolby Vision sources"
-msgstr ""
+msgstr "Entfernen Sie Dolby Vision-Quellen"
 
 msgctxt "#32389"
 msgid "Remove HDR sources"
-msgstr ""
+msgstr "Entfernen Sie HDR-Quellen"
 
 msgctxt "#32390"
 msgid ""
@@ -713,16 +713,16 @@ msgid ""
 msgstr ""
 
 msgctxt "#32398"
-msgid ""
-msgstr ""
+msgid "Resolving Canceled"
+msgstr "Abgebrochen"
 
 msgctxt "#32399"
 msgid "Error with Debrid Pack"
-msgstr ""
+msgstr "Fehler mit Debrid Pack"
 
 msgctxt "#32400"
-msgid "Sources Cancelled"
-msgstr ""
+msgid "Sources Canceled"
+msgstr "Quellen abgebrochen"
 
 msgctxt "#32401"
 msgid "No stream available"

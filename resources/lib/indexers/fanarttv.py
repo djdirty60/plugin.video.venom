@@ -6,14 +6,14 @@
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from resources.lib.modules import control, log_utils
+from resources.lib.modules.control import setting as getSetting, apiLanguage, notification
 
 headers = {'api-key': '9f846e7ec1ea94fad5d8a431d1d26b43'}
-client_key = control.setting('fanart.tv.api.key')
+client_key = getSetting('fanart.tv.api.key')
 if not client_key: client_key = 'cf0ebcc2f7b824bd04cf3a318f15c17d'
 headers.update({'client-key': client_key})
 base_url = "http://webservice.fanart.tv/v3/%s/%s"
-lang = control.apiLanguage()['trakt']
+lang = apiLanguage()['trakt']
 error_codes = ['500 Internal Server Error', '502 Bad Gateway', '504 Gateway Timeout']
 session = requests.Session()
 retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
@@ -22,24 +22,25 @@ session.mount('http://', HTTPAdapter(max_retries=retries))
 def get_request(url):
 	try:
 		try:
-			# result = requests.get(url, headers=headers, timeout=5)
 			result = session.get(url, headers=headers, timeout=5)
 		except requests.exceptions.SSLError:
-			# result = requests.get(url, headers=headers, verify=False)
 			result = session.get(url, headers=headers, verify=False)
 	except requests.exceptions.ConnectionError:
-		control.notification(message='FANART.TV server Problems')
+		notification(message='FANART.TV server Problems')
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 	if '200' in str(result):
 		return result.json() 
 	elif 'Not found' in str(result.text):
+		if getSetting('debug.level') != '1': return None
+		from resources.lib.modules import log_utils
 		log_utils.log('requests.get() failed - FANART.TV URL: %s (NOT FOUND)' % url, level=log_utils.LOGDEBUG)
-		return None
 	else:
+		if getSetting('debug.level') != '1': return None
+		from resources.lib.modules import log_utils
 		title = client.parseDOM(result.text, 'title')[0]
 		log_utils.log('requests.get() failed - FANART.TV URL: %s (%s)' % (url, title), level=log_utils.LOGDEBUG)
-		return None
 
 def parse_art(img):
 	if not img: return None
@@ -54,6 +55,7 @@ def parse_art(img):
 		if not ret_img: return None
 		ret_img = [x[0] for x in ret_img][0]
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
 	return ret_img
