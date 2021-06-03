@@ -118,8 +118,6 @@ class SourceResultsXML(BaseDialog):
 			d_dict = {'AllDebrid': 'AD', 'Premiumize.me': 'PM', 'Real-Debrid': 'RD'}
 			d = d_dict[debrid]
 		except:
-			from resources.lib.modules import log_utils
-			log_utils.error()
 			d = ''
 		return d
 
@@ -155,7 +153,8 @@ class SourceResultsXML(BaseDialog):
 					listitem.setProperty('venom.quality_icon', quality_icon)
 					listitem.setProperty('venom.url', item.get('url'))
 					listitem.setProperty('venom.extra_info', extra_info)
-					listitem.setProperty('venom.size_label', size_label)
+					if size_label: listitem.setProperty('venom.size_label', size_label)
+					else: listitem.setProperty('venom.size_label', 'NA')
 					listitem.setProperty('venom.count', '%02d.)' % count)
 					yield listitem
 				except:
@@ -171,7 +170,7 @@ class SourceResultsXML(BaseDialog):
 	def set_properties(self):
 		try:
 			if self.meta is None: return
-			self.setProperty('venom.mediatype', self.meta.get('mediatype', ''))
+			# self.setProperty('venom.mediatype', self.meta.get('mediatype', ''))
 			self.setProperty('venom.season', str(self.meta.get('season', '')))
 			if self.meta.get('season_poster'):	self.setProperty('venom.poster', self.meta.get('season_poster', ''))
 			else: self.setProperty('venom.poster', self.meta.get('poster', ''))

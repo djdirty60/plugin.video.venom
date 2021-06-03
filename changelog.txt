@@ -1,4 +1,12 @@
 
+[B][COLOR red]Update - v5.1.1 - June 03, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added "SEEDERS: xx" count to the Source Select secondary line for uncached torrents.[/I]
+[COLOR yellow]--[/COLOR][I] Added "HOSTER" to the Source Select secondary line for hosters.[/I]
+[COLOR yellow]--[/COLOR][I] Added missed "en-US" to the TMDB indexer api request.  This helps bring in some missing
+    poster and fanart artwork.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed bogus "Key Error" log entry for "debrid_abv" method.[/I]
+
+
 [B][COLOR red]Update - v5.1.0 - June 02, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] New Windows xml style Source Select.[/I]
 [COLOR yellow]--[/COLOR][I] Dialog Source Select has been removed from settings.  The options are now only

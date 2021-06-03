@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.0">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.1">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -32,22 +32,12 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v5.1.0 - June 02, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] New Windows xml style Source Select.[/I]
-[COLOR yellow]--[/COLOR][I] Dialog Source Select has been removed from settings.  The options are now only
-    "Source Select (Window xml skin)" or "AutoPlay".[/I]
-[COLOR yellow]--[/COLOR][I] Due to the changes above it is important that you open Venom's settings and set the option
-    for "Default movie/episode) select action".  This has a new ID and is need to be saved to
-    the userdata settings.xml.[/I]
-[COLOR yellow]--[/COLOR][I] Color settings for torrents, hosters, and direct links has been removed in favor of the contrast skin
-    theme chosen.  I may listen to a few small tweaks of this.[/I]
-[COLOR yellow]--[/COLOR][I] TMDb Helper will need updated player files if you are using that.  They will be available shortly.[/I]
-[COLOR yellow]--[/COLOR][I] A complete new system has been added for meta retrieval during the scrape process to satisfy
-    the required artwork for the skin.  From widgets, or inside Venom, there will be no overhead
-    added as the needed meta is already available.  If you are a library user the needed meta is
-    now pulled from the Kodi db so I encourage you to use the TMDb scraper, from the official
-    Kodi repo, and enable fanart.tv for the extended artwork, which I pull out of the db during
-    this process.[/I]
+[B][COLOR red]Update - v5.1.1 - June 03, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added "SEEDERS: xx" count to the Source Select secondary line for uncached torrents.[/I]
+[COLOR yellow]--[/COLOR][I] Added "HOSTER" to the Source Select secondary line for hosters.[/I]
+[COLOR yellow]--[/COLOR][I] Added missed "en-US" to the TMDB indexer api request.  This helps bring in some missing
+    poster and fanart artwork.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed bogus "Key Error" log entry for "debrid_abv" method.[/I]
 		</news>
 	</extension>
 </addon>

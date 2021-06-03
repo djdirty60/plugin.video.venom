@@ -87,7 +87,7 @@ class Movies:
 		self.meta = []
 		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
-		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
+		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s,en-US&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
 ###  other "append_to_response" options external_ids,images,content_ratings
 		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', API_key)
 		self.external_ids = base_link + 'movie/%s/external_ids?api_key=%s' % ('%s', API_key)
@@ -240,6 +240,7 @@ class Movies:
 		try:
 			meta['mediatype'] = 'movie'
 # adult
+
 			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
 # belongs_to_collection
 # budget
@@ -371,7 +372,7 @@ class TVshows:
 		self.meta = []
 		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
-		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
+		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s,en-US&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
 # 'append_to_response=aggregate_credits' DO NOT USE, response data way to massive and bogs the response time
 		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
 		self.tvdb_key = getSetting('tvdb.api.key')
@@ -669,7 +670,7 @@ class TVshows:
 		if not tmdb and not season and not episode: return None
 		try:
 			result = None
-			url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, episode, API_key, self.lang))
+			url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=%s,en-US&append_to_response=credits' % (tmdb, season, episode, API_key, self.lang))
 			result = get_request(url)
 		except:
 			from resources.lib.modules import log_utils
