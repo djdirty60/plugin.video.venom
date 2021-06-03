@@ -6,6 +6,8 @@
 from datetime import datetime
 import re
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import fanarttv
 from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, iteritems, trailer as control_trailer, yesnoDialog
@@ -17,13 +19,16 @@ base_link = 'https://api.themoviedb.org/3/'
 tmdb_networks = base_link + 'discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1' % (API_key, '%s')
 poster_path = 'https://image.tmdb.org/t/p/w300'
 fanart_path = 'https://image.tmdb.org/t/p/w1280'
+session = requests.Session()
+retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
+session.mount('https://', HTTPAdapter(max_retries=retries))
 
 
 def get_request(url):
 	try:
-		try: response = requests.get(url)
+		try: response = session.get(url)
 		except requests.exceptions.SSLError:
-			response = requests.get(url, verify=False)
+			response = session.get(url, verify=False)
 	except requests.exceptions.ConnectionError:
 		return notification(message=32024)
 	if '200' in str(response): return response.json()
@@ -83,7 +88,7 @@ class Movies:
 		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
 		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
-###                                                                  other "append_to_response" options                     external_ids,images,content_ratings
+###  other "append_to_response" options external_ids,images,content_ratings
 		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', API_key)
 		self.external_ids = base_link + 'movie/%s/external_ids?api_key=%s' % ('%s', API_key)
 		# self.user = str(self.imdb_user) + str(API_key)
@@ -142,7 +147,7 @@ class Movies:
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
-			self.meta = [i for i in self.meta if i.get('tmdb')] # without this "self.list=" below removes missing tmdb but here still writes these cases to metacache?
+			self.meta = [i for i in self.meta if i.get('tmdb')]
 			metacache.insert(self.meta)
 		sorted_list = []
 		self.list = [i for i in self.list if i.get('tmdb')]
@@ -205,7 +210,7 @@ class Movies:
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
-			self.meta = [i for i in self.meta if i.get('tmdb')] # without this "self.list=" below removes missing tmdb but here still writes these cases to metacache?
+			self.meta = [i for i in self.meta if i.get('tmdb')]
 			metacache.insert(self.meta)
 		self.list = [i for i in self.list if i.get('tmdb')]
 		return self.list
@@ -235,7 +240,7 @@ class Movies:
 		try:
 			meta['mediatype'] = 'movie'
 # adult
-			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result['backdrop_path'] else ''
+			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
 # belongs_to_collection
 # budget
 			meta['genre'] = []
@@ -249,7 +254,7 @@ class Movies:
 			meta['originaltitle'] = py_tools.ensure_str(result.get('original_title', ''))
 			meta['plot'] = py_tools.ensure_str(result.get('overview', '')) if result.get('overview') else ''
 			# meta['?'] = result.get('popularity', '')
-			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result['poster_path'] else ''
+			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			# try: meta['studio'] = result.get('production_companies', {})[0]['name'] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
 			# except: meta['studio'] = ''
 # production_countries
@@ -271,7 +276,7 @@ class Movies:
 			except: meta['writer'] = ''
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ((poster_path + person.get('profile_path')) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (poster_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			try:
@@ -301,11 +306,11 @@ class Movies:
 		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
-			poster3 = poster_path + poster3
+			poster3 = '%s%s' % (poster_path, poster3) if poster3 else ''
 		except: poster3 = ''
 		try:
 			fanart3 = self.parse_art(art3['backdrops'])
-			fanart3 = fanart_path + fanart3
+			fanart3 = '%s%s' % (fanart_path, fanart3) if fanart3 else ''
 		except: fanart3 = ''
 		extended_art = {'extended': True, 'poster3': poster3, 'fanart3': fanart3}
 		return extended_art
@@ -367,6 +372,7 @@ class TVshows:
 		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
 		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
+# 'append_to_response=aggregate_credits' DO NOT USE, response data way to massive and bogs the response time
 		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
 		self.tvdb_key = getSetting('tvdb.api.key')
 		self.imdb_user = getSetting('imdb.user').replace('ur', '')
@@ -427,7 +433,7 @@ class TVshows:
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
-			self.meta = [i for i in self.meta if i.get('tmdb')] # without this "self.list=" below removes missing tmdb but here still writes these cases to metacache?
+			self.meta = [i for i in self.meta if i.get('tmdb')]
 			metacache.insert(self.meta)
 		sorted_list = []
 		self.list = [i for i in self.list if i.get('tmdb')]
@@ -490,7 +496,7 @@ class TVshows:
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
-			self.meta = [i for i in self.meta if i.get('tmdb')] # without this "self.list=" below removes missing tmdb but here still writes these cases to metacache?
+			self.meta = [i for i in self.meta if i.get('tmdb')]
 			metacache.insert(self.meta)
 		self.list = [i for i in self.list if i.get('tmdb')]
 		return self.list
@@ -518,7 +524,7 @@ class TVshows:
 			return None
 		try:
 			meta['mediatype'] = 'tvshow'
-			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result['backdrop_path'] else ''
+			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
 			try: meta['duration'] = min(result['episode_run_time']) * 60
 			except: meta['duration'] = ''
 			meta['premiered'] = str(result.get('first_air_date', '')) if result.get('first_air_date') else ''
@@ -541,7 +547,7 @@ class TVshows:
 			meta['originaltitle'] = py_tools.ensure_str(result.get('original_name'))
 			meta['plot'] = py_tools.ensure_str(result.get('overview', '')) if result.get('overview') else ''
 			# meta['?'] = result.get('popularity', '')
-			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result['poster_path'] else ''
+			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			meta['seasons'] = result.get('seasons')
 			meta['status'] = result.get('status')
 			# meta['counts'] = self.seasonCountParse(meta['seasons']) # check on performance hit
@@ -563,7 +569,7 @@ class TVshows:
 			except: meta['writer'] = ''
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ((poster_path + person.get('profile_path')) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (poster_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			try: meta['mpaa'] = [x['rating'] for x in result['content_ratings']['results'] if x['iso_3166_1'] == 'US'][0]
@@ -635,7 +641,7 @@ class TVshows:
 				episode_meta['plot'] = py_tools.ensure_str(episode.get('overview', '')) if episode.get('overview') else ''
 				episode_meta['code'] = episode['production_code']
 				episode_meta['season'] = episode['season_number']
-				episode_meta['thumb'] = '%s%s' % (fanart_path, episode.get('still_path')) if episode.get('still_path') else ''
+				episode_meta['thumb'] = '%s%s' % (fanart_path, episode['still_path']) if episode.get('still_path') else ''
 				episode_meta['rating'] = episode['vote_average']
 				episode_meta['votes'] = episode['vote_count']
 				episodes.append(episode_meta)
@@ -644,12 +650,12 @@ class TVshows:
 			# meta['tvseasontitle'] = result['name'] # seasontitle ?
 			meta['plot'] = py_tools.ensure_str(result.get('overview', '')) if result.get('overview') else '' # Kodi season level Information seems no longer available in 19
 			meta['tmdb'] = tmdb
-			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result['poster_path'] else ''
+			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			meta['season_poster'] = meta['poster']
 			meta['season'] = result.get('season_number')
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ((poster_path + person.get('profile_path')) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (poster_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			# meta['banner'] = '' # not available from TMDb
@@ -677,11 +683,11 @@ class TVshows:
 		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
-			poster3 = poster_path + poster3
+			poster3 = '%s%s' % (poster_path, poster3) if poster3 else ''
 		except: poster3 = ''
 		try:
 			fanart3 = self.parse_art(art3['backdrops'])
-			fanart3 = fanart_path + fanart3
+			fanart3 = '%s%s' % (fanart_path, fanart3) if fanart3 else ''
 		except: fanart3 = ''
 		extended_art = {'extended': True, 'poster3': poster3, 'fanart3': fanart3}
 		return extended_art

@@ -37,7 +37,7 @@ MULTI_LANG = ['hindi.eng', 'ara.eng', 'ces.eng', 'chi.eng', 'cze.eng', 'dan.eng'
 				'kor.eng', 'lat.eng', 'lebb.eng', 'lit.eng', 'nor.eng', 'pol.eng', 'por.eng', 'rus.eng', 'som.eng', 'spa.eng', 'sve.eng', 'swe.eng', 'tha.eng', 'tur.eng',
 				'uae.eng', 'ukr.eng', 'vie.eng', 'zho.eng', 'dual.audio', 'multi']
 SUBS = ['subita', 'subfrench', 'subspanish', 'subtitula', 'swesub', 'nl.subs']
-ADDS = ['1xbet', 'betwin']
+ADS = ['1xbet', 'betwin']
 
 
 def seas_ep_filter(season, episode, release_title, split=False):
@@ -177,7 +177,7 @@ def getFileType(name_info=None, url=None):
 
 		if any(value in fmt for value in ['.hc', 'korsub', 'kor.sub']): type += ' HC /'
 		if any(value in fmt for value in MULTI_LANG): type += ' MULTI-LANG /'
-		if any(value in fmt for value in ADDS): type += ' ADDS /'
+		if any(value in fmt for value in ADS): type += ' ADS /'
 		if any(value in fmt for value in SUBS):
 			if type != '': type += ' WITH SUBS'
 			else: type = 'SUBS'

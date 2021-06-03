@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+	Venom Add-on
+"""
 
 from xbmc import executebuiltin
 from xbmcgui import WindowXMLDialog, ListItem

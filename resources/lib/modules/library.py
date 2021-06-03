@@ -69,14 +69,14 @@ class lib_tools:
 		elif 'tmdb' in ids: return tmdb_url % (media_string, str(ids['tmdb']))
 		else: return ''
 
-	@staticmethod
-	def check_sources(title, year, imdb, tvdb=None, season=None, episode=None, tvshowtitle=None, premiered=None):
-		try:
-			from resources.lib.modules import sources
-			src = sources.Sources().getSources(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
-			return src and len(src) > 5
-		except:
-			return False
+	# @staticmethod
+	# def check_sources(title, year, imdb, tvdb=None, season=None, episode=None, tvshowtitle=None, premiered=None):
+		# try:
+			# from resources.lib.modules import sources
+			# src = sources.Sources().getSources(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
+			# return src and len(src) > 5
+		# except:
+			# return False
 
 	@staticmethod
 	def legal_filename(filename):

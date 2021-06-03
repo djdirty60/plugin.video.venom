@@ -728,7 +728,7 @@ msgid "Dialog"
 msgstr ""
 
 msgctxt "#32333"
-msgid "Directory"
+msgid "Source Select (Window xml skin)"
 msgstr ""
 
 msgctxt "#32334"
@@ -1752,7 +1752,7 @@ msgid "Preparing sources"
 msgstr ""
 
 msgctxt "#32601"
-msgid "[COLOR cyan]Total: [/COLOR]  %s"
+msgid "[COLOR cyan]Unfiltered Total: [/COLOR]  %s"
 msgstr ""
 
 msgctxt "#32602"

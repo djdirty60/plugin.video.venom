@@ -76,11 +76,10 @@ class Premiumize:
 		token_ttl = token['expires_in']
 		poll_again = True
 		success = False
+		line = '%s[CR]%s'
 		progressDialog = control.progressDialog
-		progressDialog.create(control.lang(40054),
-								line1=control.lang(32513) % token['verification_uri'],
-								line2=control.lang(32514) % token['user_code'])
-		progressDialog.update(0)
+		progressDialog.create(control.lang(40054))
+		progressDialog.update(-1, line % (control.lang(32513) % token['verification_uri'], control.lang(32514) % token['user_code']))
 		while poll_again and not token_ttl <= 0 and not progressDialog.iscanceled():
 			poll_again, success = self.poll_token(token['device_code'])
 			progress_percent = 100 - int((float((expiry - token_ttl) / expiry) * 100))
@@ -252,15 +251,16 @@ class Premiumize:
 			control.okDialog(title='default', message=control.lang(40017) % control.lang(40057))
 			return True
 		interval = 5
+		line = '%s[CR]%s[CR]%s'
 		line1 = '%s...' % (control.lang(40017) % control.lang(40057))
 		line2 = transfer_info['name']
 		line3 = transfer_info['message']
-		control.progressDialog.create(control.lang(40018), line1, line2, line3)
+		control.progressDialog.create(control.lang(40018), line % (line1, line2, line3))
 		while not transfer_info['status'] == 'seeding':
 			control.sleep(1000 * interval)
 			transfer_info = _transfer_info(transfer_id)
 			line3 = transfer_info['message']
-			control.progressDialog.update(int(float(transfer_info['progress']) * 100), line3=line3)
+			control.progressDialog.update(int(float(transfer_info['progress']) * 100), line % (line1, line2, line3))
 			if control.monitor.abortRequested(): return sysexit()
 			try:
 				if control.progressDialog.iscanceled():

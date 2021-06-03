@@ -115,10 +115,7 @@ class Player(xbmc.Player):
 			discart = meta.get('discart')
 			if 'mediatype' not in meta:
 				meta.update({'mediatype': 'episode' if self.episode else 'movie'})
-				if self.episode:
-					meta.update({'season': self.season})
-					meta.update({'episode': self.episode})
-					meta.update({'tvshowtitle': self.title})
+				if self.episode: meta.update({'tvshowtitle': self.title, 'season': self.season, 'episode': self.episode})
 			return (poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta)
 		except:
 			log_utils.error()
@@ -129,10 +126,8 @@ class Player(xbmc.Player):
 			meta = jsloads(meta)['result']['movies']
 			t = cleantitle.get(self.title)
 			meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))][0]
-			if 'mediatype' not in meta:
-				meta.update({'mediatype': 'movie'})
-			if 'duration' not in meta:
-				meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
+			if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
+			if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
 					try: meta[k] = str(' / '.join([i for i in v]))
@@ -158,10 +153,8 @@ class Player(xbmc.Player):
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
 			meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['episodes'][0]
-			if 'mediatype' not in meta:
-				meta.update({'mediatype': 'episode'})
-			if 'duration' not in meta:
-				meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
+			if 'mediatype' not in meta: meta.update({'mediatype': 'episode'})
+			if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
 			for k, v in control.iteritems(meta):
 				if type(v) == list:
 					try: meta[k] = str(' / '.join([i for i in v]))
@@ -360,7 +353,6 @@ class Player(xbmc.Player):
 		try:
 			log_utils.log('self.play_next_triggered = %s' % self.play_next_triggered)
 			log_utils.log('data = %s' % data)
-
 			if not self.play_next_triggered:
 				if not self.scrobbled:
 					try:

@@ -134,16 +134,16 @@ class RealDebrid:
 		url = 'client_id=%s&new_credentials=yes' % self.client_ID
 		url = oauth_base_url + device_code_url % url
 		response = requests.get(url).json()
-		control.progressDialog.create(control.lang(40055))
-		control.progressDialog.update(-1,
-				control.lang(32513) % 'https://real-debrid.com/device',
-				control.lang(32514) % response['user_code'])
+		line = '%s[CR]%s'
+		progressDialog = control.progressDialog
+		progressDialog.create(control.lang(40055))
+		progressDialog.update(-1, line % (control.lang(32513) % 'https://real-debrid.com/device', control.lang(32514) % response['user_code']))
 		self.auth_timeout = int(response['expires_in'])
 		self.auth_step = int(response['interval'])
 		self.device_code = response['device_code']
 		while self.secret == '':
-			if control.progressDialog.iscanceled():
-				control.progressDialog.close()
+			if progressDialog.iscanceled():
+				progressDialog.close()
 				break
 			self.auth_loop()
 		if self.secret: self.get_token()
@@ -534,15 +534,15 @@ class RealDebrid:
 		torrent_info = self.torrent_info(torrent_id)
 		if 'error_code' in torrent_info: return _return_failed()
 		status = torrent_info['status']
-		if any(x in status for x in stalled): return _return_failed(status)
+		line = '%s[CR]%s[CR]%s'
 		if status == 'magnet_conversion':
 			line1 = control.lang(40013)
 			line2 = torrent_info['filename']
 			line3 = control.lang(40012) % str(torrent_info['seeders'])
 			timeout = 100
-			control.progressDialog.create(control.lang(40018), line1, line2, line3)
+			control.progressDialog.create(control.lang(40018), line % (line1, line2, line3))
 			while status == 'magnet_conversion' and timeout > 0:
-				control.progressDialog.update(timeout, line3=line3)
+				control.progressDialog.update(timeout, line % (line1, line2, line3))
 				if control.monitor.abortRequested(): return sysexit()
 				try:
 					if control.progressDialog.iscanceled(): return _return_failed(control.lang(40014))
@@ -555,7 +555,11 @@ class RealDebrid:
 				line3 = control.lang(40012) % str(torrent_info['seeders'])
 			try: control.progressDialog.close()
 			except: pass
+		if status == 'downloaded':
+			control.busy()
+			return True
 		if status == 'magnet_conversion': return _return_failed()
+		if any(x in status for x in stalled): return _return_failed(status)
 		if status == 'waiting_files_selection': 
 			video_files = []
 			all_files = torrent_info['files']
@@ -590,7 +594,7 @@ class RealDebrid:
 			line1 = '%s...' % (control.lang(40017) % control.lang(40058))
 			line2 = torrent_info['filename']
 			line3 = status
-			control.progressDialog.create(control.lang(40018), line1, line2, line3)
+			control.progressDialog.create(control.lang(40018), line % (line1, line2, line3))
 			while not status == 'downloaded':
 				control.sleep(1000 * interval)
 				torrent_info = self.torrent_info(torrent_id)
@@ -599,7 +603,7 @@ class RealDebrid:
 					line3 = control.lang(40011) % (file_size, round(float(torrent_info['speed']) / (1000**2), 2), torrent_info['seeders'], torrent_info['progress'])
 				else:
 					line3 = status
-				control.progressDialog.update(int(float(torrent_info['progress'])), line3=line3)
+				control.progressDialog.update(int(float(torrent_info['progress'])), line % (line1, line2, line3))
 				if control.monitor.abortRequested(): return sysexit()
 				try:
 					if control.progressDialog.iscanceled():

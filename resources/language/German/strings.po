@@ -1449,7 +1449,7 @@ msgid "Preparing sources"
 msgstr "Quellen werden vorbereitet"
 
 msgctxt "#32601"
-msgid "Total"
+msgid "[COLOR cyan]Unfiltered Total: [/COLOR]  %s"
 msgstr "Gesamt"
 
 msgctxt "#32602"

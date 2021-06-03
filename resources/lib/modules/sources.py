@@ -26,6 +26,7 @@ from resources.lib.modules import source_utils
 from resources.lib.modules import trakt
 from resources.lib.modules import workers
 from fenomscrapers import sources as fs_sources
+from resources.lib.windows.source_results import SourceResultsXML
 
 
 class Sources:
@@ -37,7 +38,7 @@ class Sources:
 		self.getConstants()
 		self.sources = []
 		self.scraper_sources = []
-		self.uncached_sources = []
+		self.uncached_chosen = False
 		self.sourceFile = control.providercacheFile
 		self.dev_mode = control.setting('dev.mode.enable') == 'true'
 		self.dev_disable_single = control.setting('dev.disable.single') == 'true'
@@ -81,6 +82,10 @@ class Sources:
 			url = None
 			self.mediatype = 'movie'
 
+			try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
+			except: pass
+			self.meta = meta
+
 			if tvshowtitle is None and control.setting('imdb.year.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
 				year, title = self.movie_chk_imdb(imdb, title, year)
 			if tvshowtitle is not None: # get "total_seasons" and "season_isAiring" for Pack scrapers. 1st=passed meta, 2nd=matacache check, 3rd=request
@@ -95,12 +100,13 @@ class Sources:
 			filter = []
 			if control.setting('torrent.remove.uncached') == 'true':
 				filter += [i for i in items if not re.match(r'^uncached.*torrent', i['source'])]
-				if filter:
-					for i in range(len(filter)): filter[i].update({'label': re.sub(r'(\d+)', '%02d' % int(i + 1), filter[i]['label'], 1)})
+				if filter: pass
+					# for i in range(len(filter)): filter[i].update({'label': re.sub(r'(\d+)', '%02d' % int(i + 1), filter[i]['label'], 1)})
 				elif not filter:
 					if control.yesnoDialog('No cached torrents returned. Would you like to view the uncached torrents to cache yourself?', '', ''):
 						control.cancelPlayback()
-						select = '1'
+						select = '0'
+						self.uncached_chosen = True
 						filter += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 				items = filter
 				if not items:
@@ -108,166 +114,174 @@ class Sources:
 					return self.errorForSources()
 
 			if select is None:
-				if episode is not None and control.setting('enable.upnext') == 'true': select = '2'
-				else: select = control.setting('hosts.mode')
+				if episode is not None and control.setting('enable.upnext') == 'true': select = '1'
+				else: select = control.setting('play.mode')
 			else: select = select
 
-			if select == '1':
-				if control.condVisibility("Window.IsActive(script.extendedinfo-DialogVideoInfo.xml)") or \
-				control.condVisibility("Window.IsActive(script.extendedinfo-DialogVideoInfo-Aura.xml)") or \
-				control.condVisibility("Window.IsActive(script.extendedinfo-DialogVideoInfo-Estuary.xml)") or \
-				control.condVisibility("Window.IsActive(script.extendedinfo-DialogVideoInfo-Netflix.xml)") or \
-				control.condVisibility("Window.IsActive(DialogVideoInfo.xml)") or \
-				control.infoLabel('Container.PluginName') == 'plugin.video.themoviedb.helper':
-					select = '0'
-
 			title = tvshowtitle if tvshowtitle is not None else title
+			self.imdb=imdb ; self.tmdb = tmdb ; self.tvdb = tvdb ; self.title = title ; self.year = year
+			self.season = season ; self.episode = episode
+			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
 			if len(items) > 0:
-				if select == '1' and 'plugin' in control.infoLabel('Container.PluginName'):
-					control.homeWindow.clearProperty(self.itemProperty)
-					control.homeWindow.setProperty(self.itemProperty, jsdumps(items))
+				if select == '0':
+					# control.homeWindow.clearProperty(self.itemProperty)
+					# control.homeWindow.setProperty(self.itemProperty, jsdumps(items))
 					control.sleep(200)
-					return control.execute('Container.Update(plugin://plugin.video.venom/?action=addItem&title=%s)' % quote_plus(title))
-
-				elif select == '0' or select == '1': url = self.sourcesDialog(items)
+					return self.addItem(title, items, self.meta)
 				else: url = self.sourcesAutoPlay(items)
 
 			if url == 'close://' or url is None:
 				self.url = url
 				return self.errorForSources()
-
-			try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
-			except: pass
 			from resources.lib.modules import player
-			player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, url, meta, select)
+			player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, url, self.meta, select)
 		except:
 			log_utils.error()
 			control.cancelPlayback()
 
-	def addItem(self, title):
-		control.hide()
-		def sourcesDirMeta(metadata):
-			if not metadata: return metadata
-			allowed = ['poster', 'season_poster', 'fanart', 'thumb', 'title', 'year', 'tvshowtitle', 'season', 'episode']
-			return {k: v for k, v in control.iteritems(metadata) if k in allowed}
-
-		control.playlist.clear()
-		items = control.homeWindow.getProperty(self.itemProperty)
-		items = jsloads(items)
-
-		if not items:
-			control.sleep(200)
-			control.hide()
-			sysexit()
+	def addItem(self, title, items, meta):
 		try:
-			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
-			meta = sourcesDirMeta(meta)
-			from sys import argv
-			sysaddon = argv[0] ; syshandle = int(argv[1])
-			systitle = sysname = quote_plus(title)
+			control.hide()
+			control.playlist.clear()
+			if not items:
+				control.sleep(200)
+				control.hide()
+				sysexit()
+			# listItem_FolderPath = control.infoLabel('ListItem.FolderPath') # could be used to determin if venom, library, or TMDb Helper is selected ListItem for meta retrieval
 
-			downloads = True if control.setting('downloads') == 'true' and (control.setting(
-				'movie.download.path') != '' or control.setting('tv.download.path') != '') else False
-			poster = meta.get('poster') or control.addonPoster()
-			if 'tvshowtitle' in meta and 'season' in meta and 'episode' in meta:
-				poster = meta.get('season_poster') or poster or control.addonPoster()
-				sysname += quote_plus(' S%02dE%02d' % (int(meta['season']), int(meta['episode'])))
-			elif 'year' in meta: sysname += quote_plus(' (%s)' % meta['year'])
-
-			fanart = meta.get('fanart')
-			if control.setting('fanart') != 'true': fanart = ''
-
-			resquality_icons = control.setting('enable.resquality.icons') == 'true'
-			artPath = control.artPath()
-			sysimage = quote_plus(poster)
-			downloadMenu = control.lang(32403)
+## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
+			self.imdb_user = control.setting('imdb.user').replace('ur', '')
+			self.tmdb_key = control.setting('tmdb.api.key')
+			if not self.tmdb_key: self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
+			self.tvdb_key = control.setting('tvdb.api.key')
+			if self.mediatype == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
+			else: self.user = str(self.tmdb_key)
+			self.lang = control.apiLanguage()['tvdb']
+			meta1 = meta
+			meta2 = metacache.fetch([{'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}], self.lang, self.user)[0]
+			if meta2 != self.ids: meta2 = dict((k, v) for k, v in control.iteritems(meta2) if v is not None and v != '')
+			if meta1 is not None:
+				try:
+					if len(meta2) > len(meta1):
+						meta2.update(meta1)
+						meta = meta2
+					else: meta = meta1
+				except: log_utils.error()
+			else: meta = meta2 if meta2 != self.ids else meta1
+##################
+			self.meta = meta
 		except:
 			log_utils.error('Error addItem: ')
 
-		for i in range(len(items)):
+		def checkLibMeta(): # check Kodi db for meta for library playback.
+			from resources.lib.modules import py_tools
+			def cleanLibArt(art):
+				if not art: return ''
+				art = unquote(art.replace('image://', ''))
+				if art.endswith('/'):
+					art = art[:-1]
+				return art
 			try:
-				label = str(items[i]['label'])
-				syssource = quote_plus(jsdumps([items[i]]))
-				sysurl = '%s?action=play_SourceItem&title=%s&source=%s' % (sysaddon, systitle, syssource)
-				cm = []
-				link_type = 'pack' if 'package' in items[i] else 'single'
-				isCached = True if re.match(r'^cached.*torrent', items[i]['source']) else False
-				if downloads and (isCached or items[i]['direct'] == True or (items[i]['debridonly'] == True and 'magnet:' not in items[i]['url'])):
-					try: new_sysname = quote_plus(items[i]['name'])
-					except: new_sysname = sysname
-					cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&source=%s&caller=sources&title=%s)' %
-										(sysaddon, new_sysname, sysimage, syssource, sysname)))
-				if link_type == 'pack' and isCached:
-					cm.append(('[B]Browse Debrid Pack[/B]', 'RunPlugin(%s?action=showDebridPack&caller=%s&name=%s&url=%s&source=%s)' %
-									(sysaddon, quote_plus(items[i]['debrid']), quote_plus(items[i]['name']), quote_plus(items[i]['url']), quote_plus(items[i]['hash']))))
-				if not isCached and 'magnet:' in items[i]['url']:
-					d = self.debrid_abv(items[i]['debrid'])
-					if d in ('PM', 'RD', 'AD'):
-						try: seeders = items[i]['seeders']
-						except: seeders = '0'
-						cm.append(('[B]Cache to %s Cloud (seeders=%s)[/B]' % (d, seeders), 'RunPlugin(%s?action=cacheTorrent&caller=%s&type=%s&title=%s&url=%s&source=%s)' %
-											(sysaddon, d, link_type, sysname, quote_plus(items[i]['url']), syssource)))
-				cm.append(('[B]Additional Link Info[/B]', 'RunPlugin(%s?action=sourceInfo&source=%s)' % (sysaddon, syssource)))
-				if resquality_icons:
-					quality = items[i]['quality']
-					thumb = '%s%s' % (quality, '.png')
-					thumb = control.joinPath(artPath, thumb) if artPath else ''
-				else: thumb = meta.get('thumb') or poster or fanart or control.addonThumb()
-
-				try: item = control.item(label=label, offscreen=True)
-				except: item = control.item(label=label)
-				item.setArt({'icon': thumb, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
-				item.addContextMenuItems(cm)
-				item.setProperty('IsPlayable', 'true') # test
-				# item.setProperty('IsPlayable', 'false')
-				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-				control.addItem(handle=syshandle, url=sysurl, listitem=item, isFolder=False)
+				if self.mediatype != 'movie': raise Exception()
+				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
+				meta = py_tools.ensure_text(meta, errors='ignore')
+				meta = jsloads(meta)['result']['movies']
+				t = cleantitle.get(self.title)
+				meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
+				if meta: meta = meta[0]
+				else: raise Exception()
+				if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
+				if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
+				poster = cleanLibArt(meta.get('art').get('poster', ''))
+				fanart = cleanLibArt(meta.get('art').get('fanart', ''))
+				clearart = cleanLibArt(meta.get('art').get('clearart', ''))
+				clearlogo = cleanLibArt(meta.get('art').get('clearlogo', ''))
+				discart = cleanLibArt(meta.get('art').get('discart'))
+				meta.update({'poster': poster, 'fanart': fanart, 'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart})
+				return meta
 			except:
-				log_utils.error('Error addItem: ')
-		control.content(syshandle, 'files')
-		control.directory(syshandle, cacheToDisc=True)
-
-	def playItem(self, title, source):
+				log_utils.error()
+				meta = ''
+			try:
+				if self.mediatype != 'episode': raise Exception()
+				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
+				show_meta = py_tools.ensure_text(show_meta, errors='ignore')
+				show_meta = jsloads(show_meta)['result']['tvshows']
+				t = cleantitle.get(self.title)
+				show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
+				if show_meta: show_meta = show_meta[0]
+				else: raise Exception()
+				tvshowid = show_meta['tvshowid']
+				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
+				meta = py_tools.ensure_text(meta, errors='ignore')
+				meta = jsloads(meta)['result']['episodes']
+				if meta: meta = meta[0]
+				else: raise Exception()
+				if 'mediatype' not in meta: meta.update({'mediatype': 'episode'})
+				if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
+				if 'mpaa' not in meta: meta.update({'mpaa': show_meta.get('mpaa')})
+				if 'premiered' not in meta: meta.update({'premiered': meta.get('firstaired')})
+				if 'year' not in meta: meta.update({'year': meta.get('firstaired')[:4]})
+				poster = cleanLibArt(meta.get('art').get('season.poster', ''))
+				fanart = cleanLibArt(meta.get('art').get('tvshow.fanart', ''))
+				clearart = cleanLibArt(meta.get('art').get('tvshow.clearart', ''))
+				clearlogo = cleanLibArt(meta.get('art').get('tvshow.clearlogo', ''))
+				discart = cleanLibArt(meta.get('art').get('discart'))
+				meta.update({'poster': poster, 'fanart': fanart, 'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart})
+				return meta
+			except:
+				log_utils.error()
+				meta = ''
+		if self.meta is None:
+			self.meta = checkLibMeta()
 		try:
-			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+			def sourcesDirMeta(metadata):
+				if not metadata: return metadata
+				allowed = ['mediatype', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'plot', 'duration', 'mpaa', 'season', 'episode']
+				return {k: v for k, v in control.iteritems(metadata) if k in allowed}
+			self.meta = sourcesDirMeta(self.meta)
+
+			window = SourceResultsXML('source_results.xml', control.addonPath(control.addonId()), results=items, meta=self.meta)
+			action, chosen_source = window.run()
+			del window
+			if action == 'play_Item' and self.uncached_chosen != True:
+				return self.playItem(title, items, chosen_source.getProperty('venom.source_dict'), self.meta)
+			else:
+				control.cancelPlayback()
+		except:
+			log_utils.error('Error addItem: ')
+
+	def playItem(self, title, items, chosen_source, meta):
+		try:
+			# meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+			# meta = self.meta
+			try: items = jsloads(items)
+			except: pass
+			try: meta = jsloads(meta)
+			except: pass
+
 			year = meta['year'] if 'year' in meta else None # year to be shows year, not season year.
 			season = meta['season'] if 'season' in meta else None
 			episode = meta['episode'] if 'episode' in meta else None
 			imdb = meta['imdb'] if 'imdb' in meta else None
 			tmdb = meta['tmdb'] if 'tmdb' in meta else None
 			tvdb = meta['tvdb'] if 'tvdb' in meta else None
-
-			next = [] ; prev = [] ; total = []
-			for i in range(1, 1000):
-				try:
-					u = control.infoLabel('ListItem(%s).FolderPath' % str(i))
-					if u in total: raise Exception()
-					total.append(u)
-					u = dict(parse_qsl(u.replace('?', '')))
-					u = jsloads(u['source'])[0]
-					next.append(u)
-				except: break
-			for i in range(-1000, 0)[::-1]:
-				try:
-					u = control.infoLabel('ListItem(%s).FolderPath' % str(i))
-					if u in total: raise Exception()
-					total.append(u)
-					u = dict(parse_qsl(u.replace('?', '')))
-					u = jsloads(u['source'])[0]
-					prev.append(u)
-				except: break
-
-			items = jsloads(source)
-			items = [i for i in items + next + prev][:40]
-
+			try:
+				chosen_source = jsloads(chosen_source)
+				source_index = items.index(chosen_source[0])
+				source_len = len(items)
+				next_end = min(source_len, source_index+41)
+				sources_next = items[source_index+1:next_end]
+				sources_prev = [] if next_end < source_len else items[0:41-(source_len-source_index)]
+				items = [i for i in chosen_source + sources_next + sources_prev]
+			except:
+				log_utils.error()
 			header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
 			progressDialog.create(header, '')
-
 			for i in range(len(items)):
 				try:
-					label = re.sub(r' {2,}', ' ', str(items[i]['label']))
-					label = re.sub(r'\n', '', label)
+					label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
 					try:
 						if progressDialog.iscanceled(): break
 						progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -275,7 +289,6 @@ class Sources:
 
 					w = workers.Thread(self.sourcesResolve, items[i])
 					w.start()
-
 					for x in range(40):
 						try:
 							if control.monitor.abortRequested(): return sysexit()
@@ -297,11 +310,10 @@ class Sources:
 					except: pass
 					del progressDialog
 					from resources.lib.modules import player
-					player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta, select='1')
+					player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta, select='0')
 					return self.url
 				except:
 					log_utils.error()
-
 			try: progressDialog.close()
 			except: pass
 			del progressDialog
@@ -327,7 +339,8 @@ class Sources:
 		sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
 		aliases = []
 		try:
-			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+			# meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+			meta = self.meta
 			aliases = meta.get('aliases', [])
 		except: pass
 		threads = []
@@ -356,7 +369,7 @@ class Sources:
 		string1 = control.lang(32404) # msgid "[COLOR cyan]Time elapsed:[/COLOR]  %s seconds"
 		# string2 = control.lang(32405) # msgid "%s seconds"
 		string3 = control.lang(32406) # msgid "[COLOR cyan]Remaining providers:[/COLOR] %s"
-		string4 = control.lang(32601) # msgid "[COLOR cyan]Total:[/COLOR]"
+		string4 = control.lang(32601) # msgid "[COLOR cyan]Unfiltered Total:[/COLOR]"
 
 		try: timeout = int(control.setting('scrapers.timeout'))
 		except: pass
@@ -633,9 +646,8 @@ class Sources:
 
 	def alterSources(self, url, meta):
 		try:
-			if control.setting('hosts.mode') == '2' or (control.setting('enable.upnext') == 'true' and 'episode' in meta): url += '&select=1'
-			else: url += '&select=2'
-			# control.execute('RunPlugin(%s)' % url)
+			if control.setting('play.mode') == '1' or (control.setting('enable.upnext') == 'true' and 'episode' in meta): url += '&select=0'
+			else: url += '&select=1'
 			control.execute('PlayMedia(%s)' % url)
 		except:
 			log_utils.error()
@@ -741,59 +753,6 @@ class Sources:
 		filter += [i for i in self.sources if i['quality'] == 'CAM']
 		self.sources = filter
 		self.sources = self.sources[:4000]
-
-		cached_color = control.getColor(control.setting('sources.cached.color'))
-		uncached_color = control.getColor(control.setting('sources.uncached.color'))
-		prem_color = control.getColor(control.setting('sources.prem.color'))
-		line2_color = control.getColor(control.setting('sources.sec.color'))
-		line2_type = control.setting('sources.sec.type')
-
-		for i in range(len(self.sources)):
-			t = ''
-			if line2_type == 'link title' and 'name' in self.sources[i]: t = self.sources[i]['name']
-			else:
-				try: f = (' / '.join(['%s ' % info.strip() for info in self.sources[i]['info'].split('|')]))
-				except: f = ''
-				if 'name_info' in self.sources[i]: t = source_utils.getFileType(name_info=self.sources[i]['name_info'])
-				else: t = source_utils.getFileType(url=self.sources[i]['url'])
-				t = '%s / %s' % (f, t) if (f != '' and f != '0 ' and f != ' ') else t
-			if t == '': t = source_utils.getFileType(url=self.sources[i]['url'])
-			try:
-				size = self.sources[i]['info'].split('|', 1)[0]
-				if any(value in size for value in ['HEVC', '3D']): size = ''
-			except: size = ''
-			u = self.sources[i]['url']
-			q = self.sources[i]['quality']
-			p = self.sources[i]['provider'].upper()
-			s = self.sources[i]['source'].upper().rsplit('.', 1)[0]
-			if 'debrid' in self.sources[i]: d = self.debrid_abv(self.sources[i]['debrid'])
-			else: d = self.sources[i]['debrid'] = ''
-			if d:
-				if 'UNCACHED' in s and uncached_color != 'nocolor':
-					color = uncached_color
-					sec_color = uncached_color
-				elif 'CACHED' in s and cached_color != 'nocolor':
-					color = cached_color
-					sec_color = line2_color
-				elif 'TORRENT' not in s and prem_color != 'nocolor':
-					color = prem_color
-					sec_color = line2_color
-			else: sec_color = line2_color
-			if d != '':
-				if size: line1 = '[COLOR %s]%02d  |  [B]%s[/B]  |  %s  |  %s  |  %s  |  [B]%s[/B][/COLOR]' % (color, int(i + 1), q, d, p, s, size)
-				else: line1 = '[COLOR %s]%02d  |  [B]%s[/B]  |  %s  |  %s  |  %s[/COLOR]' % (color, int(i + 1), q, d, p, s)
-			else:
-				if size: line1 = '%02d  |  [B]%s[/B]  |  %s  |  %s  |  [B]%s[/B]' % (int(i + 1), q, p, s, size)
-				else: line1 = '%02d  |  [B]%s[/B]  |  %s  |  %s' % (int(i + 1), q, p, s)
-			line1_len = len(line1)-20
-			if t != '': line2 = '\n       [COLOR %s][I]%s[/I][/COLOR]' % (sec_color, t)
-			else: line2 = ''
-			line2_len = len(line2)
-			if line2_len > line1_len:
-				adjust = line2_len - line1_len
-				line1 = line1.ljust(line1_len+30+adjust)
-			label = line1 + line2
-			self.sources[i]['label'] = label
 		control.hide()
 		return self.sources
 
@@ -827,79 +786,16 @@ class Sources:
 		log_utils.log('Removed %s duplicate sources for (%s) from list' % (len(self.sources) - len(filter), control.homeWindow.getProperty(self.labelProperty)), level=log_utils.LOGDEBUG)
 		return filter
 
-	def sourcesDialog(self, items):
-		try:
-			labels = [i['label'] for i in items]
-			select = control.selectDialog(labels)
-			if select == -1: return 'close://'
-			next = [y for x, y in enumerate(items) if x >= select]
-			prev = [y for x, y in enumerate(items) if x < select][::-1]
-			items = [items[select]]
-			items = [i for i in items + next + prev][:40]
-			header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
-			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
-			progressDialog.create(header, '')
-
-			for i in range(len(items)):
-				try:
-					label = re.sub(r' {2,}', ' ', str(items[i]['label']))
-					label = re.sub(r'\n', '', label)
-					try:
-						if progressDialog.iscanceled(): break
-						progressDialog.update(int((100 / float(len(items))) * i), label)
-					except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
-
-					w = workers.Thread(self.sourcesResolve, items[i])
-					w.start()
-
-					for x in range(40):
-						try:
-							if control.monitor.abortRequested(): return sysexit()
-							if progressDialog.iscanceled():
-								control.notification(message=32398)
-								control.cancelPlayback()
-								progressDialog.close()
-								del progressDialog
-								return
-						except: pass
-						if not w.is_alive(): break
-						sleep(0.5)
-
-					if not self.url: raise Exception()
-					if not any(x in self.url.lower() for x in self.extensions):
-						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
-						raise Exception()
-					try: progressDialog.close()
-					except: pass
-					del progressDialog
-					return self.url
-				except:
-					log_utils.error()
-
-			try: progressDialog.close()
-			except: pass
-			del progressDialog
-		except:
-			log_utils.error('Error sourcesDialog: ')
-			try: progressDialog.close()
-			except: pass
-			del progressDialog
-
 	def sourcesAutoPlay(self, items):
-		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p', 'HD']]
+		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p']]
 		u = None
 		header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
 		try:
-			# if control.setting('progress.dialog') == '0': progressDialog = control.progressDialog
-			# else: progressDialog = control.progressDialogBG
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
-
 			progressDialog.create(header, '')
 		except: pass
-
 		for i in range(len(items)):
-			label = re.sub(r' {2,}', ' ', str(items[i]['label']))
-			label = re.sub(r'\n', '', label)
+			label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
 			try:
 				if progressDialog.iscanceled(): break
 				progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -925,7 +821,7 @@ class Sources:
 		if 'magnet:' in url:
 			if not 'uncached' in item['source']:
 				try:
-					meta = control.homeWindow.getProperty(self.metaProperty)
+					meta = control.homeWindow.getProperty(self.metaProperty) # need for CM "downlod" action
 					if meta:
 						meta = jsloads(unquote(meta.replace('%22', '\\"')))
 						season = meta.get('season')
@@ -972,11 +868,11 @@ class Sources:
 
 	def debridPackDialog(self, provider, name, magnet_url, info_hash):
 		try:
-			if provider == 'Real-Debrid':
+			if provider in ['Real-Debrid', 'RD']:
 				from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
-			elif provider == 'Premiumize.me':
+			elif provider in ['Premiumize.me', 'PM']:
 				from resources.lib.debrid.premiumize import Premiumize as debrid_function
-			elif provider == 'AllDebrid':
+			elif provider in ['AllDebrid', 'AD']:
 				from resources.lib.debrid.alldebrid import AllDebrid as debrid_function
 			else: return
 			debrid_files = None
@@ -1001,7 +897,7 @@ class Sources:
 				self.url = debrid_function().unrestrict_link(chosen_result['link'])
 			from resources.lib.modules import player
 			from resources.lib.modules.source_utils import seas_ep_filter
-			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"'))) # needed for CM "showDebridPack" action
 			title = meta['tvshowtitle']
 			year = meta['year'] if 'year' in meta else None
 			season = meta['season'] if 'season' in meta else None
@@ -1072,7 +968,7 @@ class Sources:
 		return title
 
 	def getConstants(self): # gets initialized multiple times
-		self.itemProperty = 'plugin.video.venom.container.items'
+		# self.itemProperty = 'plugin.video.venom.container.items'
 		self.metaProperty = 'plugin.video.venom.container.meta'
 		self.seasonProperty = 'plugin.video.venom.container.season'
 		self.episodeProperty = 'plugin.video.venom.container.episode'
@@ -1100,9 +996,8 @@ class Sources:
 	def calc_pack_size(self):
 		seasoncount = None ; counts = None
 		try:
-			meta = control.homeWindow.getProperty(self.metaProperty)
+			meta = self.meta
 			if meta:
-				meta = jsloads(unquote(meta.replace('%22', '\\"')))
 				seasoncount = meta.get('seasoncount', None)
 				counts = meta.get('counts', None)
 		except:
@@ -1147,8 +1042,7 @@ class Sources:
 						if not divider: continue
 					else:
 						if not counts: continue
-						season_count = 1
-						divider = 0
+						season_count = 1 ; divider = 0
 						while season_count <= int(i['last_season']):
 							divider += int(counts[str(season_count)])
 							season_count += 1
@@ -1280,7 +1174,6 @@ class Sources:
 		total_seasons = None
 		season_isAiring = None
 		try:
-			meta = jsloads(unquote(meta.replace('%22', '\\"')))
 			total_seasons = meta.get('total_seasons', None)
 			season_isAiring = meta.get('season_isAiring', None)
 		except: pass

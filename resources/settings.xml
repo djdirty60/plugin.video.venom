@@ -145,7 +145,7 @@
 	<category label="32074">
 		<!-- Scraper Preperation -->
 		<setting type="lsep" label="32125" />
-		<setting id="hosts.mode" type="select" label="32331" lvalues="32332|32333|32334" default="1" />
+		<setting id="play.mode" type="select" label="32331" lvalues="32333|32334" default="0" />
 		<setting id="cf.disable" type="bool" label="32364" default="false" />
 		<setting id="imdb.year.check" type="bool" label="32017" default="true" />
 		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdbYearCheck)" />
@@ -178,13 +178,6 @@
 
 		<!-- Sources Select -->
 		<setting type="lsep" label="32387" />
-		<setting id="enable.resquality.icons" type="bool" label="32052" default="false" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=resolutionIcons)" />
-		<setting id="sources.cached.color" type="select" label="32634" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" visible = "true" />
-		<setting id="sources.uncached.color" type="select" label="32635" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="13" visible = "true" />
-		<setting id="sources.prem.color" type="select" label="32588" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="6" />
-		<setting id="sources.sec.color" type="select" label="32636" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="4" />
-		<setting id="sources.sec.type" type="select" label="32637" values="std info line|link title" default="link title" />
 		<setting id="sources.group.sort" type="select" label="Torent/Hoster sorting method" lvalues="32021|32022" default="0" visible = "true" />
 		<setting id="sources.size.sort" type="bool" label="Sort by file size" default="true" />
 		<setting id="autoplay.sd" type="bool" label="32656" default="false" />
@@ -269,7 +262,7 @@
 		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=tmdbUser)" />
 		<setting id="tmdb.session_id" type="text" default="" label="session_id" enable="false" />
 
-<!-- 		<setting type="lsep" label="TVDb" visible="false" /> -->
+		<!-- <setting type="lsep" label="TVDb" visible="false" /> -->
 		<setting id="tvdb.api.key" type="text" option="hidden" label="TVDb API key (legacy)" default="" enable="false" visible="false" />
 		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=tvdbApiKey)" visible="false" />
 		<setting id="tvdb.jw" type="text" default="" visible="false" />
@@ -340,7 +333,7 @@
 		<setting id="reuse.languageinvoker" type="action" option="close" default="true" label="Toggle reuselanguageinvoker" action="RunPlugin(plugin://plugin.video.venom/?action=tools_LanguageInvoker)" visible="eq(-2,true)" />
 		<setting type="action" label="[COLOR FFA0C12C] -- reuselanguageinvoker Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=langinvoker)" visible="eq(-3,true)" />
 		<setting id="dev.disable.single" type="bool" label="Disable single episode scraping" default="false" visible="eq(-4,true)" />
-<!-- 		<setting id="dev.disable.single.filter" type="bool" label="    Disable single scraper filter" default="false" visible="eq(-5,true)" enable="eq(-1,false)" /> -->
+		<!-- <setting id="dev.disable.single.filter" type="bool" label="    Disable single scraper filter" default="false" visible="eq(-5,true)" enable="eq(-1,false)" /> -->
 		<setting id="dev.disable.season.packs" type="bool" label="Disable season pack scraping" default="false" visible="eq(-5,true)" />
 		<setting id="dev.disable.season.filter" type="bool" label="    Disable season pack scraper filter" default="false" visible="eq(-6,true)" enable="eq(-1,false)" />
 		<setting id="dev.disable.show.packs" type="bool" label="Disable show pack scraping" default="false" visible="eq(-7,true)" />

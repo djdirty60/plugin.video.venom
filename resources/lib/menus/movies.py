@@ -736,15 +736,12 @@ class Movies:
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		disable_player_art = control.setting('disable.player.art') == 'true'
-		hosts_mode = control.setting('hosts.mode') 
+		play_mode = control.setting('play.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		indicators = getMovieIndicators(refresh=True)
-		isPlayable = 'false'
-		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
-		elif hosts_mode != '1': isPlayable = 'true'
-		if hosts_mode == '2': playbackMenu = control.lang(32063)
+		if play_mode == '1': playbackMenu = control.lang(32063)
 		else: playbackMenu = control.lang(32064)
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
@@ -783,7 +780,7 @@ class Movies:
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				if disable_player_art and hosts_mode == '2': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
+				if disable_player_art and play_mode == '1': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
 					for k in ('clearart', 'clearlogo', 'discart'): meta.pop(k, None)
 				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape, 'clearlogo': meta.get('clearlogo', ''),
 								'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', ''), 'keyart': meta.get('keyart', '')})
@@ -818,11 +815,12 @@ class Movies:
 ####################################
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
-				item = control.item(label=labelProgress, offscreen=True)
+				try: item = control.item(label=labelProgress, offscreen=True)
+				except: item = control.item(label=labelProgress)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb})
-				item.setProperty('IsPlayable', isPlayable)
+				item.setProperty('IsPlayable', 'true')
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				resumetime = Bookmarks().get(name=label, imdb=imdb, tmdb=tmdb, year=str(year), runtime=runtime, ck=True)
 				# item.setProperty('TotalTime', str(meta['duration'])) # Adding this property causes the Kodi bookmark CM items to be added
@@ -853,7 +851,8 @@ class Movies:
 					url = '%s?action=moviePage&url=%s' % (sysaddon, quote_plus(url))
 				elif u in self.tmdb_link:
 					url = '%s?action=tmdbmoviePage&url=%s' % (sysaddon, quote_plus(url))
-				item = control.item(label=nextMenu, offscreen=True)
+				try: item = control.item(label=nextMenu, offscreen=True)
+				except: item = control.item(label=nextMenu)
 				icon = control.addonNext()
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
@@ -893,7 +892,8 @@ class Movies:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_moviesToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-				item = control.item(label=name, offscreen=True)
+				try: item = control.item(label=name, offscreen=True)
+				except: item = control.item(label=name)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 				item.addContextMenuItems(cm)

@@ -5,7 +5,6 @@
 
 from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
-# import imp
 import re
 import threading
 from time import sleep

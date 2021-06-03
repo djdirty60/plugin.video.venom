@@ -96,15 +96,15 @@ class AllDebrid:
 		url = base_url + 'pin/get?agent=%s' % user_agent
 		response = requests.get(url, timeout=self.timeout).json()
 		response = response['data']
-		control.progressDialog.create(control.lang(40056))
-		control.progressDialog.update(-1,
-				control.lang(32513) % 'https://alldebrid.com/pin/',
-				control.lang(32514) % response['pin'])
+		line = '%s[CR]%s'
+		progressDialog = control.progressDialog
+		progressDialog.create(control.lang(40056))
+		progressDialog.update(-1, line % (control.lang(32513) % 'https://alldebrid.com/pin/', control.lang(32514) % response['pin']))
 		self.check_url = response.get('check_url')
 		control.sleep(2000)
 		while not self.token:
-			if control.progressDialog.iscanceled():
-				control.progressDialog.close()
+			if progressDialog.iscanceled():
+				progressDialog.close()
 				break
 			self.auth_loop()
 		if self.token in (None, '', 'failed'): return
@@ -311,15 +311,15 @@ class AllDebrid:
 		extensions = supported_video_extensions()
 		torrent_folder = jsloads(folder)
 		links = torrent_folder['links']
-		links = [i for i in links if i['filename'].lower().endswith(tuple(extensions))]
+		# links = [i for i in links if i['filename'].lower().endswith(tuple(extensions))]
 		status_code = torrent_folder['statusCode'] 
 		file_str, downloadMenu, deleteMenu = control.lang(40047).upper(), control.lang(40048), control.lang(40050)
-
 		for count, item in enumerate(links, 1):
 			try:
 				cm = []
 				url_link = item['link']
 				name = control.strip_non_ascii_and_unprintable(item['filename'])
+				if any(value in name for value in ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']): continue
 				size = item['size']
 				display_size = float(int(size)) / 1073741824
 				label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, display_size, name)
@@ -408,10 +408,11 @@ class AllDebrid:
 			control.okDialog(title='default', message=control.lang(40017) % control.lang(40059))
 			return True
 		interval = 5
+		line = '%s[CR]%s[CR]%s'
 		line1 = '%s...' % (control.lang(40017) % control.lang(40059))
 		line2 = transfer_info['filename']
 		line3 = transfer_info['status']
-		control.progressDialog.create(control.lang(40018), line1, line2, line3)
+		control.progressDialog.create(control.lang(40018), line % (line1, line2, line3))
 		while not transfer_info['statusCode'] == 4:
 			control.sleep(1000 * interval)
 			transfer_info = self.list_transfer(transfer_id)
@@ -428,7 +429,7 @@ class AllDebrid:
 			else:
 				line3 = transfer_info['status']
 				progress = 0
-			control.progressDialog.update(progress, line2=line2, line3=line3)
+			control.progressDialog.update(progress, line % (line1, line2, line3))
 			if control.monitor.abortRequested(): return sysexit()
 			try:
 				if control.progressDialog.iscanceled():

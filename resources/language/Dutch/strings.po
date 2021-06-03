@@ -1448,7 +1448,7 @@ msgid "Preparing sources"
 msgstr ""
 
 msgctxt "#32601"
-msgid "Total"
+msgid "[COLOR cyan]Unfiltered Total: [/COLOR]  %s"
 msgstr ""
 
 msgctxt "#32602"

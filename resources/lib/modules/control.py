@@ -238,7 +238,7 @@ def notification(title=None, message=None, icon=None, time=3000, sound=(setting(
 
 def yesnoDialog(line1, line2, line3, heading=addonInfo('name'), nolabel='', yeslabel=''):
 	if isPY3:
-		message = line1 + line2 + line3
+		message = '%s[CR]%s[CR]%s' % (line1, line2, line3)
 		return dialog.yesno(heading, message, nolabel, yeslabel)
 	else: return dialog.yesno(heading, line1, line2, line3, nolabel, yeslabel)
 
@@ -346,14 +346,14 @@ def trigger_widget_refresh(): # should prob make this run only on "isVenom_widge
 	import time
 	timestr = time.strftime("%Y%m%d%H%M%S", time.gmtime())
 	homeWindow.setProperty("widgetreload", timestr)
-	homeWindow.setProperty('widgetreload-tvshows', timestr)
-	homeWindow.setProperty('widgetreload-episodes', timestr)
-	homeWindow.setProperty('widgetreload-movies', timestr)
+	# homeWindow.setProperty('widgetreload-tvshows', timestr) # does not appear used
+	# homeWindow.setProperty('widgetreload-episodes', timestr)
+	# homeWindow.setProperty('widgetreload-movies', timestr)
 	# execute('UpdateLibrary(video,/fake/path/to/force/refresh/on/home)') # make sure this is ok coupled with above
 
 def refresh_playAction(): # for venom global CM play actions
-	playAction = setting('hosts.mode')
-	autoPlay = 'true' if playAction == '2' else ''
+	play_mode = setting('play.mode')
+	autoPlay = 'true' if play_mode == '1' else ''
 	homeWindow.setProperty('plugin.video.venom.autoPlay', autoPlay)
 
 def datetime_workaround(string_date, format="%Y-%m-%d", date_only=True):

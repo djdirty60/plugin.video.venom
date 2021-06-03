@@ -335,6 +335,8 @@ class Episodes:
 				except:
 					from resources.lib.modules import log_utils
 					log_utils.error()
+				values['poster'] = item.get('poster') or showSeasons.get('poster')
+				values['season_poster'] = item.get('season_poster') or showSeasons.get('season_poster')
 				values['fanart'] = showSeasons.get('fanart')
 				values['icon'] = showSeasons.get('icon')
 				values['banner'] = showSeasons.get('banner')
@@ -729,19 +731,16 @@ class Episodes:
 		disable_player_art = control.setting('disable.player.art') == 'true'
 		try: airEnabled = control.setting('tvshows.air.enabled') if 'ForceAirEnabled' not in items[0] else 'true'
 		except: airEnabled = 'false'
-		hosts_mode = control.setting('hosts.mode')
+		play_mode = control.setting('play.mode')
 		enable_upnext = control.setting('enable.upnext') == 'true'
 		indicators = getTVShowIndicators(refresh=True)
 		isFolder = False if sysaction != 'episodes' else True
-		isPlayable = 'false'
-		if 'plugin' not in control.infoLabel('Container.PluginName'): isPlayable = 'true'
-		elif enable_upnext or hosts_mode != '1': isPlayable = 'true'
 		if airEnabled == 'true':
 			airZone, airLocation = control.setting('tvshows.air.zone'), control.setting('tvshows.air.location')
 			airFormat, airFormatDay = control.setting('tvshows.air.format'), control.setting('tvshows.air.day')
 			airFormatTime, airBold = control.setting('tvshows.air.time'), control.setting('tvshows.air.bold')
 			airLabel = control.lang(35032)
-		if hosts_mode == '2' or enable_upnext: playbackMenu = control.lang(32063)
+		if play_mode == '1' or enable_upnext: playbackMenu = control.lang(32063)
 		else: playbackMenu = control.lang(32064)
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
@@ -822,7 +821,7 @@ class Episodes:
 				icon = meta.get('icon') or season_poster or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				if disable_player_art and (hosts_mode == '2' or enable_upnext): # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
+				if disable_player_art and (play_mode == '1' or enable_upnext): # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
 					for k in ('clearart', 'clearlogo'): meta.pop(k, None)
 				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb, 'banner': banner,
 						'clearlogo': meta.get('clearlogo', ''), 'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': thumb})
@@ -882,7 +881,7 @@ class Episodes:
 								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 						except: pass
-				item.setProperty('IsPlayable', isPlayable)
+				item.setProperty('IsPlayable', 'true')
 				item.setProperty('tvshow.tmdb_id', tmdb)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				blabel = tvshowtitle + ' S%02dE%02d' % (int(season), int(episode))

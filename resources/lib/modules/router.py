@@ -570,9 +570,9 @@ def router(params):
 				else: control.player.play(url.replace(' ', '%20'))
 			else: control.player.play(url.replace(' ', '%20'))
 
-		elif action == 'play_SourceItem':
-			from resources.lib.modules import sources
-			sources.Sources().playItem(title, source)
+		# elif action == 'play_SourceItem':
+			# from resources.lib.modules import sources
+			# sources.Sources().playItem(title, source)
 
 		elif action == 'play_EpisodesList': # global context option
 			from json import dumps as jsdumps
@@ -593,7 +593,7 @@ def router(params):
 				systvshowtitle = quote_plus(tvshowtitle)
 				premiered = i['premiered']
 				sysmeta = quote_plus(jsdumps(i))
-				url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select="2"' % (
+				url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select="1"' % (
 										systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
 				try: item = control.item(label=title, offscreen=True)
 				except: item = control.item(label=title)
@@ -696,9 +696,9 @@ def router(params):
 	####################################################
 	#---Source Actions
 	####################################################
-	elif action == 'addItem':
-		from resources.lib.modules import sources
-		sources.Sources().addItem(title)
+	# elif action == 'addItem':
+		# from resources.lib.modules import sources
+		# sources.Sources().addItem(title)
 
 	elif action == 'alterSources':
 		from resources.lib.modules import sources
@@ -726,7 +726,9 @@ def router(params):
 		success = debrid_function().add_uncached_torrent(url, pack=pack)
 		if success:
 			from resources.lib.modules import sources
-			sources.Sources().playItem(title, source)
+			meta = params.get('meta')
+			items = params.get('items')
+			sources.Sources().playItem(title, items, source, meta)
 
 	####################################################
 	#---Library Actions
