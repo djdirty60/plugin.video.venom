@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 import _strptime # import _strptime to workaround python 2 bug with threads
-from sys import exit as sysexit, platform as sys_platform # something is up with argv[1] when module re-initializes for "addItem()"
+from sys import exit as sysexit, platform as sys_platform
 from time import time, sleep
 try: #Py2
 	from urllib import quote_plus, unquote
@@ -97,8 +97,9 @@ class Sources:
 				self.url = url
 				return self.errorForSources()
 
-			filter = []
+			filter = [] ; uncached_items = []
 			if control.setting('torrent.remove.uncached') == 'true':
+				uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 				filter += [i for i in items if not re.match(r'^uncached.*torrent', i['source'])]
 				if filter: pass
 					# for i in range(len(filter)): filter[i].update({'label': re.sub(r'(\d+)', '%02d' % int(i + 1), filter[i]['label'], 1)})
@@ -112,6 +113,7 @@ class Sources:
 				if not items:
 					self.url = url
 					return self.errorForSources()
+			else: uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 
 			if select is None:
 				if episode is not None and control.setting('enable.upnext') == 'true': select = '1'
@@ -127,7 +129,7 @@ class Sources:
 					# control.homeWindow.clearProperty(self.itemProperty)
 					# control.homeWindow.setProperty(self.itemProperty, jsdumps(items))
 					control.sleep(200)
-					return self.addItem(title, items, self.meta)
+					return self.sourceSelect(title, items, uncached_items, self.meta)
 				else: url = self.sourcesAutoPlay(items)
 
 			if url == 'close://' or url is None:
@@ -139,7 +141,7 @@ class Sources:
 			log_utils.error()
 			control.cancelPlayback()
 
-	def addItem(self, title, items, meta):
+	def sourceSelect(self, title, items, uncached_items, meta):
 		try:
 			control.hide()
 			control.playlist.clear()
@@ -147,7 +149,7 @@ class Sources:
 				control.sleep(200)
 				control.hide()
 				sysexit()
-			# listItem_FolderPath = control.infoLabel('ListItem.FolderPath') # could be used to determin if venom, library, or TMDb Helper is selected ListItem for meta retrieval
+			# control.infoLabel('ListItem.FolderPath') # could be used to determin if venom, library, or TMDb Helper is selected ListItem for meta retrieval
 
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
 			self.imdb_user = control.setting('imdb.user').replace('ur', '')
@@ -171,7 +173,7 @@ class Sources:
 ##################
 			self.meta = meta
 		except:
-			log_utils.error('Error addItem: ')
+			log_utils.error('Error sourceSelect(): ')
 
 		def checkLibMeta(): # check Kodi db for meta for library playback.
 			from resources.lib.modules import py_tools
@@ -186,8 +188,10 @@ class Sources:
 				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
 				meta = py_tools.ensure_text(meta, errors='ignore')
 				meta = jsloads(meta)['result']['movies']
-				t = cleantitle.get(self.title)
-				meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
+				# t = cleantitle.get(self.title)
+				t = cleantitle.get(self.title.replace('&', 'and'))
+				# meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
+				meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
 				if meta: meta = meta[0]
 				else: raise Exception()
 				if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
@@ -207,8 +211,10 @@ class Sources:
 				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
 				show_meta = py_tools.ensure_text(show_meta, errors='ignore')
 				show_meta = jsloads(show_meta)['result']['tvshows']
-				t = cleantitle.get(self.title)
-				show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
+				# t = cleantitle.get(self.title)
+				t = cleantitle.get(self.title.replace('&', 'and'))
+				# show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
+				show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
 				if show_meta: show_meta = show_meta[0]
 				else: raise Exception()
 				tvshowid = show_meta['tvshowid']
@@ -232,16 +238,20 @@ class Sources:
 			except:
 				log_utils.error()
 				meta = ''
-		if self.meta is None:
+		# if self.meta is None:
+		if self.meta is None or 'videodb' in control.infoLabel('ListItem.FolderPath'):
 			self.meta = checkLibMeta()
 		try:
 			def sourcesDirMeta(metadata):
 				if not metadata: return metadata
-				allowed = ['mediatype', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'plot', 'duration', 'mpaa', 'season', 'episode']
+				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'plot', 'duration', 'mpaa', 'season', 'episode']
 				return {k: v for k, v in control.iteritems(metadata) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
 
-			window = SourceResultsXML('source_results.xml', control.addonPath(control.addonId()), results=items, meta=self.meta)
+			if items == uncached_items:
+				from resources.lib.windows.uncached_results import UncachedResultsXML
+				window = UncachedResultsXML('uncached_results.xml', control.addonPath(control.addonId()), uncached=uncached_items, meta=self.meta)
+			else: window = SourceResultsXML('source_results.xml', control.addonPath(control.addonId()), results=items, uncached=uncached_items, meta=self.meta)
 			action, chosen_source = window.run()
 			del window
 			if action == 'play_Item' and self.uncached_chosen != True:
@@ -249,7 +259,8 @@ class Sources:
 			else:
 				control.cancelPlayback()
 		except:
-			log_utils.error('Error addItem: ')
+			log_utils.error('Error sourceSelect(): ')
+			control.cancelPlayback()
 
 	def playItem(self, title, items, chosen_source, meta):
 		try:
@@ -281,7 +292,7 @@ class Sources:
 			progressDialog.create(header, '')
 			for i in range(len(items)):
 				try:
-					label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
+					label = '[COLOR %s]%s[CR]%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
 					try:
 						if progressDialog.iscanceled(): break
 						progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -795,7 +806,7 @@ class Sources:
 			progressDialog.create(header, '')
 		except: pass
 		for i in range(len(items)):
-			label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
+			label = '[COLOR %s]%s[CR]%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
 			try:
 				if progressDialog.iscanceled(): break
 				progressDialog.update(int((100 / float(len(items))) * i), label)

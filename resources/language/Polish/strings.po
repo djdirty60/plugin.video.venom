@@ -10,14 +10,6 @@
 # Translators:
 # Translators:
 # Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
 # Daniel Szurgot, 2015
 # Ghuthek, 2015-2016
 # Ghuthek, 2016-2017
@@ -37,6 +29,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: pl\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>=14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+
+
+msgctxt "#32000"
+msgid "Collections"
+msgstr ""
 
 msgctxt "#32001"
 msgid "Movies"
@@ -331,8 +328,279 @@ msgid "[B]TRAKT[/B] : Authorize"
 msgstr "[B]TRAKT[/B]: Autoryzacja"
 
 msgctxt "#32074"
-msgid "[B]HELP[/B]"
-msgstr "[B]POMOC[/B]"
+msgid "Source Options"
+msgstr ""
+
+msgctxt "#32075"
+msgid "Auto update User Lists"
+msgstr ""
+
+msgctxt "#32076"
+msgid "Removing metacache results in excessive api requests and\nsystem slow down.\nAre you sure?"
+msgstr ""
+
+msgctxt "#32077"
+msgid "This also wipes out your metacache and all meta must be\nfetched from scratch, resulting in excessive api requests\nand system slow down.\nBest to only use this unless ABSOLUTELY necessary.\nAre you sure?"
+msgstr ""
+
+msgctxt "#32078"
+msgid "Show general notifications"
+msgstr ""
+
+msgctxt "#32079"
+msgid "Enable File Size Limit"
+msgstr ""
+
+msgctxt "#32080"
+msgid "File Size limit (GB)"
+msgstr ""
+
+msgctxt "#32081"
+msgid "Enable"
+msgstr ""
+
+msgctxt "#32082"
+msgid "Trakt: Scrobble Reset"
+msgstr ""
+
+msgctxt "#32083"
+msgid "Clean Settings file: [B]VENOM[/B] and [B]FENOMSCRAPERS[/B]"
+msgstr ""
+
+msgctxt "#32084"
+msgid "{} Obsolete Settings Entries Removed"
+msgstr ""
+
+msgctxt "#32085"
+msgid "Updating Library..."
+msgstr ""
+
+msgctxt "#32086"
+msgid "Libray Update Complete"
+msgstr ""
+
+msgctxt "#32087"
+msgid "View Types Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32088"
+msgid "Trakt: Scrobbled"
+msgstr ""
+
+msgctxt "#32089"
+msgid "All Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32090"
+msgid "Provider Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32091"
+msgid "Metadata Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32092"
+msgid "Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32093"
+msgid "Search History Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32094"
+msgid "Search Phrase Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32095"
+msgid "Resume Point source:"
+msgstr ""
+
+msgctxt "#32096"
+msgid "Trakt scrobbles"
+msgstr ""
+
+msgctxt "#32097"
+msgid "Enable scrobbling"
+msgstr ""
+
+msgctxt "#32098"
+msgid "NOTE: Do Not enable this if you scrobble through the Trakt add-on.[CR]Also note that only scrobble on Stop currently works."
+msgstr ""
+
+msgctxt "#32099"
+msgid "Show notification on scrobble"
+msgstr ""
+
+msgctxt "#32100"
+msgid "Bookmarks Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32101"
+msgid "Bookmarks Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32102"
+msgid "Bookmark Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32103"
+msgid "strm files written but library cannot be updated"
+msgstr ""
+
+msgctxt "#32104"
+msgid "strm file written but library cannot be updated"
+msgstr ""
+
+msgctxt "#32105"
+msgid "Trakt Movies Sync Complete"
+msgstr ""
+
+msgctxt "#32106"
+msgid "Update Service is disabled. Please enable and try again"
+msgstr ""
+
+msgctxt "#32107"
+msgid "Your Library Folders do not exist in Kodi Sources. Please run setup"
+msgstr ""
+
+msgctxt "#32108"
+msgid "No Shows in Addon Folder"
+msgstr ""
+
+msgctxt "#32109"
+msgid "No Episode Updates Found"
+msgstr ""
+
+msgctxt "#32110"
+msgid "Restart Kodi for changes is required"
+msgstr ""
+
+msgctxt "#32111"
+msgid "Folders Failed to add to Kodi Sources"
+msgstr ""
+
+msgctxt "#32112"
+msgid "Library Auto Update Service is now turned off"
+msgstr ""
+
+msgctxt "#32113"
+msgid "No Movie lists imports found"
+msgstr ""
+
+msgctxt "#32114"
+msgid "My Accounts sync complete"
+msgstr ""
+
+msgctxt "#32115"
+msgid "Error Cleaning Settings.xml. Old settings.xml files Restored."
+msgstr ""
+
+msgctxt "#32116"
+msgid "This feature is only supported in kodi 18 and beyond"
+msgstr ""
+
+msgctxt "#32117"
+msgid "Added to Favorites"
+msgstr ""
+
+msgctxt "#32118"
+msgid "Removed From Favorites"
+msgstr ""
+
+msgctxt "#32119"
+msgid "Playlist is empty"
+msgstr ""
+
+msgctxt "#32120"
+msgid "Title already in playlist"
+msgstr ""
+
+msgctxt "#32121"
+msgid "%s Added to playlist"
+msgstr ""
+
+msgctxt "#32122"
+msgid "%s Removed from playlist"
+msgstr ""
+
+msgctxt "#32123"
+msgid "Not found in playlist"
+msgstr ""
+
+msgctxt "#32124"
+msgid "No TVShow lists imports found"
+msgstr ""
+
+msgctxt "#32125"
+msgid "Scraper Preperation"
+msgstr ""
+
+msgctxt "#32126"
+msgid "Furk Username"
+msgstr ""
+
+msgctxt "#32127"
+msgid "Furk Password"
+msgstr ""
+
+msgctxt "#32128"
+msgid "Furk API Key"
+msgstr ""
+
+msgctxt "#32129"
+msgid "Enable Furk.net Menu"
+msgstr ""
+
+msgctxt "#32130"
+msgid "Trakt: Scrobble Failed"
+msgstr ""
+
+msgctxt "#32131"
+msgid "Trakt: Scrobble Reset Failed"
+msgstr ""
+
+msgctxt "#32132"
+msgid ""
+msgstr ""
+
+msgctxt "#32133"
+msgid ""
+msgstr ""
+
+msgctxt "#32134"
+msgid ""
+msgstr ""
+
+msgctxt "#32135"
+msgid ""
+msgstr ""
+
+msgctxt "#32136"
+msgid ""
+msgstr ""
+
+msgctxt "#32137"
+msgid ""
+msgstr ""
+
+msgctxt "#32138"
+msgid ""
+msgstr ""
+
+msgctxt "#32139"
+msgid ""
+msgstr ""
+
+msgctxt "#32140"
+msgid ""
+msgstr ""
+
+
+
+
+
+
+
 
 msgctxt "#32301"
 msgid "Enabled"
@@ -574,9 +842,21 @@ msgctxt "#32360"
 msgid "Providers Language"
 msgstr "Język źródeł"
 
+msgctxt "#32361"
+msgid "[B]VENOM[/B] : Reset View Types"
+msgstr ""
+
+msgctxt "#32362"
+msgid "[B]SETTINGS[/B] : Navigation"
+msgstr ""
+
 msgctxt "#32363"
 msgid "Remove HEVC sources"
 msgstr "Remove HEVC sources"
+
+msgctxt "#32364"
+msgid "Disable CloudFlare protected providers"
+msgstr ""
 
 msgctxt "#32365"
 msgid " (IMDb)"
@@ -1134,6 +1414,34 @@ msgctxt "#32503"
 msgid "Resume"
 msgstr "Wznów"
 
+msgctxt "#32504"
+msgid ""
+msgstr ""
+
+msgctxt "#32505"
+msgid "[B][COLOR red]UpNext[/COLOR][/B] Settings"
+msgstr ""
+
+msgctxt "#32506"
+msgid "[B][COLOR red]Venom Global Context[/COLOR][/B] Settings"
+msgstr ""
+
+msgctxt "#32507"
+msgid ""
+msgstr ""
+
+msgctxt "#32508"
+msgid ""
+msgstr ""
+
+msgctxt "#32509"
+msgid ""
+msgstr ""
+
+msgctxt "#32510"
+msgid "[B]Cache Functions[/B]"
+msgstr ""
+
 msgctxt "#32511"
 msgid "An account already exists."
 msgstr "Konto już istnieje."
@@ -1182,6 +1490,38 @@ msgctxt "#32522"
 msgid "Remove from [B]%s[/B]"
 msgstr "Usuń z [B]%s[/B]"
 
+msgctxt "#32523"
+msgid ""
+msgstr ""
+
+msgctxt "#32524"
+msgid ""
+msgstr ""
+
+msgctxt "#32525"
+msgid ""
+msgstr ""
+
+msgctxt "#32526
+msgid ""
+msgstr ""
+
+msgctxt "#32527"
+msgid ""
+msgstr ""
+
+msgctxt "#32528"
+msgid ""
+msgstr ""
+
+msgctxt "#32529"
+msgid ""
+msgstr ""
+
+msgctxt "#32530"
+msgid ""
+msgstr ""
+
 msgctxt "#32531"
 msgid "An account already exists."
 msgstr "Konto już istnieje."
@@ -1191,12 +1531,12 @@ msgid "Do you want to reset?"
 msgstr "Czy chcesz zrestartować? "
 
 msgctxt "#32533"
-msgid "1) Visit : [COLOR skyblue]%s[/COLOR]"
-msgstr "1) Odwiedź : [COLOR skyblue]%s[/COLOR]"
+msgid ""
+msgstr ""
 
 msgctxt "#32534"
-msgid "2) When prompted enter : [COLOR skyblue]%s[/COLOR]"
-msgstr "2) Po pojawieniu się monitu wpisz : [COLOR skyblue]%s[/COLOR]"
+msgid ""
+msgstr ""
 
 msgctxt "#32535"
 msgid "Play Random"
@@ -1743,7 +2083,7 @@ msgid "[B]VENOM[/B] : Clean library..."
 msgstr ""
 
 msgctxt "#32677"
-msgid "    Add folders to Kodi Sources Now..."
+msgid "Add folders to Kodi Sources Now..."
 msgstr ""
 
 msgctxt "#32678"
@@ -1781,10 +2121,6 @@ msgstr ""
 msgctxt "#32686"
 msgid ""
 msgstr ""
-
-
-
-
 
 
 
@@ -2108,6 +2444,9 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#33564"
 msgid "Default"
 msgstr ""
@@ -2260,6 +2599,9 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#33648"
 msgid "Date Sorting"
 msgstr ""
@@ -2393,6 +2735,8 @@ msgstr ""
 
 
 
+
+
 msgctxt "#33786"
 msgid "No Trakt Result"
 msgstr ""
@@ -2400,6 +2744,8 @@ msgstr ""
 msgctxt "#33787"
 msgid "Trakt Rate Limit Reached"
 msgstr ""
+
+
 
 
 
@@ -2421,9 +2767,16 @@ msgstr ""
 
 
 
+
+
+
+
 msgctxt "#33942"
 msgid "The Venom library path does not appear in the Kodi file sources and automatic library updates are therefore not possible. Please manually add the library path from Venom's settings to the Kodi file sources. If the path in the settings were not changed, Venom will use a directory in the addon profile to store library data."
 msgstr ""
+
+
+
 
 
 
@@ -2582,6 +2935,8 @@ msgstr ""
 
 
 
+
+
 msgctxt "#35187"
 msgid "Rating"
 msgstr ""
@@ -2626,9 +2981,14 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#35308"
 msgid "Finish Watching"
 msgstr ""
+
+
 
 
 
@@ -2674,6 +3034,8 @@ msgstr ""
 msgctxt "#35400"
 msgid ""
 msgstr ""
+
+
 
 
 
@@ -3152,6 +3514,9 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#40000"
 msgid ""
 msgstr ""
@@ -3241,7 +3606,7 @@ msgid "Authentication with All-Debrid has failed, please try again"
 msgstr ""
 
 msgctxt "#40022"
-msgid "   File Name Format"
+msgid "File Name Format"
 msgstr ""
 
 msgctxt "#40023"
@@ -3269,7 +3634,7 @@ msgid "Enabled Up Next Addon Integration"
 msgstr ""
 
 msgctxt "#40029"
-msgid "    Up Next Notification Time"
+msgid "Up Next Notification Time"
 msgstr ""
 
 msgctxt "#40030"
@@ -3409,7 +3774,7 @@ msgid "Months to Rollback for Hide in Cinema"
 msgstr ""
 
 msgctxt "#40064"
-msgid "   Enable Christmas Collections"
+msgid "Enable Christmas Collections"
 msgstr ""
 
 msgctxt "#40065"

@@ -246,10 +246,10 @@ class Premiumize:
 		transfer_id = transfer_id['id']
 		transfer_info = _transfer_info(transfer_id)
 		if not transfer_info: return _return_failed()
-		if pack:
-			control.hide()
-			control.okDialog(title='default', message=control.lang(40017) % control.lang(40057))
-			return True
+		# if pack:
+			# control.hide()
+			# control.okDialog(title='default', message=control.lang(40017) % control.lang(40057))
+			# return True
 		interval = 5
 		line = '%s[CR]%s[CR]%s'
 		line1 = '%s...' % (control.lang(40017) % control.lang(40057))

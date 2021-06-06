@@ -55,7 +55,7 @@
 		<setting id="navi.movie.trakt.recommended" type="bool" label="32445" default="true" />
 		<setting id="navi.movie.imdb.featured" type="bool" label="32447" default="true" />
 		<setting id="navi.movie.collections" type="bool" label="32000" default="true" />
-		<setting id="navi.xmascollections" type="bool" label="40064" enable="eq(-1,true)" default="false" />
+		<setting id="navi.xmascollections" subsetting="true" type="bool" label="40064" enable="eq(-1,true)" default="false" />
 		<setting id="navi.movie.imdb.oscarwinners" type="bool" label="32452" default="true" />
 		<setting id="navi.movie.imdb.oscarnominees" type="bool" label="32454" default="true" />
 		<setting id="navi.movie.imdb.genres" type="bool" label="32456" default="true" />
@@ -99,7 +99,7 @@
 		<setting type="action" label="40027" action="InstallAddon(service.upnext)" option="close" visible="!System.HasAddon(service.upnext)" />
 		<setting id="enable.upnext" type="bool" default="false" label="40028" visible="System.HasAddon(service.upnext)" />
 		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=upnext)" />
-		<setting id="upnext.time" type="slider" enable="eq(-2,true)" visible="eq(-2,true)" default="60" label="40029" option="int" range="10,60" />
+		<setting id="upnext.time" type="slider" subsetting="true" enable="eq(-2,true)" visible="eq(-2,true)" default="60" label="40029" option="int" range="10,60" />
 		<setting id="auto.playlistcreate" type="bool" label="40030" default="true" />
 		<setting type="lsep" label="32375" />
 		<setting id="tvshows.networks.view" type="enum" label="32376" lvalues="32377|32378" default="1" />
@@ -283,7 +283,7 @@
 		<setting id="library.movie" type="folder" label="32543" default="special://userdata/addon_data/plugin.video.venom/Movies" />
 		<setting id="library.tv" type="folder" label="32544" default="special://userdata/addon_data/plugin.video.venom/TVShows" />
 		<!-- <setting id="library.tv.scraper" type="select" label="   TV Show scraper" values="TMDb|TVDb" default="TVDb" /> -->
-		<setting type="action" label="32677" action="RunPlugin(plugin://plugin.video.venom/?action=library_setup)" />
+		<setting type="action" label="32677" subsetting="true" action="RunPlugin(plugin://plugin.video.venom/?action=library_setup)" />
 		<setting type="lsep" label="32542" />
 		<setting id="library.service.update" type="bool" label="32545" default="false" />
 		<setting id="library.service.notification" type="bool" label="32546" enable="eq(-1,true)" default="true" />
@@ -304,7 +304,7 @@
 		<setting type="sep" />
 		<setting id="movie.download.path" type="folder" label="32349" enable="eq(-2,true)" default="" />
 		<setting id="tv.download.path" type="folder" label="32350" enable="eq(-3,true)" default="" />
-		<setting id="downloads.file.format" type="select" label="40022" lvalues="40023|40024" default="1" enable="eq(-4,true)" />
+		<setting id="downloads.file.format" type="select" subsetting="true" label="40022" lvalues="40023|40024" default="1" enable="eq(-4,true)" />
 		<setting type="sep" />
 		<setting id="downloads.message1" type="text" label="32351" enable="false" />
 		<setting id="downloads.message2" type="text" label="32352" default="" enable="false" />

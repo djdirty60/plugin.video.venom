@@ -56,7 +56,7 @@ def getTrakt(url, post=None, extended=False):
 			control.notification(title=32315, message=33675)
 			return None
 		elif result and code in ['404']:
-			log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGDEBUG)
+			log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
 			return None
 		elif result and code in ['429']:
 			if 'Retry-After' in result[2]:
@@ -128,7 +128,7 @@ def re_auth(headers):
 			log_utils.log('Trakt Token Successfully Re-Authorized', level=log_utils.LOGDEBUG)
 			return True
 		else:
-			log_utils.log('Error while Re-Authorizing Trakt Token: %s' % str(result[0]), level=log_utils.LOGDEBUG)
+			log_utils.log('Error while Re-Authorizing Trakt Token: %s' % str(result[0]), level=log_utils.LOGWARNING)
 			return False
 	except:
 		log_utils.error()
@@ -930,8 +930,11 @@ def scrobbleMovie(imdb, tmdb, watched_percent):
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		items = [{'progress': watched_percent, 'paused_at': timestamp, 'type': 'movie', 'movie': {'ids': {'imdb': imdb, 'tmdb': tmdb}}}]
 		traktsync.insert_bookmarks(items, new_scrobble=True)
-		if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
-		return getTrakt('/scrobble/pause', {"movie": {"ids": {"imdb": imdb}}, "progress": watched_percent})
+		success = getTrakt('/scrobble/pause', {"movie": {"ids": {"imdb": imdb}}, "progress": watched_percent})
+		if success:
+			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
+		else:
+			control.notification(message=32130)
 	except:
 		log_utils.error()
 
@@ -941,8 +944,11 @@ def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		items = [{'progress': watched_percent, 'paused_at': timestamp, 'type': 'episode', 'episode': {'season': season, 'number': episode}, 'show': {'ids': {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb}}}]
 		traktsync.insert_bookmarks(items, new_scrobble=True)
-		if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
-		return getTrakt('/scrobble/pause', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": watched_percent})
+		success = getTrakt('/scrobble/pause', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": watched_percent})
+		if success:
+			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
+		else:
+			control.notification(message=32130)
 	except:
 		log_utils.error()
 
@@ -952,17 +958,20 @@ def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True):
 		type = 'movie' if not episode else 'episode'
 		if type == 'movie':
 			items = [{'type': 'movie', 'movie': {'ids': {'imdb': imdb}}}]
-			getTrakt('/scrobble/start', {"movie": {"ids": {"imdb": imdb}}, "progress": 0})
+			success = getTrakt('/scrobble/start', {"movie": {"ids": {"imdb": imdb}}, "progress": 0})
 		else:
 			items = [{'type': 'episode', 'episode': {'season': season, 'number': episode}, 'show': {'ids': {'imdb': imdb, 'tvdb': tvdb}}}]
-			getTrakt('/scrobble/start', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": 0})
+			success = getTrakt('/scrobble/start', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": 0})
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		items[0].update({'paused_at': timestamp})
 		traktsync.delete_bookmark(items)
 		control.hide()
 		if refresh: control.refresh()
-		control.trigger_widget_refresh()
-		if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32082)
+		# control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh
+		if success:
+			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32082)
+		else:
+			control.notification(message=32131)
 	except:
 		log_utils.error()
 

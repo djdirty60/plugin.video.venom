@@ -575,7 +575,7 @@ class RealDebrid:
 					self.add_torrent_select(torrent_id, torrent_keys)
 					control.okDialog(title='default', message=control.lang(40017) % control.lang(40058))
 					control.hide()
-					return True
+					return True # returning true here causes "success" to be returned and resolve runs on  non valid link
 				except: return _return_failed()
 			else:
 				try:

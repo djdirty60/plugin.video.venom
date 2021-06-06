@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window>
-	<defaultcontrol>2000</defaultcontrol>
+	<defaultcontrol>2001</defaultcontrol>
 	<controls>
 		<control type="image">
 			<left>0</left>
@@ -17,13 +17,13 @@
 			<control type="textbox">
 				<left>50</left>
 				<top>110</top>
-				<width>300</width>
+				<width>400</width>
 				<height>40</height>
 				<font>font14</font>
 				<textcolor>white</textcolor>
 				<align>left</align>
 				<aligny>bottom</aligny>
-				<label>[COLOR lightblue]$INFO[Window().Property(venom.total_results)] Total Sources[/COLOR]</label>
+				<label>[COLOR lightblue]$INFO[Window().Property(venom.total_results)] Total Uncached Sources[/COLOR]</label>
 			</control>
 			<control type="image">
 				<aspectratio align="center" aligny="center">keep</aspectratio>
@@ -80,7 +80,7 @@
 				<textcolor>white</textcolor>
 				<autoscroll time="2000" delay="5500" repeat="5000"></autoscroll>
 			</control>
-			<control type="list" id="2000">
+			<control type="list" id="2001">
 				<description>Source Select List</description>
 				<onright>2001</onright>
 				<viewtype>list</viewtype>
@@ -116,19 +116,6 @@
 						<label>[B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.name)][/B]</label>
 					</control>
 					<control type="label">
-						<description>Line2 cached torrents</description>
-						<left>180</left>
-						<top>50</top>
-						<width>1170</width>
-						<height>25</height>
-						<font>font12</font>
-						<textcolor>white</textcolor>
-						<align>left</align>
-						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
-					</control>
-					<control type="label">
 						<description>Line2 uncached torrents</description>
 						<left>180</left>
 						<top>50</top>
@@ -141,32 +128,6 @@
 						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   SEEDERS: $INFO[ListItem.Property(venom.seeders)]</label>
 						<visible>String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
 					</control>
-					<control type="label">
-						<description>Line2 direct links</description>
-						<left>180</left>
-						<top>50</top>
-						<width>1170</width>
-						<height>25</height>
-						<font>font12</font>
-						<textcolor>white</textcolor>
-						<align>left</align>
-						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]</label>
-						<visible>String.Contains(ListItem.Property(venom.source),DIRECT)</visible>
-					</control>
-					<control type="label">
-						<description>Line2 hosters</description>
-						<left>180</left>
-						<top>50</top>
-						<width>1170</width>
-						<height>25</height>
-						<font>font12</font>
-						<textcolor>white</textcolor>
-						<align>left</align>
-						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   HOSTER</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),TORRENT)</visible>
-					</control>
 				</itemlayout>
 				<focusedlayout height="100" width="1325">
 					<control type="image">
@@ -175,14 +136,6 @@
 						<width>1350</width>
 						<height>100</height>
 						<texture colordiffuse="">common/white.png</texture>
-					</control>
-					<control type="image">
-						<left>0</left>
-						<top>0</top>
-						<width>1350</width>
-						<height>100</height>
-						<texture colordiffuse="blue">common/white.png</texture>
-						<visible>!Control.HasFocus(2000)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -207,19 +160,6 @@
 						<label>[B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.name)][/B]</label>
 					</control>
 					<control type="label">
-						<description>Line2 cached torrents</description>
-						<left>180</left>
-						<top>50</top>
-						<width>1170</width>
-						<height>25</height>
-						<font>font12</font>
-						<textcolor>black</textcolor>
-						<align>left</align>
-						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
-					</control>
-					<control type="label">
 						<description>Line2 uncached torrents</description>
 						<left>180</left>
 						<top>50</top>
@@ -232,51 +172,7 @@
 						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   SEEDERS: $INFO[ListItem.Property(venom.seeders)]</label>
 						<visible>String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
 					</control>
-					<control type="label">
-						<description>Line2 direct links</description>
-						<left>180</left>
-						<top>50</top>
-						<width>1170</width>
-						<height>25</height>
-						<font>font12</font>
-						<textcolor>black</textcolor>
-						<align>left</align>
-						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]</label>
-						<visible>String.Contains(ListItem.Property(venom.source),DIRECT)</visible>
-					</control>
-					<control type="label">
-						<description>Line2 hosters</description>
-						<left>180</left>
-						<top>50</top>
-						<width>1170</width>
-						<height>25</height>
-						<font>font12</font>
-						<textcolor>black</textcolor>
-						<align>left</align>
-						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   HOSTER</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),TORRENT)</visible>
-					</control>
 				</focusedlayout>
-			</control>
-			<control type="group">
-				<left>1435</left>
-				<top>30</top>
-					<control type="button" id="2001">
-						<description>View Uncached Torrents button</description>
-						<onleft>2000</onleft>
-						<width>300</width>
-						<height>60</height>
-						<textoffsetx>5</textoffsetx>
-						<texturefocus colordiffuse="">common/white.png</texturefocus>
-						<texturenofocus colordiffuse="blue">common/white.png</texturenofocus>
-						<label>$ADDON[plugin.video.venom 32639]</label>
-						<font>font12</font>
-						<align>center</align>
-						<textcolor>white</textcolor>
-						<focusedcolor>black</focusedcolor>
-					</control>
 			</control>
 			<control type="grouplist" id="2002">
 				<description>Info icons group list control</description>

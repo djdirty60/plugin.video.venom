@@ -21,7 +21,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Venom\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2016-08-01 02:03+0000\n"
+"PO-Revision-Date: 2020-08-01 02:03+0000\n"
 "Last-Translator: lambda81\n"
 "Language-Team: English (http://www.transifex.com/)\n"
 "MIME-Version: 1.0\n"
@@ -552,11 +552,11 @@ msgid "Enable Furk.net Menu"
 msgstr ""
 
 msgctxt "#32130"
-msgid ""
+msgid "Trakt: Scrobble Failed"
 msgstr ""
 
 msgctxt "#32131"
-msgid ""
+msgid "Trakt: Scrobble Reset Failed"
 msgstr ""
 
 msgctxt "#32132"
@@ -594,6 +594,9 @@ msgstr ""
 msgctxt "#32140"
 msgid ""
 msgstr ""
+
+
+
 
 
 
@@ -1487,6 +1490,38 @@ msgctxt "#32522"
 msgid "Remove from [B]%s[/B]"
 msgstr ""
 
+msgctxt "#32523"
+msgid ""
+msgstr ""
+
+msgctxt "#32524"
+msgid ""
+msgstr ""
+
+msgctxt "#32525"
+msgid ""
+msgstr ""
+
+msgctxt "#32526
+msgid ""
+msgstr ""
+
+msgctxt "#32527"
+msgid ""
+msgstr ""
+
+msgctxt "#32528"
+msgid ""
+msgstr ""
+
+msgctxt "#32529"
+msgid ""
+msgstr ""
+
+msgctxt "#32530"
+msgid ""
+msgstr ""
+
 msgctxt "#32531"
 msgid ""
 msgstr ""
@@ -1896,7 +1931,7 @@ msgid "Minimum Seeders"
 msgstr ""
 
 msgctxt "#32639"
-msgid ""
+msgid "View Uncached Torrents"
 msgstr ""
 
 msgctxt "#32640"
@@ -2048,7 +2083,7 @@ msgid "[B]VENOM[/B] : Clean library..."
 msgstr ""
 
 msgctxt "#32677"
-msgid "    Add folders to Kodi Sources Now..."
+msgid "Add folders to Kodi Sources Now..."
 msgstr ""
 
 msgctxt "#32678"
@@ -2086,10 +2121,6 @@ msgstr ""
 msgctxt "#32686"
 msgid ""
 msgstr ""
-
-
-
-
 
 
 
@@ -2413,6 +2444,9 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#33564"
 msgid "Default"
 msgstr ""
@@ -2565,6 +2599,9 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#33648"
 msgid "Date Sorting"
 msgstr ""
@@ -2698,6 +2735,8 @@ msgstr ""
 
 
 
+
+
 msgctxt "#33786"
 msgid "No Trakt Result"
 msgstr ""
@@ -2705,6 +2744,8 @@ msgstr ""
 msgctxt "#33787"
 msgid "Trakt Rate Limit Reached"
 msgstr ""
+
+
 
 
 
@@ -2726,9 +2767,16 @@ msgstr ""
 
 
 
+
+
+
+
 msgctxt "#33942"
 msgid "The Venom library path does not appear in the Kodi file sources and automatic library updates are therefore not possible. Please manually add the library path from Venom's settings to the Kodi file sources. If the path in the settings were not changed, Venom will use a directory in the addon profile to store library data."
 msgstr ""
+
+
+
 
 
 
@@ -2887,6 +2935,8 @@ msgstr ""
 
 
 
+
+
 msgctxt "#35187"
 msgid "Rating"
 msgstr ""
@@ -2931,9 +2981,14 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#35308"
 msgid "Finish Watching"
 msgstr ""
+
+
 
 
 
@@ -2979,6 +3034,8 @@ msgstr ""
 msgctxt "#35400"
 msgid ""
 msgstr ""
+
+
 
 
 
@@ -3457,6 +3514,9 @@ msgstr ""
 
 
 
+
+
+
 msgctxt "#40000"
 msgid ""
 msgstr ""
@@ -3546,7 +3606,7 @@ msgid "Authentication with All-Debrid has failed, please try again"
 msgstr ""
 
 msgctxt "#40022"
-msgid "   File Name Format"
+msgid "File Name Format"
 msgstr ""
 
 msgctxt "#40023"
@@ -3574,7 +3634,7 @@ msgid "Enabled Up Next Addon Integration"
 msgstr ""
 
 msgctxt "#40029"
-msgid "    Up Next Notification Time"
+msgid "Up Next Notification Time"
 msgstr ""
 
 msgctxt "#40030"
@@ -3714,7 +3774,7 @@ msgid "Months to Rollback for Hide in Cinema"
 msgstr ""
 
 msgctxt "#40064"
-msgid "   Enable Christmas Collections"
+msgid "Enable Christmas Collections"
 msgstr ""
 
 msgctxt "#40065"

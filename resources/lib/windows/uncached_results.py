@@ -13,13 +13,12 @@ from resources.lib.modules.source_utils import getFileType
 from resources.lib.windows.base import BaseDialog
 
 
-class SourceResultsXML(BaseDialog):
+class UncachedResultsXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(SourceResultsXML, self).__init__(self, args)
-		self.window_id = 2000
-		self.results = kwargs.get('results')
+		super(UncachedResultsXML, self).__init__(self, args)
+		self.window_id = 2001
 		self.uncached = kwargs.get('uncached')
-		self.total_results = str(len(self.results))
+		self.total_results = str(len(self.uncached))
 		self.meta = kwargs.get('meta')
 		self.info = None
 		self.cm = None
@@ -27,7 +26,7 @@ class SourceResultsXML(BaseDialog):
 		self.set_properties()
 
 	def onInit(self):
-		super(SourceResultsXML, self).onInit()
+		super(UncachedResultsXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
@@ -49,9 +48,6 @@ class SourceResultsXML(BaseDialog):
 				syssource = quote_plus(chosen_source)
 				self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=sourceInfo&source=%s)' % syssource)
 			if action_id in self.selection_actions:
-				focus_id = self.getFocusId()
-				if focus_id == 2001:
-					return self.load_uncachedTorrents()
 				chosen_source = self.item_list[self.get_position(self.window_id)]
 				source = chosen_source.getProperty('venom.source')
 				if 'UNCACHED' in source:
@@ -66,17 +62,18 @@ class SourceResultsXML(BaseDialog):
 					try: new_sysname = quote_plus(chosen_source.getProperty('venom.name'))
 					except: new_sysname = sysname
 					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=cacheTorrent&caller=%s&type=%s&title=%s&items=%s&url=%s&source=%s&meta=%s)' %
-											(debrid, link_type, sysname, quote_plus(jsdumps(self.results)), quote_plus(chosen_source.getProperty('venom.url')), quote_plus(source_dict), quote_plus(jsdumps(self.meta))))
+											(debrid, link_type, sysname, quote_plus(jsdumps(self.uncached)), quote_plus(chosen_source.getProperty('venom.url')), quote_plus(source_dict), quote_plus(jsdumps(self.meta))))
 					self.selected = (None, '')
 				else:
-					self.selected = ('play_Item', chosen_source)
+					# self.selected = ('play_Item', chosen_source)
+					self.selected = (None, '')
 				return self.close()
 			elif action_id in self.context_actions:
 				chosen_source = self.item_list[self.get_position(self.window_id)]
 				source_dict = chosen_source.getProperty('venom.source_dict')
 				cm_list = [('[B]Additional Link Info[/B]', 'sourceInfo')]
-				if 'cached (pack)' in source_dict:
-					cm_list += [('[B]Browse Debrid Pack[/B]', 'showDebridPack')]
+				# if 'cached (pack)' in source_dict:
+					# cm_list += [('[B]Browse Debrid Pack[/B]', 'showDebridPack')]
 				source = chosen_source.getProperty('venom.source')
 				if not 'UNCACHED' in source:
 					cm_list += [('[B]Download[/B]', 'download')]
@@ -128,7 +125,7 @@ class SourceResultsXML(BaseDialog):
 
 	def make_items(self):
 		def builder():
-			for count, item in enumerate(self.results, 1):
+			for count, item in enumerate(self.uncached, 1):
 				try:
 					listitem = self.make_listitem()
 					quality = item.get('quality', 'SD')
@@ -192,16 +189,6 @@ class SourceResultsXML(BaseDialog):
 				self.setProperty('venom.duration', str(int(duration)))
 			else: self.setProperty('venom.duration', 'NA ')
 			self.setProperty('venom.total_results', self.total_results)
-		except:
-			from resources.lib.modules import log_utils
-			log_utils.error()
-
-	def load_uncachedTorrents(self):
-		try:
-			from resources.lib.windows.uncached_results import UncachedResultsXML
-			from resources.lib.modules.control import addonPath, addonId
-			window = UncachedResultsXML('uncached_results.xml', addonPath(addonId()), uncached=self.uncached, meta=self.meta)
-			window.run()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

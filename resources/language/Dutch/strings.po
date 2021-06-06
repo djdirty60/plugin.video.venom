@@ -328,8 +328,279 @@ msgid "[B]TRAKT[/B] : Authorize"
 msgstr "[B]TRAKT[/B]: Autoriseren"
 
 msgctxt "#32074"
-msgid "[B]HELP[/B]"
-msgstr "[B]HELP[/B]"
+msgid "Source Options"
+msgstr ""
+
+msgctxt "#32075"
+msgid "Auto update User Lists"
+msgstr ""
+
+msgctxt "#32076"
+msgid "Removing metacache results in excessive api requests and\nsystem slow down.\nAre you sure?"
+msgstr ""
+
+msgctxt "#32077"
+msgid "This also wipes out your metacache and all meta must be\nfetched from scratch, resulting in excessive api requests\nand system slow down.\nBest to only use this unless ABSOLUTELY necessary.\nAre you sure?"
+msgstr ""
+
+msgctxt "#32078"
+msgid "Show general notifications"
+msgstr ""
+
+msgctxt "#32079"
+msgid "Enable File Size Limit"
+msgstr ""
+
+msgctxt "#32080"
+msgid "File Size limit (GB)"
+msgstr ""
+
+msgctxt "#32081"
+msgid "Enable"
+msgstr ""
+
+msgctxt "#32082"
+msgid "Trakt: Scrobble Reset"
+msgstr ""
+
+msgctxt "#32083"
+msgid "Clean Settings file: [B]VENOM[/B] and [B]FENOMSCRAPERS[/B]"
+msgstr ""
+
+msgctxt "#32084"
+msgid "{} Obsolete Settings Entries Removed"
+msgstr ""
+
+msgctxt "#32085"
+msgid "Updating Library..."
+msgstr ""
+
+msgctxt "#32086"
+msgid "Libray Update Complete"
+msgstr ""
+
+msgctxt "#32087"
+msgid "View Types Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32088"
+msgid "Trakt: Scrobbled"
+msgstr ""
+
+msgctxt "#32089"
+msgid "All Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32090"
+msgid "Provider Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32091"
+msgid "Metadata Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32092"
+msgid "Cache Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32093"
+msgid "Search History Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32094"
+msgid "Search Phrase Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32095"
+msgid "Resume Point source:"
+msgstr ""
+
+msgctxt "#32096"
+msgid "Trakt scrobbles"
+msgstr ""
+
+msgctxt "#32097"
+msgid "Enable scrobbling"
+msgstr ""
+
+msgctxt "#32098"
+msgid "NOTE: Do Not enable this if you scrobble through the Trakt add-on.[CR]Also note that only scrobble on Stop currently works."
+msgstr ""
+
+msgctxt "#32099"
+msgid "Show notification on scrobble"
+msgstr ""
+
+msgctxt "#32100"
+msgid "Bookmarks Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32101"
+msgid "Bookmarks Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32102"
+msgid "Bookmark Successfully Cleared!"
+msgstr ""
+
+msgctxt "#32103"
+msgid "strm files written but library cannot be updated"
+msgstr ""
+
+msgctxt "#32104"
+msgid "strm file written but library cannot be updated"
+msgstr ""
+
+msgctxt "#32105"
+msgid "Trakt Movies Sync Complete"
+msgstr ""
+
+msgctxt "#32106"
+msgid "Update Service is disabled. Please enable and try again"
+msgstr ""
+
+msgctxt "#32107"
+msgid "Your Library Folders do not exist in Kodi Sources. Please run setup"
+msgstr ""
+
+msgctxt "#32108"
+msgid "No Shows in Addon Folder"
+msgstr ""
+
+msgctxt "#32109"
+msgid "No Episode Updates Found"
+msgstr ""
+
+msgctxt "#32110"
+msgid "Restart Kodi for changes is required"
+msgstr ""
+
+msgctxt "#32111"
+msgid "Folders Failed to add to Kodi Sources"
+msgstr ""
+
+msgctxt "#32112"
+msgid "Library Auto Update Service is now turned off"
+msgstr ""
+
+msgctxt "#32113"
+msgid "No Movie lists imports found"
+msgstr ""
+
+msgctxt "#32114"
+msgid "My Accounts sync complete"
+msgstr ""
+
+msgctxt "#32115"
+msgid "Error Cleaning Settings.xml. Old settings.xml files Restored."
+msgstr ""
+
+msgctxt "#32116"
+msgid "This feature is only supported in kodi 18 and beyond"
+msgstr ""
+
+msgctxt "#32117"
+msgid "Added to Favorites"
+msgstr ""
+
+msgctxt "#32118"
+msgid "Removed From Favorites"
+msgstr ""
+
+msgctxt "#32119"
+msgid "Playlist is empty"
+msgstr ""
+
+msgctxt "#32120"
+msgid "Title already in playlist"
+msgstr ""
+
+msgctxt "#32121"
+msgid "%s Added to playlist"
+msgstr ""
+
+msgctxt "#32122"
+msgid "%s Removed from playlist"
+msgstr ""
+
+msgctxt "#32123"
+msgid "Not found in playlist"
+msgstr ""
+
+msgctxt "#32124"
+msgid "No TVShow lists imports found"
+msgstr ""
+
+msgctxt "#32125"
+msgid "Scraper Preperation"
+msgstr ""
+
+msgctxt "#32126"
+msgid "Furk Username"
+msgstr ""
+
+msgctxt "#32127"
+msgid "Furk Password"
+msgstr ""
+
+msgctxt "#32128"
+msgid "Furk API Key"
+msgstr ""
+
+msgctxt "#32129"
+msgid "Enable Furk.net Menu"
+msgstr ""
+
+msgctxt "#32130"
+msgid "Trakt: Scrobble Failed"
+msgstr ""
+
+msgctxt "#32131"
+msgid "Trakt: Scrobble Reset Failed"
+msgstr ""
+
+msgctxt "#32132"
+msgid ""
+msgstr ""
+
+msgctxt "#32133"
+msgid ""
+msgstr ""
+
+msgctxt "#32134"
+msgid ""
+msgstr ""
+
+msgctxt "#32135"
+msgid ""
+msgstr ""
+
+msgctxt "#32136"
+msgid ""
+msgstr ""
+
+msgctxt "#32137"
+msgid ""
+msgstr ""
+
+msgctxt "#32138"
+msgid ""
+msgstr ""
+
+msgctxt "#32139"
+msgid ""
+msgstr ""
+
+msgctxt "#32140"
+msgid ""
+msgstr ""
+
+
+
+
+
+
+
 
 msgctxt "#32301"
 msgid "Enabled"
@@ -570,6 +841,14 @@ msgstr "In dat geval kies uw eigen ondertiteling."
 msgctxt "#32360"
 msgid "Providers Language"
 msgstr "Taal van bronnen"
+
+msgctxt "#32361"
+msgid "[B]VENOM[/B] : Reset View Types"
+msgstr ""
+
+msgctxt "#32362"
+msgid "[B]SETTINGS[/B] : Navigation"
+msgstr ""
 
 msgctxt "#32363"
 msgid "Remove HEVC sources"
@@ -1135,6 +1414,34 @@ msgctxt "#32503"
 msgid "Resume"
 msgstr "Doorgaan"
 
+msgctxt "#32504"
+msgid ""
+msgstr ""
+
+msgctxt "#32505"
+msgid "[B][COLOR red]UpNext[/COLOR][/B] Settings"
+msgstr ""
+
+msgctxt "#32506"
+msgid "[B][COLOR red]Venom Global Context[/COLOR][/B] Settings"
+msgstr ""
+
+msgctxt "#32507"
+msgid ""
+msgstr ""
+
+msgctxt "#32508"
+msgid ""
+msgstr ""
+
+msgctxt "#32509"
+msgid ""
+msgstr ""
+
+msgctxt "#32510"
+msgid "[B]Cache Functions[/B]"
+msgstr ""
+
 msgctxt "#32511"
 msgid "An account already exists."
 msgstr "Een account bestaat reeds."
@@ -1183,21 +1490,53 @@ msgctxt "#32522"
 msgid "Remove from [B]%s[/B]"
 msgstr "Verwijderen van [B]%s[/B]"
 
+msgctxt "#32523"
+msgid ""
+msgstr ""
+
+msgctxt "#32524"
+msgid ""
+msgstr ""
+
+msgctxt "#32525"
+msgid ""
+msgstr ""
+
+msgctxt "#32526
+msgid ""
+msgstr ""
+
+msgctxt "#32527"
+msgid ""
+msgstr ""
+
+msgctxt "#32528"
+msgid ""
+msgstr ""
+
+msgctxt "#32529"
+msgid ""
+msgstr ""
+
+msgctxt "#32530"
+msgid ""
+msgstr ""
+
 msgctxt "#32531"
-msgid "An account already exists."
-msgstr "Een account bestaat reeds."
+msgid ""
+msgstr ""
 
 msgctxt "#32532"
-msgid "Do you want to reset?"
-msgstr "Wilt u een reset uitvoeren?"
+msgid ""
+msgstr ""
 
 msgctxt "#32533"
-msgid "1) Visit : [COLOR skyblue]%s[/COLOR]"
-msgstr "1) Bezoek : [COLOR skyblue]%s[/COLOR]"
+msgid ""
+msgstr ""
 
 msgctxt "#32534"
-msgid "2) When prompted enter : [COLOR skyblue]%s[/COLOR]"
-msgstr "2) Wanneer gevraagd, vul in : [COLOR skyblue]%s[/COLOR]"
+msgid ""
+msgstr ""
 
 msgctxt "#32535"
 msgid "Play Random"
@@ -1483,6 +1822,18 @@ msgctxt "#32609"
 msgid "[B][COLOR red]ResolveURL[/COLOR][/B] Settings"
 msgstr ""
 
+msgctxt "#32610"
+msgid "Clear [COLOR yellow]All [/COLOR]Cache..."
+msgstr ""
+
+msgctxt "#32611"
+msgid "Clear [COLOR yellow]Providers [/COLOR]Cache..."
+msgstr ""
+
+msgctxt "#32612"
+msgid "Clear [COLOR yellow]Metadata [/COLOR]Cache..."
+msgstr ""
+
 msgctxt "#32613"
 msgid "[B]VENOM[/B] : Clear All Cache..."
 msgstr ""
@@ -1492,7 +1843,7 @@ msgid "[B]VENOM[/B] : Clear Meta Cache..."
 msgstr ""
 
 msgctxt "#32615"
-msgid "Check Host for Valid URL"
+msgid "Clear [COLOR yellow]Bookmarks[/COLOR] Cache..."
 msgstr ""
 
 msgctxt "#32616"
@@ -1660,62 +2011,279 @@ msgid "Your Online List is Empty!"
 msgstr "Uw Online-lijst is leeg!"
 
 msgctxt "#32659"
-msgid "Oscar Nominees"
-msgstr "Oscar genomineerden"
+msgid "Min. Pre-emptive Res."
+msgstr ""
+
+msgctxt "#32660"
+msgid "Resume Point Saved..."
+msgstr ""
+
+msgctxt "#32661"
+msgid "Importing Trakt Collection..."
+msgstr ""
+
+msgctxt "#32662"
+msgid "Importing Trakt Watchlist..."
+msgstr ""
+
+msgctxt "#32663"
+msgid "Importing Trakt User List..."
+msgstr ""
+
+msgctxt "#32664"
+msgid "Importing Trakt Liked List..."
+msgstr ""
+
+msgctxt "#32665"
+msgid "Check Host for Valid URL"
+msgstr ""
+
+msgctxt "#32666"
+msgid "[COLOR skyblue]Sky Blue[/COLOR]"
+msgstr ""
+
+msgctxt "#32667"
+msgid "[COLOR lime]Lime[/COLOR]"
+msgstr ""
+
+msgctxt "#32668"
+msgid "[COLOR limegreen]Lime Green[/COLOR]"
+msgstr ""
+
+msgctxt "#32669"
+msgid "[COLOR deepskyblue]Deep Sky Blue[/COLOR]"
+msgstr ""
+
+msgctxt "#32670"
+msgid "[COLOR white]White[/COLOR]"
+msgstr ""
+
+msgctxt "#32671"
+msgid "[COLOR whitesmoke]White Smoke[/COLOR]"
+msgstr ""
+
+msgctxt "#32672"
+msgid "[B]TRAKT[/B] : Import Movie User List..."
+msgstr ""
+
+msgctxt "#32673"
+msgid "[B]TRAKT[/B] : Import Movie Liked List..."
+msgstr ""
+
+msgctxt "#32674"
+msgid "[B]TRAKT[/B] : Import TV User List..."
+msgstr ""
+
+msgctxt "#32675"
+msgid "[B]TRAKT[/B] : Import TV Liked List..."
+msgstr ""
+
+msgctxt "#32676"
+msgid "[B]VENOM[/B] : Clean library..."
+msgstr ""
+
+msgctxt "#32677"
+msgid "Add folders to Kodi Sources Now..."
+msgstr ""
+
+msgctxt "#32678"
+msgid "Updated TV Show title"
+msgstr ""
+
+msgctxt "#32679"
+msgid "Importing TMDb Watchlist..."
+msgstr ""
+
+msgctxt "#32680"
+msgid "Importing TMDb Favorites..."
+msgstr ""
+
+msgctxt "#32681"
+msgid "Importing TMDb Userlist..."
+msgstr ""
+
+msgctxt "#32682"
+msgid "IMDb Watchlist"
+msgstr ""
+
+msgctxt "#32683"
+msgid "Trakt Watchlist"
+msgstr ""
+
+msgctxt "#32684"
+msgid "Store resolved items in cloud"
+msgstr ""
+
+msgctxt "#32685"
+msgid ""
+msgstr ""
+
+msgctxt "#32686"
+msgid ""
+msgstr ""
+
+
+
+
 
 
 
 
 msgctxt "#33000"
-msgid "Favourites"
-msgstr "favorieten"
+msgid ""
+msgstr ""
 
 msgctxt "#33001"
-msgid "Categories"
-msgstr "Categorieën"
+msgid ""
+msgstr ""
 
 msgctxt "#33002"
-msgid "Lists"
-msgstr "lijsten"
+msgid ""
+msgstr ""
 
 msgctxt "#33003"
-msgid "Browse"
-msgstr "Blader"
+msgid ""
+msgstr ""
 
 msgctxt "#33004"
-msgid "New Releases"
-msgstr "Nieuwe uitgaven"
+msgid ""
+msgstr ""
 
+msgctxt "#33005"
+msgid "Enable startup notice"
+msgstr ""
 
+msgctxt "#33006"
+msgid ""
+msgstr ""
 
+msgctxt "#33007"
+msgid ""
+msgstr ""
 
+msgctxt "#33008"
+msgid ""
+msgstr ""
+
+msgctxt "#33009"
+msgid ""
+msgstr ""
+
+msgctxt "#33010"
+msgid ""
+msgstr ""
+
+msgctxt "#33011"
+msgid ""
+msgstr ""
+
+msgctxt "#33012"
+msgid ""
+msgstr ""
+
+msgctxt "#33013"
+msgid ""
+msgstr ""
+
+msgctxt "#33014"
+msgid ""
+msgstr ""
+
+msgctxt "#33015"
+msgid ""
+msgstr ""
+
+msgctxt "#33016"
+msgid ""
+msgstr ""
+
+msgctxt "#33017"
+msgid "New value = [B]%s[/B]: Successfully changed."
+msgstr ""
+
+msgctxt "#33018"
+msgid "[B]Reuse Langauage Invoker[/B] is currently set to [B]%s[/B].\n\nDo you wish to change this setting to [B]%s[/B]?"
+msgstr ""
+
+msgctxt "#33019"
+msgid "Enabling this setting may cause instability issues.\nTest at your own free will.\nContinue?"
+msgstr ""
+
+msgctxt "#33020"
+msgid "Venom will reload your profile to refresh the addon.xml"
+msgstr ""
+
+msgctxt "#33021"
+msgid "Write failed"
+msgstr ""
+
+msgctxt "#33022"
+msgid "Error setting correct value."
+msgstr ""
+
+msgctxt "#33023"
+msgid "[B]Reuse Language Invoker[/B] SETTING/XML mismatch"
+msgstr ""
+
+msgctxt "#33024"
+msgid ""
+msgstr ""
+
+msgctxt "#33025"
+msgid ""
+msgstr ""
+
+msgctxt "#33026"
+msgid ""
+msgstr ""
+
+msgctxt "#33027"
+msgid ""
+msgstr ""
 
 msgctxt "#33028"
-msgid "Episode"
-msgstr "Aflevering"
+msgid ""
+msgstr ""
 
 msgctxt "#33029"
-msgid "All"
-msgstr "Allemaal"
+msgid ""
+msgstr ""
 
+msgctxt "#33030"
+msgid ""
+msgstr ""
 
+msgctxt "#33031"
+msgid ""
+msgstr ""
 
+msgctxt "#33032"
+msgid ""
+msgstr ""
+
+msgctxt "#33033"
+msgid ""
+msgstr ""
+
+msgctxt "#33034"
+msgid "No Debrid Account setup, account is required!"
+msgstr ""
 
 msgctxt "#33035"
-msgid "item"
-msgstr "item"
+msgid ""
+msgstr ""
 
 msgctxt "#33036"
-msgid "link"
-msgstr "link"
+msgid ""
+msgstr ""
 
 msgctxt "#33037"
-msgid "Splash"
-msgstr "Plons"
+msgid ""
+msgstr ""
 
 msgctxt "#33038"
-msgid "Recent"
-msgstr "Recent"
+msgid ""
+msgstr ""
 
 msgctxt "#33039"
 msgid "Title"
@@ -1729,8 +2297,29 @@ msgctxt "#33041"
 msgid "Searches"
 msgstr "zoekopdrachten"
 
+msgctxt "#33042"
+msgid "Search Movies..."
+msgstr ""
 
+msgctxt "#33043"
+msgid "Search Shows..."
+msgstr ""
 
+msgctxt "#33044"
+msgid "Search Movies By Actor..."
+msgstr ""
+
+msgctxt "#33045"
+msgid "Search Shows By Actor..."
+msgstr ""
+
+msgctxt "#33046"
+msgid "Discover Movies"
+msgstr ""
+
+msgctxt "#33047"
+msgid "Discover TV Shows"
+msgstr ""
 
 msgctxt "#33048"
 msgid "Local Content"
@@ -1744,6 +2333,50 @@ msgctxt "#33050"
 msgid "Notifications"
 msgstr "meldingen"
 
+msgctxt "#33051"
+msgid "Server Notifications"
+msgstr ""
+
+msgctxt "#33052"
+msgid "General Notifications"
+msgstr ""
+
+msgctxt "#33053"
+msgid "%s has been hidden from your %s"
+msgstr ""
+
+msgctxt "#33054"
+msgid ""
+msgstr ""
+
+msgctxt "#33055"
+msgid ""
+msgstr ""
+
+msgctxt "#33055"
+msgid ""
+msgstr ""
+
+msgctxt "#33056"
+msgid ""
+msgstr ""
+
+msgctxt "#33057"
+msgid ""
+msgstr ""
+
+msgctxt "#33058"
+msgid ""
+msgstr ""
+
+msgctxt "#33059"
+msgid ""
+msgstr ""
+
+
+
+
+
 
 
 
@@ -1751,19 +2384,64 @@ msgctxt "#33486"
 msgid "Close"
 msgstr ""
 
+msgctxt "#33487"
+msgid ""
+msgstr ""
+
+msgctxt "#33488"
+msgid ""
+msgstr ""
+
+msgctxt "#33489"
+msgid ""
+msgstr ""
+
+msgctxt "#33490"
+msgid ""
+msgstr ""
+
+msgctxt "#33491"
+msgid ""
+msgstr ""
+
+msgctxt "#33492"
+msgid ""
+msgstr ""
+
+msgctxt "#33493"
+msgid ""
+msgstr ""
+
+msgctxt "#33494"
+msgid ""
+msgstr ""
+
+msgctxt "#33495"
+msgid ""
+msgstr ""
+
+msgctxt "#33496"
+msgid ""
+msgstr ""
+
+msgctxt "#33497"
+msgid ""
+msgstr ""
+
+msgctxt "#33498"
+msgid ""
+msgstr ""
+
+msgctxt "#33499"
+msgid ""
+msgstr ""
+
+msgctxt "#33500"
+msgid ""
+msgstr ""
 
 
 
-msgctxt "#35500"
-msgid "Watch"
-msgstr "Kijk maar"
-
-
-
-
-msgctxt "#35547"
-msgid "Force"
-msgstr "Dwingen"
 
 
 
@@ -1773,9 +2451,45 @@ msgctxt "#33564"
 msgid "Default"
 msgstr ""
 
+msgctxt "#33565"
+msgid ""
+msgstr ""
 
+msgctxt "#33566"
+msgid ""
+msgstr ""
 
+msgctxt "#33567"
+msgid ""
+msgstr ""
 
+msgctxt "#33568"
+msgid ""
+msgstr ""
+
+msgctxt "#33569"
+msgid ""
+msgstr ""
+
+msgctxt "#33570"
+msgid ""
+msgstr ""
+
+msgctxt "#33571"
+msgid ""
+msgstr ""
+
+msgctxt "#33572"
+msgid ""
+msgstr ""
+
+msgctxt "#33573"
+msgid "Add Show to your [COLOR red][B]Watchlist[/B][/COLOR]"
+msgstr ""
+
+msgctxt "#33574"
+msgid "Remove Show from your [COLOR red][B]Watchlist[/B][/COLOR]"
+msgstr ""
 
 msgctxt "#33575"
 msgid "Add item to your [COLOR red][B]Collection[/B][/COLOR]"
@@ -1820,6 +2534,70 @@ msgstr ""
 msgctxt "#33585"
 msgid "Download Manager"
 msgstr ""
+
+msgctxt "#33586"
+msgid "Error"
+msgstr ""
+
+msgctxt "#33587"
+msgid "Install Venom Global Context menu Addon..."
+msgstr ""
+
+msgctxt "#33588"
+msgid "Enable Venom Global Context menu"
+msgstr ""
+
+msgctxt "#33589"
+msgid ""
+msgstr ""
+
+msgctxt "#33590"
+msgid ""
+msgstr ""
+
+msgctxt "#33591"
+msgid ""
+msgstr ""
+
+msgctxt "#33592"
+msgid ""
+msgstr ""
+
+msgctxt "#33593"
+msgid ""
+msgstr ""
+
+msgctxt "#33594"
+msgid ""
+msgstr ""
+
+msgctxt "#33595"
+msgid ""
+msgstr ""
+
+msgctxt "#33596"
+msgid ""
+msgstr ""
+
+msgctxt "#33597"
+msgid ""
+msgstr ""
+
+msgctxt "#33598"
+msgid ""
+msgstr ""
+
+msgctxt "#33599"
+msgid ""
+msgstr ""
+
+msgctxt "#33600"
+msgid ""
+msgstr ""
+
+
+
+
 
 
 
@@ -1881,13 +2659,60 @@ msgid "Trakt List Addition Succeeded"
 msgstr ""
 
 msgctxt "#33662"
-msgid "Recommended"
+msgid ""
 msgstr ""
 
+msgctxt "#33663"
+msgid ""
+msgstr ""
 
+msgctxt "#33664"
+msgid ""
+msgstr ""
 
+msgctxt "#33665"
+msgid "Season Lists"
+msgstr ""
 
+msgctxt "#33666"
+msgid ""
+msgstr ""
 
+msgctxt "#33667"
+msgid ""
+msgstr ""
+
+msgctxt "#33668"
+msgid ""
+msgstr ""
+
+msgctxt "#33669"
+msgid ""
+msgstr ""
+
+msgctxt "#33670"
+msgid ""
+msgstr ""
+
+msgctxt "#33671"
+msgid ""
+msgstr ""
+
+msgctxt "#33672"
+msgid ""
+msgstr ""
+
+msgctxt "#33673"
+msgid ""
+msgstr ""
+
+msgctxt "#33674"
+msgid "Trakt Throttling Applied, Sleeping for %s seconds"
+msgstr ""
+
+msgctxt "#33675"
+msgid "Locked User Account - contact Trakt support"
+msgstr ""
 
 msgctxt "#33676"
 msgid "Temporary Trakt Server Problems"
@@ -1910,6 +2735,27 @@ msgstr ""
 
 
 
+
+
+msgctxt "#33786"
+msgid "No Trakt Result"
+msgstr ""
+
+msgctxt "#33787"
+msgid "Trakt Rate Limit Reached"
+msgstr ""
+
+
+
+
+
+
+
+
+msgctxt "#33890"
+msgid "Season Count"
+msgstr ""
+
 msgctxt "#33891"
 msgid "Unwatched Count"
 msgstr ""
@@ -1917,6 +2763,174 @@ msgstr ""
 msgctxt "#33892"
 msgid "Unwatched Limit"
 msgstr ""
+
+
+
+
+
+
+
+
+msgctxt "#33942"
+msgid "The Venom library path does not appear in the Kodi file sources and automatic library updates are therefore not possible. Please manually add the library path from Venom's settings to the Kodi file sources. If the path in the settings were not changed, Venom will use a directory in the addon profile to store library data."
+msgstr ""
+
+
+
+
+
+
+
+
+msgctxt "#35017"
+msgid "Air Information"
+msgstr ""
+
+msgctxt "#35018"
+msgid "Air Label Zone"
+msgstr ""
+
+msgctxt "#35019"
+msgid "Air Label Location"
+msgstr ""
+
+msgctxt "#35020"
+msgid "Air Label Format"
+msgstr ""
+
+msgctxt "#35021"
+msgid "Air Label Bold"
+msgstr ""
+
+msgctxt "#35022"
+msgid "Native"
+msgstr ""
+
+msgctxt "#35023"
+msgid "UTC"
+msgstr ""
+
+msgctxt "#35024"
+msgid "Before Title"
+msgstr ""
+
+msgctxt "#35025"
+msgid "After Title"
+msgstr ""
+
+msgctxt "#35026"
+msgid "Before Plot"
+msgstr ""
+
+msgctxt "#35027"
+msgid "After Plot"
+msgstr ""
+
+msgctxt "#35028"
+msgid "Day"
+msgstr ""
+
+msgctxt "#35029"
+msgid "Time"
+msgstr ""
+
+msgctxt "#35030"
+msgid "Day and Time"
+msgstr ""
+
+msgctxt "#35031"
+msgid "Air Label Day"
+msgstr ""
+
+msgctxt "#35032"
+msgid "[B]Airs[/B]:"
+msgstr ""
+
+msgctxt "#35033"
+msgid ""
+msgstr ""
+
+msgctxt "#35034"
+msgid ""
+msgstr ""
+
+msgctxt "#35035"
+msgid ""
+msgstr ""
+
+msgctxt "#35036"
+msgid ""
+msgstr ""
+
+msgctxt "#35037"
+msgid ""
+msgstr ""
+
+msgctxt "#35038"
+msgid ""
+msgstr ""
+
+msgctxt "#35039"
+msgid ""
+msgstr ""
+
+msgctxt "#35040"
+msgid ""
+msgstr ""
+
+msgctxt "#35041"
+msgid ""
+msgstr ""
+
+msgctxt "#35042"
+msgid ""
+msgstr ""
+
+msgctxt "#35043"
+msgid ""
+msgstr ""
+
+msgctxt "#35044"
+msgid ""
+msgstr ""
+
+msgctxt "#35045"
+msgid ""
+msgstr ""
+
+msgctxt "#35046"
+msgid ""
+msgstr ""
+
+msgctxt "#35047"
+msgid ""
+msgstr ""
+
+msgctxt "#35048"
+msgid "Air Label Time"
+msgstr ""
+
+msgctxt "#35049"
+msgid "Full"
+msgstr ""
+
+msgctxt "#35050"
+msgid "Abbreviated"
+msgstr ""
+
+msgctxt "#35051"
+msgid "24-Hour"
+msgstr ""
+
+msgctxt "#35052"
+msgid "12-Hour"
+msgstr ""
+
+msgctxt "#35053"
+msgid "Period"
+msgstr ""
+
+
 
 
 
@@ -1966,103 +2980,16 @@ msgstr "Mislukt om toe te voegen aan de lokale bibliotheek"
 
 
 
+
+
+
+
 msgctxt "#35308"
 msgid "Unfinished"
 msgstr "onafgewerkt"
 
 
 
-
-msgctxt "#35017"
-msgid "Air Information"
-msgstr "Luchtinformatie"
-
-msgctxt "#35018"
-msgid "Air Label Zone"
-msgstr "Air Label Zone"
-
-msgctxt "#35019"
-msgid "Air Label Location"
-msgstr "Locatie van het luchtlabel"
-
-msgctxt "#35020"
-msgid "Air Label Format"
-msgstr "Air Label-formaat"
-
-msgctxt "#35021"
-msgid "Air Label Bold"
-msgstr "Air Label vet"
-
-msgctxt "#35022"
-msgid "Native"
-msgstr "inheems"
-
-msgctxt "#35023"
-msgid "UTC"
-msgstr "UTC"
-
-msgctxt "#35024"
-msgid "Before Title"
-msgstr "Voor titel"
-
-msgctxt "#35025"
-msgid "After Title"
-msgstr "Na titel"
-
-msgctxt "#35026"
-msgid "Before Plot"
-msgstr "Vóór het plot"
-
-msgctxt "#35027"
-msgid "After Plot"
-msgstr "Na plot"
-
-msgctxt "#35028"
-msgid "Day"
-msgstr "Dag"
-
-msgctxt "#35029"
-msgid "Time"
-msgstr "Tijd"
-
-msgctxt "#35030"
-msgid "Day and Time"
-msgstr "Dag en tijd"
-
-msgctxt "#35031"
-msgid "Air Label Day"
-msgstr "Air Label Day"
-
-msgctxt "#35032"
-msgid "Airs"
-msgstr "Airs"
-
-
-
-
-msgctxt "#35048"
-msgid "Air Label Time"
-msgstr "Air Label Time"
-
-msgctxt "#35049"
-msgid "Full"
-msgstr "Vol"
-
-msgctxt "#35050"
-msgid "Abbreviated"
-msgstr "Afgekort"
-
-msgctxt "#35051"
-msgid "24-Hour"
-msgstr "24 uur"
-
-msgctxt "#35052"
-msgid "12-Hour"
-msgstr "12 uur"
-
-msgctxt "#35053"
-msgid "Period"
-msgstr "Periode"
 
 
 
@@ -2080,9 +3007,72 @@ msgctxt "#35393"
 msgid "Date Watched"
 msgstr "Date Watched"
 
+msgctxt "#35394"
+msgid ""
+msgstr ""
+
+msgctxt "#35395"
+msgid ""
+msgstr ""
+
+msgctxt "#35396"
+msgid ""
+msgstr ""
+
+msgctxt "#35397"
+msgid ""
+msgstr ""
+
+msgctxt "#35398"
+msgid ""
+msgstr ""
+
+msgctxt "#35399"
+msgid ""
+msgstr ""
+
+msgctxt "#35400"
+msgid ""
+msgstr ""
 
 
 
+
+
+
+
+
+msgctxt "#35485"
+msgid "Note"
+msgstr ""
+
+msgctxt "#35486"
+msgid ""
+msgstr ""
+
+msgctxt "#35487"
+msgid ""
+msgstr ""
+
+msgctxt "#35488"
+msgid ""
+msgstr ""
+
+msgctxt "#35489"
+msgid ""
+msgstr ""
+
+msgctxt "#35490"
+msgid ""
+msgstr ""
+
+msgctxt "#35491"
+msgid ""
+msgstr ""
+
+msgctxt "#35492"
+msgid "Direct Progress Scraping"
+msgstr ""
 
 msgctxt "#35493"
 msgid "Update Library"
@@ -2096,10 +3086,21 @@ msgctxt "#35495"
 msgid "Add %s To Library"
 msgstr "Toevoegen %s Naar bibliotheek"
 
+msgctxt "#35496"
+msgid ""
+msgstr ""
 
+msgctxt "#35497"
+msgid ""
+msgstr ""
 
+msgctxt "#35498"
+msgid ""
+msgstr ""
 
-
+msgctxt "#35499"
+msgid ""
+msgstr ""
 
 msgctxt "#35500"
 msgid "Watch"
@@ -2110,15 +3111,20 @@ msgid "Rate"
 msgstr "Tarief"
 
 msgctxt "#35502"
-msgid "Marked As Watched On Trakt"
-msgstr "Gemarkeerd als Gevolgd op Trakt"
+msgid "%s Marked As Watched On Trakt"
+msgstr "%s Gemarkeerd als Gevolgd op Trakt"
 
 msgctxt "#35503"
-msgid "Marked As Unwatched On Trakt"
-msgstr "Gemarkeerd als Ongebruikt op Trakt"
+msgid "%s Marked As Unwatched On Trakt"
+msgstr "%s Gemarkeerd als Ongebruikt op Trakt"
 
+msgctxt "#35504"
+msgid ""
+msgstr ""
 
-
+msgctxt "#35505"
+msgid ""
+msgstr ""
 
 msgctxt "#35506"
 msgid "Movie Information"
@@ -2184,9 +3190,580 @@ msgctxt "#35521"
 msgid "Playlist Cleared"
 msgstr "Afspeellijst gewist"
 
+msgctxt "#35522"
+msgid "Playlist Manager"
+msgstr ""
+
+msgctxt "#35523"
+msgid "A new verison of Venom is available from the repository. Please consider updating to v%s"
+msgstr ""
+
+msgctxt "#35524"
+msgid "Notify Me About Available Updates"
+msgstr ""
+
+msgctxt "#35525"
+msgid "Disable clearart, clearlogo, and discart in player"
+msgstr ""
+
+msgctxt "#35526"
+msgid "Movie theatrical unreleased color"
+msgstr ""
+
+msgctxt "#35527"
+msgid "Enable Notification Sound"
+msgstr ""
+
+msgctxt "#35528"
+msgid "Log Level"
+msgstr ""
+
+msgctxt "#35529"
+msgid "Normal"
+msgstr ""
+
+msgctxt "#35530"
+msgid "Debug(Extra info)"
+msgstr ""
+
+msgctxt "#35531"
+msgid ""
+msgstr ""
+
+msgctxt "#35532"
+msgid ""
+msgstr ""
+
+msgctxt "#35533"
+msgid ""
+msgstr ""
+
+msgctxt "#35534"
+msgid ""
+msgstr ""
+
+msgctxt "#35535"
+msgid ""
+msgstr ""
+
+msgctxt "#35536"
+msgid ""
+msgstr ""
+
+msgctxt "#35537"
+msgid ""
+msgstr ""
+
+msgctxt "#35538"
+msgid ""
+msgstr ""
+
+msgctxt "#35539"
+msgid ""
+msgstr ""
+
+msgctxt "#35540"
+msgid ""
+msgstr ""
+
+msgctxt "#35541"
+msgid ""
+msgstr ""
+
+msgctxt "#35542"
+msgid ""
+msgstr ""
+
+msgctxt "#35543"
+msgid ""
+msgstr ""
+
+msgctxt "#35544"
+msgid ""
+msgstr ""
+
+msgctxt "#35545"
+msgid ""
+msgstr ""
+
+msgctxt "#35546"
+msgid ""
+msgstr ""
+
+msgctxt "#35547"
+msgid "Force"
+msgstr ""
+
+msgctxt "#35548"
+msgid ""
+msgstr ""
+
+msgctxt "#35549"
+msgid ""
+msgstr ""
+
+msgctxt "#35550"
+msgid ""
+msgstr ""
+
+msgctxt "#35551"
+msgid ""
+msgstr ""
+
+msgctxt "#35552"
+msgid ""
+msgstr ""
+
+msgctxt "#35553"
+msgid ""
+msgstr ""
+
+msgctxt "#35554"
+msgid ""
+msgstr ""
+
+msgctxt "#35555"
+msgid ""
+msgstr ""
+
+msgctxt "#35556"
+msgid ""
+msgstr ""
+
+msgctxt "#35557"
+msgid ""
+msgstr ""
+
+msgctxt "#35558"
+msgid ""
+msgstr ""
+
+msgctxt "#35559"
+msgid ""
+msgstr ""
+
+msgctxt "#35560"
+msgid ""
+msgstr ""
+
+msgctxt "#35561"
+msgid ""
+msgstr ""
+
+msgctxt "#35562"
+msgid ""
+msgstr ""
+
+msgctxt "#35563"
+msgid ""
+msgstr ""
+
+msgctxt "#35564"
+msgid ""
+msgstr ""
+
+msgctxt "#35565"
+msgid ""
+msgstr ""
+
+msgctxt "#35566"
+msgid ""
+msgstr ""
+
+msgctxt "#35567"
+msgid ""
+msgstr ""
+
+msgctxt "#35568"
+msgid ""
+msgstr ""
+
+msgctxt "#35569"
+msgid ""
+msgstr ""
+
+msgctxt "#35570"
+msgid ""
+msgstr ""
+
+msgctxt "#35571"
+msgid ""
+msgstr ""
+
+msgctxt "#35572"
+msgid "Progress Sorting"
+msgstr ""
+
+msgctxt "#35573"
+msgid "Calendar Sorting"
+msgstr ""
+
+msgctxt "#35574"
+msgid "Watchlist Sorting"
+msgstr ""
+
+msgctxt "#35575"
+msgid ""
+msgstr ""
+
+msgctxt "#35576"
+msgid ""
+msgstr ""
+
+msgctxt "#35577"
+msgid ""
+msgstr ""
+
+msgctxt "#35578"
+msgid ""
+msgstr ""
+
+msgctxt "#35579"
+msgid ""
+msgstr ""
+
+msgctxt "#35580"
+msgid ""
+msgstr ""
+
+msgctxt "#35581"
+msgid ""
+msgstr ""
+
+msgctxt "#35582"
+msgid ""
+msgstr ""
+
+msgctxt "#35583"
+msgid ""
+msgstr ""
+
+msgctxt "#35584"
+msgid ""
+msgstr ""
+
+msgctxt "#35585"
+msgid ""
+msgstr ""
+
+msgctxt "#35586"
+msgid ""
+msgstr ""
+
+msgctxt "#35587"
+msgid ""
+msgstr ""
+
+msgctxt "#35588"
+msgid ""
+msgstr ""
+
+msgctxt "#35589"
+msgid ""
+msgstr ""
+
+msgctxt "#35589"
+msgid ""
+msgstr ""
+
+msgctxt "#35590"
+msgid ""
+msgstr ""
+
+msgctxt "#35591"
+msgid ""
+msgstr ""
+
+msgctxt "#35592"
+msgid ""
+msgstr ""
+
+msgctxt "#35593"
+msgid ""
+msgstr ""
+
+msgctxt "#35594"
+msgid ""
+msgstr ""
+
+msgctxt "#35595"
+msgid ""
+msgstr ""
+
+msgctxt "#35596"
+msgid ""
+msgstr ""
+
+msgctxt "#355977"
+msgid ""
+msgstr ""
+
+msgctxt "#35598"
+msgid ""
+msgstr ""
+
+msgctxt "#35599"
+msgid ""
+msgstr ""
+
+msgctxt "#35600"
+msgid ""
+msgstr ""
 
 
 
+
+
+
+
+
+msgctxt "#40000"
+msgid ""
+msgstr ""
+
+msgctxt "#40001"
+msgid ""
+msgstr ""
+
+msgctxt "#40002"
+msgid ""
+msgstr ""
+
+msgctxt "#40003"
+msgid ""
+msgstr ""
+
+msgctxt "#40004"
+msgid ""
+msgstr ""
+
+msgctxt "#40005"
+msgid "Priority"
+msgstr ""
+
+msgctxt "#40006"
+msgid "username"
+msgstr ""
+
+msgctxt "#40007"
+msgid "[B]Restart Transfer?: %s[/B]"
+msgstr ""
+
+msgctxt "#40008"
+msgid "[B]Restart Transfer[/B]"
+msgstr ""
+
+msgctxt "#40009"
+msgid "Revoke Authorization Success"
+msgstr ""
+
+msgctxt "#40010"
+msgid "All Debrid succesfuly authorized"
+msgstr ""
+
+msgctxt "#40011"
+msgid "Downloading %s GB @ %s mbps from %s peers, %s %% completed"
+msgstr ""
+
+msgctxt "#40012"
+msgid "%s seeders"
+msgstr ""
+
+msgctxt "#40013"
+msgid "Converting MAGNET..."
+msgstr ""
+
+msgctxt "#40014"
+msgid "Progress Dialog Canceled"
+msgstr ""
+
+msgctxt "#40015"
+msgid "Uploading at %s MB/s, %s%% of %s GB completed"
+msgstr ""
+
+msgctxt "#40016"
+msgid "Downloading at %s MB/s from %s peers, %s%% of %sGB completed"
+msgstr ""
+
+msgctxt "#40017"
+msgid "Saving Torrent to the %s Cloud"
+msgstr ""
+
+msgctxt "#40018"
+msgid "Venom: Cloud Transfer"
+msgstr ""
+
+msgctxt "#40019"
+msgid "Authentication with Real-Debrid has failed, please try again"
+msgstr ""
+
+msgctxt "#40020"
+msgid "Authentication with Premiumize.me has failed, please try again"
+msgstr ""
+
+msgctxt "#40021"
+msgid "Authentication with All-Debrid has failed, please try again"
+msgstr ""
+
+msgctxt "#40022"
+msgid "File Name Format"
+msgstr ""
+
+msgctxt "#40023"
+msgid "Title (year) or Title S01E01"
+msgstr ""
+
+msgctxt "#40024"
+msgid "torrent file name"
+msgstr ""
+
+msgctxt "#40025"
+msgid "Up Next Settings"
+msgstr ""
+
+msgctxt "#40026"
+msgid "Smart Play Settings"
+msgstr ""
+
+msgctxt "#40027"
+msgid "Install UpNext Addon..."
+msgstr ""
+
+msgctxt "#40028"
+msgid "Enabled Up Next Addon Integration"
+msgstr ""
+
+msgctxt "#40029"
+msgid "Up Next Notification Time"
+msgstr ""
+
+msgctxt "#40030"
+msgid "Auto Playlist Creation"
+msgstr ""
+
+msgctxt "#40031"
+msgid "Auto Episode Resume"
+msgstr ""
+
+msgctxt "#40032"
+msgid "Force Episode Resume on Continue Watching Items"
+msgstr ""
+
+msgctxt "#40033"
+msgid "Menu Icon type"
+msgstr ""
+
+msgctxt "#40034"
+msgid "Add Meta Provider Labels..ex. (IMDb)"
+msgstr ""
+
+msgctxt "#40035"
+msgid "[B]Email:[/B] %s"
+msgstr ""
+
+msgctxt "#40036"
+msgid "[B]Username:[/B] %s"
+msgstr ""
+
+msgctxt "#40037"
+msgid "[B]Status:[/B] %s"
+msgstr ""
+
+msgctxt "#40038"
+msgid "[B]Fidelity Points:[/B] %s"
+msgstr ""
+
+msgctxt "#40039"
+msgid "Highlight Color"
+msgstr ""
+
+msgctxt "#40040"
+msgid "[B]Customer ID:[/B] %s"
+msgstr ""
+
+msgctxt "#40041"
+msgid "[B]Expires:[/B] %s"
+msgstr ""
+
+msgctxt "#40042"
+msgid "[B]Days Remaining:[/B] %s"
+msgstr ""
+
+msgctxt "#40043"
+msgid "[B]Points Used:[/B] %.f"
+msgstr ""
+
+msgctxt "#40044"
+msgid "[B]Space Used:[/B] %.2f"
+msgstr ""
+
+msgctxt "#40045"
+msgid "[B]Fair Use (Percentage Used):[/B] %s"
+msgstr ""
+
+msgctxt "#40046"
+msgid "folder"
+msgstr ""
+
+msgctxt "#40047"
+msgid "file"
+msgstr ""
+
+msgctxt "#40048"
+msgid "[B]Download File[/B]"
+msgstr ""
+
+msgctxt "#40049"
+msgid "[B]Rename %s[/B]"
+msgstr ""
+
+msgctxt "#40050"
+msgid "[B]Delete %s[/B]"
+msgstr ""
+
+msgctxt "#40051"
+msgid "[B]Clear Finished Transfers[/B]"
+msgstr ""
+
+msgctxt "#40052"
+msgid "Preminumize.me succesfuly authorized"
+msgstr ""
+
+msgctxt "#40053"
+msgid "All Debrid Torrent Settings"
+msgstr ""
+
+msgctxt "#40054"
+msgid "Premiumize.me Auth"
+msgstr ""
+
+msgctxt "#40055"
+msgid "Real-Debrid Auth"
+msgstr ""
+
+msgctxt "#40056"
+msgid "All-Debrid Auth"
+msgstr ""
+
+msgctxt "#40057"
+msgid "Premiumize.me"
+msgstr ""
+
+msgctxt "#40058"
+msgid "Real-Debrid"
+msgstr ""
+
+msgctxt "#40059"
+msgid "All Debrid"
+msgstr ""
+
+msgctxt "#40060"
+msgid "Enable Premium Services Menu"
+msgstr ""
+
+msgctxt "#40061"
+msgid "Enable Youtube Menu"
+msgstr ""
 
 msgctxt "#40062"
 msgid "Trakt Username"
@@ -2197,7 +3774,7 @@ msgid "Months to Rollback for Hide in Cinema"
 msgstr ""
 
 msgctxt "#40064"
-msgid "   Enable Christmas Collections"
+msgid "Enable Christmas Collections"
 msgstr ""
 
 msgctxt "#40065"
@@ -2251,4 +3828,3 @@ msgstr ""
 msgctxt "#40077"
 msgid "Originals (TMDb)"
 msgstr ""
-

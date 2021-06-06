@@ -403,10 +403,10 @@ class AllDebrid:
 		if not transfer_id: return _return_failed()
 		transfer_info = self.list_transfer(transfer_id)
 		if not transfer_info: return _return_failed()
-		if pack:
-			control.hide()
-			control.okDialog(title='default', message=control.lang(40017) % control.lang(40059))
-			return True
+		# if pack:
+			# control.hide()
+			# control.okDialog(title='default', message=control.lang(40017) % control.lang(40059))
+			# return True
 		interval = 5
 		line = '%s[CR]%s[CR]%s'
 		line1 = '%s...' % (control.lang(40017) % control.lang(40059))

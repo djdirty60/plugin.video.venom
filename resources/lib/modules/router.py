@@ -696,10 +696,6 @@ def router(params):
 	####################################################
 	#---Source Actions
 	####################################################
-	# elif action == 'addItem':
-		# from resources.lib.modules import sources
-		# sources.Sources().addItem(title)
-
 	elif action == 'alterSources':
 		from resources.lib.modules import sources
 		meta = params.get('meta')
