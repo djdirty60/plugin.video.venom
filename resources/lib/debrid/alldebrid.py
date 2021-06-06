@@ -96,7 +96,7 @@ class AllDebrid:
 		url = base_url + 'pin/get?agent=%s' % user_agent
 		response = requests.get(url, timeout=self.timeout).json()
 		response = response['data']
-		line = '%s[CR]%s'
+		line = '%s\n%s'
 		progressDialog = control.progressDialog
 		progressDialog.create(control.lang(40056))
 		progressDialog.update(-1, line % (control.lang(32513) % 'https://alldebrid.com/pin/', control.lang(32514) % response['pin']))
@@ -204,7 +204,7 @@ class AllDebrid:
 	def delete_transfer(self, transfer_id, folder_name=None, silent=True):
 		try:
 			if not silent:
-				if not control.yesnoDialog(control.lang(40050) % '?[CR]' + folder_name, '', ''): return
+				if not control.yesnoDialog(control.lang(40050) % '?\n' + folder_name, '', ''): return
 			url = 'magnet/delete'
 			url_append = '&id=%s' % transfer_id
 			response = self._get(url, url_append)
@@ -221,7 +221,7 @@ class AllDebrid:
 	def restart_transfer(self, transfer_id, folder_name=None, silent=True):
 		try:
 			if not silent:
-				if not control.yesnoDialog(control.lang(40007) % '[CR]' + folder_name, '', ''): return
+				if not control.yesnoDialog(control.lang(40007) % '\n' + folder_name, '', ''): return
 			url = 'magnet/restart'
 			url_append = '&id=%s' % transfer_id
 			response = self._get(url, url_append)
@@ -408,7 +408,7 @@ class AllDebrid:
 			# control.okDialog(title='default', message=control.lang(40017) % control.lang(40059))
 			# return True
 		interval = 5
-		line = '%s[CR]%s[CR]%s'
+		line = '%s\n%s\n%s'
 		line1 = '%s...' % (control.lang(40017) % control.lang(40059))
 		line2 = transfer_info['filename']
 		line3 = transfer_info['status']

@@ -134,7 +134,7 @@ class RealDebrid:
 		url = 'client_id=%s&new_credentials=yes' % self.client_ID
 		url = oauth_base_url + device_code_url % url
 		response = requests.get(url).json()
-		line = '%s[CR]%s'
+		line = '%s\n%s'
 		progressDialog = control.progressDialog
 		progressDialog.create(control.lang(40055))
 		progressDialog.update(-1, line % (control.lang(32513) % 'https://real-debrid.com/device', control.lang(32514) % response['user_code']))
@@ -254,7 +254,7 @@ class RealDebrid:
 
 	def delete_user_torrent(self, media_id, name):
 		try:
-			if not control.yesnoDialog(control.lang(40050) % '?[CR]' + name, '', ''): return
+			if not control.yesnoDialog(control.lang(40050) % '?\n' + name, '', ''): return
 			ck_token = self._get('user', token_ck=True) # check token, and refresh if needed
 			url = torrents_delete_url + "/%s&auth_token=%s" % (media_id, self.token)
 			response = requests.delete(rest_base_url + url).text
@@ -332,7 +332,7 @@ class RealDebrid:
 
 	def delete_download(self, media_id, name):
 		try:
-			if not control.yesnoDialog(control.lang(40050) % '?[CR]' + name, '', ''): return
+			if not control.yesnoDialog(control.lang(40050) % '?\n' + name, '', ''): return
 			ck_token = self._get('user', token_ck=True) # check token, and refresh if needed
 			url = downloads_delete_url + "/%s&auth_token=%s" % (media_id, self.token)
 			response = requests.delete(rest_base_url + url).text
@@ -534,7 +534,7 @@ class RealDebrid:
 		torrent_info = self.torrent_info(torrent_id)
 		if 'error_code' in torrent_info: return _return_failed()
 		status = torrent_info['status']
-		line = '%s[CR]%s[CR]%s'
+		line = '%s\n%s\n%s'
 		if status == 'magnet_conversion':
 			line1 = control.lang(40013)
 			line2 = torrent_info['filename']

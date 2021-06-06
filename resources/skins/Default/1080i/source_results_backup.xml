@@ -217,7 +217,7 @@
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>top</aligny>
-						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)][/B]</label>
+						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]</label>
 						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
 					</control>
 					<control type="label">
@@ -230,7 +230,7 @@
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>top</aligny>
-						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   SEEDERS: $INFO[ListItem.Property(venom.seeders)][/B]</label>
+						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   SEEDERS: $INFO[ListItem.Property(venom.seeders)]</label>
 						<visible>String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
 					</control>
 					<control type="label">
@@ -243,7 +243,7 @@
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>top</aligny>
-						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)][/B]</label>
+						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]</label>
 						<visible>String.Contains(ListItem.Property(venom.source),DIRECT)</visible>
 					</control>
 					<control type="label">
@@ -256,7 +256,7 @@
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>top</aligny>
-						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   HOSTER[/B]</label>
+						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   HOSTER</label>
 						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),TORRENT)</visible>
 					</control>
 				</focusedlayout>

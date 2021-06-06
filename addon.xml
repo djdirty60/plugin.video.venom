@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.2">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.3">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -32,12 +32,10 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v5.1.2 - June 05, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed  local bookmarks and Trakt scrobble resume not working.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed Marked as watched during playback not working.[/I]
-[COLOR yellow]--[/COLOR][I] Added "View Uncached Torrents" button to the "Source Select" skin. Right arrow to acess,
-    left arrow to return focus to the "Source Select" list.[/I]
-[COLOR yellow]--[/COLOR][I] Viewing Uncached Torrents now has it's own skin.[/I]
+[B][COLOR red]Update - v5.1.3 - June 06, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed Direct links not playing.[/I]
+[COLOR yellow]--[/COLOR][I] Some complaints that the new window xml is a little to brite and hard on the eyes. I added
+    new Source Select Highlight color option to settings.  See Source Options.[/I]
 		</news>
 	</extension>
 </addon>

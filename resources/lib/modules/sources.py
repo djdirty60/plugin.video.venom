@@ -126,8 +126,6 @@ class Sources:
 			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
 			if len(items) > 0:
 				if select == '0':
-					# control.homeWindow.clearProperty(self.itemProperty)
-					# control.homeWindow.setProperty(self.itemProperty, jsdumps(items))
 					control.sleep(200)
 					return self.sourceSelect(title, items, uncached_items, self.meta)
 				else: url = self.sourcesAutoPlay(items)
@@ -188,9 +186,7 @@ class Sources:
 				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
 				meta = py_tools.ensure_text(meta, errors='ignore')
 				meta = jsloads(meta)['result']['movies']
-				# t = cleantitle.get(self.title)
 				t = cleantitle.get(self.title.replace('&', 'and'))
-				# meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
 				meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
 				if meta: meta = meta[0]
 				else: raise Exception()
@@ -211,9 +207,7 @@ class Sources:
 				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
 				show_meta = py_tools.ensure_text(show_meta, errors='ignore')
 				show_meta = jsloads(show_meta)['result']['tvshows']
-				# t = cleantitle.get(self.title)
 				t = cleantitle.get(self.title.replace('&', 'and'))
-				# show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))]
 				show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
 				if show_meta: show_meta = show_meta[0]
 				else: raise Exception()
@@ -292,7 +286,8 @@ class Sources:
 			progressDialog.create(header, '')
 			for i in range(len(items)):
 				try:
-					label = '[COLOR %s]%s[CR]%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
+					src_provider = items[i]['debrid'] if items[i].get('debrid') else items[i]['source']
+					label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider, items[i]['name'])# using "[CR]" has some weird delay with progressDialog.update()
 					try:
 						if progressDialog.iscanceled(): break
 						progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -378,7 +373,6 @@ class Sources:
 
 		sdc = control.getColor(control.setting('scraper.dialog.color'))
 		string1 = control.lang(32404) # msgid "[COLOR cyan]Time elapsed:[/COLOR]  %s seconds"
-		# string2 = control.lang(32405) # msgid "%s seconds"
 		string3 = control.lang(32406) # msgid "[COLOR cyan]Remaining providers:[/COLOR] %s"
 		string4 = control.lang(32601) # msgid "[COLOR cyan]Unfiltered Total:[/COLOR]"
 
@@ -447,7 +441,7 @@ class Sources:
 					current_time = time()
 					current_progress = current_time - start_time
 					percent = int((current_progress / float(timeout)) * 100)
-					if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1 + '[CR]' + line2 + '[CR]' + line3)
+					if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1 + '\n' + line2 + '\n' + line3)
 					else: progressDialog.update(max(1, percent), line1 + '  ' + string3 % str(len(info)))
 					if end_time < current_time: break
 				except:
@@ -806,29 +800,37 @@ class Sources:
 			progressDialog.create(header, '')
 		except: pass
 		for i in range(len(items)):
-			label = '[COLOR %s]%s[CR]%s[/COLOR]' % (self.highlight_color, items[i]['debrid'], items[i]['name'])
 			try:
-				if progressDialog.iscanceled(): break
-				progressDialog.update(int((100 / float(len(items))) * i), label)
-			except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
-			try:
-				if control.monitor.abortRequested(): return sysexit()
-				url = self.sourcesResolve(items[i])
-				if not any(x in url.lower() for x in self.extensions):
-					log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
-					raise Exception()
-				if not u: u = url
-				if url: break
-			except: pass
+				src_provider = items[i]['debrid'] if items[i].get('debrid') else items[i]['source']
+				label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider, items[i]['name']) # using "[CR]" has some weird delay with progressDialog.update()
+				try:
+					if progressDialog.iscanceled(): break
+					progressDialog.update(int((100 / float(len(items))) * i), label)
+				except: progressDialog.update(int((100 / float(len(items))) * i), '[COLOR %s]Resolving...[/COLOR]%s' % (self.highlight_color, items[i]['name']))
+				try:
+					if control.monitor.abortRequested(): return sysexit()
+					url = self.sourcesResolve(items[i])
+					if not any(x in url.lower() for x in self.extensions):
+						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
+						raise Exception()
+					if not u: u = url
+					if url: break
+				except: pass
+			except:
+				log_utils.error()
 		try: progressDialog.close()
 		except: pass
 		del progressDialog
 		return u
 
 	def sourcesResolve(self, item):
-		url = item['url']
-		self.url = None
-		debrid_provider = item['debrid']
+		try:
+			url = item['url']
+			self.url = None
+			debrid_provider = item['debrid'] if item.get('debrid') else ''
+		except:
+			log_utils.error()
+
 		if 'magnet:' in url:
 			if not 'uncached' in item['source']:
 				try:
@@ -856,13 +858,13 @@ class Sources:
 					log_utils.error()
 					return
 		else:
-			direct = item['direct']
-			call = [i[1] for i in self.sourceDict if i[0] == item['provider']][0]
-			if direct:
-				self.url = call.resolve(url)
-				return url
-			else:
-				try:
+			try:
+				direct = item['direct']
+				call = [i[1] for i in self.sourceDict if i[0] == item['provider']][0]
+				if direct:
+					self.url = call.resolve(url)
+					return url
+				else:
 					if debrid_provider == 'Real-Debrid':
 						from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
 					elif debrid_provider == 'Premiumize.me':
@@ -873,9 +875,9 @@ class Sources:
 					url = debrid_function().unrestrict_link(url)
 					self.url = url
 					return url
-				except:
-					log_utils.error()
-					return
+			except:
+				log_utils.error()
+				return
 
 	def debridPackDialog(self, provider, name, magnet_url, info_hash):
 		try:

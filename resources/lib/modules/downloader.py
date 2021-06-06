@@ -98,7 +98,8 @@ def done(title, dest, downloaded):
 	try:
 		playing = control.player.isPlaying()
 		text = control.homeWindow.getProperty('GEN-DOWNLOADED')
-		if len(text) > 0: text += '[CR]'
+		# if len(text) > 0: text += '[CR]'
+		if len(text) > 0: text += '\n'
 		if downloaded:
 			text += '%s : %s' % (dest.rsplit(os.sep)[-1], '[COLOR forestgreen]Download succeeded[/COLOR]')
 		else:
@@ -134,7 +135,7 @@ def doDownload(url, dest, title, image, headers):
 	resume = 0
 	sleep = 0
 	control.hide()
-	if control.yesnoDialog('File Size: %sGB[CR]Path: %s[CR]Continue with download?' % (gb, dest), '', '', 'Confirm Download', 'Confirm',  'Cancel') == 1: return
+	if control.yesnoDialog('File Size: %sGB\nPath: %s\nContinue with download?' % (gb, dest), '', '', 'Confirm Download', 'Confirm',  'Cancel') == 1: return
 	f = control.openFile(dest, 'w')
 	chunk  = None
 	chunks = []

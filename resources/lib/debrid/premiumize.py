@@ -76,7 +76,7 @@ class Premiumize:
 		token_ttl = token['expires_in']
 		poll_again = True
 		success = False
-		line = '%s[CR]%s'
+		line = '%s\n%s'
 		progressDialog = control.progressDialog
 		progressDialog.create(control.lang(40054))
 		progressDialog.update(-1, line % (control.lang(32513) % token['verification_uri'], control.lang(32514) % token['user_code']))
@@ -251,7 +251,7 @@ class Premiumize:
 			# control.okDialog(title='default', message=control.lang(40017) % control.lang(40057))
 			# return True
 		interval = 5
-		line = '%s[CR]%s[CR]%s'
+		line = '%s\n%s\n%s'
 		line1 = '%s...' % (control.lang(40017) % control.lang(40057))
 		line2 = transfer_info['name']
 		line3 = transfer_info['message']
@@ -343,7 +343,7 @@ class Premiumize:
 	def delete_transfer(self, media_id, folder_name=None, silent=True):
 		try:
 			if not silent:
-				if not control.yesnoDialog(control.lang(40050) % '?[CR]' + folder_name, '', ''): return
+				if not control.yesnoDialog(control.lang(40050) % '?\n' + folder_name, '', ''): return
 			data = {'id': media_id}
 			response = self._post(transfer_delete_url, data)
 			if silent: return

@@ -238,7 +238,7 @@ def notification(title=None, message=None, icon=None, time=3000, sound=(setting(
 
 def yesnoDialog(line1, line2, line3, heading=addonInfo('name'), nolabel='', yeslabel=''):
 	if isPY3:
-		message = '%s[CR]%s[CR]%s' % (line1, line2, line3)
+		message = '%s\n%s\n%s' % (line1, line2, line3)
 		return dialog.yesno(heading, message, nolabel, yeslabel)
 	else: return dialog.yesno(heading, line1, line2, line3, nolabel, yeslabel)
 
@@ -331,6 +331,14 @@ def autoTraktSubscription(tvshowtitle, year, imdb, tvdb): #---start adding TMDb 
 	library.libtvshows().add(tvshowtitle, year, imdb, tvdb)
 
 def getColor(n):
+	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
+						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor']
+	if not n: n = '8'
+	color = colorChart[int(n)]
+	return color
+
+def getSourceHighlightColor():
+	n = setting('sources.highlight.color')
 	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
 						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor']
 	if not n: n = '8'

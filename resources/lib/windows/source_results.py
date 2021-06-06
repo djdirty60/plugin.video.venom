@@ -8,7 +8,7 @@ try: #Py2
 	from urllib import quote_plus
 except ImportError: #Py3
 	from urllib.parse import quote_plus
-from resources.lib.modules.control import joinPath, transPath, dialog
+from resources.lib.modules.control import joinPath, transPath, dialog, getSourceHighlightColor
 from resources.lib.modules.source_utils import getFileType
 from resources.lib.windows.base import BaseDialog
 
@@ -192,6 +192,8 @@ class SourceResultsXML(BaseDialog):
 				self.setProperty('venom.duration', str(int(duration)))
 			else: self.setProperty('venom.duration', 'NA ')
 			self.setProperty('venom.total_results', self.total_results)
+			# self.setProperty('venom.line1.color', getSourceHighlightColor())
+			self.setProperty('venom.highlight.color', getSourceHighlightColor())
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

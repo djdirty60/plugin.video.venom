@@ -923,7 +923,7 @@ class Auth:
 			result3 = requests.post(url3, data=post3).json()
 			if result3.get('success') is True:
 				session_id = result3.get('session_id')
-				msg = '%s' % ('username =' + username + '[CR]password =' + password + '[CR]token = ' + token + '[CR]confirm?')
+				msg = '%s' % ('username =' + username + '\n password =' + password + '\n token = ' + token + '\n confirm?')
 				if yesnoDialog(msg, '', ''):
 					setSetting('tmdb.session_id', session_id)
 					notification(message='TMDb Successfully Authorized')

@@ -1,4 +1,10 @@
 
+[B][COLOR red]Update - v5.1.3 - June 06, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed Direct links not playing.[/I]
+[COLOR yellow]--[/COLOR][I] Some complaints that the new window xml is a little to brite and hard on the eyes. I added
+    new Source Select Highlight color option to settings.  See Source Options.[/I]
+
+
 [B][COLOR red]Update - v5.1.2 - June 05, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed  local bookmarks and Trakt scrobble resume not working.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Marked as watched during playback not working.[/I]

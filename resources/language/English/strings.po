@@ -560,38 +560,118 @@ msgid "Trakt: Scrobble Reset Failed"
 msgstr ""
 
 msgctxt "#32132"
-msgid ""
+msgid "Highlight Color"
 msgstr ""
 
 msgctxt "#32133"
-msgid ""
+msgid "Torent/Hoster sorting method"
 msgstr ""
 
 msgctxt "#32134"
-msgid ""
+msgid "Sort by file size"
 msgstr ""
 
 msgctxt "#32135"
-msgid ""
+msgid "Open My Accounts Addon"
 msgstr ""
 
 msgctxt "#32136"
-msgid ""
+msgid "sync(re) with My Accounts"
 msgstr ""
 
 msgctxt "#32137"
-msgid ""
+msgid "[COLOR FFA0C12C] -- Help --[/COLOR]"
 msgstr ""
 
 msgctxt "#32138"
-msgid ""
+msgid "[COLOR FFA0C12C] -- Dev Mode Help --[/COLOR]"
 msgstr ""
 
 msgctxt "#32139"
-msgid ""
+msgid "Toggle reuselanguageinvoker"
 msgstr ""
 
 msgctxt "#32140"
+msgid "[COLOR FFA0C12C] -- reuselanguageinvoker Help --[/COLOR]"
+msgstr ""
+
+msgctxt "#32141"
+msgid "Disable single episode scraping"
+msgstr ""
+
+msgctxt "#32142"
+msgid "Disable single scraper filter"
+msgstr ""
+
+msgctxt "#32143"
+msgid "Disable season pack scraping"
+msgstr ""
+
+msgctxt "#32144"
+msgid "Disable season pack scraper filter"
+msgstr ""
+
+msgctxt "#32145"
+msgid "Disable show pack scraping"
+msgstr ""
+
+msgctxt "#32146"
+msgid "Disable show pack scraper filter"
+msgstr ""
+
+msgctxt "#32147"
+msgid "Developer mode"
+msgstr ""
+
+msgctxt "#32148"
+msgid "$NUMBER[24]HR delay before import"
+msgstr ""
+
+msgctxt "#32149"
+msgid "Create .strm files for TMDB Helper"
+msgstr ""
+
+msgctxt "#32150"
+msgid "Acount Info from My Accounts"
+msgstr ""
+
+msgctxt "#32151"
+msgid "[I]Please visit My Accounts for setup[/I]"
+msgstr ""
+
+msgctxt "#32152"
+msgid "alldebrid token"
+msgstr ""
+
+msgctxt "#32153"
+msgid "Account Info"
+msgstr ""
+
+msgctxt "#32154"
+msgid "premiumize token"
+msgstr ""
+
+msgctxt "#32155"
+msgid ""
+msgstr ""
+
+msgctxt "#32156"
+msgid ""
+msgstr ""
+
+msgctxt "#32157"
+msgid ""
+msgstr ""
+
+msgctxt "#32158"
+msgid ""
+msgstr ""
+
+msgctxt "#32159"
+msgid ""
+msgstr ""
+
+msgctxt "#32160"
 msgid ""
 msgstr ""
 
@@ -1019,7 +1099,7 @@ msgid "[COLOR cyan]Time elapsed:[/COLOR]  %s seconds"
 msgstr ""
 
 msgctxt "#32405"
-msgid "%s seconds"
+msgid ""
 msgstr ""
 
 msgctxt "#32406"
