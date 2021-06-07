@@ -218,7 +218,7 @@
 		<setting type="lsep" label="32150" />
 		<setting id="seperator" type="bool" visible="false" /> <!-- trick to ensures that a separator is drawn. -->
 
-		<setting type="lsep" label="400059" />
+		<setting type="lsep" label="40059" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.5&amp;opensettings=true&amp;query2=7.4)" visible="eq(2,)" />
 		<setting id="alldebrid.enable" type="bool" label="32081" default="true" visible="!eq(1,)" />
 		<setting id="alldebrid.token" label="32152" type="text" default="" visible="false" />

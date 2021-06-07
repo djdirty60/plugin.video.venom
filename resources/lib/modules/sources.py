@@ -102,7 +102,6 @@ class Sources:
 				uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 				filter += [i for i in items if not re.match(r'^uncached.*torrent', i['source'])]
 				if filter: pass
-					# for i in range(len(filter)): filter[i].update({'label': re.sub(r'(\d+)', '%02d' % int(i + 1), filter[i]['label'], 1)})
 				elif not filter:
 					if control.yesnoDialog('No cached torrents returned. Would you like to view the uncached torrents to cache yourself?', '', ''):
 						control.cancelPlayback()
@@ -134,7 +133,7 @@ class Sources:
 				self.url = url
 				return self.errorForSources()
 			from resources.lib.modules import player
-			player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, url, self.meta, select)
+			player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, url, self.meta)
 		except:
 			log_utils.error()
 			control.cancelPlayback()
@@ -232,7 +231,6 @@ class Sources:
 			except:
 				log_utils.error()
 				meta = ''
-		# if self.meta is None:
 		if self.meta is None or 'videodb' in control.infoLabel('ListItem.FolderPath'):
 			self.meta = checkLibMeta()
 		try:
@@ -286,8 +284,8 @@ class Sources:
 			progressDialog.create(header, '')
 			for i in range(len(items)):
 				try:
-					src_provider = items[i]['debrid'] if items[i].get('debrid') else items[i]['source']
-					label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider, items[i]['name'])# using "[CR]" has some weird delay with progressDialog.update()
+					src_provider = items[i]['debrid'] if items[i].get('debrid') else ('%s - %s' % (items[i]['source'], items[i]['provider']))
+					label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'])# using "[CR]" has some weird delay with progressDialog.update()
 					try:
 						if progressDialog.iscanceled(): break
 						progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -316,7 +314,7 @@ class Sources:
 					except: pass
 					del progressDialog
 					from resources.lib.modules import player
-					player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta, select='0')
+					player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta)
 					return self.url
 				except:
 					log_utils.error()
@@ -801,8 +799,8 @@ class Sources:
 		except: pass
 		for i in range(len(items)):
 			try:
-				src_provider = items[i]['debrid'] if items[i].get('debrid') else items[i]['source']
-				label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider, items[i]['name']) # using "[CR]" has some weird delay with progressDialog.update()
+				src_provider = items[i]['debrid'] if items[i].get('debrid') else ('%s - %s' % (items[i]['source'], items[i]['provider']))
+				label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name']) # using "[CR]" has some weird delay with progressDialog.update()
 				try:
 					if progressDialog.iscanceled(): break
 					progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -900,16 +898,17 @@ class Sources:
 			control.hide()
 			chosen = control.selectDialog(display_list, heading=name)
 			if chosen < 0: return None
+			if control.condVisibility("Window.IsActive(source_results.xml)"): 	# close "source_results.xml" here after selection is made and valid
+				control.closeAll()
 			control.busy()
 			chosen_result = debrid_files[chosen]
-			if provider	 == 'Real-Debrid':
+			if provider	 in ['Real-Debrid', 'RD']:
 				self.url = debrid_function().unrestrict_link(chosen_result['link'])
-			elif provider == 'Premiumize.me':
+			elif provider in ['Premiumize.me', 'PM']:
 				self.url = debrid_function().add_headers_to_url(chosen_result['link'])
-			elif provider == 'AllDebrid':
+			elif provider in ['AllDebrid', 'AD']:
 				self.url = debrid_function().unrestrict_link(chosen_result['link'])
 			from resources.lib.modules import player
-			from resources.lib.modules.source_utils import seas_ep_filter
 			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"'))) # needed for CM "showDebridPack" action
 			title = meta['tvshowtitle']
 			year = meta['year'] if 'year' in meta else None
@@ -920,10 +919,11 @@ class Sources:
 			tvdb = meta['tvdb'] if 'tvdb' in meta else None
 			release_title = chosen_result['filename']
 			control.hide()
-			if seas_ep_filter(season, episode, release_title):
-				return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta, select='1')
-			else:
-				return player.Player().play(self.url)
+			# if source_utils.seas_ep_filter(season, episode, release_title):
+				# return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta)
+			# else:
+				# return player.Player().play(self.url)
+			return player.Player().play(self.url)
 		except:
 			log_utils.error('Error debridPackDialog: ')
 			control.hide()

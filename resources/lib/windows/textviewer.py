@@ -18,7 +18,7 @@ class TextViewerXML(BaseDialog):
 		self.doModal()
 
 	def onAction(self, action):
-		if action in self.closing_actions:
+		if action in self.closing_actions or action in self.selection_actions:
 			self.close()
 
 	def set_properties(self):

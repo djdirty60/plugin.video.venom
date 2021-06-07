@@ -41,7 +41,7 @@ class UncachedResultsXML(BaseDialog):
 
 	def onAction(self, action):
 		try:
-			action_id = action.getId()
+			action_id = action.getId()# change to just "action" as the ID is already returned in that.
 			if action_id in self.info_actions:
 				chosen_source = self.item_list[self.get_position(self.window_id)]
 				chosen_source = chosen_source.getProperty('venom.source_dict')
@@ -65,42 +65,39 @@ class UncachedResultsXML(BaseDialog):
 											(debrid, link_type, sysname, quote_plus(jsdumps(self.uncached)), quote_plus(chosen_source.getProperty('venom.url')), quote_plus(source_dict), quote_plus(jsdumps(self.meta))))
 					self.selected = (None, '')
 				else:
-					# self.selected = ('play_Item', chosen_source)
 					self.selected = (None, '')
 				return self.close()
 			elif action_id in self.context_actions:
 				chosen_source = self.item_list[self.get_position(self.window_id)]
 				source_dict = chosen_source.getProperty('venom.source_dict')
 				cm_list = [('[B]Additional Link Info[/B]', 'sourceInfo')]
-				# if 'cached (pack)' in source_dict:
-					# cm_list += [('[B]Browse Debrid Pack[/B]', 'showDebridPack')]
+
 				source = chosen_source.getProperty('venom.source')
-				if not 'UNCACHED' in source:
-					cm_list += [('[B]Download[/B]', 'download')]
+				if 'UNCACHED' in source:
+					debrid = chosen_source.getProperty('venom.debrid')
+					seeders = chosen_source.getProperty('venom.seeders')
+					cm_list += [('[B]Cache to %s Cloud (seeders=%s)[/B]' % (debrid, seeders) , 'cacheToCloud')]
 
 				chosen_cm_item = dialog.contextmenu([i[0] for i in cm_list])
 				if chosen_cm_item == -1: return
-
 				cm_action = cm_list[chosen_cm_item][1]
+
 				if cm_action == 'sourceInfo':
 					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=sourceInfo&source=%s)' % quote_plus(source_dict))
-				elif cm_action == 'showDebridPack':
+
+				if cm_action == 'cacheToCloud':
 					debrid = chosen_source.getProperty('venom.debrid')
-					name = chosen_source.getProperty('venom.name')
-					hash = chosen_source.getProperty('venom.hash')
-					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=showDebridPack&caller=%s&name=%s&url=%s&source=%s)' %
-									(quote_plus(debrid), quote_plus(name), quote_plus(chosen_source.getProperty('venom.url')), quote_plus(hash)))
-				elif cm_action == 'download':
+					source_dict = chosen_source.getProperty('venom.source_dict')
+					link_type = 'pack' if 'package' in source_dict else 'single'
 					sysname = quote_plus(self.meta.get('title'))
-					poster = self.meta.get('poster', '')
 					if 'tvshowtitle' in self.meta and 'season' in self.meta and 'episode' in self.meta:
 						poster = self.meta.get('season_poster') or self.meta.get('poster')
 						sysname += quote_plus(' S%02dE%02d' % (int(self.meta['season']), int(self.meta['episode'])))
 					elif 'year' in self.meta: sysname += quote_plus(' (%s)' % self.meta['year'])
 					try: new_sysname = quote_plus(chosen_source.getProperty('venom.name'))
 					except: new_sysname = sysname
-					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=download&name=%s&image=%s&source=%s&caller=sources&title=%s)' %
-										(new_sysname, quote_plus(poster), quote_plus(source_dict), sysname))
+					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=cacheTorrent&caller=%s&type=%s&title=%s&items=%s&url=%s&source=%s&meta=%s)' %
+											(debrid, link_type, sysname, quote_plus(jsdumps(self.uncached)), quote_plus(chosen_source.getProperty('venom.url')), quote_plus(source_dict), quote_plus(jsdumps(self.meta))))
 			elif action in self.closing_actions:
 				self.selected = (None, '')
 				self.close()

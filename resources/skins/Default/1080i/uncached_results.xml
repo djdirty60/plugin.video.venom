@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window>
-	<defaultcontrol>2001</defaultcontrol>
+	<!-- <defaultcontrol>2001</defaultcontrol> -->
 	<controls>
 		<control type="image">
 			<left>0</left>
@@ -27,12 +27,28 @@
 			</control>
 			<control type="image">
 				<aspectratio align="center" aligny="center">keep</aspectratio>
-				<width>600</width>
 				<left>600</left>
 				<top>0</top>
+				<width>600</width>
 				<height>175%</height>
 				<texture background="true">$INFO[Window().Property(venom.clearlogo)]</texture>
+				<!-- <visible>!String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
 			</control>
+
+			<!-- <control type="textbox"> -->
+				<!-- <description>Title when no clearlogo</description> -->
+				<!-- <left>200</left> -->
+				<!-- <top>0</top> -->
+				<!-- <width>900</width> -->
+				<!-- <height>400</height> -->
+				<!-- <font>font100caps_title</font> -->
+				<!-- <textcolor>$INFO[Window().Property(venom.highlight.color)]</textcolor> -->
+				<!-- <align>center</align> -->
+				<!-- <aligny>bottom</aligny> -->
+				<!-- <label>$INFO[Window().Property(venom.title)]</label> -->
+				<!-- <visible>String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
+			<!-- </control> -->
+
 			<control type="textbox">
 				<description>Episode details</description>
 				<left>1345</left>
@@ -81,15 +97,16 @@
 				<autoscroll time="2000" delay="5500" repeat="5000"></autoscroll>
 			</control>
 			<control type="list" id="2001">
-				<description>Source Select List</description>
-				<onright>2001</onright>
+				<description>Uncached Torrent List</description>
 				<viewtype>list</viewtype>
 				<left>0</left>
 				<top>150</top>
 				<width>1350</width>
 				<height>800</height>
-				<onup>2000</onup>
-				<ondown>2000</ondown>
+				<onright>2001</onright>
+				<onleft>2001</onleft>
+				<onup>2001</onup>
+				<ondown>2001</ondown>
 				<scrolltime tween="sine">400</scrolltime>
 				<orientation>Vertical</orientation>
 				<itemlayout height="100" width="1325">
@@ -109,7 +126,7 @@
 						<top>15</top>
 						<width>1240</width>
 						<height>25</height>
-						<font>font12</font>
+						<font>font13</font>
 						<textcolor>white</textcolor>
 						<align>left</align>
 						<aligny>bottom</aligny>
@@ -153,7 +170,7 @@
 						<top>15</top>
 						<width>1240</width>
 						<height>25</height>
-						<font>font12</font>
+						<font>font13</font>
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>bottom</aligny>
@@ -169,7 +186,7 @@
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   SEEDERS: $INFO[ListItem.Property(venom.seeders)]</label>
+						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR lightblue]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR lightblue]|[/COLOR]   SEEDERS: $INFO[ListItem.Property(venom.seeders)][/B]</label>
 						<visible>String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
 					</control>
 				</focusedlayout>
@@ -177,10 +194,10 @@
 			<control type="grouplist" id="2002">
 				<description>Info icons group list control</description>
 				<left>180</left>
-				<top>975</top>
+				<top>965</top>
 				<width>1250</width>
 				<height>100</height>
-				<itemgap>10</itemgap>
+				<itemgap>20</itemgap>
 				<orientation>horizontal</orientation>
 					<control type="image">
 						<left>0</left>
@@ -190,7 +207,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/dv.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DOLBY-VISION)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBY-VISION)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -200,7 +217,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/hdr.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),HDR) + !String.Contains(Container(2000).ListItem.Property(venom.extra_info),HDRIP)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDR) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDRIP)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -210,7 +227,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/3d.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),3D)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),3D)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -220,7 +237,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/hevc.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),HEVC) | [String.Contains(Container(2000).ListItem.Property(venom.extra_info),DOLBY-VISION) | String.Contains(Container(2000).ListItem.Property(venom.extra_info),HDR)] + !String.Contains(Container(2000).ListItem.Property(venom.extra_info),HDRIP) + !String.Contains(Container(2000).ListItem.Property(venom.extra_info),AVC)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),HEVC) | [String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBY-VISION) | String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDR)] + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDRIP) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),AVC)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -230,7 +247,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/x264.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),AVC)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),AVC)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -240,7 +257,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/mpeg_video.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),MPEG)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MPEG)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -250,7 +267,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/wmv2.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),WMV)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),WMV)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -260,7 +277,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/dx50.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DIVX)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DIVX)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -270,7 +287,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/xvid2.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),XVID)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),XVID)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -280,7 +297,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/bluray.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),BLURAY)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),BLURAY)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -290,7 +307,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/hdtv.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),HDTV)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDTV)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -300,7 +317,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/web-dl.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),WEB)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),WEB)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -310,7 +327,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/dvd.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DVDRIP)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DVDRIP)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -320,7 +337,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/atmos.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),ATMOS)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),ATMOS)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -330,7 +347,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/dolbytruehd.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DOLBY-TRUEHD)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBY-TRUEHD)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -340,7 +357,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/dolbydigital.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DOLBYDIGITAL)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBYDIGITAL)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -350,7 +367,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/eac3.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DD) + !String.Contains(Container(2000).ListItem.Property(venom.extra_info),DD-EX)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DD) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DD-EX)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -360,7 +377,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/dolbypro.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DD-EX)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DD-EX)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -370,7 +387,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/dts.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DTS) + !String.Contains(Container(2000).ListItem.Property(venom.extra_info),DTS-X) + !String.Contains(Container(2000).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-X) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -380,7 +397,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/dts_x.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DTS-X)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-X)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -390,7 +407,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/dtshd_ma.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -400,7 +417,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/aac.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),AAC)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),AAC)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -410,7 +427,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>audio/mp3.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),MP3)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MP3)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -420,7 +437,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>channels/2.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),2CH)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),2CH)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -430,7 +447,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>channels/6.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),6CH)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),6CH)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -440,7 +457,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>channels/7.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),7CH)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),7CH)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -450,7 +467,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>channels/8.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),8CH)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),8CH)</visible>
 					</control>
 			</control>
 		</control>

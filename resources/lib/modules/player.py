@@ -35,7 +35,7 @@ class Player(xbmc.Player):
 		self.playback_resumed = False
 		self.av_started = False
 
-	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta, select=None):
+	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta):
 		try:
 			if not url: raise Exception
 			self.media_type = 'movie' if season is None or episode is None else 'episode'
@@ -93,6 +93,7 @@ class Player(xbmc.Player):
 				else: item.setArt({'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
 			if 'castandart' in meta: item.setCast(meta.get('castandart', ''))
 			item.setInfo(type='video', infoLabels=control.metadataClean(meta))
+			# item.setProperty('IsPlayable', 'false')
 			control.resolve(int(argv[1]), True, item)
 			control.homeWindow.setProperty('script.trakt.ids', jsdumps(self.ids))
 			self.keepAlive()

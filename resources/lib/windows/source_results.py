@@ -42,7 +42,7 @@ class SourceResultsXML(BaseDialog):
 
 	def onAction(self, action):
 		try:
-			action_id = action.getId()
+			action_id = action.getId() # change to just "action" as the ID is already returned in that.
 			if action_id in self.info_actions:
 				chosen_source = self.item_list[self.get_position(self.window_id)]
 				chosen_source = chosen_source.getProperty('venom.source_dict')
@@ -93,6 +93,7 @@ class SourceResultsXML(BaseDialog):
 					hash = chosen_source.getProperty('venom.hash')
 					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=showDebridPack&caller=%s&name=%s&url=%s&source=%s)' %
 									(quote_plus(debrid), quote_plus(name), quote_plus(chosen_source.getProperty('venom.url')), quote_plus(hash)))
+					self.selected = (None, '')
 				elif cm_action == 'download':
 					sysname = quote_plus(self.meta.get('title'))
 					poster = self.meta.get('poster', '')
@@ -150,6 +151,8 @@ class SourceResultsXML(BaseDialog):
 					listitem.setProperty('venom.source_dict', jsdumps([item]))
 					listitem.setProperty('venom.debrid', self.debrid_abv(item.get('debrid')))
 					listitem.setProperty('venom.provider', item.get('provider').upper())
+					if item.get('source') == 'Google Drive': item['source'] = 'direct'
+					if item.get('provider') == 'furk': item['source'] = 'direct'
 					listitem.setProperty('venom.source', item.get('source').upper())
 					listitem.setProperty('venom.seeders', str(item.get('seeders')))
 					listitem.setProperty('venom.hash', item.get('hash', 'N/A'))
@@ -182,6 +185,8 @@ class SourceResultsXML(BaseDialog):
 			# self.setProperty('venom.fanart', self.meta.get('fanart', ''))
 			# self.setProperty('venom.clearart', self.meta.get('clearart', ''))
 			self.setProperty('venom.clearlogo', self.meta.get('clearlogo', ''))
+			# title = self.meta.get('tvshowtitle') if self.meta.get('tvshowtitle') else self.meta.get('title')
+			# self.setProperty('venom.title', title)
 			self.setProperty('venom.plot', self.meta.get('plot', ''))
 			self.setProperty('venom.year', str(self.meta.get('year', '')))
 			self.setProperty('venom.premiered', str(self.meta.get('premiered', '')))
@@ -192,7 +197,6 @@ class SourceResultsXML(BaseDialog):
 				self.setProperty('venom.duration', str(int(duration)))
 			else: self.setProperty('venom.duration', 'NA ')
 			self.setProperty('venom.total_results', self.total_results)
-			# self.setProperty('venom.line1.color', getSourceHighlightColor())
 			self.setProperty('venom.highlight.color', getSourceHighlightColor())
 		except:
 			from resources.lib.modules import log_utils

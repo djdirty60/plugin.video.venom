@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window>
-	<defaultcontrol>2000</defaultcontrol>
+	<!-- <defaultcontrol>2000</defaultcontrol> -->
 	<controls>
 		<control type="image">
 			<left>0</left>
@@ -27,12 +27,28 @@
 			</control>
 			<control type="image">
 				<aspectratio align="center" aligny="center">keep</aspectratio>
-				<width>600</width>
-				<left>600</left>
+				<left>400</left>
 				<top>0</top>
+				<width>600</width>
 				<height>175%</height>
 				<texture background="true">$INFO[Window().Property(venom.clearlogo)]</texture>
+				<!-- <visible>!String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
 			</control>
+
+			<!-- <control type="textbox"> -->
+				<!-- <description>Title when no clearlogo</description> -->
+				<!-- <left>200</left> -->
+				<!-- <top>0</top> -->
+				<!-- <width>900</width> -->
+				<!-- <height>400</height> -->
+				<!-- <font>font100caps_title</font> -->
+				<!-- <textcolor>$INFO[Window().Property(venom.highlight.color)]</textcolor> -->
+				<!-- <align>center</align> -->
+				<!-- <aligny>bottom</aligny> -->
+				<!-- <label>$INFO[Window().Property(venom.title)]</label> -->
+				<!-- <visible>String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
+			<!-- </control> -->
+
 			<control type="textbox">
 				<description>Episode details</description>
 				<left>1345</left>
@@ -82,12 +98,13 @@
 			</control>
 			<control type="list" id="2000">
 				<description>Source Select List</description>
-				<onright>2001</onright>
 				<viewtype>list</viewtype>
 				<left>0</left>
 				<top>150</top>
 				<width>1350</width>
 				<height>800</height>
+				<onright>2001</onright>
+				<onleft>2000</onleft>
 				<onup>2000</onup>
 				<ondown>2000</ondown>
 				<scrolltime tween="sine">400</scrolltime>
@@ -174,8 +191,7 @@
 						<top>0</top>
 						<width>1350</width>
 						<height>100</height>
-						<!-- <texture colordiffuse="gainsboro">common/white.png</texture> -->
-						<texture colordiffuse="$INFO[Window().Property(venom.highlight.color)">common/white.png</texture>
+						<texture colordiffuse="$INFO[Window().Property(venom.highlight.color)]">common/white.png</texture>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -266,17 +282,16 @@
 				<top>30</top>
 					<control type="button" id="2001">
 						<description>View Uncached Torrents button</description>
+						<onright>2000</onright>
 						<onleft>2000</onleft>
 						<width>300</width>
 						<height>60</height>
 						<textoffsetx>5</textoffsetx>
-						<!-- <texturefocus colordiffuse="gainsboro">common/white.png</texturefocus> -->
-						<texturefocus colordiffuse="$INFO[Window().Property(venom.highlight.color)">common/white.png</texturefocus>
+						<texturefocus colordiffuse="$INFO[Window().Property(venom.highlight.color)]">common/white.png</texturefocus>
 						<texturenofocus colordiffuse="gainsboro">common/white.png</texturenofocus>
 						<label>$ADDON[plugin.video.venom 32639]</label>
 						<font>font12</font>
 						<align>center</align>
-						<!-- <textcolor>white</textcolor> -->
 						<textcolor>black</textcolor>
 						<focusedcolor>black</focusedcolor>
 					</control>
@@ -284,10 +299,10 @@
 			<control type="grouplist" id="2002">
 				<description>Info icons group list control</description>
 				<left>180</left>
-				<top>975</top>
+				<top>965</top>
 				<width>1250</width>
 				<height>100</height>
-				<itemgap>10</itemgap>
+				<itemgap>20</itemgap>
 				<orientation>horizontal</orientation>
 					<control type="image">
 						<left>0</left>
