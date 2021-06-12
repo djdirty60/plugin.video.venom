@@ -10,6 +10,7 @@ except ImportError: #Py3
 	from urllib.parse import quote_plus
 from resources.lib.modules.control import joinPath, transPath, dialog, getSourceHighlightColor
 from resources.lib.modules.source_utils import getFileType
+from resources.lib.modules import tools
 from resources.lib.windows.base import BaseDialog
 
 
@@ -191,7 +192,13 @@ class SourceResultsXML(BaseDialog):
 			# self.setProperty('venom.title', title)
 			self.setProperty('venom.plot', self.meta.get('plot', ''))
 			self.setProperty('venom.year', str(self.meta.get('year', '')))
-			self.setProperty('venom.premiered', str(self.meta.get('premiered', '')))
+
+			new_date = tools.Time.convert(stringTime=str(self.meta.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')
+			# new_date = new_date.lstrip('0')
+			# new_date = new_date.replace('-0', '-')
+			# self.setProperty('venom.premiered', str(self.meta.get('premiered', '')))
+			self.setProperty('venom.premiered', new_date)
+
 			if self.meta.get('mpaa'): self.setProperty('venom.mpaa', self.meta.get('mpaa'))
 			else: self.setProperty('venom.mpaa', 'NA ')
 			if self.meta.get('duration'):

@@ -437,7 +437,7 @@ class Sources:
 					current_time = time()
 					current_progress = current_time - start_time
 					percent = int((current_progress / float(timeout)) * 100)
-					if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1 + '\n' + line2 + '\n' + line3)
+					if progressDialog != control.progressDialogBG: progressDialog.update(max(1, percent), line1 + '[CR]' + line2 + '[CR]' + line3)
 					else: progressDialog.update(max(1, percent), line1 + '  ' + string3 % str(len(info)))
 					if end_time < current_time: break
 				except:

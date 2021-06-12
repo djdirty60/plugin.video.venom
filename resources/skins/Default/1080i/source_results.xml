@@ -278,30 +278,23 @@
 				</focusedlayout>
 			</control>
 			<control type="group">
-				<!-- <left>1435</left> -->
-				<left>1420</left>
-				<!-- <top>30</top> -->
-				<top>-5</top>
+				<left>1432</left>
+				<top>10</top>
 					<control type="button" id="2001">
 						<description>View Uncached Torrents button</description>
 						<onright>2000</onright>
 						<onleft>2000</onleft>
-						<!-- <width>300</width> -->
-						<width>330</width>
-						<!-- <height>60</height> -->
-						<height>120</height>
-						<textoffsetx>5</textoffsetx>
-						<!-- <texturefocus colordiffuse="$INFO[Window().Property(venom.highlight.color)]">common/white.png</texturefocus> -->
-						<texturefocus colordiffuse="$INFO[Window().Property(venom.highlight.color)]">common/button-view-base-fo.png</texturefocus>
-
-						<!-- <texturenofocus colordiffuse="gainsboro">common/white.png</texturenofocus> -->
-						<texturenofocus colordiffuse="gainsboro">common/button-view-base-fo.png</texturenofocus>
-
+						<width>305</width>
+						<height>100</height>
+						<textoffsetx>0</textoffsetx>
+						<texturefocus colordiffuse="$INFO[Window().Property(venom.highlight.color)]">common/button5.png</texturefocus>
+						<!-- <texturenofocus colordiffuse="gainsboro">common/button2.png</texturenofocus> -->
+						<texturenofocus>common/button5.png</texturenofocus>
 						<label>$ADDON[plugin.video.venom 32639]</label>
 						<font>font12</font>
 						<align>center</align>
-						<textcolor>black</textcolor>
-						<focusedcolor>black</focusedcolor>
+						<textcolor>white</textcolor>
+						<focusedcolor>white</focusedcolor>
 					</control>
 			</control>
 			<control type="grouplist" id="2002">
