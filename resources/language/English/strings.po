@@ -128,7 +128,7 @@ msgid "Enable Calendar (TVMaze) fetching extended meta"
 msgstr ""
 
 msgctxt "#32024"
-msgid "Error Connecting to TMDB"
+msgid "Error Connecting to TMDb"
 msgstr ""
 
 msgctxt "#32025"
@@ -232,7 +232,7 @@ msgid "[B]VENOM[/B] : Viewtypes"
 msgstr ""
 
 msgctxt "#32050"
-msgid "Remove CAM and SD sources"
+msgid ""
 msgstr ""
 
 msgctxt "#32051"
@@ -240,7 +240,7 @@ msgid "Remove 3D sources"
 msgstr ""
 
 msgctxt "#32052"
-msgid "Enable Resolution Quality Icons"
+msgid ""
 msgstr ""
 
 msgctxt "#32053"
@@ -348,7 +348,7 @@ msgid "Show general notifications"
 msgstr ""
 
 msgctxt "#32079"
-msgid "Enable File Size Limit"
+msgid ""
 msgstr ""
 
 msgctxt "#32080"
@@ -436,7 +436,7 @@ msgid "Bookmarks Successfully Cleared!"
 msgstr ""
 
 msgctxt "#32101"
-msgid "Bookmarks Successfully Cleared!"
+msgid ""
 msgstr ""
 
 msgctxt "#32102"
@@ -652,26 +652,58 @@ msgid "premiumize token"
 msgstr ""
 
 msgctxt "#32155"
-msgid ""
+msgid "Min. Movie Size (GB)"
 msgstr ""
 
 msgctxt "#32156"
-msgid ""
+msgid "Max. Movie Size (GB)"
 msgstr ""
 
 msgctxt "#32157"
-msgid ""
+msgid "Min. Episode Size (GB)"
 msgstr ""
 
 msgctxt "#32158"
-msgid ""
+msgid "Max. Episode Size (GB)"
 msgstr ""
 
 msgctxt "#32159"
-msgid ""
+msgid "Do not spam log with removed duplicates"
 msgstr ""
 
 msgctxt "#32160"
+msgid "Remove CAM sources"
+msgstr ""
+
+msgctxt "#32161"
+msgid "Remove SD sources (only if better quality exists)"
+msgstr ""
+
+msgctxt "#32162"
+msgid "Remove uncached torrents"
+msgstr ""
+
+msgctxt "#32163"
+msgid "Allow Multi Episodes to Show Unwatched Count"
+msgstr ""
+
+msgctxt "#32164"
+msgid "Scraper Dialog Highlight Color"
+msgstr ""
+
+msgctxt "#32165"
+msgid "Enable Movie File Size Limit"
+msgstr ""
+
+msgctxt "#32166"
+msgid "Enable Episode File Size Limit"
+msgstr ""
+
+msgctxt "#32167"
+msgid ""
+msgstr ""
+
+msgctxt "#32168"
 msgid ""
 msgstr ""
 
@@ -1095,7 +1127,7 @@ msgid "[B]Download[/B]"
 msgstr ""
 
 msgctxt "#32404"
-msgid "[COLOR cyan]Time elapsed:[/COLOR]  %s seconds"
+msgid "[COLOR %s]Time Elapsed:[/COLOR][COLOR %s]  %s seconds[/COLOR]"
 msgstr ""
 
 msgctxt "#32405"
@@ -1103,11 +1135,11 @@ msgid ""
 msgstr ""
 
 msgctxt "#32406"
-msgid "[COLOR cyan]Remaining providers:[/COLOR] %s"
+msgid "[COLOR %s]Remaining Providers:[/COLOR][COLOR %s] %s[/COLOR]"
 msgstr ""
 
 msgctxt "#32407"
-msgid ""
+msgid "[COLOR %s]Unfiltered Total:[/COLOR][COLOR %s]  %s[/COLOR]"
 msgstr ""
 
 msgctxt "#32408"
@@ -1207,7 +1239,7 @@ msgid "Popular (TMDb)"
 msgstr ""
 
 msgctxt "#32432"
-msgid "Popular"
+msgid ""
 msgstr ""
 
 msgctxt "#32433"
@@ -1867,7 +1899,7 @@ msgid "Preparing sources"
 msgstr ""
 
 msgctxt "#32601"
-msgid "[COLOR cyan]Unfiltered Total: [/COLOR]  %s"
+msgid ""
 msgstr ""
 
 msgctxt "#32602"
@@ -2564,27 +2596,27 @@ msgid ""
 msgstr ""
 
 msgctxt "#33573"
-msgid "Add Show to your [COLOR red][B]Watchlist[/B][/COLOR]"
+msgid "Add Show to your [COLOR %s][B]Watchlist[/B][/COLOR]"
 msgstr ""
 
 msgctxt "#33574"
-msgid "Remove Show from your [COLOR red][B]Watchlist[/B][/COLOR]"
+msgid "Remove Show from your [COLOR %s][B]Watchlist[/B][/COLOR]"
 msgstr ""
 
 msgctxt "#33575"
-msgid "Add item to your [COLOR red][B]Collection[/B][/COLOR]"
+msgid "Add item to your [COLOR %s][B]Collection[/B][/COLOR]"
 msgstr ""
 
 msgctxt "#33576"
-msgid "Remove item from your [COLOR red][B]Collection[/B][/COLOR]"
+msgid "Remove item from your [COLOR %s][B]Collection[/B][/COLOR]"
 msgstr ""
 
 msgctxt "#33577"
-msgid "Add item to your [COLOR red][B]Watchlist[/B][/COLOR]"
+msgid "Add item to your [COLOR %s][B]Watchlist[/B][/COLOR]"
 msgstr ""
 
 msgctxt "#33578"
-msgid "Remove item from your [COLOR red][B]Watchlist[/B][/COLOR]"
+msgid "Remove item from your [COLOR %s][B]Watchlist[/B][/COLOR]"
 msgstr ""
 
 msgctxt "#33579"
@@ -2592,11 +2624,11 @@ msgid "Add item to a new list"
 msgstr ""
 
 msgctxt "#33580"
-msgid "Add item to your [COLOR red][B]%s[/B][/COLOR] list"
+msgid "Add item to your [COLOR %s][B]%s[/B][/COLOR] list"
 msgstr ""
 
 msgctxt "#33581"
-msgid "Remove item from your [COLOR red][B]%s[/B][/COLOR] list"
+msgid "Remove item from your [COLOR %s][B]%s[/B][/COLOR] list"
 msgstr ""
 
 msgctxt "#33582"
@@ -2695,19 +2727,19 @@ msgid "Descending"
 msgstr ""
 
 msgctxt "#33651"
-msgid "Mark As [COLOR red][B]Watched[/B][/COLOR] Item"
+msgid "Mark As [COLOR %s][B]Watched[/B][/COLOR] Item"
 msgstr ""
 
 msgctxt "#33652"
-msgid "Mark As [COLOR red][B]Unwatched[/B][/COLOR] Item"
+msgid "Mark As [COLOR %s][B]Unwatched[/B][/COLOR] Item"
 msgstr ""
 
 msgctxt "#33653"
-msgid "[COLOR red][B]Rate[/B][/COLOR] Item"
+msgid "[COLOR %s][B]Rate[/B][/COLOR] Item"
 msgstr ""
 
 msgctxt "#33654"
-msgid "[COLOR red][B]Unrate[/B][/COLOR] Item"
+msgid "[COLOR %s][B]Unrate[/B][/COLOR] Item"
 msgstr ""
 
 msgctxt "#33655"
@@ -2799,7 +2831,7 @@ msgid "Temporary Trakt Server Problems"
 msgstr ""
 
 msgctxt "#33677"
-msgid "Reauthenticate Trakt Access"
+msgid "Re-Authenticate Trakt Access"
 msgstr ""
 
 msgctxt "#33678"
@@ -2841,7 +2873,7 @@ msgid "Unwatched Count"
 msgstr ""
 
 msgctxt "#33892"
-msgid "Unwatched Limit"
+msgid ""
 msgstr ""
 
 
@@ -3682,7 +3714,7 @@ msgid "Authentication with Premiumize.me has failed, please try again"
 msgstr ""
 
 msgctxt "#40021"
-msgid "Authentication with All-Debrid has failed, please try again"
+msgid "Authentication with AllDebrid has failed, please try again"
 msgstr ""
 
 msgctxt "#40022"
@@ -3698,11 +3730,11 @@ msgid "torrent file name"
 msgstr ""
 
 msgctxt "#40025"
-msgid "Up Next Settings"
+msgid "UpNext Settings"
 msgstr ""
 
 msgctxt "#40026"
-msgid "Smart Play Settings"
+msgid ""
 msgstr ""
 
 msgctxt "#40027"
@@ -3714,7 +3746,7 @@ msgid "Enabled Up Next Addon Integration"
 msgstr ""
 
 msgctxt "#40029"
-msgid "Up Next Notification Time"
+msgid "UpNext Notification Time"
 msgstr ""
 
 msgctxt "#40030"
@@ -3822,7 +3854,7 @@ msgid "Real-Debrid Auth"
 msgstr ""
 
 msgctxt "#40056"
-msgid "All-Debrid Auth"
+msgid "AllDebrid Auth"
 msgstr ""
 
 msgctxt "#40057"
@@ -3898,11 +3930,11 @@ msgid "Select Menu type to hide from"
 msgstr ""
 
 msgctxt "#40075"
-msgid "[COLOR red][B]Hide[/B][/COLOR] %s"
+msgid "[COLOR %s][B]Hide[/B][/COLOR] %s"
 msgstr ""
 
 msgctxt "#40076"
-msgid "[COLOR red][B]Scrobbble Reset[/B][/COLOR] Item"
+msgid "[COLOR %s][B]Scrobbble Reset[/B][/COLOR] Item"
 msgstr ""
 
 msgctxt "#40077"

@@ -14,7 +14,7 @@
 		<setting id="fanart" type="bool" label="32318" default="true" />
 		<setting id="disable.fanarttv" type="bool" label="32012" default="false" />
 		<setting type="action" label="32612" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMeta)" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disableFanartTV)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disableFanartTV)" />
 		<setting id="disable.player.art" type="bool" label="35525" default="false" enable="!eq(-3,true)" />
 		<setting id="hidecinema" type="bool" label="32571" default="false" />
 		<setting id="hidecinema.rollback" type="slider" label="40063" enable="eq(-1,true)" default="6" range="1,12" option="int" />
@@ -92,13 +92,13 @@
 		<setting id="showunaired" type="bool" label="32570" default="false" />
 		<setting id="unaired.identify" type="select" label="32608" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" enable="eq(-1,true)" />
 		<setting id="tvshows.unwatched.enabled" type="bool" label="33891" default="false" />
-		<setting id="multi.unwatched.enabled" type="bool" label="    allow multi Episodes to Show Unwatched Count" default="false" visible="eq(-1,true)" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=multi.unwatched)" visible="eq(-2,true)" />
+		<setting id="multi.unwatched.enabled" type="bool" subsetting="true" label="32163" default="false" visible="eq(-1,true)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=multi.unwatched)" visible="eq(-2,true)" />
 		<setting id="tvshows.calendar.extended" type="bool" label="32023" default="false" />
 		<setting type="lsep" label="40025" />
 		<setting type="action" label="40027" action="InstallAddon(service.upnext)" option="close" visible="!System.HasAddon(service.upnext)" />
 		<setting id="enable.upnext" type="bool" default="false" label="40028" visible="System.HasAddon(service.upnext)" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=upnext)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=upnext)" />
 		<setting id="upnext.time" type="slider" subsetting="true" enable="eq(-2,true)" visible="eq(-2,true)" default="60" label="40029" option="int" range="10,60" />
 		<setting id="auto.playlistcreate" type="bool" label="40030" default="true" />
 		<setting type="lsep" label="32375" />
@@ -106,7 +106,7 @@
 		<!-- <setting id="tvshows.networks.filter" type="select" label="32379" lvalues="32380|32381|32382|32383|32384|32385" default="4" enable="eq(-1, 1)" /> -->
 		<setting label="32004" type="lsep" />
 		<setting id="tvshows.direct" type="bool" label="35492" default="false" visible="!eq(-17,)" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=directProgress)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=directProgress)" />
 		<setting id="sort.shows.type" type="select" label="35191" lvalues="33564|33039|35187|35188|35391|35392|35393" default="0" />
 		<setting id="sort.shows.order" type="enum" label="33679" lvalues="33649|33650" default="0" subsetting="true" enable="!eq(-1,0)" />
 		<setting id="sort.shows.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" visible="!eq(-20,)" />
@@ -136,7 +136,7 @@
 	<!-- Providers - 4 -->
 	<category label="32345">
 		<setting type="action" label="32651" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_fenomscrapersSettings&amp;opensettings=true&amp;query=4.1)" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=Providers)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=Providers)" />
 		<setting type="lsep" label="40067" />
 		<setting type="action" label="32611" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearSources)" />
 	</category>
@@ -148,13 +148,13 @@
 		<setting id="play.mode" type="select" label="32331" lvalues="32333|32334" default="0" />
 		<setting id="cf.disable" type="bool" label="32364" default="false" />
 		<setting id="imdb.year.check" type="bool" label="32017" default="true" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdbYearCheck)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdbYearCheck)" />
 
 		<!-- Scraper Progress Dialog -->
 		<setting type="lsep" label="32386" />
 		<setting id="progress.dialog" type="enum" label="32335" lvalues="32336|32337" default="0" />
-		<setting id="scrapers.timeout" type="slider" label="Scraper Timeout" default="60" range="10,60" option="int" />
-		<setting id="scraper.dialog.color" type="select" label="Scraper Dialog Highlight Color" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" />
+		<setting id="scrapers.timeout" type="slider" label="32312" default="60" range="10,60" option="int" />
+		<setting id="scraper.dialog.color" type="select" label="32164" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" />
 		<setting id="preemptive.termination" type="bool" label="32654" default="false" />
 		<setting id="preemptive.limit" type="slider" label="32655" default="25" range="1,50" option="int" visible="eq(-1,true)" />
 		<setting id="preemptive.res" type="enum" label="32659" values="4K|1080p|720p|480p(SD)" default="2" visible="eq(-2,true)" />
@@ -162,19 +162,23 @@
 		<!-- Sources Filtering Options -->
 		<setting type="lsep" label="32338" />
 		<setting id="hosts.quality" type="enum" label="32339" values="4K|1080p|720p|480p(SD)" default="0" />
-		<setting id="source.enablesizelimit" type="bool" label="32079" default="false" />
-		<setting id="source.sizelimit" type="slider" subsetting="true" label="32080" option="int" range="0,1,300" default="10" visible="eq(-1,true)" />
+		<setting id="source.enable.msizelimit" type="bool" label="32165" default="false" />
+		<setting id="source.min.moviesize" type="slider" subsetting="true" label="32155" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
+		<setting id="source.max.moviesize" type="slider" subsetting="true" label="32156" option="float" range="5.0,0.3,200" default="10" visible="eq(-2,true)" />
+		<setting id="source.enable.esizelimit" type="bool" label="32166" default="false" />
+		<setting id="source.min.epsize" type="slider" subsetting="true" label="32157" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
+		<setting id="source.max.epsize" type="slider" subsetting="true" label="32158" option="float" range="5.0,0.3,200" default="10" visible="eq(-2,true)" />
 		<setting id="remove.duplicates" type="bool" label="32035" default="true" />
-		<setting id="remove.duplicates.logging" type="bool" label=" -- Do not spam log with removed duplicates" default="true" enable="eq(-1,true)" />
+		<setting id="remove.duplicates.logging" type="bool" subsetting="true" label="32159" default="true" enable="eq(-1,true)" />
 		<setting id="remove.dolby.vision" type="bool" label="32388" default="false" />
 		<setting id="remove.hevc" type="bool" label="32363" default="false" />
 		<setting id="remove.hdr" type="bool" label="32389" default="false" />
-		<setting id="remove.cam.sources" type="bool" label="Remove CAM sources" default="false" />
-		<setting id="remove.sd.sources" type="bool" label="Remove SD sources (only if better quality exists)" default="false" />
+		<setting id="remove.cam.sources" type="bool" label="32160" default="false" />
+		<setting id="remove.sd.sources" type="bool" label="32161" default="false" />
 		<setting id="remove.3D.sources" type="bool" label="32051" default="true" />
 		<setting id="torrent.min.seeders" type="slider" label="32638" default="1" range="1,100" option="int" visible="false" /> <!-- Hard coded by Fenomscrapers so not visible for now-->
-		<setting id="torrent.remove.uncached" type="bool" label="Remove uncached torrents" default="true" />
-		<setting type="action" label="[COLOR FFA0C12C] -- Help --[/COLOR]" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=removeUncached)" />
+		<setting id="torrent.remove.uncached" type="bool" label="32162" default="true" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=removeUncached)" />
 
 		<!-- Sources Select -->
 		<setting type="lsep" label="32387" />
@@ -238,7 +242,7 @@
 		<setting id="premiumize.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,) + eq(-5,true)" />
 		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_pmAcctMyAccounts)" visible="!eq(-5,) + eq(-6,true)" />
 
-		<setting type="lsep" label="Real-Debrid" />
+		<setting type="lsep" label="40058" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.21&amp;opensettings=true&amp;query2=7.26)" visible="eq(2,)" />
 		<setting id="realdebrid.enable" type="bool" label="32081" default="true" visible="!eq(1,)" />
 		<setting id="realdebrid.token" label="realdebrid token" type="text" default="" visible="false" />

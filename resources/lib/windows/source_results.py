@@ -98,6 +98,7 @@ class SourceResultsXML(BaseDialog):
 					sysname = quote_plus(self.meta.get('title'))
 					poster = self.meta.get('poster', '')
 					if 'tvshowtitle' in self.meta and 'season' in self.meta and 'episode' in self.meta:
+						sysname = quote_plus(self.meta.get('tvshowtitle'))
 						poster = self.meta.get('season_poster') or self.meta.get('poster')
 						sysname += quote_plus(' S%02dE%02d' % (int(self.meta['season']), int(self.meta['episode'])))
 					elif 'year' in self.meta: sysname += quote_plus(' (%s)' % self.meta['year'])
@@ -105,6 +106,7 @@ class SourceResultsXML(BaseDialog):
 					except: new_sysname = sysname
 					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=download&name=%s&image=%s&source=%s&caller=sources&title=%s)' %
 										(new_sysname, quote_plus(poster), quote_plus(source_dict), sysname))
+					self.selected = (None, '')
 			elif action in self.closing_actions:
 				self.selected = (None, '')
 				self.close()

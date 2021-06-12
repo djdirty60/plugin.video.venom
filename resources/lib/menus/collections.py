@@ -793,14 +793,16 @@ class Collections:
 			if not imdb: imdb = values.get('imdb', '')
 			if not values.get('imdb'): values['imdb'] = imdb
 			if not values.get('tmdb'): values['tmdb'] = tmdb
-			try:
-				if self.lang == 'en' or self.lang not in values.get('available_translations', [self.lang]): raise Exception()
-				trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
-				title = trans_item.get('title') or title
-				plot = trans_item.get('overview') or plot
-			except:
-				from resources.lib.modules import log_utils
-				log_utils.error()
+			if self.lang != 'en':
+				try:
+					# if self.lang == 'en' or self.lang not in values.get('available_translations', [self.lang]): raise Exception()
+					trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
+					if trans_item:
+						if trans_item.get('title'): values['title'] = trans_item.get('title')
+						if trans_item.get('overview'): values['plot'] =trans_item.get('overview')
+				except:
+					from resources.lib.modules import log_utils
+					log_utils.error()
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: values.update(extended_art)
@@ -862,11 +864,11 @@ class Collections:
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
 ####-Context Menu and Overlays-####
 				cm = []
-				if self.traktCredentials:
-					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s)' % (sysaddon, sysname, imdb)))
 				try:
 					overlay = int(getMovieOverlay(indicators, imdb))
 					watched = (overlay == 5)
+					if self.traktCredentials:
+						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&watched=%s)' % (sysaddon, sysname, imdb, watched)))
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 1, 'overlay': 5})

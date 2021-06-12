@@ -122,6 +122,7 @@ def make_settings_dict(): # service runs upon a setting change
 			settings_dict.update(dict_item)
 		homeWindow.setProperty('venom_settings', jsdumps(settings_dict))
 		refresh_playAction()
+		refresh_libPath()
 		return settings_dict
 	except:
 		return None
@@ -355,14 +356,18 @@ def trigger_widget_refresh(): # should prob make this run only on "isVenom_widge
 	timestr = time.strftime("%Y%m%d%H%M%S", time.gmtime())
 	homeWindow.setProperty("widgetreload", timestr)
 	# homeWindow.setProperty('widgetreload-tvshows', timestr) # does not appear used
-	# homeWindow.setProperty('widgetreload-episodes', timestr)
-	# homeWindow.setProperty('widgetreload-movies', timestr)
+	homeWindow.setProperty('widgetreload-episodes', timestr)
+	homeWindow.setProperty('widgetreload-movies', timestr)
 	# execute('UpdateLibrary(video,/fake/path/to/force/refresh/on/home)') # make sure this is ok coupled with above
 
 def refresh_playAction(): # for venom global CM play actions
 	play_mode = setting('play.mode')
 	autoPlay = 'true' if play_mode == '1' else ''
-	homeWindow.setProperty('plugin.video.venom.autoPlay', autoPlay)
+	homeWindow.setProperty('venom.autoPlay.enabled', autoPlay)
+
+def refresh_libPath(): # for venom global CM library actions
+	homeWindow.setProperty('venom.movieLib.path', transPath(setting('library.movie')))
+	homeWindow.setProperty('venom.tvLib.path', transPath(setting('library.tv')))
 
 def datetime_workaround(string_date, format="%Y-%m-%d", date_only=True):
 	sleep(200)

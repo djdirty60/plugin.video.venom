@@ -33,7 +33,7 @@ cache_check_url = '%s/cache/check' % BaseUrl
 list_services_path_url = '%s/services/list' % BaseUrl
 pm_icon = control.joinPath(control.artPath(), 'premiumize.png')
 addonFanart = control.addonFanart()
-store_to_cloud = control.setting('premiumize.saveToCloud') == 'true'
+
 
 class Premiumize:
 	name = "Premiumize.me"
@@ -43,6 +43,7 @@ class Premiumize:
 		self.token = control.setting('premiumize.token')
 		self.headers = {'User-Agent': 'Venom for Kodi', 'Authorization': 'Bearer %s' % self.token}
 		self.server_notifications = control.setting('premiumize.server.notifications')
+		self.store_to_cloud = control.setting('premiumize.saveToCloud') == 'true'
 
 	def _get(self, url):
 		try:
@@ -51,7 +52,7 @@ class Premiumize:
 				if response.get('status') == 'success': return response
 				if response.get('status') == 'error':
 					if self.server_notifications: control.notification(message=response.get('message'), icon=pm_icon)
-					log_utils.log('Premiumize.me: %s' % response.get('message'), __name__, log_utils.LOGWARNING)
+					log_utils.log('Premiumize.me: %s' % response.get('message'), level=log_utils.LOGWARNING)
 		except:
 			log_utils.error()
 		return response
@@ -64,7 +65,7 @@ class Premiumize:
 				if response.get('status') == 'error':
 					if 'You already have this job added' in response.get('message'): return None
 					if self.server_notifications: control.notification(message=response.get('message'), icon=pm_icon)
-					log_utils.log('Premiumize.me: %s' % response.get('message'), __name__, log_utils.LOGWARNING)
+					log_utils.log('Premiumize.me: %s' % response.get('message'), level=log_utils.LOGWARNING)
 		except:
 			log_utils.error()
 		return response
@@ -198,7 +199,7 @@ class Premiumize:
 			else:
 				file_url = max(valid_results, key=lambda x: int(x.get('size'))).get('link', None)
 			if file_url:
-				if store_to_cloud: self.create_transfer(magnet_url)
+				if self.store_to_cloud: self.create_transfer(magnet_url)
 				return self.add_headers_to_url(file_url)
 			else:
 				log_utils.log('Premiumize.me: FAILED TO RESOLVE MAGNET %s : ' % magnet_url, __name__, log_utils.LOGWARNING)
@@ -437,8 +438,7 @@ class Premiumize:
 		except:
 			log_utils.error()
 			return
-		folder_str, file_str, downloadMenu, renameMenu, deleteMenu, clearFinishedMenu = control.lang(40046).upper(),\
-			control.lang(40047).upper(), control.lang(40048), control.lang(40049), control.lang(40050), control.lang(40051)
+		folder_str, file_str, downloadMenu, renameMenu, deleteMenu, clearFinishedMenu = control.lang(40046).upper(), control.lang(40047).upper(), control.lang(40048), control.lang(40049), control.lang(40050), control.lang(40051)
 		for count, item in enumerate(transfer_files, 1):
 			try:
 				cm = []

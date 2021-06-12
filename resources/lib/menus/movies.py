@@ -253,7 +253,7 @@ class Movies:
 
 	def search(self):
 		from resources.lib.menus import navigator
-		navigator.Navigator().addDirectoryItem(32603, 'movieSearchnew', 'search.png', 'DefaultAddonsSearch.png')
+		navigator.Navigator().addDirectoryItem(32603, 'movieSearchnew', 'search.png', 'DefaultAddonsSearch.png', isFolder=False)
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
 		try:
@@ -281,9 +281,7 @@ class Movies:
 		navigator.Navigator().endDirectory()
 
 	def search_new(self):
-# need fix for when context menu returns here brings keyboard input back up
-		t = control.lang(32010)
-		k = control.keyboard('', t)
+		k = control.keyboard('', control.lang(32010))
 		k.doModal()
 		q = k.getText() if k.isConfirmed() else None
 		if not q: return
@@ -300,25 +298,31 @@ class Movies:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-		url = self.search_link + quote_plus(q)
-		if control.getKodiVersion() >= 18:
-			self.get(url)
-		else:
-			url = '%s?action=moviePage&url=%s' % (argv[0], quote_plus(url))
-			control.execute('Container.Update(%s)' % url)
+		url = quote_plus(self.search_link + q)
+		control.execute('Container.Update(%s?action=movies&url=%s)' % (argv[0], url))
 
 	def search_term(self, name):
 		url = self.search_link + quote_plus(name)
 		self.get(url)
 
 	def person(self):
-		t = control.lang(32010)
-		k = control.keyboard('', t)
+		k = control.keyboard('', control.lang(32010))
 		k.doModal()
 		q = k.getText().strip() if k.isConfirmed() else None
 		if not q: return
 		url = self.persons_link + quote_plus(q)
 		self.persons(url)
+
+	def persons(self, url):
+		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
+		else: self.list = cache.get(self.imdb_person_list, 1, url)
+		if len(self.list) == 0:
+			control.hide()
+			control.notification(title=32010, message=33049)
+		for i in range(0, len(self.list)):
+			self.list[i].update({'icon': 'DefaultActor.png', 'action': 'movies'})
+		self.addDirectory(self.list)
+		return self.list
 
 	def genres(self):
 		genres = [
@@ -367,17 +371,6 @@ class Movies:
 		year = (self.date_time.strftime('%Y'))
 		for i in range(int(year)-0, 1900, -1):
 			self.list.append({'name': str(i), 'url': self.year_link % (str(i), str(i)), 'image': 'years.png', 'icon': 'DefaultYear.png', 'action': 'movies'})
-		self.addDirectory(self.list)
-		return self.list
-
-	def persons(self, url):
-		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
-		else: self.list = cache.get(self.imdb_person_list, 1, url)
-		if len(self.list) == 0:
-			control.hide()
-			control.notification(title=32010, message=33049)
-		for i in range(0, len(self.list)):
-			self.list[i].update({'icon': 'DefaultActor.png', 'action': 'movies'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -711,14 +704,16 @@ class Movies:
 			if not imdb: imdb = values.get('imdb', '')
 			if not values.get('imdb'): values['imdb'] = imdb
 			if not values.get('tmdb'): values['tmdb'] = tmdb
-			try:
-				if self.lang == 'en' or self.lang not in values.get('available_translations', [self.lang]): raise Exception()
-				trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
-				title = trans_item.get('title') or title
-				plot = trans_item.get('overview') or plot
-			except:
-				from resources.lib.modules import log_utils
-				log_utils.error()
+			if self.lang != 'en':
+				try:
+					# if self.lang == 'en' or self.lang not in values.get('available_translations', [self.lang]): raise Exception()
+					trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
+					if trans_item:
+						if trans_item.get('title'): values['title'] = trans_item.get('title')
+						if trans_item.get('overview'): values['plot'] =trans_item.get('overview')
+				except:
+					from resources.lib.modules import log_utils
+					log_utils.error()
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: values.update(extended_art)
@@ -788,11 +783,11 @@ class Movies:
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner})
 ####-Context Menu and Overlays-####
 				cm = []
-				if self.traktCredentials:
-					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s)' % (sysaddon, sysname, imdb)))
 				try:
 					overlay = int(getMovieOverlay(indicators, imdb))
 					watched = (overlay == 5)
+					if self.traktCredentials:
+						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&watched=%s)' % (sysaddon, sysname, imdb, watched)))
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 1, 'overlay': 5})

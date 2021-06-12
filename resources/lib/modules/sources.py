@@ -146,7 +146,6 @@ class Sources:
 				control.sleep(200)
 				control.hide()
 				sysexit()
-			# control.infoLabel('ListItem.FolderPath') # could be used to determin if venom, library, or TMDb Helper is selected ListItem for meta retrieval
 
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
 			self.imdb_user = control.setting('imdb.user').replace('ur', '')
@@ -186,7 +185,8 @@ class Sources:
 				meta = py_tools.ensure_text(meta, errors='ignore')
 				meta = jsloads(meta)['result']['movies']
 				t = cleantitle.get(self.title.replace('&', 'and'))
-				meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
+				years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
+				meta = [i for i in meta if str(i['year']) in years and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
 				if meta: meta = meta[0]
 				else: raise Exception()
 				if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
@@ -234,9 +234,9 @@ class Sources:
 		if self.meta is None or 'videodb' in control.infoLabel('ListItem.FolderPath'):
 			self.meta = checkLibMeta()
 		try:
-			def sourcesDirMeta(metadata):
+			def sourcesDirMeta(metadata): # pass skin minimal meta needed
 				if not metadata: return metadata
-				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'plot', 'duration', 'mpaa', 'season', 'episode']
+				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode']
 				return {k: v for k, v in control.iteritems(metadata) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
 
@@ -256,8 +256,6 @@ class Sources:
 
 	def playItem(self, title, items, chosen_source, meta):
 		try:
-			# meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
-			# meta = self.meta
 			try: items = jsloads(items)
 			except: pass
 			try: meta = jsloads(meta)
@@ -370,9 +368,9 @@ class Sources:
 		[i.start() for i in threads]
 
 		sdc = control.getColor(control.setting('scraper.dialog.color'))
-		string1 = control.lang(32404) # msgid "[COLOR cyan]Time elapsed:[/COLOR]  %s seconds"
-		string3 = control.lang(32406) # msgid "[COLOR cyan]Remaining providers:[/COLOR] %s"
-		string4 = control.lang(32601) # msgid "[COLOR cyan]Unfiltered Total:[/COLOR]"
+		string1 = control.lang(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
+		string3 = control.lang(32406) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Remaining providers:[/COLOR] [COLOR %s]%s[/COLOR]"
+		string4 = control.lang(32407) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Unfiltered Total: [/COLOR]  [COLOR %s]%s[/COLOR]"
 
 		try: timeout = int(control.setting('scrapers.timeout'))
 		except: pass
@@ -388,8 +386,8 @@ class Sources:
 		pre_emp_res = str(control.setting('preemptive.res'))
 		source_4k = source_1080 = source_720 = source_sd = total = 0
 		total_format = '[COLOR %s][B]%s[/B][/COLOR]'
-		pdiag_format = '4K:  %s  |  1080p:  %s  |  720p:  %s  |  SD:  %s'
-
+		pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % \
+			(self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s')
 		control.hide()
 		while True:
 			try:
@@ -657,15 +655,27 @@ class Sources:
 
 	def sourcesFilter(self):
 		control.busy()
-		quality = control.setting('hosts.quality')
-		if quality == '': quality = '0'
+		quality = control.setting('hosts.quality') or '0'
 		if control.setting('remove.duplicates') == 'true':
 			self.sources = self.filter_dupes()
-		if self.mediatype == 'episode':
+		if self.mediatype == 'movie':
+			if control.setting('source.enable.msizelimit') == 'true':
+				try:
+					movie_minSize = float(control.setting('source.min.moviesize'))
+					movie_maxSize = float(control.setting('source.max.moviesize'))
+					self.sources = [i for i in self.sources if (i.get('size', 0) >= movie_minSize and i.get('size', 0) <= movie_maxSize)]
+				except:
+					log_utils.error()
+		else:
 			try: self.sources = self.calc_pack_size()
 			except: pass
-		if control.setting('source.enablesizelimit') == 'true':
-			self.sources = [i for i in self.sources if i.get('size', 0) <= int(control.setting('source.sizelimit'))]
+			if control.setting('source.enable.esizelimit') == 'true':
+				try:
+					episode_minSize = float(control.setting('source.min.epsize'))
+					episode_maxSize = float(control.setting('source.max.epsize'))
+					self.sources = [i for i in self.sources if (i.get('size', 0) >= episode_minSize and i.get('size', 0) <= episode_maxSize)]
+				except:
+					log_utils.error()
 		if control.setting('remove.hevc') == 'true':
 			self.sources = [i for i in self.sources if 'HEVC' not in i.get('info', '')] # scrapers write HEVC to info
 		if control.setting('remove.hdr') == 'true':
@@ -828,7 +838,6 @@ class Sources:
 			debrid_provider = item['debrid'] if item.get('debrid') else ''
 		except:
 			log_utils.error()
-
 		if 'magnet:' in url:
 			if not 'uncached' in item['source']:
 				try:
@@ -980,7 +989,7 @@ class Sources:
 		title = cleantitle.normalize(title)
 		return title
 
-	def getConstants(self): # gets initialized multiple times
+	def getConstants(self):
 		# self.itemProperty = 'plugin.video.venom.container.items'
 		self.metaProperty = 'plugin.video.venom.container.meta'
 		self.seasonProperty = 'plugin.video.venom.container.season'
@@ -992,7 +1001,7 @@ class Sources:
 		self.labelProperty = 'plugin.video.venom.container.label'
 
 		self.sourceDict = fs_sources()
-		# add cloud scrapers to sourceDict
+		# self.sourceDict.extend(internal_sources())		# add cloud scrapers to sourceDict
 
 		from resources.lib.debrid import premium_hosters
 		self.debrid_resolvers = debrid.debrid_resolvers()

@@ -411,7 +411,7 @@ def router(params):
 		elif action == 'download':
 			caller = params.get('caller')
 			image = params.get('image')
-			if caller == 'sources':
+			if caller == 'sources': # future, move to downloader module for pack support
 				control.busy()
 				try:
 					from json import loads as jsloads
@@ -529,7 +529,8 @@ def router(params):
 			control.openSettings('0.0', 'script.module.fenomscrapers')
 		elif action == 'tools_traktManager':
 			from resources.lib.modules import trakt
-			trakt.manager(name, imdb, tvdb, season, episode)
+			watched = (params.get('watched') == 'True') if params.get('watched') else None
+			trakt.manager(name, imdb, tvdb, season, episode, watched=watched)
 		elif action == 'tools_cachesyncMovies':
 			from resources.lib.modules import trakt
 			trakt.cachesyncMovies(int(params.get('timeout')))

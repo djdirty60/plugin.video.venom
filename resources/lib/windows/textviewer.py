@@ -6,7 +6,7 @@ from resources.lib.windows.base import BaseDialog
 class TextViewerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
 		super(TextViewerXML, self).__init__(self, args)
-		self.window_id = 2000
+		self.window_id = 2060
 		self.text = kwargs.get('text')
 		self.heading = kwargs.get('heading')
 

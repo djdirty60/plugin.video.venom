@@ -33,7 +33,7 @@ msgstr ""
 
 msgctxt "#32000"
 msgid "Collections"
-msgstr "collecties"
+msgstr "Collecties"
 
 msgctxt "#32001"
 msgid "Movies"
@@ -52,8 +52,8 @@ msgid "My TV Shows"
 msgstr "Mijn Series"
 
 msgctxt "#32005"
-msgid "New Movies"
-msgstr "Nieuwe Films"
+msgid "Main"
+msgstr "Hoofd"
 
 msgctxt "#32006"
 msgid "New Episodes"
@@ -76,32 +76,32 @@ msgid "Search"
 msgstr "Zoeken"
 
 msgctxt "#32011"
-msgid "Genres"
-msgstr "Genres"
+msgid "Page Item Limit"
+msgstr "Limiet pagina-item"
 
 msgctxt "#32012"
-msgid "Year"
-msgstr "Jaren"
+msgid "Disable Extended artwork(fanart.tv)"
+msgstr "Uitgebreide illustraties uitschakelen (fanart.tv)"
 
 msgctxt "#32013"
-msgid "People"
-msgstr "Acteurs"
+msgid "News and Info!!"
+msgstr "Nieuws en informatie!!"
 
 msgctxt "#32014"
 msgid "Change Log!!"
-msgstr ""
+msgstr "Wijzig logboek!!"
 
 msgctxt "#32015"
 msgid "Direct Progress Scrape"
-msgstr ""
+msgstr "Directe voortgang schrapen"
 
 msgctxt "#32016"
 msgid "Browse Progress"
-msgstr ""
+msgstr "Blader door voortgang"
 
 msgctxt "#32017"
 msgid "check IMDb year for Movies"
-msgstr ""
+msgstr "controleer IMDb-jaar voor films"
 
 msgctxt "#32018"
 msgid "Most Popular"
@@ -109,7 +109,7 @@ msgstr "Populair"
 
 msgctxt "#32019"
 msgid "Upcoming Progress"
-msgstr ""
+msgstr "Aankomende vooruitgang"
 
 msgctxt "#32020"
 msgid "Box Office"
@@ -117,27 +117,27 @@ msgstr "Box Office"
 
 msgctxt "#32021"
 msgid "Do Not Group(quality, size priority)"
-msgstr ""
+msgstr "Niet groeperen (kwaliteit, prioriteit grootte)"
 
 msgctxt "#32022"
 msgid "Group(Torrents, Acct Sources, Prem Hosters)"
-msgstr ""
+msgstr "Groep (Torrents, Acct-bronnen, Prem Hosters)"
 
 msgctxt "#32023"
 msgid "Enable Calendar (TVMaze) fetching extended meta"
-msgstr ""
+msgstr "Schakel Agenda (TVMaze) in om uitgebreide meta op te halen"
 
 msgctxt "#32024"
-msgid "Error Connecting to TMDB"
-msgstr ""
+msgid "Error Connecting to TMDb"
+msgstr "Fout bij verbinden met TMDb"
 
 msgctxt "#32025"
 msgid "My Ratings"
-msgstr ""
+msgstr "Mijn beoordelingen"
 
 msgctxt "#32026"
 msgid "Favorites"
-msgstr ""
+msgstr "Favorieten"
 
 msgctxt "#32027"
 msgid "Calendar"
@@ -172,8 +172,8 @@ msgid "IMDb"
 msgstr "IMDb"
 
 msgctxt "#32035"
-msgid "Featured"
-msgstr "Uitgelicht"
+msgid "Remove Duplicate Sources"
+msgstr "Dubbele bronnen verwijderen"
 
 msgctxt "#32036"
 msgid "History"
@@ -224,24 +224,24 @@ msgid "[B]SETTINGS[/B] : Providers"
 msgstr "[B]INSTELLINGEN[/B] : Bronnen"
 
 msgctxt "#32048"
-msgid "[B]VENOM[/B] : Downloads"
-msgstr "[B]VENOM[/B] : Downloads"
+msgid "[B]SETTINGS[/B] : Downloads"
+msgstr "[B]INSTELLINGEN[/B] : Downloads"
 
 msgctxt "#32049"
 msgid "[B]VENOM[/B] : Viewtypes"
-msgstr "[B]VENOM[/B] : Layout instellingen"
+msgstr "[B]VENIJN[/B] : Layout instellingen"
 
 msgctxt "#32050"
-msgid "Remove CAM and SD sources"
-msgstr "Remove CAM and SD sources"
+msgid ""
+msgstr ""
 
 msgctxt "#32051"
 msgid "Remove 3D sources"
-msgstr "Remove 3D sources"
+msgstr "3D-bronnen verwijderen"
 
 msgctxt "#32052"
-msgid "Enable Resolution Quality Icons"
-msgstr "Enable Resolution Quality Icons"
+msgid ""
+msgstr ""
 
 msgctxt "#32053"
 msgid "[I]Next Page[/I]"
@@ -317,7 +317,7 @@ msgstr "[COLOR yellowgreen]Trakt Beheer[/COLOR]"
 
 msgctxt "#32071"
 msgid "Browse Series"
-msgstr "Zoek in Series"
+msgstr "Door series bladeren"
 
 msgctxt "#32072"
 msgid "Refresh"
@@ -329,349 +329,381 @@ msgstr "[B]TRAKT[/B]: Autoriseren"
 
 msgctxt "#32074"
 msgid "Source Options"
-msgstr ""
+msgstr "Bronopties"
 
 msgctxt "#32075"
 msgid "Auto update User Lists"
-msgstr ""
+msgstr "Gebruikerslijsten automatisch bijwerken"
 
 msgctxt "#32076"
 msgid "Removing metacache results in excessive api requests and\nsystem slow down.\nAre you sure?"
-msgstr ""
+msgstr "Het verwijderen van metacache resulteert in overmatige API-verzoeken en\nsysteem vertraagt.\nWeet je het zeker?"
 
 msgctxt "#32077"
 msgid "This also wipes out your metacache and all meta must be\nfetched from scratch, resulting in excessive api requests\nand system slow down.\nBest to only use this unless ABSOLUTELY necessary.\nAre you sure?"
-msgstr ""
+msgstr "Dit verwijdert ook je metacache en alle meta moet\nvanaf nul worden opgehaald, wat resulteert in buitensporige API-verzoeken\en het systeem vertraagt.\nHet is het beste om dit alleen te gebruiken tenzij ABSOLUUT noodzakelijk.\nWeet je het zeker?"
 
 msgctxt "#32078"
 msgid "Show general notifications"
-msgstr ""
+msgstr "Algemene meldingen weergeven"
 
 msgctxt "#32079"
-msgid "Enable File Size Limit"
+msgid ""
 msgstr ""
 
 msgctxt "#32080"
 msgid "File Size limit (GB)"
-msgstr ""
+msgstr "Bestandsgroottelimiet (GB)"
 
 msgctxt "#32081"
 msgid "Enable"
-msgstr ""
+msgstr "Inschakelen"
 
 msgctxt "#32082"
 msgid "Trakt: Scrobble Reset"
-msgstr ""
+msgstr "Trakt: Scrobble Reset"
 
 msgctxt "#32083"
 msgid "Clean Settings file: [B]VENOM[/B] and [B]FENOMSCRAPERS[/B]"
-msgstr ""
+msgstr "Clean Settings-bestand: [B]VENOM[/B] en [B]FENOMSCRAPERS[/B]"
 
 msgctxt "#32084"
 msgid "{} Obsolete Settings Entries Removed"
-msgstr ""
+msgstr "{} Veraltete Einstellungseinträge entfernt"
 
 msgctxt "#32085"
 msgid "Updating Library..."
-msgstr ""
+msgstr "Bibliotheek bijwerken..."
 
 msgctxt "#32086"
 msgid "Libray Update Complete"
-msgstr ""
+msgstr "Bibliotheekupdate voltooid"
 
 msgctxt "#32087"
 msgid "View Types Successfully Cleared!"
-msgstr ""
+msgstr "Bekijk typen succesvol gewist!"
 
 msgctxt "#32088"
 msgid "Trakt: Scrobbled"
-msgstr ""
+msgstr "Traktaat: Gescrobbled"
 
 msgctxt "#32089"
 msgid "All Cache Successfully Cleared!"
-msgstr ""
+msgstr "Alle cache succesvol gewist!"
 
 msgctxt "#32090"
 msgid "Provider Cache Successfully Cleared!"
-msgstr ""
+msgstr "Providercache succesvol gewist!"
 
 msgctxt "#32091"
 msgid "Metadata Cache Successfully Cleared!"
-msgstr ""
+msgstr "Metadatacache succesvol gewist!"
 
 msgctxt "#32092"
 msgid "Cache Successfully Cleared!"
-msgstr ""
+msgstr "Cache succesvol gewist!"
 
 msgctxt "#32093"
 msgid "Search History Successfully Cleared!"
-msgstr ""
+msgstr "Zoekgeschiedenis succesvol gewist!"
 
 msgctxt "#32094"
 msgid "Search Phrase Successfully Cleared!"
-msgstr ""
+msgstr "Zoekzin succesvol gewist!"
 
 msgctxt "#32095"
 msgid "Resume Point source:"
-msgstr ""
+msgstr "Hervattingspunt bron:"
 
 msgctxt "#32096"
 msgid "Trakt scrobbles"
-msgstr ""
+msgstr "Trakt scrobbles"
 
 msgctxt "#32097"
 msgid "Enable scrobbling"
-msgstr ""
+msgstr "Scrobbling inschakelen"
 
 msgctxt "#32098"
 msgid "NOTE: Do Not enable this if you scrobble through the Trakt add-on.[CR]Also note that only scrobble on Stop currently works."
-msgstr ""
+msgstr "OPMERKING: Schakel dit niet in als u door de Trakt-add-on scrobblet. [CR]Houd er ook rekening mee dat momenteel alleen scrobblen op Stop werkt."
 
 msgctxt "#32099"
 msgid "Show notification on scrobble"
-msgstr ""
+msgstr "Melding weergeven op scrobble"
 
 msgctxt "#32100"
 msgid "Bookmarks Successfully Cleared!"
-msgstr ""
+msgstr "Bladwijzers succesvol gewist!"
 
 msgctxt "#32101"
-msgid "Bookmarks Successfully Cleared!"
+msgid ""
 msgstr ""
 
 msgctxt "#32102"
 msgid "Bookmark Successfully Cleared!"
-msgstr ""
+msgstr "Bladwijzer succesvol gewist!"
 
 msgctxt "#32103"
 msgid "strm files written but library cannot be updated"
-msgstr ""
+msgstr "strm-bestanden geschreven maar bibliotheek kan niet worden bijgewerkt"
 
 msgctxt "#32104"
 msgid "strm file written but library cannot be updated"
-msgstr ""
+msgstr "strm-bestand geschreven maar bibliotheek kan niet worden bijgewerkt"
 
 msgctxt "#32105"
 msgid "Trakt Movies Sync Complete"
-msgstr ""
+msgstr "Trakt Movies-synchronisatie voltooid"
 
 msgctxt "#32106"
 msgid "Update Service is disabled. Please enable and try again"
-msgstr ""
+msgstr "Update-service is uitgeschakeld. Schakel het in en probeer het opnieuw"
 
 msgctxt "#32107"
 msgid "Your Library Folders do not exist in Kodi Sources. Please run setup"
-msgstr ""
+msgstr "Update-service is uitgeschakeld. Schakel het in en probeer het opnieuw"
 
 msgctxt "#32108"
 msgid "No Shows in Addon Folder"
-msgstr ""
+msgstr "Brak programów w folderze dodatków"
 
 msgctxt "#32109"
 msgid "No Episode Updates Found"
-msgstr ""
+msgstr "Geen afleveringsupdates gevonden"
 
 msgctxt "#32110"
 msgid "Restart Kodi for changes is required"
-msgstr ""
+msgstr "Herstart Kodi voor wijzigingen is vereist"
 
 msgctxt "#32111"
 msgid "Folders Failed to add to Kodi Sources"
-msgstr ""
+msgstr "Mappen kunnen niet worden toegevoegd aan Kodi-bronnen"
 
 msgctxt "#32112"
 msgid "Library Auto Update Service is now turned off"
-msgstr ""
+msgstr "Bibliotheek Auto Update Service is nu uitgeschakeld"
 
 msgctxt "#32113"
 msgid "No Movie lists imports found"
-msgstr ""
+msgstr "Geen geïmporteerde filmlijsten gevonden"
 
 msgctxt "#32114"
 msgid "My Accounts sync complete"
-msgstr ""
+msgstr "Synchronisatie van Mijn accounts voltooid"
 
 msgctxt "#32115"
 msgid "Error Cleaning Settings.xml. Old settings.xml files Restored."
-msgstr ""
+msgstr "Fout bij het opschonen van Settings.xml. Oude settings.xml-bestanden Hersteld."
 
 msgctxt "#32116"
 msgid "This feature is only supported in kodi 18 and beyond"
-msgstr ""
+msgstr "Deze functie wordt alleen ondersteund in Kodi 18 en hoger"
 
 msgctxt "#32117"
 msgid "Added to Favorites"
-msgstr ""
+msgstr "Toegevoegd aan favorieten"
 
 msgctxt "#32118"
 msgid "Removed From Favorites"
-msgstr ""
+msgstr "Verwijderd uit favorieten"
 
 msgctxt "#32119"
 msgid "Playlist is empty"
-msgstr ""
+msgstr "Afspeellijst is leeg"
 
 msgctxt "#32120"
 msgid "Title already in playlist"
-msgstr ""
+msgstr "Titel al in afspeellijst"
 
 msgctxt "#32121"
 msgid "%s Added to playlist"
-msgstr ""
+msgstr "%s Toegevoegd aan afspeellijst"
 
 msgctxt "#32122"
 msgid "%s Removed from playlist"
-msgstr ""
+msgstr "%s Verwijderd uit afspeellijst"
 
 msgctxt "#32123"
 msgid "Not found in playlist"
-msgstr ""
+msgstr "Niet gevonden in afspeellijst"
 
 msgctxt "#32124"
 msgid "No TVShow lists imports found"
-msgstr ""
+msgstr "Geen TVShow-lijsten gevonden import"
 
 msgctxt "#32125"
 msgid "Scraper Preperation"
-msgstr ""
+msgstr "Schraper voorbereiding"
 
 msgctxt "#32126"
 msgid "Furk Username"
-msgstr ""
+msgstr "Furk gebruikersnaam"
 
 msgctxt "#32127"
 msgid "Furk Password"
-msgstr ""
+msgstr "Furk Wachtwoord"
 
 msgctxt "#32128"
 msgid "Furk API Key"
-msgstr ""
+msgstr "Furk API sleutel"
 
 msgctxt "#32129"
 msgid "Enable Furk.net Menu"
-msgstr ""
+msgstr "Furk.net-menu inschakelen"
 
 msgctxt "#32130"
 msgid "Trakt: Scrobble Failed"
-msgstr ""
+msgstr "Traktaat: Scrobble mislukt"
 
 msgctxt "#32131"
 msgid "Trakt: Scrobble Reset Failed"
-msgstr ""
+msgstr "Trakt: Scrobble-reset mislukt"
 
 msgctxt "#32132"
 msgid "Highlight Color"
-msgstr ""
+msgstr "Markeer kleur"
 
 msgctxt "#32133"
 msgid "Torent/Hoster sorting method"
-msgstr ""
+msgstr "Torrent/Hoster-sorteermethode"
 
 msgctxt "#32134"
 msgid "Sort by file size"
-msgstr ""
+msgstr "Sorteren op bestandsgrootte"
 
 msgctxt "#32135"
 msgid "Open My Accounts Addon"
-msgstr ""
+msgstr "Open Mijn Accounts-add-on"
 
 msgctxt "#32136"
 msgid "sync(re) with My Accounts"
-msgstr ""
+msgstr "synchroniseren(opnieuw) met Mijn Accounts"
 
 msgctxt "#32137"
 msgid "[COLOR FFA0C12C] -- Help --[/COLOR]"
-msgstr ""
+msgstr "[COLOR FFA0C12C] -- Helpen --[/COLOR]"
 
 msgctxt "#32138"
 msgid "[COLOR FFA0C12C] -- Dev Mode Help --[/COLOR]"
-msgstr ""
+msgstr "[COLOR FFA0C12C] -- Hulp bij dev-modus --[/COLOR]"
 
 msgctxt "#32139"
 msgid "Toggle reuselanguageinvoker"
-msgstr ""
+msgstr "Toggle hergebruiktaalaanroeper"
 
 msgctxt "#32140"
 msgid "[COLOR FFA0C12C] -- reuselanguageinvoker Help --[/COLOR]"
-msgstr ""
+msgstr "[COLOR FFA0C12C] -- hergebruiktaalaanroeper Help --[/COLOR]"
 
 msgctxt "#32141"
 msgid "Disable single episode scraping"
-msgstr ""
+msgstr "Scraping van één aflevering uitschakelen"
 
 msgctxt "#32142"
 msgid "Disable single scraper filter"
-msgstr ""
+msgstr "Enkele schraperfilter uitschakelen"
 
 msgctxt "#32143"
 msgid "Disable season pack scraping"
-msgstr ""
+msgstr "Seizoenspakket schrapen uitschakelen"
 
 msgctxt "#32144"
 msgid "Disable season pack scraper filter"
-msgstr ""
+msgstr "Seizoenspakketschraperfilter uitschakelen"
 
 msgctxt "#32145"
 msgid "Disable show pack scraping"
-msgstr ""
+msgstr "Showpack-schraperfilter uitschakelen"
 
 msgctxt "#32146"
 msgid "Disable show pack scraper filter"
-msgstr ""
+msgstr "Showpack-schraperfilter uitschakelen"
 
 msgctxt "#32147"
 msgid "Developer mode"
-msgstr ""
+msgstr "Ontwikkelaarsmodus"
 
 msgctxt "#32148"
 msgid "$NUMBER[24]HR delay before import"
-msgstr ""
+msgstr "$NUMBER[24]HR-vertraging vóór import"
 
 msgctxt "#32149"
 msgid "Create .strm files for TMDB Helper"
-msgstr ""
+msgstr "Maak .stem-bestanden voor TMDB Helper"
 
 msgctxt "#32150"
 msgid "Acount Info from My Accounts"
-msgstr ""
+msgstr "Kontoinformationen aus Meine Konten"
 
 msgctxt "#32151"
 msgid "[I]Please visit My Accounts for setup[/I]"
-msgstr ""
+msgstr "[I]Ga naar Mijn accounts voor configuratie[/I]"
 
 msgctxt "#32152"
 msgid "alldebrid token"
-msgstr ""
+msgstr "alldebrid-token"
 
 msgctxt "#32153"
 msgid "Account Info"
-msgstr ""
+msgstr "Account informatie"
 
 msgctxt "#32154"
 msgid "premiumize token"
-msgstr ""
+msgstr "premium token"
 
 msgctxt "#32155"
-msgid ""
-msgstr ""
+msgid "Min. Movie Size (GB)"
+msgstr "Min. Filmgrootte ((NL))"
 
 msgctxt "#32156"
-msgid ""
-msgstr ""
+msgid "Max. Movie Size (GB)"
+msgstr "Maximaal. Filmgrootte ((NL))"
 
 msgctxt "#32157"
-msgid ""
-msgstr ""
+msgid "Min. Episode Size (GB)"
+msgstr "Min. Afleveringsgrootte ((NL))"
 
 msgctxt "#32158"
-msgid ""
-msgstr ""
+msgid "Max. Episode Size (GB)"
+msgstr "Maximaal. Afleveringsgrootte ((NL))"
 
 msgctxt "#32159"
+msgid "Do not spam log with removed duplicates"
+msgstr "Log geen spam met verwijderde duplicaten"
+
+msgctxt "#32160"
+msgid "Remove CAM sources"
+msgstr "CAM-bronnen verwijderen"
+
+msgctxt "#32161"
+msgid "Remove SD sources (only if better quality exists)"
+msgstr "SD-bronnen verwijderen (alleen als er betere kwaliteit is)"
+
+msgctxt "#32162"
+msgid "Remove uncached torrents"
+msgstr "Verwijder niet-gecachete torrents"
+
+msgctxt "#32163"
+msgid "Allow Multi Episodes to Show Unwatched Count"
+msgstr "Sta toe dat meerdere afleveringen niet-bekeken worden weergegeven"
+
+msgctxt "#32164"
+msgid "Scraper Dialog Highlight Color"
+msgstr "Schraper Dialoogvenster Markeringskleur"
+
+msgctxt "#32165"
+msgid "Enable Movie File Size Limit"
+msgstr "Limiet voor filmbestandsgrootte inschakelen"
+
+msgctxt "#32166"
+msgid "Enable Episode File Size Limit"
+msgstr "Limiet voor afleveringsbestandsgrootte inschakelen"
+
+msgctxt "#32167"
 msgid ""
 msgstr ""
 
-msgctxt "#32160"
+msgctxt "#32168"
 msgid ""
 msgstr ""
 
@@ -724,11 +756,11 @@ msgstr "Algemeen"
 
 msgctxt "#32311"
 msgid "Icon Package"
-msgstr "Pictogram Pakket"
+msgstr "Icoonpakket"
 
 msgctxt "#32312"
-msgid "Providers Timeout"
-msgstr "Bronnen Tijdslimiet"
+msgid "Scraper Timeout"
+msgstr "Time-out schraper"
 
 msgctxt "#32313"
 msgid "Indicators"
@@ -743,8 +775,8 @@ msgid "Trakt"
 msgstr "Trakt"
 
 msgctxt "#32316"
-msgid "Info Language"
-msgstr "Taal Info"
+msgid "api Language"
+msgstr "api-taal"
 
 msgctxt "#32317"
 msgid "Flatten TV seasons"
@@ -803,24 +835,24 @@ msgid "Playback"
 msgstr "Afspelen"
 
 msgctxt "#32331"
-msgid "Default action"
-msgstr "Standaard Actie"
+msgid "Default (movie/episode) select action"
+msgstr "Standaard (film/aflevering) actie selecteren"
 
 msgctxt "#32332"
 msgid "Dialog"
 msgstr "Dialoog"
 
 msgctxt "#32333"
-msgid "Directory"
-msgstr "Map"
+msgid "Source Select (Window xml skin)"
+msgstr "Bron selecteren (Windows xml-skin)"
 
 msgctxt "#32334"
 msgid "Auto Play"
 msgstr "Automatisch Afspelen"
 
 msgctxt "#32335"
-msgid "Progress Dialog"
-msgstr "Voortgangs Dialoog "
+msgid "Progress Dialog (Scraping and Resolving)"
+msgstr "Voortgangsdialoogvenster (schrapen en oplossen)"
 
 msgctxt "#32336"
 msgid "Foreground"
@@ -831,8 +863,8 @@ msgid "Background"
 msgstr "Achtergrond"
 
 msgctxt "#32338"
-msgid "File Hosting Filters"
-msgstr "Bestand Bron Filters"
+msgid "Sources Filtering Options"
+msgstr "Bronnen filteropties"
 
 msgctxt "#32339"
 msgid "Max Quality"
@@ -843,12 +875,12 @@ msgid "SD Hosters in Auto Play"
 msgstr "SD Bronnen Automatisch Afspelen"
 
 msgctxt "#32341"
-msgid "Exclude Hosters with captchas"
-msgstr "Sluit Hosters met captchas uit"
+msgid "Remove pair/captcha hosts"
+msgstr "Koppel/captcha-hosts verwijderen"
 
 msgctxt "#32342"
-msgid "Sort by Provider"
-msgstr "Sorteren op Bron"
+msgid "Sort by Scraper Provider"
+msgstr "Sorteren op schraperleverancier"
 
 msgctxt "#32343"
 msgid "When playback starts..."
@@ -924,11 +956,11 @@ msgstr "Taal van bronnen"
 
 msgctxt "#32361"
 msgid "[B]VENOM[/B] : Reset View Types"
-msgstr ""
+msgstr "[B]VENIJN[/B] : Weergavetypen resetten"
 
 msgctxt "#32362"
 msgid "[B]SETTINGS[/B] : Navigation"
-msgstr ""
+msgstr "[B]INSTELLINGEN[/B] : Navigatie"
 
 msgctxt "#32363"
 msgid "Remove HEVC sources"
@@ -936,63 +968,63 @@ msgstr "Remove HEVC sources"
 
 msgctxt "#32364"
 msgid "Disable CloudFlare protected providers"
-msgstr ""
+msgstr "Schakel CloudFlare-beveiligde providers uit"
 
 msgctxt "#32365"
 msgid " (IMDb)"
-msgstr ""
+msgstr " (IMDb)"
 
 msgctxt "#32366"
 msgid " (TMDb)"
-msgstr ""
+msgstr " (TMDb)"
 
 msgctxt "#32367"
 msgid " (TVDb)"
-msgstr ""
+msgstr " (TVDb)"
 
 msgctxt "#32368"
 msgid " (Trakt)"
-msgstr ""
+msgstr " (Trakt)"
 
 msgctxt "#32369"
 msgid "TVDB api key1"
-msgstr ""
+msgstr "TVDB api-sleutel1"
 
 msgctxt "#32370"
 msgid "TVDB api key2"
-msgstr ""
+msgstr "TVDB api-sleutel2"
 
 msgctxt "#32371"
 msgid "TVDB api key3"
-msgstr ""
+msgstr "TVDB api-sleutel3"
 
 msgctxt "#32372"
 msgid "When playback ends..."
-msgstr "Wanneer het afspelen eindigt ..."
+msgstr "Wanneer het afspelen stopt..."
 
 msgctxt "#32373"
 msgid "Force container refresh"
-msgstr "Forceer container verversen"
+msgstr "Containervernieuwing forceren"
 
 msgctxt "#32374"
 msgid "Enable Debug"
-msgstr "Schakel Debug in"
+msgstr "Foutopsporing inschakelen"
 
 msgctxt "#32375"
 msgid "TV "Networks" menu options"
-msgstr ""
+msgstr "TV "Netwerken" menu-opties"
 
 msgctxt "#32376"
 msgid "List Mode"
-msgstr ""
+msgstr "Lijstmodus"
 
 msgctxt "#32377"
 msgid "This Season's Shows"
-msgstr ""
+msgstr "Shows van dit seizoen"
 
 msgctxt "#32378"
 msgid "View All Shows"
-msgstr ""
+msgstr "Bekijk alle shows"
 
 msgctxt "#32379"
 msgid "Allowed Shows"
@@ -1091,24 +1123,24 @@ msgid ""
 msgstr ""
 
 msgctxt "#32403"
-msgid "Download"
-msgstr "Downloaden"
+msgid "[B]Download[/B]"
+msgstr "[B]Downloaden[/B]"
 
 msgctxt "#32404"
-msgid "[COLOR cyan]Time elapsed:[/COLOR]  %s seconds"
-msgstr "Tijd verstreken: %s seconden"
+msgid "[COLOR %s]Time Elapsed:[/COLOR][COLOR %s]  %s seconds[/COLOR]"
+msgstr "[COLOR %s]Tijd Verstreken:[/COLOR][COLOR %s]  %s seconden[/COLOR]"
 
 msgctxt "#32405"
 msgid ""
 msgstr ""
 
 msgctxt "#32406"
-msgid "[COLOR cyan]Remaining providers:[/COLOR] %s"
-msgstr "Overgebleven Bronnen: %s"
+msgid "[COLOR %s]Remaining Providers:[/COLOR][COLOR %s] %s[/COLOR]"
+msgstr "[COLOR %s]Overgebleven Bronnen:[/COLOR][COLOR %s] %s[/COLOR]"
 
 msgctxt "#32407"
-msgid ""
-msgstr ""
+msgid "[COLOR %s]Unfiltered Total:[/COLOR][COLOR %s]  %s[/COLOR]"
+msgstr "[COLOR %s]Ongefilterd totaal:[/COLOR][COLOR %s]  %s[/COLOR]"
 
 msgctxt "#32408"
 msgid ""
@@ -1160,263 +1192,263 @@ msgstr ""
 
 msgctxt "#32420"
 msgid "In Theaters"
-msgstr ""
+msgstr "In theaters"
 
 msgctxt "#32421"
 msgid "In Theaters (IMDb)"
-msgstr ""
+msgstr "In theaters (IMDb)"
 
 msgctxt "#32422"
 msgid "Now Playing"
-msgstr ""
+msgstr "Nu aan het spelen"
 
 msgctxt "#32423"
 msgid "Now Playing (TMDb)"
-msgstr ""
+msgstr "Nu aan het spelen (TMDb)"
 
 msgctxt "#32424"
 msgid "Anticipated"
-msgstr ""
+msgstr "verwacht"
 
 msgctxt "#32425"
 msgid "Anticipated (Trakt)"
-msgstr ""
+msgstr "verwacht (Trakt)"
 
 msgctxt "#32426"
 msgid "Upcoming"
-msgstr ""
+msgstr "Aanstaande"
 
 msgctxt "#32427"
 msgid "Upcoming (TMDb)"
-msgstr ""
+msgstr "Aanstaande (TMDb)"
 
 msgctxt "#32428"
 msgid "Most Popular"
-msgstr ""
+msgstr "Meest populair"
 
 msgctxt "#32429"
 msgid "Most Popular (IMDb)"
-msgstr ""
+msgstr "Meest populair (IMDb)"
 
 msgctxt "#32430"
 msgid "Popular"
-msgstr ""
+msgstr "Populair"
 
 msgctxt "#32431"
 msgid "Popular (TMDb)"
-msgstr ""
+msgstr "Populair (TMDb)"
 
 msgctxt "#32432"
-msgid "Popular"
+msgid ""
 msgstr ""
 
 msgctxt "#32433"
 msgid "Popular (Trakt)"
-msgstr ""
+msgstr "Populair (Trakt)"
 
 msgctxt "#32434"
 msgid "Box Office"
-msgstr ""
+msgstr "Theaterkassa"
 
 msgctxt "#32435"
 msgid "Box Office (IMDb)"
-msgstr ""
+msgstr "Theaterkassa (IMDb)"
 
 msgctxt "#32436"
 msgid "Box Office (TMDb)"
-msgstr ""
+msgstr "Theaterkassa (TMDb)"
 
 msgctxt "#32437"
 msgid "Box Office (Trakt)"
-msgstr ""
+msgstr "Theaterkassa (Trakt)"
 
 msgctxt "#32438"
 msgid "Most Voted"
-msgstr ""
+msgstr "Meest gestemd"
 
 msgctxt "#32439"
 msgid "Most Voted (IMDb)"
-msgstr ""
+msgstr "Meest gestemd (IMDb)"
 
 msgctxt "#32440"
 msgid "Top Rated"
-msgstr ""
+msgstr "Hoogst gewaardeerd"
 
 msgctxt "#32441"
 msgid "Top Rated (TMDb)"
-msgstr ""
+msgstr "Hoogst gewaardeerd TMDb)"
 
 msgctxt "#32442"
 msgid "Trending"
-msgstr ""
+msgstr "Im Trend"
 
 msgctxt "#32443"
 msgid "Trending (Trakt)"
-msgstr ""
+msgstr "Im Trend (Trakt)"
 
 msgctxt "#32444"
 msgid "Recommended"
-msgstr ""
+msgstr "Aanbevolen"
 
 msgctxt "#32445"
 msgid "Recommended (Trakt)"
-msgstr ""
+msgstr "Aanbevolen (Trakt)"
 
 msgctxt "#32446"
 msgid "Featured"
-msgstr ""
+msgstr "Aanbevolen"
 
 msgctxt "#32447"
 msgid "Featured (IMDb)"
-msgstr ""
+msgstr "Aanbevolen (IMDb)"
 
 msgctxt "#32448"
 msgid "Highly Rated"
-msgstr ""
+msgstr "Hoog gewaardeerd"
 
 msgctxt "#32449"
 msgid "Highly Rated (IMDb)"
-msgstr ""
+msgstr "Hoog gewaardeerd (IMDb)"
 
 msgctxt "#32450"
 msgid "Calendar (TVMaze)"
-msgstr ""
+msgstr "Kalender (TVMaze)"
 
 msgctxt "#32451"
 msgid "Oscar Winners"
-msgstr ""
+msgstr "Oscarwinnaars"
 
 msgctxt "#32452"
 msgid "Oscar Winners (IMDb)"
-msgstr ""
+msgstr "Oscarwinnaars (IMDb)"
 
 msgctxt "#32453"
 msgid "Oscar Nominees"
-msgstr ""
+msgstr "Oscar-Nominierte"
 
 msgctxt "#32454"
 msgid "Oscar Nominees (IMDb)"
-msgstr ""
+msgstr "Oscar-Nominierte (IMDb)"
 
 msgctxt "#32455"
 msgid "Genres"
-msgstr ""
+msgstr "Genres"
 
 msgctxt "#32456"
 msgid "Genres (IMDb)"
-msgstr ""
+msgstr "Genres (IMDb)"
 
 msgctxt "#32457"
 msgid "Year"
-msgstr ""
+msgstr "Jaar"
 
 msgctxt "#32458"
 msgid "Year (IMDb)"
-msgstr ""
+msgstr "Jaar (IMDb)"
 
 msgctxt "#32459"
 msgid "People"
-msgstr ""
+msgstr "Mensen"
 
 msgctxt "#32460"
 msgid "People (IMDb)"
-msgstr ""
+msgstr "Mensen (IMDb)"
 
 msgctxt "#32461"
 msgid "Languages"
-msgstr ""
+msgstr "Talen"
 
 msgctxt "#32462"
 msgid "Languages (IMDb)"
-msgstr ""
+msgstr "Talen (IMDb)"
 
 msgctxt "#32463"
 msgid "Certificates"
-msgstr ""
+msgstr "certificaten"
 
 msgctxt "#32464"
 msgid "Certificates (IMDb)"
-msgstr ""
+msgstr "certificaten (IMDb)"
 
 msgctxt "#32465"
 msgid "Airing Today"
-msgstr ""
+msgstr "Vandaag uitgezonden"
 
 msgctxt "#32466"
 msgid "Airing Today (IMDb)"
-msgstr ""
+msgstr "Vandaag uitgezonden (IMDb)"
 
 msgctxt "#32467"
 msgid "Airing Today (TMDb)"
-msgstr ""
+msgstr "Vandaag uitgezonden (TMDb)"
 
 msgctxt "#32468"
 msgid "Networks (TMDb)"
-msgstr ""
+msgstr "Netwerken (TMDb)"
 
 msgctxt "#32469"
 msgid "Networks"
-msgstr ""
+msgstr "Netwerken"
 
 msgctxt "#32470"
 msgid "Networks (TVMaze)"
-msgstr ""
+msgstr "Netwerken (TVMaze)"
 
 msgctxt "#32471"
 msgid "On TV"
-msgstr ""
+msgstr "Op tv"
 
 msgctxt "#32472"
 msgid "On TV (TMDb)"
-msgstr ""
+msgstr "Op tv (TMDb)"
 
 msgctxt "#32473"
 msgid "Returning TV Shows"
-msgstr ""
+msgstr "Terugkerende tv-programma's"
 
 msgctxt "#32474"
 msgid "Returning TV Shows (IMDb)"
-msgstr ""
+msgstr "Terugkerende tv-programma's (IMDb)"
 
 msgctxt "#32475"
 msgid "New TV Shows"
-msgstr ""
+msgstr "Nieuwe tv-programma's"
 
 msgctxt "#32476"
 msgid "New TV Shows (IMDb)"
-msgstr ""
+msgstr "Nieuwe tv-programma's (IMDb)"
 
 msgctxt "#32477"
 msgid "New Movies"
-msgstr ""
+msgstr "Nieuwe films"
 
 msgctxt "#32478"
 msgid "New Movies (IMDb)"
-msgstr ""
+msgstr "Nieuwe films (IMDb)"
 
 msgctxt "#32479"
 msgid "New Movies (Trakt)"
-msgstr ""
+msgstr "Neue Filme (Trakt)"
 
 msgctxt "#32480"
 msgid "New Episodes"
-msgstr ""
+msgstr "Nieuwe afleveringen"
 
 msgctxt "#32481"
 msgid "New Episodes (TVMaze)"
-msgstr ""
+msgstr "Nieuwe afleveringen (TVMaze)"
 
 msgctxt "#32482"
 msgid "New Episodes (Trakt)"
-msgstr ""
+msgstr "Nieuwe afleveringen (Trakt)"
 
 msgctxt "#32483"
 msgid "Recently aired"
-msgstr ""
+msgstr "Onlangs uitgezonden"
 
 msgctxt "#32484"
 msgid "Recently aired (TVMaze)"
-msgstr ""
+msgstr "Onlangs uitgezonden (TVMaze)"
 
 msgctxt "#32485"
 msgid ""
@@ -1500,11 +1532,11 @@ msgstr ""
 
 msgctxt "#32505"
 msgid "[B][COLOR red]UpNext[/COLOR][/B] Settings"
-msgstr ""
+msgstr "[B][COLOR red]Volgende[/COLOR][/B] Instellingen"
 
 msgctxt "#32506"
 msgid "[B][COLOR red]Venom Global Context[/COLOR][/B] Settings"
-msgstr ""
+msgstr "[B][COLOR red]Wereldwijde context van gif[/COLOR][/B] Instellingen"
 
 msgctxt "#32507"
 msgid ""
@@ -1520,7 +1552,7 @@ msgstr ""
 
 msgctxt "#32510"
 msgid "[B]Cache Functions[/B]"
-msgstr ""
+msgstr "[B]Cache-functies[/B]"
 
 msgctxt "#32511"
 msgid "An account already exists."
@@ -1552,15 +1584,15 @@ msgstr "Verwijderen Collectie"
 
 msgctxt "#32518"
 msgid "Add Watchlist"
-msgstr "Toevoegen Watchlist"
+msgstr "Volglijst toevoegen"
 
 msgctxt "#32519"
 msgid "Remove Watchlist"
-msgstr "Verwijderen Watchlist"
+msgstr "Volglijst verwijderen"
 
 msgctxt "#32520"
 msgid "Add new List"
-msgstr "Voeg een nieuwe lijst toe"
+msgstr "Nieuwe lijst toevoegen"
 
 msgctxt "#32521"
 msgid "Add to [B]%s[/B]"
@@ -1631,15 +1663,15 @@ msgid "Nothing found to play"
 msgstr "Niets gevonden om af te spelen"
 
 msgctxt "#32538"
-msgid "DEBRID-SERVICE"
+msgid ""
 msgstr ""
 
 msgctxt "#32539"
-msgid "Configure Debrid Services in ResolveURL Settings."
+msgid ""
 msgstr ""
 
 msgctxt "#32540"
-msgid "[B]RESOLVEURL[/B] : Settings"
+msgid ""
 msgstr ""
 
 msgctxt "#32541"
@@ -1648,15 +1680,15 @@ msgstr ""
 
 msgctxt "#32542"
 msgid "folders will be imported to library if they are added to media sources."
-msgstr ""
+msgstr "mappen worden geïmporteerd naar de bibliotheek als ze worden toegevoegd aan mediabronnen."
 
 msgctxt "#32543"
 msgid "Movies"
-msgstr ""
+msgstr "Films"
 
 msgctxt "#32544"
 msgid "TV"
-msgstr ""
+msgstr "TV"
 
 msgctxt "#32545"
 msgid "Auto Update Service"
@@ -1824,162 +1856,162 @@ msgstr "[COLOR blauw] Blauw [/ COLOR]"
 
 msgctxt "#32590"
 msgid "[COLOR red]Red[/COLOR]"
-msgstr "[COLOR red] Rood [/ COLOR]"
+msgstr "[COLOR red]Rood[/ COLOR]"
 
 msgctxt "#32591"
 msgid "[COLOR yellow]Yellow[/COLOR]"
-msgstr ""
+msgstr "[COLOR yellow]Geel[/COLOR]"
 
 msgctxt "#32592"
 msgid "[COLOR deeppink]Deep Pink[/COLOR]"
-msgstr ""
+msgstr "[COLOR deeppink]Donker roze[/COLOR]"
 
 msgctxt "#32593"
 msgid "[COLOR cyan]Cyan[/COLOR]"
-msgstr ""
+msgstr "[COLOR cyan]cyaan[/COLOR]"
 
 msgctxt "#32594"
 msgid "[COLOR lawngreen]Lawn Green[/COLOR]"
-msgstr ""
+msgstr "[COLOR lawngreen]Gazon groen[/COLOR]"
 
 msgctxt "#32595"
 msgid "[COLOR gold]Gold[/COLOR]"
-msgstr ""
+msgstr "[COLOR gold]Goud[/COLOR]"
 
 msgctxt "#32596"
 msgid "[COLOR magenta]Magenta[/COLOR]"
-msgstr ""
+msgstr "[COLOR magenta]Magenta[/COLOR]"
 
 msgctxt "#32597"
 msgid "[COLOR yellowgreen]Yellow Green[/COLOR]"
-msgstr ""
+msgstr "[COLOR yellowgreen]Geel groen[/COLOR]"
 
 msgctxt "#32598"
 msgid "[COLOR nocolor]No Color[/COLOR]"
-msgstr ""
+msgstr "[COLOR nocolor]Geen kleur[/COLOR]"
 
 msgctxt "#32599"
 msgid "Getting genre information from Trakt"
-msgstr ""
+msgstr "Genre-informatie ophalen van Trakt"
 
 msgctxt "#32600"
 msgid "Preparing sources"
-msgstr ""
+msgstr "Bronnen voorbereiden"
 
 msgctxt "#32601"
-msgid "[COLOR cyan]Unfiltered Total: [/COLOR]  %s"
+msgid ""
 msgstr ""
 
 msgctxt "#32602"
-msgid "Waiting for"
+msgid ""
 msgstr ""
 
 msgctxt "#32603"
 msgid "New search..."
-msgstr ""
+msgstr "Nieuwe zoekopdracht..."
 
 msgctxt "#32604"
 msgid "[B]VENOM[/B] : Clear search history..."
-msgstr ""
+msgstr "[B]VENIJN[/B] : Verwijder zoekgeschiedenis..."
 
 msgctxt "#32605"
 msgid "Click to clear search history"
-msgstr ""
+msgstr "Klik om de zoekgeschiedenis te wissen"
 
 msgctxt "#32606"
-msgid "[COLOR=red]Paid[/COLOR]"
+msgid ""
 msgstr ""
 
 msgctxt "#32607"
-msgid "[COLOR=blue]Free[/COLOR]"
+msgid ""
 msgstr ""
 
 msgctxt "#32608"
 msgid "Unaired Season/Episode Color"
-msgstr ""
+msgstr "Unaired seizoen/aflevering kleur"
 
 msgctxt "#32609"
-msgid "[B][COLOR red]ResolveURL[/COLOR][/B] Settings"
-msgstr ""
+msgid "[B][COLOR red]My Accounts[/COLOR][/B] Settings"
+msgstr "[B][COLOR red]Mijn accounts[/COLOR][/B] Instellingen"
 
 msgctxt "#32610"
 msgid "Clear [COLOR yellow]All [/COLOR]Cache..."
-msgstr ""
+msgstr "Doorzichtig [COLOR yellow]Alle [/COLOR]Cache..."
 
 msgctxt "#32611"
 msgid "Clear [COLOR yellow]Providers [/COLOR]Cache..."
-msgstr ""
+msgstr "Doorzichtig [COLOR yellow]Aanbieders [/COLOR]Cache..."
 
 msgctxt "#32612"
 msgid "Clear [COLOR yellow]Metadata [/COLOR]Cache..."
-msgstr ""
+msgstr "Doorzichtig [COLOR yellow]Metagegevens [/COLOR]Cache..."
 
 msgctxt "#32613"
-msgid "[B]VENOM[/B] : Clear All Cache..."
-msgstr ""
+msgid "Clear [COLOR yellow]Cache [/COLOR]..."
+msgstr "Doorzichtig [COLOR yellow]Cache [/COLOR]..."
 
 msgctxt "#32614"
-msgid "[B]VENOM[/B] : Clear Meta Cache..."
-msgstr ""
+msgid "Clear [COLOR yellow]Search[/COLOR] Cache..."
+msgstr "Doorzichtig [COLOR yellow]Zoeken[/COLOR] Cache..."
 
 msgctxt "#32615"
 msgid "Clear [COLOR yellow]Bookmarks[/COLOR] Cache..."
-msgstr ""
+msgstr "Doorzichtig [COLOR yellow]Bladwijzers[/COLOR] Cache..."
 
 msgctxt "#32616"
 msgid "Debugging"
-msgstr ""
+msgstr "Debuggen"
 
 msgctxt "#32617"
-msgid "Debug Log"
-msgstr ""
+msgid "Logging Location""
+msgstr "Logging Locatie"
 
 msgctxt "#32618"
-msgid "Kodi Log"
-msgstr ""
+msgid "kodi.Log"
+msgstr "kodi.Log"
 
 msgctxt "#32619"
 msgid "Addon Log"
 msgstr ""
 
 msgctxt "#32620"
-msgid "Podcasts"
+msgid ""
 msgstr ""
 
 msgctxt "#32621"
 msgid "Navigation"
-msgstr ""
+msgstr "Navigatie"
 
 msgctxt "#32622"
 msgid "Main Menu"
-msgstr ""
+msgstr "Hoofdmenu"
 
 msgctxt "#32623"
-msgid "Reviews and Trailers"
+msgid ""
 msgstr ""
 
 msgctxt "#32624"
-msgid "P[COLOR red]o[/COLOR]dcast[COLOR red]One[/COLOR]"
+msgid ""
 msgstr ""
 
 msgctxt "#32625"
-msgid "Featured Podcasts"
+msgid ""
 msgstr ""
 
 msgctxt "#32626"
-msgid "New Podcasts"
+msgid ""
 msgstr ""
 
 msgctxt "#32627"
-msgid "Categories"
+msgid ""
 msgstr ""
 
 msgctxt "#32628"
-msgid "[B]SETTINGS[/B] : Navigation"
+msgid ""
 msgstr ""
 
 msgctxt "#32629"
-msgid "PodBay"
+msgid ""
 msgstr ""
 
 msgctxt "#32630"
@@ -1991,44 +2023,44 @@ msgid "Documentaries"
 msgstr "Documentaires"
 
 msgctxt "#32634"
-msgid "Torrent Source Identifier Color"
-msgstr "Torrent Bronidentificator Kleur"
+msgid "Cached Torrent Source Color"
+msgstr "Gecachte Torrent-bronkleur"
 
 msgctxt "#32635"
-msgid "Torrent Support (Requires Debrid account)"
-msgstr "Torrent-ondersteuning (vereist Debrid-account)"
+msgid "UnCached Torrent Source Color"
+msgstr "Uncached Torrent-bronkleur"
 
 msgctxt "#32636"
-msgid "Enable Torrent Scrapers"
-msgstr "Schakel Torrent Scrapers in"
+msgid "Secondary(info) Line Color"
+msgstr "Secundaire (info) lijnkleur"
 
 msgctxt "#32637"
 msgid "Secondary Line Content Type"
-msgstr "Secondary Line Content Type"
+msgstr "Inhoudstype secundaire regel"
 
 msgctxt "#32638"
 msgid "Minimum Seeders"
 msgstr "Minimale zaaimachines"
 
 msgctxt "#32639"
-msgid "Sort By Torrent/Premium"
-msgstr "Sorteer op Torrent / Premium"
+msgid "View Uncached Torrents"
+msgstr "Bekijk niet-gecachete torrents"
 
 msgctxt "#32640"
-msgid "Premiumize.me Torrent Settings"
-msgstr "Premiumize.me Torrent-instellingen"
+msgid ""
+msgstr ""
 
 msgctxt "#32641"
-msgid "TV Shows"
-msgstr "Tv shows"
+msgid ""
+msgstr ""
 
 msgctxt "#32642"
 msgid "Provider filters"
-msgstr "Provider filters"
+msgstr "Providerfilters"
 
 msgctxt "#32643"
 msgid "[B]VENOM[/B]: Settings"
-msgstr ""[B]VENOM[/B]: instellingen"
+msgstr ""[B]Venijn[/B]: instellingen"
 
 msgctxt "#32644"
 msgid "Trakt Bookmarks"
@@ -2036,7 +2068,7 @@ msgstr "Trakt-bladwijzers"
 
 msgctxt "#32645"
 msgid "Auto Trakt Collections Syncing"
-msgstr ""
+msgstr "Auto Trakt-verzamelingen synchroniseren"
 
 msgctxt "#32646"
 msgid "Sync on Kodi Start"
@@ -2055,24 +2087,24 @@ msgid "Include Special Episodes (Season 0)"
 msgstr "Inclusief speciale afleveringen (seizoen 0)"
 
 msgctxt "#32650"
-msgid "Powered by..."
-msgstr "Aangedreven door..."
+msgid ""
+msgstr ""
 
 msgctxt "#32651"
-msgid "Fenomscrapers Settings"
-msgstr "Fenomscrapers-instellingen"
+msgid "[B][COLOR red]Fenom Scrapers[/COLOR][/B] Settings"
+msgstr "[B][COLOR red]Fenom Schrapers[/COLOR][/B] instellingen"
 
 msgctxt "#32652"
-msgid "Clear Providers Cache"
-msgstr "Wis Providers Cache"
+msgid "Title Already Exists in Library"
+msgstr "Titel bestaat al in bibliotheek"
 
 msgctxt "#32653"
-msgid "Debrid Sources Only"
-msgstr "Alleen Debrid-bronnen"
+msgid ""
+msgstr ""
 
 msgctxt "#32654"
 msgid "Pre-emptive Termination"
-msgstr "Pre-emptive beëindiging"
+msgstr "Preventieve beëindiging"
 
 msgctxt "#32655"
 msgid "Pre-emptive Limit"
@@ -2092,107 +2124,107 @@ msgstr "Uw Online-lijst is leeg!"
 
 msgctxt "#32659"
 msgid "Min. Pre-emptive Res."
-msgstr ""
+msgstr "Min. Preventief onderzoek."
 
 msgctxt "#32660"
 msgid "Resume Point Saved..."
-msgstr ""
+msgstr "Hervattingspunt opgeslagen..."
 
 msgctxt "#32661"
 msgid "Importing Trakt Collection..."
-msgstr ""
+msgstr "Trakt-verzameling importeren..."
 
 msgctxt "#32662"
 msgid "Importing Trakt Watchlist..."
-msgstr ""
+msgstr "Trakt-volglijst importeren..."
 
 msgctxt "#32663"
 msgid "Importing Trakt User List..."
-msgstr ""
+msgstr "Trakt-gebruikerslijst importeren..."
 
 msgctxt "#32664"
 msgid "Importing Trakt Liked List..."
-msgstr ""
+msgstr "Trakt Like-lijst importeren..."
 
 msgctxt "#32665"
 msgid "Check Host for Valid URL"
-msgstr ""
+msgstr "Controleer host op geldige URL"
 
 msgctxt "#32666"
 msgid "[COLOR skyblue]Sky Blue[/COLOR]"
-msgstr ""
+msgstr "[COLOR skyblue]Sky Blue[/COLOR]"
 
 msgctxt "#32667"
 msgid "[COLOR lime]Lime[/COLOR]"
-msgstr ""
+msgstr "[COLOR lime]Lime[/COLOR]"
 
 msgctxt "#32668"
 msgid "[COLOR limegreen]Lime Green[/COLOR]"
-msgstr ""
+msgstr "[COLOR limegreen]Lime Green[/COLOR]"
 
 msgctxt "#32669"
 msgid "[COLOR deepskyblue]Deep Sky Blue[/COLOR]"
-msgstr ""
+msgstr "[COLOR deepskyblue]Deep Sky Blue[/COLOR]"
 
 msgctxt "#32670"
 msgid "[COLOR white]White[/COLOR]"
-msgstr ""
+msgstr "[COLOR white]White[/COLOR]"
 
 msgctxt "#32671"
 msgid "[COLOR whitesmoke]White Smoke[/COLOR]"
-msgstr ""
+msgstr "[COLOR whitesmoke]White Smoke[/COLOR]"
 
 msgctxt "#32672"
 msgid "[B]TRAKT[/B] : Import Movie User List..."
-msgstr ""
+msgstr "[B]TRAKT[/B] : Filmgebruikerslijst importeren..."
 
 msgctxt "#32673"
 msgid "[B]TRAKT[/B] : Import Movie Liked List..."
-msgstr ""
+msgstr "[B]TRAKT[/B] : Lijst met films met favorieten importeren..."
 
 msgctxt "#32674"
 msgid "[B]TRAKT[/B] : Import TV User List..."
-msgstr ""
+msgstr "[B]TRAKT[/B] : Tv-gebruikerslijst importeren..."
 
 msgctxt "#32675"
 msgid "[B]TRAKT[/B] : Import TV Liked List..."
-msgstr ""
+msgstr "[B]TRAKT[/B] : Lijst met tv-likes importeren..."
 
 msgctxt "#32676"
 msgid "[B]VENOM[/B] : Clean library..."
-msgstr ""
+msgstr "[B]VENIJN[/B] : Bibliotheek opschonen..."
 
 msgctxt "#32677"
 msgid "Add folders to Kodi Sources Now..."
-msgstr ""
+msgstr "Voeg nu mappen toe aan Kodi Sources..."
 
 msgctxt "#32678"
 msgid "Updated TV Show title"
-msgstr ""
+msgstr "Titel van tv-programma bijgewerkt"
 
 msgctxt "#32679"
 msgid "Importing TMDb Watchlist..."
-msgstr ""
+msgstr "TMDb-volglijst importeren..."
 
 msgctxt "#32680"
 msgid "Importing TMDb Favorites..."
-msgstr ""
+msgstr "TMDb-favorieten importeren..."
 
 msgctxt "#32681"
 msgid "Importing TMDb Userlist..."
-msgstr ""
+msgstr "TMDb-gebruikerslijst importeren..."
 
 msgctxt "#32682"
 msgid "IMDb Watchlist"
-msgstr ""
+msgstr "IMDb-volglijst"
 
 msgctxt "#32683"
 msgid "Trakt Watchlist"
-msgstr ""
+msgstr "Trakt-volglijst"
 
 msgctxt "#32684"
 msgid "Store resolved items in cloud"
-msgstr ""
+msgstr "Opgeloste items opslaan in de cloud"
 
 msgctxt "#32685"
 msgid ""
@@ -2231,7 +2263,7 @@ msgstr ""
 
 msgctxt "#33005"
 msgid "Enable startup notice"
-msgstr ""
+msgstr "Opstartmelding inschakelen"
 
 msgctxt "#33006"
 msgid ""
@@ -2279,31 +2311,31 @@ msgstr ""
 
 msgctxt "#33017"
 msgid "New value = [B]%s[/B]: Successfully changed."
-msgstr ""
+msgstr "Nieuwe waarde = [B]%s[/B]: succesvol gewijzigd."
 
 msgctxt "#33018"
 msgid "[B]Reuse Langauage Invoker[/B] is currently set to [B]%s[/B].\n\nDo you wish to change this setting to [B]%s[/B]?"
-msgstr ""
+msgstr ""[B]Taalaanroeper opnieuw gebruiken[/B] is momenteel ingesteld op [B]%s[/B].\n\nWilt u deze instelling wijzigen in: [B]%s[/B]?""
 
 msgctxt "#33019"
 msgid "Enabling this setting may cause instability issues.\nTest at your own free will.\nContinue?"
-msgstr ""
+msgstr "Als u deze instelling inschakelt, kan dit instabiliteitsproblemen veroorzaken.\nCert u uit eigen vrije wil.\Doorgaan?"
 
 msgctxt "#33020"
 msgid "Venom will reload your profile to refresh the addon.xml"
-msgstr ""
+msgstr "Venom laadt je profiel opnieuw om de addon.xml te vernieuwen"
 
 msgctxt "#33021"
 msgid "Write failed"
-msgstr ""
+msgstr "Schrijven mislukt"
 
 msgctxt "#33022"
 msgid "Error setting correct value."
-msgstr ""
+msgstr "Fout bij het instellen van de juiste waarde."
 
 msgctxt "#33023"
 msgid "[B]Reuse Language Invoker[/B] SETTING/XML mismatch"
-msgstr ""
+msgstr "[B]Taalaanroeper opnieuw gebruiken[/B] INSTELLING/XML komt niet overeen"
 
 msgctxt "#33024"
 msgid ""
@@ -2347,7 +2379,7 @@ msgstr ""
 
 msgctxt "#33034"
 msgid "No Debrid Account setup, account is required!"
-msgstr ""
+msgstr "Geen Debrid-account instellen, account is vereist!"
 
 msgctxt "#33035"
 msgid ""
@@ -2379,27 +2411,27 @@ msgstr "zoekopdrachten"
 
 msgctxt "#33042"
 msgid "Search Movies..."
-msgstr ""
+msgstr "Films zoeken..."
 
 msgctxt "#33043"
 msgid "Search Shows..."
-msgstr ""
+msgstr "Zoek programma's..."
 
 msgctxt "#33044"
 msgid "Search Movies By Actor..."
-msgstr ""
+msgstr "Zoek films op acteur..."
 
 msgctxt "#33045"
 msgid "Search Shows By Actor..."
-msgstr ""
+msgstr "Zoek programma's op acteur..."
 
 msgctxt "#33046"
 msgid "Discover Movies"
-msgstr ""
+msgstr "Films ontdekken"
 
 msgctxt "#33047"
 msgid "Discover TV Shows"
-msgstr ""
+msgstr "Ontdek tv-programma's"
 
 msgctxt "#33048"
 msgid "Local Content"
@@ -2415,15 +2447,15 @@ msgstr "meldingen"
 
 msgctxt "#33051"
 msgid "Server Notifications"
-msgstr ""
+msgstr "Servermeldingen"
 
 msgctxt "#33052"
 msgid "General Notifications"
-msgstr ""
+msgstr "Algemene meldingen"
 
 msgctxt "#33053"
 msgid "%s has been hidden from your %s"
-msgstr ""
+msgstr "%s is verborgen voor je %s"
 
 msgctxt "#33054"
 msgid ""
@@ -2462,7 +2494,7 @@ msgstr ""
 
 msgctxt "#33486"
 msgid "Close"
-msgstr ""
+msgstr "Dichtbij"
 
 msgctxt "#33487"
 msgid ""
@@ -2529,7 +2561,7 @@ msgstr ""
 
 msgctxt "#33564"
 msgid "Default"
-msgstr ""
+msgstr "Standaard"
 
 msgctxt "#33565"
 msgid ""
@@ -2564,68 +2596,68 @@ msgid ""
 msgstr ""
 
 msgctxt "#33573"
-msgid "Add Show to your [COLOR red][B]Watchlist[/B][/COLOR]"
-msgstr ""
+msgid "Add Show to your [COLOR %s][B]Watchlist[/B][/COLOR]"
+msgstr "Voeg Show toe aan je [COLOR %s][B]Volglijst[/B][/COLOR]"
 
 msgctxt "#33574"
-msgid "Remove Show from your [COLOR red][B]Watchlist[/B][/COLOR]"
-msgstr ""
+msgid "Remove Show from your [COLOR %s][B]Watchlist[/B][/COLOR]"
+msgstr "Verwijder Show van je [COLOR %s][B]Volglijst[/B][/COLOR]"
 
 msgctxt "#33575"
-msgid "Add item to your [COLOR red][B]Collection[/B][/COLOR]"
-msgstr ""
+msgid "Add item to your [COLOR %s][B]Collection[/B][/COLOR]"
+msgstr "Voeg item toe aan je [COLOR %s][B]Verzameling[/B][/COLOR]"
 
 msgctxt "#33576"
-msgid "Remove item from your [COLOR red][B]Collection[/B][/COLOR]"
-msgstr ""
+msgid "Remove item from your [COLOR %s][B]Collection[/B][/COLOR]"
+msgstr "Verwijder item uit je [COLOR %s][B]Verzameling[/B][/COLOR]"
 
 msgctxt "#33577"
-msgid "Add item to your [COLOR red][B]Watchlist[/B][/COLOR]"
-msgstr ""
+msgid "Add item to your [COLOR %s][B]Watchlist[/B][/COLOR]"
+msgstr "Voeg item toe aan je  [COLOR %s][B]Volglijst[/B][/COLOR]"
 
 msgctxt "#33578"
-msgid "Remove item from your [COLOR red][B]Watchlist[/B][/COLOR]"
-msgstr ""
+msgid "Remove item from your [COLOR %s][B]Watchlist[/B][/COLOR]"
+msgstr "Verwijder item uit je [COLOR %s][B]Volglijst[/B][/COLOR]"
 
 msgctxt "#33579"
 msgid "Add item to a new list"
-msgstr ""
+msgstr "Item toevoegen aan een nieuwe lijst"
 
 msgctxt "#33580"
-msgid "Add item to your [COLOR red][B]%s[/B][/COLOR] list"
-msgstr ""
+msgid "Add item to your [COLOR %s][B]%s[/B][/COLOR] list"
+msgstr "Voeg item toe aan je [COLOR %s][B]%s[/B][/COLOR] lijst"
 
 msgctxt "#33581"
-msgid "Remove item from your [COLOR red][B]%s[/B][/COLOR] list"
-msgstr ""
+msgid "Remove item from your [COLOR %s][B]%s[/B][/COLOR] list"
+msgstr "Verwijder item uit je [COLOR %s][B]%s[/B][/COLOR] lijst"
 
 msgctxt "#33582"
 msgid "Item Added To Trakt"
-msgstr ""
+msgstr "Artikel toegevoegd aan Trakt"
 
 msgctxt "#33583"
 msgid "Item Removed From Trakt"
-msgstr ""
+msgstr "Item verwijderd uit Trakt"
 
 msgctxt "#33584"
 msgid "Trakt List Addition Failed"
-msgstr ""
+msgstr "Toevoeging van Trakt-lijst mislukt"
 
 msgctxt "#33585"
 msgid "Download Manager"
-msgstr ""
+msgstr "Downloadbeheer"
 
 msgctxt "#33586"
 msgid "Error"
-msgstr ""
+msgstr "Fout"
 
 msgctxt "#33587"
 msgid "Install Venom Global Context menu Addon..."
-msgstr ""
+msgstr "Installeer Venom Global Context menu-add-on..."
 
 msgctxt "#33588"
 msgid "Enable Venom Global Context menu"
-msgstr ""
+msgstr "Venom Globaal contextmenu inschakelen"
 
 msgctxt "#33589"
 msgid ""
@@ -2684,59 +2716,59 @@ msgstr ""
 
 msgctxt "#33648"
 msgid "Date Sorting"
-msgstr ""
+msgstr "Datum sorteren"
 
 msgctxt "#33649"
 msgid "Ascending"
-msgstr ""
+msgstr "Oplopend"
 
 msgctxt "#33650"
 msgid "Descending"
-msgstr ""
+msgstr "Aflopend"
 
 msgctxt "#33651"
-msgid "Mark As [COLOR red][B]Watched[/B][/COLOR] Item"
-msgstr ""
+msgid "Mark As [COLOR %s][B]Watched[/B][/COLOR] Item"
+msgstr "Markeer als [COLOR %s][B]Gekeken[/B][/COLOR] Item"
 
 msgctxt "#33652"
-msgid "Mark As [COLOR red][B]Unwatched[/B][/COLOR] Item"
-msgstr ""
+msgid "Mark As [COLOR %s][B]Unwatched[/B][/COLOR] Item"
+msgstr "Markeer als [COLOR %s][B]niet bekeken[/B][/COLOR] Item"
 
 msgctxt "#33653"
-msgid "[COLOR red][B]Rate[/B][/COLOR] Item"
-msgstr ""
+msgid "[COLOR %s][B]Rate[/B][/COLOR] Item"
+msgstr "[COLOR %s][B]Beoordeel[/B][/COLOR] Item"
 
 msgctxt "#33654"
-msgid "[COLOR red][B]Unrate[/B][/COLOR] Item"
-msgstr ""
+msgid "[COLOR %s][B]Unrate[/B][/COLOR] Item"
+msgstr "[COLOR %s][B]Unrate[/B][/COLOR] Item"
 
 msgctxt "#33655"
 msgid "Mark the item as [COLOR red][B]Watched[/B][/COLOR]"
-msgstr ""
+msgstr "Markeer het item als [COLOR red][B]Gekeken[/B][/COLOR]"
 
 msgctxt "#33656"
 msgid "Mark the item as [COLOR red][B]Unwatched[/B][/COLOR]"
-msgstr ""
+msgstr "Markeer het item als [COLOR red][B]niet bekeken[/B][/COLOR]"
 
 msgctxt "#33657"
 msgid "Provide a rating for the item"
-msgstr ""
+msgstr "Geef een beoordeling voor het item"
 
 msgctxt "#33658"
 msgid "Remove the rating from the item"
-msgstr ""
+msgstr "De beoordeling van het item verwijderen"
 
 msgctxt "#33659"
 msgid "This action requires the Trakt addon to be installed."
-msgstr ""
+msgstr "Voor deze actie moet de Trakt-add-on zijn geïnstalleerd."
 
 msgctxt "#33660"
 msgid "IMDb Charts"
-msgstr ""
+msgstr "IMDb-grafieken"
 
 msgctxt "#33661"
 msgid "Trakt List Addition Succeeded"
-msgstr ""
+msgstr "Toevoeging van Trakt-lijst geslaagd"
 
 msgctxt "#33662"
 msgid ""
@@ -2752,7 +2784,7 @@ msgstr ""
 
 msgctxt "#33665"
 msgid "Season Lists"
-msgstr ""
+msgstr "Seizoenslijsten"
 
 msgctxt "#33666"
 msgid ""
@@ -2788,27 +2820,27 @@ msgstr ""
 
 msgctxt "#33674"
 msgid "Trakt Throttling Applied, Sleeping for %s seconds"
-msgstr ""
+msgstr "Trakt Throttling toegepast, slaapstand voor %s seconden"
 
 msgctxt "#33675"
 msgid "Locked User Account - contact Trakt support"
-msgstr ""
+msgstr "Vergrendeld gebruikersaccount - neem contact op met Trakt-ondersteuning"
 
 msgctxt "#33676"
 msgid "Temporary Trakt Server Problems"
-msgstr ""
+msgstr "Tijdelijke Trakt-serverproblemen"
 
 msgctxt "#33677"
-msgid "Reauthenticate Trakt Access"
-msgstr ""
+msgid "Re-Authenticate Trakt Access"
+msgstr "Verifieer Trakt-toegang opnieuw"
 
 msgctxt "#33678"
 msgid "Sorting Filters"
-msgstr ""
+msgstr "Sorteerfilters"
 
 msgctxt "#33679"
 msgid "Sorting Order"
-msgstr ""
+msgstr "Sorteervolgorde"
 
 
 
@@ -2819,11 +2851,11 @@ msgstr ""
 
 msgctxt "#33786"
 msgid "No Trakt Result"
-msgstr ""
+msgstr "Geen Trakt-resultaat"
 
 msgctxt "#33787"
 msgid "Trakt Rate Limit Reached"
-msgstr ""
+msgstr "Trakt-snelheidslimiet bereikt"
 
 
 
@@ -2834,14 +2866,14 @@ msgstr ""
 
 msgctxt "#33890"
 msgid "Season Count"
-msgstr ""
+msgstr "Seizoen Telling"
 
 msgctxt "#33891"
 msgid "Unwatched Count"
-msgstr ""
+msgstr "Niet-bekeken telling"
 
 msgctxt "#33892"
-msgid "Unwatched Limit"
+msgid ""
 msgstr ""
 
 
@@ -2853,7 +2885,7 @@ msgstr ""
 
 msgctxt "#33942"
 msgid "The Venom library path does not appear in the Kodi file sources and automatic library updates are therefore not possible. Please manually add the library path from Venom's settings to the Kodi file sources. If the path in the settings were not changed, Venom will use a directory in the addon profile to store library data."
-msgstr ""
+msgstr "Het Venom-bibliotheekpad verschijnt niet in de Kodi-bestandsbronnen en automatische bibliotheekupdates zijn daarom niet mogelijk. Voeg handmatig het bibliotheekpad van de instellingen van Venom toe aan de Kodi-bestandsbronnen. Als het pad in de instellingen niet is gewijzigd, gebruikt Venom een map in het add-onprofiel om bibliotheekgegevens op te slaan."
 
 
 
@@ -2864,67 +2896,67 @@ msgstr ""
 
 msgctxt "#35017"
 msgid "Air Information"
-msgstr ""
+msgstr "Lucht informatie"
 
 msgctxt "#35018"
 msgid "Air Label Zone"
-msgstr ""
+msgstr "Luchtlabelzone"
 
 msgctxt "#35019"
 msgid "Air Label Location"
-msgstr ""
+msgstr "Locatie luchtlabel"
 
 msgctxt "#35020"
 msgid "Air Label Format"
-msgstr ""
+msgstr "Luchtlabelformaat"
 
 msgctxt "#35021"
 msgid "Air Label Bold"
-msgstr ""
+msgstr "Luchtlabel Vet"
 
 msgctxt "#35022"
 msgid "Native"
-msgstr ""
+msgstr "inheems"
 
 msgctxt "#35023"
 msgid "UTC"
-msgstr ""
+msgstr "UTC"
 
 msgctxt "#35024"
 msgid "Before Title"
-msgstr ""
+msgstr "Voor titel"
 
 msgctxt "#35025"
 msgid "After Title"
-msgstr ""
+msgstr "Na titel"
 
 msgctxt "#35026"
 msgid "Before Plot"
-msgstr ""
+msgstr "voor plot"
 
 msgctxt "#35027"
 msgid "After Plot"
-msgstr ""
+msgstr "na plot"
 
 msgctxt "#35028"
 msgid "Day"
-msgstr ""
+msgstr "Dag"
 
 msgctxt "#35029"
 msgid "Time"
-msgstr ""
+msgstr "Tijd"
 
 msgctxt "#35030"
 msgid "Day and Time"
-msgstr ""
+msgstr "Dag en tijd"
 
 msgctxt "#35031"
 msgid "Air Label Day"
-msgstr ""
+msgstr "Luchtlabeldag"
 
 msgctxt "#35032"
 msgid "[B]Airs[/B]:"
-msgstr ""
+msgstr "[B]Uitzendingen[/B]:"
 
 msgctxt "#35033"
 msgid ""
@@ -2988,19 +3020,19 @@ msgstr ""
 
 msgctxt "#35048"
 msgid "Air Label Time"
-msgstr ""
+msgstr "Luchtlabeltijd"
 
 msgctxt "#35049"
 msgid "Full"
-msgstr ""
+msgstr "vol"
 
 msgctxt "#35050"
 msgid "Abbreviated"
-msgstr ""
+msgstr "Afgekort"
 
 msgctxt "#35051"
 msgid "24-Hour"
-msgstr ""
+msgstr "24 uur"
 
 msgctxt "#35052"
 msgid "12-Hour"
@@ -3008,7 +3040,7 @@ msgstr ""
 
 msgctxt "#35053"
 msgid "Period"
-msgstr ""
+msgstr "Periode"
 
 
 
@@ -3023,7 +3055,7 @@ msgstr "Beoordeling"
 
 msgctxt "#35188"
 msgid "Votes"
-msgstr "stemmen"
+msgstr "Stemmen"
 
 msgctxt "#35189"
 msgid "Favourites Sorting"
@@ -3031,7 +3063,7 @@ msgstr "Favorieten sorteren"
 
 msgctxt "#35190"
 msgid "Movie Sorting"
-msgstr "Sorteren van films"
+msgstr "Film sorteren"
 
 msgctxt "#35191"
 msgid "Show Sorting"
@@ -3039,7 +3071,7 @@ msgstr "Sortering weergeven"
 
 msgctxt "#35192"
 msgid "Documentary Sorting"
-msgstr "Het sorteren van documenten"
+msgstr "Documentaire Sorteren"
 
 msgctxt "#35193"
 msgid "Short Sorting"
@@ -3047,15 +3079,15 @@ msgstr "Kort sorteren"
 
 msgctxt "#35194"
 msgid "Date Order"
-msgstr "Datum bestelling"
+msgstr "Datum Bestelling"
 
 msgctxt "#35195"
 msgid "Ignore Articles"
-msgstr "Artikelen negeren"
+msgstr "Negeer artikelen"
 
 msgctxt "#35196"
 msgid "Failed To Add To Local Library"
-msgstr "Mislukt om toe te voegen aan de lokale bibliotheek"
+msgstr "Toevoegen aan lokale bibliotheek mislukt"
 
 
 
@@ -3065,8 +3097,8 @@ msgstr "Mislukt om toe te voegen aan de lokale bibliotheek"
 
 
 msgctxt "#35308"
-msgid "Unfinished"
-msgstr "onafgewerkt"
+msgid "Finish Watching"
+msgstr "Klaar met kijken"
 
 
 
@@ -3077,7 +3109,7 @@ msgstr "onafgewerkt"
 
 msgctxt "#35391"
 msgid "Date Premiered"
-msgstr "Datum gepromoveerd"
+msgstr "Datum première"
 
 msgctxt "#35392"
 msgid "Date Added"
@@ -3085,7 +3117,7 @@ msgstr "Datum toegevoegd"
 
 msgctxt "#35393"
 msgid "Date Watched"
-msgstr "Date Watched"
+msgstr "Datum bekeken"
 
 msgctxt "#35394"
 msgid ""
@@ -3124,7 +3156,7 @@ msgstr ""
 
 msgctxt "#35485"
 msgid "Note"
-msgstr ""
+msgstr "Opmerking"
 
 msgctxt "#35486"
 msgid ""
@@ -3152,7 +3184,7 @@ msgstr ""
 
 msgctxt "#35492"
 msgid "Direct Progress Scraping"
-msgstr ""
+msgstr "Directe voortgang schrapen"
 
 msgctxt "#35493"
 msgid "Update Library"
@@ -3188,7 +3220,7 @@ msgstr "Kijk maar"
 
 msgctxt "#35501"
 msgid "Rate"
-msgstr "Tarief"
+msgstr "Beoordeel"
 
 msgctxt "#35502"
 msgid "%s Marked As Watched On Trakt"
@@ -3272,39 +3304,39 @@ msgstr "Afspeellijst gewist"
 
 msgctxt "#35522"
 msgid "Playlist Manager"
-msgstr ""
+msgstr "Afspeellijstbeheer"
 
 msgctxt "#35523"
 msgid "A new verison of Venom is available from the repository. Please consider updating to v%s"
-msgstr ""
+msgstr "Een nieuwe versie van Venom is beschikbaar in de repository. Overweeg om te updaten naar v%s"
 
 msgctxt "#35524"
 msgid "Notify Me About Available Updates"
-msgstr ""
+msgstr "Houd mij op de hoogte van beschikbare updates"
 
 msgctxt "#35525"
 msgid "Disable clearart, clearlogo, and discart in player"
-msgstr ""
+msgstr "Schakel clear art, clearlogo en weggooien in speler uit"
 
 msgctxt "#35526"
 msgid "Movie theatrical unreleased color"
-msgstr ""
+msgstr "Film theatrale onuitgebrachte kleur"
 
 msgctxt "#35527"
 msgid "Enable Notification Sound"
-msgstr ""
+msgstr "Meldingsgeluid inschakelen"
 
 msgctxt "#35528"
 msgid "Log Level"
-msgstr ""
+msgstr "Log niveau"
 
 msgctxt "#35529"
 msgid "Normal"
-msgstr ""
+msgstr "normaal"
 
 msgctxt "#35530"
 msgid "Debug(Extra info)"
-msgstr ""
+msgstr "Debuggen (Extra info)"
 
 msgctxt "#35531"
 msgid ""
@@ -3372,7 +3404,7 @@ msgstr ""
 
 msgctxt "#35547"
 msgid "Force"
-msgstr ""
+msgstr "Dwingen"
 
 msgctxt "#35548"
 msgid ""
@@ -3472,15 +3504,15 @@ msgstr ""
 
 msgctxt "#35572"
 msgid "Progress Sorting"
-msgstr ""
+msgstr "Voortgang sorteren"
 
 msgctxt "#35573"
 msgid "Calendar Sorting"
-msgstr ""
+msgstr "Kalender sorteren"
 
 msgctxt "#35574"
 msgid "Watchlist Sorting"
-msgstr ""
+msgstr "Volglijst sorteren"
 
 msgctxt "#35575"
 msgid ""
@@ -3619,135 +3651,135 @@ msgstr ""
 
 msgctxt "#40005"
 msgid "Priority"
-msgstr ""
+msgstr "Prioriteit"
 
 msgctxt "#40006"
 msgid "username"
-msgstr ""
+msgstr "gebruikersnaam"
 
 msgctxt "#40007"
 msgid "[B]Restart Transfer?: %s[/B]"
-msgstr ""
+msgstr "[B]Overdracht opnieuw starten?: %s[/B]"
 
 msgctxt "#40008"
 msgid "[B]Restart Transfer[/B]"
-msgstr ""
+msgstr "[B]Overdracht opnieuw starten[/B]"
 
 msgctxt "#40009"
 msgid "Revoke Authorization Success"
-msgstr ""
+msgstr "Autorisatie intrekken gelukt"
 
 msgctxt "#40010"
-msgid "All Debrid succesfuly authorized"
-msgstr ""
+msgid "AllDebrid succesfuly authorized"
+msgstr "AllDebrid succesvol geautoriseerd"
 
 msgctxt "#40011"
 msgid "Downloading %s GB @ %s mbps from %s peers, %s %% completed"
-msgstr ""
+msgstr "Downloaden %s GB @ %s mbps van %s leeftijdsgenoten, %s %% voltooid"
 
 msgctxt "#40012"
 msgid "%s seeders"
-msgstr ""
+msgstr "%s zaaimachines"
 
 msgctxt "#40013"
 msgid "Converting MAGNET..."
-msgstr ""
+msgstr "MAGNEET omzetten..."
 
 msgctxt "#40014"
 msgid "Progress Dialog Canceled"
-msgstr ""
+msgstr "Dialoogvenster voortgang geannuleerd"
 
 msgctxt "#40015"
 msgid "Uploading at %s MB/s, %s%% of %s GB completed"
-msgstr ""
+msgstr "Uploaden bij %s MB/s, %s%% of %s GB voltooid"
 
 msgctxt "#40016"
 msgid "Downloading at %s MB/s from %s peers, %s%% of %sGB completed"
-msgstr ""
+msgstr "Downloaden op %s MB/s van %s peers, %s%% of %sGB voltooid"
 
 msgctxt "#40017"
 msgid "Saving Torrent to the %s Cloud"
-msgstr ""
+msgstr "Torrent opslaan in de %s Cloud"
 
 msgctxt "#40018"
 msgid "Venom: Cloud Transfer"
-msgstr ""
+msgstr "Venom: Cloudoverdracht"
 
 msgctxt "#40019"
 msgid "Authentication with Real-Debrid has failed, please try again"
-msgstr ""
+msgstr "Verificatie met Real-Debrid is mislukt, probeer het opnieuw"
 
 msgctxt "#40020"
 msgid "Authentication with Premiumize.me has failed, please try again"
 msgstr ""
 
 msgctxt "#40021"
-msgid "Authentication with All-Debrid has failed, please try again"
-msgstr ""
+msgid "Authentication with AllDebrid has failed, please try again"
+msgstr "Die Authentifizierung bei Premiumize.me ist fehlgeschlagen, bitte versuchen Sie es erneut"
 
 msgctxt "#40022"
 msgid "File Name Format"
-msgstr ""
+msgstr "Formaat bestandsnaam"
 
 msgctxt "#40023"
 msgid "Title (year) or Title S01E01"
-msgstr ""
+msgstr "Titel (jaar) of titel S01E01"
 
 msgctxt "#40024"
 msgid "torrent file name"
-msgstr ""
+msgstr "torrent-bestandsnaam"
 
 msgctxt "#40025"
-msgid "Up Next Settings"
-msgstr ""
+msgid "UpNext Settings"
+msgstr "Volgende Instellingen"
 
 msgctxt "#40026"
-msgid "Smart Play Settings"
+msgid ""
 msgstr ""
 
 msgctxt "#40027"
 msgid "Install UpNext Addon..."
-msgstr ""
+msgstr "Installeer de UpNext-add-on..."
 
 msgctxt "#40028"
 msgid "Enabled Up Next Addon Integration"
-msgstr ""
+msgstr "Ingeschakeld Volgende Add-on-integratie"
 
 msgctxt "#40029"
-msgid "Up Next Notification Time"
-msgstr ""
+msgid "UpNext Notification Time"
+msgstr "Tijd volgende melding"
 
 msgctxt "#40030"
 msgid "Auto Playlist Creation"
-msgstr ""
+msgstr "Automatisch afspeellijst maken"
 
 msgctxt "#40031"
 msgid "Auto Episode Resume"
-msgstr ""
+msgstr "Automatische aflevering hervatten"
 
 msgctxt "#40032"
 msgid "Force Episode Resume on Continue Watching Items"
-msgstr ""
+msgstr "Aflevering hervatten forceren om door te gaan met het bekijken van items"
 
 msgctxt "#40033"
 msgid "Menu Icon type"
-msgstr ""
+msgstr "Type menupictogram"
 
 msgctxt "#40034"
 msgid "Add Meta Provider Labels..ex. (IMDb)"
-msgstr ""
+msgstr "Metaproviderlabels toevoegen..ex. (IMDb)"
 
 msgctxt "#40035"
 msgid "[B]Email:[/B] %s"
-msgstr ""
+msgstr "[B]E-mail:[/B] %s"
 
 msgctxt "#40036"
 msgid "[B]Username:[/B] %s"
-msgstr ""
+msgstr "[B]gebruikersnaam:[/B] %s"
 
 msgctxt "#40037"
 msgid "[B]Status:[/B] %s"
-msgstr ""
+msgstr "[B]Toestand:[/B] %s"
 
 msgctxt "#40038"
 msgid "[B]Fidelity Points:[/B] %s"
@@ -3755,95 +3787,95 @@ msgstr ""
 
 msgctxt "#40039"
 msgid "Highlight Color"
-msgstr ""
+msgstr "Markeer kleur"
 
 msgctxt "#40040"
 msgid "[B]Customer ID:[/B] %s"
-msgstr ""
+msgstr "[B]Klanten ID:[/B] %s"
 
 msgctxt "#40041"
 msgid "[B]Expires:[/B] %s"
-msgstr ""
+msgstr "[B]Verloopt:[/B] %s"
 
 msgctxt "#40042"
 msgid "[B]Days Remaining:[/B] %s"
-msgstr ""
+msgstr "[B]Resterende dagen:[/B] %s"
 
 msgctxt "#40043"
 msgid "[B]Points Used:[/B] %.f"
-msgstr ""
+msgstr "[B]Punten gebruikt:[/B] %.f"
 
 msgctxt "#40044"
 msgid "[B]Space Used:[/B] %.2f"
-msgstr ""
+msgstr "[B]Gebruikte ruimte:[/B] %.2f"
 
 msgctxt "#40045"
 msgid "[B]Fair Use (Percentage Used):[/B] %s"
-msgstr ""
+msgstr "[B]Redelijk gebruik (gebruikspercentage):[/B] %s"
 
 msgctxt "#40046"
 msgid "folder"
-msgstr ""
+msgstr "map"
 
 msgctxt "#40047"
 msgid "file"
-msgstr ""
+msgstr "het dossier"
 
 msgctxt "#40048"
 msgid "[B]Download File[/B]"
-msgstr ""
+msgstr "[B]Download bestand[/B]"
 
 msgctxt "#40049"
 msgid "[B]Rename %s[/B]"
-msgstr ""
+msgstr "[B]Hernoemen %s[/B]"
 
 msgctxt "#40050"
 msgid "[B]Delete %s[/B]"
-msgstr ""
+msgstr "[B]Verwijderen %s[/B]"
 
 msgctxt "#40051"
 msgid "[B]Clear Finished Transfers[/B]"
-msgstr ""
+msgstr "[B]Voltooide overdrachten wissen[/B]"
 
 msgctxt "#40052"
 msgid "Preminumize.me succesfuly authorized"
-msgstr ""
+msgstr "Preminumize.me succesvol geautoriseerd"
 
 msgctxt "#40053"
-msgid "All Debrid Torrent Settings"
-msgstr ""
+msgid "AllDebrid Torrent Settings"
+msgstr "Alle Debrid Torrent-instellingen"
 
 msgctxt "#40054"
 msgid "Premiumize.me Auth"
-msgstr ""
+msgstr "Premiumize.me-authenticatie"
 
 msgctxt "#40055"
 msgid "Real-Debrid Auth"
-msgstr ""
+msgstr "Real-Debrid-authenticatie"
 
 msgctxt "#40056"
-msgid "All-Debrid Auth"
-msgstr ""
+msgid "AllDebrid Auth"
+msgstr "AllDebrid Auth"
 
 msgctxt "#40057"
 msgid "Premiumize.me"
-msgstr ""
+msgstr "Premiumize.me"
 
 msgctxt "#40058"
 msgid "Real-Debrid"
-msgstr ""
+msgstr "Real-Debrid"
 
 msgctxt "#40059"
-msgid "All Debrid"
-msgstr ""
+msgid "AllDebrid"
+msgstr "AllDebrid"
 
 msgctxt "#40060"
 msgid "Enable Premium Services Menu"
-msgstr ""
+msgstr "Menu Premium Services inschakelen"
 
 msgctxt "#40061"
 msgid "Enable Youtube Menu"
-msgstr ""
+msgstr "YouTube-menu inschakelen"
 
 msgctxt "#40062"
 msgid "Trakt Username"
@@ -3851,60 +3883,60 @@ msgstr "Trakt-gebruikersnaam"
 
 msgctxt "#40063"
 msgid "Months to Rollback for Hide in Cinema"
-msgstr ""
+msgstr "Maanden om terug te draaien voor Hide in Cinema"
 
 msgctxt "#40064"
 msgid "Enable Christmas Collections"
-msgstr ""
+msgstr "Kerstcollecties inschakelen"
 
 msgctxt "#40065"
 msgid "Enable UpNext Integration"
-msgstr ""
+msgstr "UpNext-integratie inschakelen"
 
 msgctxt "#40066"
 msgid "UpNext Notification time"
-msgstr ""
+msgstr "OmhoogVolgende Tijd van melding"
 
 msgctxt "#40067"
 msgid "Clear Providers Cache After Changing Scraper Provider"
-msgstr ""
+msgstr "Cache van providers wissen na wijziging van Scraper-provider"
 
 msgctxt "#40068"
 msgid "Enable Anime Menu"
-msgstr ""
+msgstr "Anime-Menü aktivieren"
 
 msgctxt "#40069"
 msgid "Enable Originals (ex. Netflix)"
-msgstr ""
+msgstr "Originelen inschakelen (bijv. Netflix)"
 
 msgctxt "#40070"
 msgid "Originals"
-msgstr ""
+msgstr "originelen"
 
 msgctxt "#40071"
 msgid "Originals (TVMaze)"
-msgstr ""
+msgstr "originelen (TVMaze)"
 
 msgctxt "#40072"
 msgid "Watched Progress"
-msgstr ""
+msgstr "Voortgang bekeken"
 
 msgctxt "#40073"
 msgid "Calendar"
-msgstr ""
+msgstr "Kalender"
 
 msgctxt "#40074"
 msgid "Select Menu type to hide from"
-msgstr ""
+msgstr "Selecteer Menutype om voor te verbergen"
 
 msgctxt "#40075"
-msgid "[COLOR red][B]Hide[/B][/COLOR] %s"
-msgstr ""
+msgid "[COLOR %s][B]Hide[/B][/COLOR] %s"
+msgstr "[COLOR %s][B]Zich verstoppen[/B][/COLOR] %s"
 
 msgctxt "#40076"
-msgid "[COLOR red][B]Scrobbble Reset[/B][/COLOR] Item"
-msgstr ""
+msgid "[COLOR %s][B]Scrobbble Reset[/B][/COLOR] Item"
+msgstr "[COLOR %s][B]Scrobble Reset[/B][/COLOR] Item"
 
 msgctxt "#40077"
 msgid "Originals (TMDb)"
-msgstr ""
+msgstr "originelen (TMDb)"

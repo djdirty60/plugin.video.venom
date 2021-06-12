@@ -27,7 +27,7 @@
 			</control>
 			<control type="image">
 				<aspectratio align="center" aligny="center">keep</aspectratio>
-				<left>600</left>
+				<left>400</left>
 				<top>0</top>
 				<width>600</width>
 				<height>175%</height>

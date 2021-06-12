@@ -213,7 +213,7 @@ class TVshows:
 
 	def search(self):
 		from resources.lib.menus import navigator
-		navigator.Navigator().addDirectoryItem(32603, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png')
+		navigator.Navigator().addDirectoryItem(32603, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png', isFolder=False)
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
 		try:
@@ -241,9 +241,7 @@ class TVshows:
 		navigator.Navigator().endDirectory()
 
 	def search_new(self):
-# need fix for when context menu returns here brings keyboard input back up
-		t = control.lang(32010)
-		k = control.keyboard('', t)
+		k = control.keyboard('', control.lang(32010))
 		k.doModal()
 		q = k.getText() if k.isConfirmed() else None
 		if not q: return
@@ -260,25 +258,31 @@ class TVshows:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-		url = self.search_link + quote_plus(q)
-		if control.getKodiVersion() >= 18:
-			self.get(url)
-		else:
-			url = '%s?action=tvshowPage&url=%s' % (argv[0], quote_plus(url))
-			control.execute('Container.Update(%s)' % url)
+		url = quote_plus(self.search_link + q)
+		control.execute('Container.Update(%s?action=tvshows&url=%s)' % (argv[0], url))
 
 	def search_term(self, name):
 		url = self.search_link + quote_plus(name)
 		self.get(url)
 
 	def person(self):
-		t = control.lang(32010)
-		k = control.keyboard('', t)
+		k = control.keyboard('', control.lang(32010))
 		k.doModal()
 		q = k.getText().strip() if k.isConfirmed() else None
 		if not q: return
 		url = self.persons_link + quote_plus(q)
 		self.persons(url)
+
+	def persons(self, url):
+		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
+		else: self.list = cache.get(self.imdb_person_list, 1, url)
+		if len(self.list) == 0:
+			control.hide()
+			control.notification(title=32010, message=33049)
+		for i in range(0, len(self.list)):
+			self.list[i].update({'icon': 'DefaultActor.png', 'action': 'tvshows'})
+		self.addDirectory(self.list)
+		return self.list
 
 	def genres(self):
 		genres = [
@@ -336,17 +340,6 @@ class TVshows:
 		if not isinstance(certificates, (tuple, list)):
 			certificates = [certificates]
 		return ','.join([base + i.upper() for i in certificates])
-
-	def persons(self, url):
-		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
-		else: self.list = cache.get(self.imdb_person_list, 1, url)
-		if len(self.list) == 0:
-			control.hide()
-			control.notification(title=32010, message=33049)
-		for i in range(0, len(self.list)):
-			self.list[i].update({'icon': 'DefaultActor.png', 'action': 'tvshows'})
-		self.addDirectory(self.list)
-		return self.list
 
 	def tvshowsListToLibrary(self, url):
 		url = getattr(self, url + '_link')
@@ -698,6 +691,18 @@ class TVshows:
 			if not values.get('imdb'): values['imdb'] = imdb
 			if not values.get('tmdb'): values['tmdb'] = tmdb
 			if not values.get('tvdb'): values['tvdb'] = tvdb
+			if self.lang != 'en':
+				try:
+					# if self.lang == 'en' or self.lang not in values.get('available_translations', [self.lang]): raise Exception()
+					trans_item = trakt.getTVShowTranslation(imdb, lang=self.lang, full=True)
+					if trans_item:
+						if trans_item.get('title'):
+							values['tvshowtitle'] = trans_item.get('title')
+							values['title'] = trans_item.get('title')
+						if trans_item.get('overview'): values['plot'] =trans_item.get('overview')
+				except:
+					from resources.lib.modules import log_utils
+					log_utils.error()
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 				if extended_art: values.update(extended_art)
@@ -755,11 +760,11 @@ class TVshows:
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
 ####-Context Menu and Overlays-####
 				cm = []
-				if self.traktCredentials:
-					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s)' % (sysaddon, systitle, imdb, tvdb)))
 				try:
 					overlay = int(getTVShowOverlay(indicators, imdb, tvdb))
 					watched = (overlay == 5)
+					if self.traktCredentials:
+						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&watched=%s)' % (sysaddon, systitle, imdb, tvdb, watched)))
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 5})
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_TVShow&name=%s&imdb=%s&tvdb=%s&query=4)' % (sysaddon, systitle, imdb, tvdb)))

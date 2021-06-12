@@ -6,11 +6,10 @@
 from resources.lib.modules.control import addonPath, addonId, getVenomVersion, joinPath
 from resources.lib.windows.textviewer import TextViewerXML
 
-venom_path = addonPath(addonId())
-venom_version = getVenomVersion()
-
 
 def get(file):
+	venom_path = addonPath(addonId())
+	venom_version = getVenomVersion()
 	helpFile = joinPath(venom_path, 'resources', 'help', file + '.txt')
 	r = open(helpFile)
 	text = r.read()

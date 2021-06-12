@@ -34,7 +34,7 @@ hosts_domains_url = 'hosts/domains'
 hosts_regex_url = 'hosts/regex'
 rd_icon = control.joinPath(control.artPath(), 'realdebrid.png')
 addonFanart = control.addonFanart()
-store_to_cloud = control.setting('realdebrid.saveToCloud') == 'true'
+
 
 class RealDebrid:
 	name = "Real-Debrid"
@@ -50,6 +50,7 @@ class RealDebrid:
 		self.auth_timeout = 0
 		self.auth_step = 0
 		self.server_notifications = control.setting('realdebrid.server.notifications')
+		self.store_to_cloud = control.setting('realdebrid.saveToCloud') == 'true'
 
 	def _get(self, url, fail_check=False, token_ck=False):
 		try:
@@ -467,7 +468,7 @@ class RealDebrid:
 				file_url = self.unrestrict_link(rd_link)
 				if file_url.endswith('rar'): file_url = None
 				if not any(file_url.lower().endswith(x) for x in extensions): file_url = None
-				if not store_to_cloud: self.delete_torrent(torrent_id)
+				if not self.store_to_cloud: self.delete_torrent(torrent_id)
 				return file_url
 			else:
 				log_utils.log('Real-Debrid FAILED TO RESOLVE MAGNET : %s' % magnet_url, __name__, log_utils.LOGWARNING)

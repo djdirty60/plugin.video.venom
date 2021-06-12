@@ -34,7 +34,7 @@ def get_request(url):
 	if '200' in str(response): return response.json()
 	elif 'Retry-After' in response.headers: 	# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
 		throttleTime = response.headers['Retry-After']
-		notification(message='TMDB Throttling Applied, Sleeping for %s seconds' % throttleTime)
+		notification(message='TMDb Throttling Applied, Sleeping for %s seconds' % throttleTime)
 		sleep((int(throttleTime) + 1) * 1000)
 		return get_request(url)
 	else:
@@ -87,8 +87,8 @@ class Movies:
 		self.meta = []
 		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
-		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s,en-US&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
-###  other "append_to_response" options external_ids,images,content_ratings
+		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
+###  other "append_to_response" options external_ids,images,content_ratings, translations
 		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', API_key)
 		self.external_ids = base_link + 'movie/%s/external_ids?api_key=%s' % ('%s', API_key)
 		# self.user = str(self.imdb_user) + str(API_key)
@@ -372,8 +372,8 @@ class TVshows:
 		self.meta = []
 		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
-		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s,en-US&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
-# 'append_to_response=aggregate_credits' DO NOT USE, response data way to massive and bogs the response time
+		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
+# 'append_to_response=translations, aggregate_credits' (DO NOT USE, response data way to massive and bogs the response time)
 		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
 		self.tvdb_key = getSetting('tvdb.api.key')
 		self.imdb_user = getSetting('imdb.user').replace('ur', '')

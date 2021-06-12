@@ -125,8 +125,9 @@ class Player(xbmc.Player):
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
 			meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['movies']
-			t = cleantitle.get(self.title)
-			meta = [i for i in meta if self.year == str(i['year']) and (t == cleantitle.get(i['title']) or t == cleantitle.get(i['originaltitle']))][0]
+			t = cleantitle.get(self.title.replace('&', 'and'))
+			years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
+			meta = [i for i in meta if str(i['year']) in years and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
 			if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
 			if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
 			for k, v in control.iteritems(meta):

@@ -13,9 +13,11 @@ except ImportError: #Py3
 	from urllib.request import urlopen, Request
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
+# from resources.lib.modules.source_utils import supported_video_extensions
 
 
 def download(name, image, url, meta_name=None):
+# def download(name, image, url, meta_name=None, selected_source): # future for re-write, pack file support
 	if not url: return control.hide()
 	try:
 		file_format = control.setting('downloads.file.format')
@@ -24,7 +26,7 @@ def download(name, image, url, meta_name=None):
 		url = url.split('|')[0]
 		try: transname = name.translate(None, '\/:*?"<>|').strip('.')
 		except: transname = name.translate(name.maketrans('', '', '\/:*?"<>|')).strip('.')  # maketrans() is in string module for py2
-		ext_list = ['.mp4', '.mkv', '.flv', '.avi', '.mpg']
+		ext_list = ['.m4v', '.mp4', '.mpg', '.mkv', '.flv', '.avi', 'wmv']
 		for i in ext_list: transname = transname.rstrip(i)
 		if meta_name:
 			try: content = re.search(r'(.+?)\sS(\d*)E\d*$', meta_name).groups()
@@ -37,8 +39,7 @@ def download(name, image, url, meta_name=None):
 			except: content = ()
 		levels =['../../../..', '../../..', '../..', '..']
 		if len(content) == 0:
-			dest = control.setting('movie.download.path')
-			dest = control.transPath(dest)
+			dest = control.transPath(control.setting('movie.download.path'))
 			for level in levels:
 				try: control.makeFile(os.path.abspath(os.path.join(dest, level)))
 				except: pass
@@ -58,8 +59,7 @@ def download(name, image, url, meta_name=None):
 					dest = os.path.join(dest, transname)
 			control.makeFile(dest)
 		else:
-			dest = control.setting('tv.download.path')
-			dest = control.transPath(dest)
+			dest = control.transPath(control.setting('tv.download.path'))
 			for level in levels:
 				try: control.makeFile(os.path.abspath(os.path.join(dest, level)))
 				except: pass
@@ -75,7 +75,7 @@ def download(name, image, url, meta_name=None):
 			if file_format == '0' and not meta_name:
 				transname = transtvshowtitle + ' S%sE%s' % (content[1], content[2])
 		ext = os.path.splitext(urlparse(url).path)[1][1:]
-		if not ext in ['mp4', 'mkv', 'flv', 'avi', 'mpg']:
+		if not ext in ['.m4v', '.mp4', '.mpg', '.mkv', '.flv', '.avi', 'wmv']:
 			ext = 'mp4'
 		dest = os.path.join(dest, transname + '.' + ext)
 		doDownload(url, dest, name, image, headers)

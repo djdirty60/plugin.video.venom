@@ -108,8 +108,7 @@ class Furk:
 
 	def search_new(self):
 			control.hide()
-			t = control.lang(32010)
-			k = control.keyboard('', t)
+			k = control.keyboard('', control.lang(32010))
 			k.doModal()
 			q = k.getText() if k.isConfirmed() else None
 			if not q: return

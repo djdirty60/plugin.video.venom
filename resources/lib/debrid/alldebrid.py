@@ -20,7 +20,6 @@ base_url = 'https://api.alldebrid.com/v4/'
 user_agent = 'Venom%20for%20Kodi'
 ad_icon = control.joinPath(control.artPath(), 'alldebrid.png')
 addonFanart = control.addonFanart()
-store_to_cloud = control.setting('alldebrid.saveToCloud') == 'true'
 
 
 class AllDebrid:
@@ -29,6 +28,7 @@ class AllDebrid:
 		self.token = control.setting('alldebrid.token')
 		self.timeout = 15.0
 		self.server_notifications = control.setting('alldebrid.server.notifications')
+		self.store_to_cloud = control.setting('alldebrid.saveToCloud') == 'true'
 
 	def _get(self, url, url_append=''):
 		response = None
@@ -362,7 +362,7 @@ class AllDebrid:
 							break
 			else:
 				media_id = max(valid_results, key=lambda x: x.get('size')).get('link', None)
-			if not store_to_cloud: self.delete_transfer(transfer_id)
+			if not self.store_to_cloud: self.delete_transfer(transfer_id)
 			file_url = self.unrestrict_link(media_id)
 			if not file_url:
 				log_utils.log('AllDebrid: FAILED TO RESOLVE MAGNET %s : ' % magnet_url, __name__, log_utils.LOGWARNING)

@@ -31,7 +31,7 @@ headers = {'Content-Type': 'application/json', 'trakt-api-key': V2_API_KEY, 'tra
 REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 databaseName = control.cacheFile
 databaseTable = 'trakt'
-
+highlight_color = control.getColor(control.setting('highlight.color'))
 
 def getTrakt(url, post=None, extended=False):
 	try:
@@ -327,28 +327,35 @@ def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True
 	if control.setting('trakt.general.notifications') == 'true':
 		control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
 
-def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
+def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True, watched=None):
 	lists = []
 	try:
 		if season: season = int(season)
 		if episode: episode = int(episode)
-		if tvdb: media_type = 'Show'
-		else: media_type = 'Movie'
+		media_type = 'Show' if tvdb else 'Movie'
 
-		items = [(control.lang(33651), 'watch')]
-		items += [(control.lang(33652), 'unwatch')]
-		items += [(control.lang(33653), 'rate')]
-		items += [(control.lang(33654), 'unrate')]
-		items += [(control.lang(40075) % media_type, 'hideItem')]
+		if watched is not None:
+			if watched is True:
+				items = [(control.lang(33652) % highlight_color, 'unwatch')]
+			else:
+				items = [(control.lang(33651) % highlight_color, 'watch')]
+		else:
+			items = [(control.lang(33651) % highlight_color, 'watch')]
+			items += [(control.lang(33652) % highlight_color, 'unwatch')]
+		if control.condVisibility('System.HasAddon(script.trakt)'):
+			items += [(control.lang(33653) % highlight_color, 'rate')]
+			items += [(control.lang(33654) % highlight_color, 'unrate')]
+		items += [(control.lang(40075) % (highlight_color, media_type), 'hideItem')]
 		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
-			items += [(control.lang(40076), 'scrobbleReset')]
-		items += [(control.lang(33575), '/sync/collection')]
-		items += [(control.lang(33576), '/sync/collection/remove')]
+			if media_type == 'Movie' or episode:
+				items += [(control.lang(40076) % highlight_color, 'scrobbleReset')]
 		if season or episode:
-			items += [(control.lang(33573), '/sync/watchlist')]
-			items += [(control.lang(33574), '/sync/watchlist/remove')]
-		items += [(control.lang(33577), '/sync/watchlist')]
-		items += [(control.lang(33578), '/sync/watchlist/remove')]
+			items += [(control.lang(33573) % highlight_color, '/sync/watchlist')]
+			items += [(control.lang(33574) % highlight_color, '/sync/watchlist/remove')]
+		items += [(control.lang(33577) % highlight_color, '/sync/watchlist')]
+		items += [(control.lang(33578) % highlight_color, '/sync/watchlist/remove')]
+		items += [(control.lang(33575) % highlight_color, '/sync/collection')]
+		items += [(control.lang(33576) % highlight_color, '/sync/collection/remove')]
 		items += [(control.lang(33579), '/users/me/lists/%s/items')]
 
 		result = getTraktAsJson('/users/me/lists')
@@ -356,9 +363,9 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 		lists = [lists[i//2] for i in range(len(lists)*2)]
 
 		for i in range(0, len(lists), 2):
-			lists[i] = ((control.lang(33580) % lists[i][0]), '/users/me/lists/%s/items' % lists[i][1])
+			lists[i] = ((control.lang(33580) % (highlight_color, lists[i][0])), '/users/me/lists/%s/items' % lists[i][1])
 		for i in range(1, len(lists), 2):
-			lists[i] = ((control.lang(33581) % lists[i][0]), '/users/me/lists/%s/items/remove' % lists[i][1])
+			lists[i] = ((control.lang(33581) % (highlight_color, lists[i][0])), '/users/me/lists/%s/items/remove' % lists[i][1])
 		items += lists
 
 		control.hide()
@@ -366,36 +373,36 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 
 		if select == -1: return
 		if select >= 0:
-			if items[select][0] == control.lang(33651):
+			if items[select][1] == 'watch':
 				watch(name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=refresh)
-			elif items[select][0] == control.lang(33652):
+			elif items[select][1] == 'unwatch':
 				unwatch(name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=refresh)
-			elif items[select][0] == control.lang(33653):
+			elif items[select][1] == 'rate':
 				rate(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-			elif items[select][0] == control.lang(33654):
+			elif items[select][1] == 'unrate':
 				unrate(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-			elif items[select][0] == control.lang(40075) % media_type:
+			elif items[select][1] == 'hideItem':
 				hideItem(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode)
-			elif items[select][0] == control.lang(40076):
-				scrobbleReset(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
+			elif items[select][1] == 'scrobbleReset':
+				scrobbleReset(imdb=imdb, tvdb=tvdb, season=season, episode=episode, widgetRefresh=True)
 			else:
 				if not tvdb:
 					post = {"movies": [{"ids": {"imdb": imdb}}]}
 				else:
 					if episode:
-						if items[select][0] == control.lang(33573) or items[select][0] == control.lang(33574):
+						if items[select][1] == '/sync/watchlist' or items[select][1] == '/sync/watchlist/remove':
 							post = {"shows": [{"ids": {"tvdb": tvdb}}]}
 						else:
 							post = {"shows": [{"ids": {"tvdb": tvdb}, "seasons": [{"number": season, "episodes": [{"number": episode}]}]}]}
 							name = name + ' - ' + '%sx%02d' % (season, episode)
 					elif season:
-						if items[select][0] == control.lang(33573) or items[select][0] == control.lang(33574):
+						if items[select][1] == '/sync/watchlist' or items[select][1] == '/sync/watchlist/remove':
 							post = {"shows": [{"ids": {"tvdb": tvdb}}]}
 						else:
 							post = {"shows": [{"ids": {"tvdb": tvdb}, "seasons": [{"number": season}]}]}
 							name = name + ' - ' + 'Season %s' % season
 					else: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
-				if items[select][0] == control.lang(33579):
+				if items[select][1] == '/users/me/lists/%s/items':
 					slug = listAdd(successNotification=True)
 					if slug: getTrakt(items[select][1] % slug, post=post)[0]
 				else:
@@ -779,19 +786,22 @@ def markEpisodeAsNotWatched(imdb, tvdb, season, episode):
 def getMovieTranslation(id, lang, full=False):
 	url = '/movies/%s/translations/%s' % (id, lang)
 	try:
-		item = cache.get(getTraktAsJson, 48, url)[0]
-		result = item if full else item.get('title')
-		return None if result == 'none' else result
+		item = cache.get(getTraktAsJson, 96, url)
+		if item: item = item[0]
+		else: return None
+		return item if full else item.get('title')
 	except:
 		log_utils.error()
+
 
 def getTVShowTranslation(id, lang, season=None, episode=None, full=False):
 	if season and episode: url = '/shows/%s/seasons/%s/episodes/%s/translations/%s' % (id, season, episode, lang)
 	else: url = '/shows/%s/translations/%s' % (id, lang)
 	try:
-		item = cache.get(getTraktAsJson, 48, url)[0]
-		result = item if full else item.get('title')
-		return None if result == 'none' else result
+		item = cache.get(getTraktAsJson, 96, url)
+		if item: item = item[0]
+		else: return None
+		return item if full else item.get('title')
 	except:
 		log_utils.error()
 
@@ -952,7 +962,7 @@ def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 	except:
 		log_utils.error()
 
-def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True):
+def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True, widgetRefresh=False):
 	control.busy()
 	try:
 		type = 'movie' if not episode else 'episode'
@@ -967,7 +977,8 @@ def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True):
 		traktsync.delete_bookmark(items)
 		control.hide()
 		if refresh: control.refresh()
-		# control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh
+		if widgetRefresh:
+			control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
 		if success:
 			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32082)
 		else:

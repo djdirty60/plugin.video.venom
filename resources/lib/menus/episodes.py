@@ -565,7 +565,9 @@ class Episodes:
 						title = trans_item.get('title') or title
 						plot = trans_item.get('overview') or plot
 						tvshowtitle = trakt.getTVShowTranslation(imdb, lang=self.lang) or tvshowtitle
-					except: pass
+					except:
+						from resources.lib.modules import log_utils
+						log_utils.error()
 				try: trailer = control.trailer % item['show']['trailer'].split('v=')[1]
 				except: trailer = ''
 				values = {'title': title, 'season': season, 'episode': episode, 'tvshowtitle': tvshowtitle, 'year': year, 'premiered': premiered,
@@ -829,11 +831,11 @@ class Episodes:
 				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
 ####-Context Menu and Overlays-####
 				cm = []
-				if self.traktCredentials:
-					cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
 				try:
 					overlay = int(getEpisodeOverlay(indicators, imdb, tvdb, season, episode))
 					watched = (overlay == 5)
+					if self.traktCredentials:
+						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&watched=%s)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode, watched)))
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 5})
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=4)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))
