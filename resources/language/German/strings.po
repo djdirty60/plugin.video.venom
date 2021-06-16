@@ -3,15 +3,6 @@
 # Addon Provider: Venom
 # Translators:
 # Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
 # Kr1ss, 2017
 # Viper2k4, 2017
 # Christian Klippel, 2015
@@ -21,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Venom\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2017-05-30 13:23+0000\n"
+"PO-Revision-Date: 2021-06-11 13:23+0000\n"
 "Last-Translator: Viper2k4\n"
 "Language-Team: German (http://www.transifex.com/)\n"
 "MIME-Version: 1.0\n"
@@ -232,8 +223,8 @@ msgid "[B]VENOM[/B] : Viewtypes"
 msgstr "[B]GIFT[/B] : Anzeige-Typen"
 
 msgctxt "#32050"
-msgid ""
-msgstr ""
+msgid "Enable cloud scraper"
+msgstr "Cloud-Scraper aktivieren"
 
 msgctxt "#32051"
 msgid "Remove 3D sources"

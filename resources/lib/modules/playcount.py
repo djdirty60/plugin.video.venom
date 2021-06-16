@@ -20,7 +20,8 @@ def getMovieIndicators(refresh=False):
 			indicators = trakt.cachesyncMovies(timeout=timeout)
 			return indicators
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
 	except:
@@ -36,7 +37,8 @@ def getTVShowIndicators(refresh=False):
 			indicators = trakt.cachesyncTVShows(timeout=timeout)
 			return indicators
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
 	except:
@@ -52,7 +54,8 @@ def getSeasonIndicators(imdb, refresh=False):
 			indicators = trakt.cachesyncSeason(imdb=imdb, timeout=timeout)
 			return indicators
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
 	except:
@@ -176,7 +179,8 @@ def markMovieDuringPlayback(imdb, watched):
 			# if trakt.getTraktAddonMovieInfo():
 				# trakt.markMovieAsNotWatched(imdb)
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('movie', name='', imdb_id=imdb)
 			metaget.change_watched('movie', name='', imdb_id=imdb, watched=int(watched))
@@ -193,7 +197,8 @@ def markEpisodeDuringPlayback(imdb, tvdb, season, episode, watched):
 			# if trakt.getTraktAddonEpisodeInfo():
 				# trakt.markEpisodeAsNotWatched(imdb, tvdb, season, episode)
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('tvshow', name='', imdb_id=imdb)
 			metaget.get_episode_meta('', imdb_id=imdb, season=season, episode=episode)
@@ -208,7 +213,8 @@ def movies(name, imdb, watched):
 			if int(watched) == 5: trakt.watch(name=name, imdb=imdb, refresh=True)
 			else: trakt.unwatch(name=name, imdb=imdb, refresh=True)
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('movie', name=name, imdb_id=imdb)
 			metaget.change_watched('movie', name=name, imdb_id=imdb, watched=int(watched))
@@ -223,7 +229,8 @@ def episodes(name, imdb, tvdb, season, episode, watched):
 			if int(watched) == 5: trakt.watch(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=True)
 			else: trakt.unwatch(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=True)
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('tvshow', name=name, imdb_id=imdb)
 			metaget.get_episode_meta(name, imdb_id=imdb, season=season, episode=episode)
@@ -243,7 +250,8 @@ def tvshows(tvshowtitle, imdb, tvdb, season, watched):
 			if watched == 5: trakt.watch(name=tvshowtitle, imdb=imdb, tvdb=tvdb, season=season, refresh=True)
 			else: trakt.unwatch(name=tvshowtitle, imdb=imdb, tvdb=tvdb, season=season, refresh=True)
 		else:
-			from metahandler import metahandlers
+			# from metahandler import metahandlers
+			check_metahandler()
 			from resources.lib.menus import episodes
 			from sys import exit as sysexit
 
@@ -282,7 +290,8 @@ def tvshows(tvshowtitle, imdb, tvdb, season, watched):
 def tvshowsUpdate(imdb, tvdb):
 	try:
 		if traktIndicators: return
-		from metahandler import metahandlers
+		# from metahandler import metahandlers
+		check_metahandler()
 		from resources.lib.menus import episodes
 
 		name = addonInfo('name')
@@ -313,3 +322,10 @@ def tvshowsUpdate(imdb, tvdb):
 		from resources.lib.modules import log_utils
 		log_utils.error()
 	containerRefresh()
+
+def check_metahandler():
+	if not control.condVisibility('System.HasAddon(script.module.metahandler)'):
+		control.execute('InstallAddon(script.module.metahandler)')
+	try: from metahandler import metahandlers
+	except: pass
+

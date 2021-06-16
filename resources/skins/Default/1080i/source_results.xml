@@ -133,6 +133,19 @@
 						<label>[COLOR $INFO[Window().Property(venom.highlight.color)]][B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.name)][/B][/COLOR]</label>
 					</control>
 					<control type="label">
+						<description>Line2 cloud file</description>
+						<left>180</left>
+						<top>50</top>
+						<width>1170</width>
+						<height>25</height>
+						<font>font12</font>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<aligny>top</aligny>
+						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.source)]</label>
+						<visible>String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
+					</control>
+					<control type="label">
 						<description>Line2 cached torrents</description>
 						<left>180</left>
 						<top>50</top>
@@ -143,7 +156,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.source)]</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
+						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),UNCACHED) + !String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 					<control type="label">
 						<description>Line2 uncached torrents</description>
@@ -182,7 +195,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   HOSTER</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),TORRENT)</visible>
+						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),TORRENT) + !String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 				</itemlayout>
 				<focusedlayout height="100" width="1325">
@@ -224,6 +237,19 @@
 						<label>[B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.name)][/B]</label>
 					</control>
 					<control type="label">
+						<description>Line2 cloud file</description>
+						<left>180</left>
+						<top>50</top>
+						<width>1170</width>
+						<height>25</height>
+						<font>font12</font>
+						<textcolor>black</textcolor>
+						<align>left</align>
+						<aligny>top</aligny>
+						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)][/B]</label>
+						<visible>String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
+					</control>
+					<control type="label">
 						<description>Line2 cached torrents</description>
 						<left>180</left>
 						<top>50</top>
@@ -234,7 +260,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)][/B]</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
+						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),UNCACHED) + !String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 					<control type="label">
 						<description>Line2 uncached torrents</description>
@@ -273,7 +299,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   HOSTER[/B]</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),TORRENT)</visible>
+						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),TORRENT) + !String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 				</focusedlayout>
 			</control>
@@ -295,6 +321,7 @@
 						<align>center</align>
 						<textcolor>white</textcolor>
 						<focusedcolor>white</focusedcolor>
+						<visible>true</visible>
 					</control>
 			</control>
 			<control type="grouplist" id="2002">
@@ -404,6 +431,16 @@
 						<aspectratio>keep</aspectratio>
 						<texture>source/bluray.png</texture>
 						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),BLURAY)</visible>
+					</control>
+					<control type="image">
+						<left>0</left>
+						<top>15</top>
+						<width>75</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
+						<texture>source/m2ts.png</texture>
+						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),M2TS)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>

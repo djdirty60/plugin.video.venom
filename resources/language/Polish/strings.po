@@ -1,15 +1,6 @@
 ﻿# Addon Name: Venom
 # Addon id: plugin.video.venom
 # Addon Provider: Venom
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
-# Translators:
 # Daniel Szurgot, 2015
 # Ghuthek, 2015-2016
 # Ghuthek, 2016-2017
@@ -21,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Venom\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2017-05-30 09:11+0000\n"
+"PO-Revision-Date: 2021-06-11 09:11+0000\n"
 "Last-Translator: Viper2k4\n"
 "Language-Team: Polish (http://www.transifex.com/)\n"
 "MIME-Version: 1.0\n"
@@ -232,8 +223,8 @@ msgid "[B]VENOM[/B] : Viewtypes"
 msgstr "[B]JAD[/B] : Styl wyświetlania"
 
 msgctxt "#32050"
-msgid ""
-msgstr ""
+msgid "Enable cloud scraper"
+msgstr "Włącz skrobak w chmurze"
 
 msgctxt "#32051"
 msgid "Remove 3D sources"

@@ -26,7 +26,7 @@ class AllDebrid:
 	name = "AllDebrid"
 	def __init__(self):
 		self.token = control.setting('alldebrid.token')
-		self.timeout = 15.0
+		self.timeout = 15
 		self.server_notifications = control.setting('alldebrid.server.notifications')
 		self.store_to_cloud = control.setting('alldebrid.saveToCloud') == 'true'
 

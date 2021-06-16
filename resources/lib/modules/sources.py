@@ -25,6 +25,8 @@ from resources.lib.modules import log_utils
 from resources.lib.modules import source_utils
 from resources.lib.modules import trakt
 from resources.lib.modules import workers
+from resources.lib.cloud_scrapers import cloudSources
+
 from fenomscrapers import sources as fs_sources
 from resources.lib.windows.source_results import SourceResultsXML
 
@@ -691,10 +693,13 @@ class Sources:
 				self.sources = [i for i in self.sources if i['quality'] != 'SD']
 		if control.setting('remove.3D.sources') == 'true':
 			self.sources = [i for i in self.sources if '3D' not in i.get('info', '')] # scrapers write 3D to info
+
 		local = [i for i in self.sources if 'local' in i and i['local'] is True] # for library and videoscraper (skips cache check)
 		self.sources = [i for i in self.sources if not i in local]
 		direct = [i for i in self.sources if i['direct'] == True] # acct scrapers (skips cache check)
 		self.sources = [i for i in self.sources if not i in direct]
+		# cloud = [i for i in self.sources if i['source'] == 'cloud'] # don't need this atm, cloud scrapers set "direct: True" so they're add to "direct" above to skip cache check
+		# self.sources = [i for i in self.sources if not i in cloud]
 
 		from copy import deepcopy
 		deepcopy_sources = deepcopy(self.sources)
@@ -733,6 +738,7 @@ class Sources:
 		if threads:
 			[i.start() for i in threads]
 			[i.join() for i in threads]
+		# self.filter += cloud
 		self.filter += direct
 		self.filter += local
 		self.sources = self.filter
@@ -765,6 +771,14 @@ class Sources:
 		filter += [i for i in self.sources if i['quality'] == 'SD']
 		filter += [i for i in self.sources if i['quality'] == 'CAM']
 		self.sources = filter
+
+
+		filter = [] # new filter to place cloud files first
+		filter += [i for i in self.sources if i['source'] == 'cloud'] 
+		filter += [i for i in self.sources if i['source'] != 'cloud']
+		self.sources = filter
+
+
 		self.sources = self.sources[:4000]
 		control.hide()
 		return self.sources
@@ -773,10 +787,12 @@ class Sources:
 		filter = []
 		log_dupes = control.setting('remove.duplicates.logging') == 'false'
 		for i in self.sources:
-			a = i['url'].lower()
 			larger = False
+			a = i['url'].lower()
 			for sublist in filter:
 				try:
+					if i['source'] == 'cloud':
+						break
 					b = sublist['url'].lower()
 					if 'magnet:' in a:
 						if i['hash'].lower() in b:
@@ -1000,8 +1016,12 @@ class Sources:
 		self.tvdbProperty = 'plugin.video.venom.container.tvdb'
 		self.labelProperty = 'plugin.video.venom.container.label'
 
+
 		self.sourceDict = fs_sources()
-		# self.sourceDict.extend(internal_sources())		# add cloud scrapers to sourceDict
+		self.sourceDict.extend(cloudSources()) # add cloud scrapers to sourceDict
+
+		# log_utils.log('self.sourceDict = %s' % self.sourceDict)
+
 
 		from resources.lib.debrid import premium_hosters
 		self.debrid_resolvers = debrid.debrid_resolvers()

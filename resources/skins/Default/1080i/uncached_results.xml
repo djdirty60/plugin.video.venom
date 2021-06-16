@@ -306,6 +306,16 @@
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
+						<texture>source/m2ts.png</texture>
+						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),M2TS)</visible>
+					</control>
+					<control type="image">
+						<left>0</left>
+						<top>15</top>
+						<width>75</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
 						<texture>source/hdtv.png</texture>
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDTV)</visible>
 					</control>

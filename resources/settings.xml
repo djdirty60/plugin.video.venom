@@ -229,8 +229,9 @@
 		<setting id="alldebrid.username" label="40006" type="text" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
 		<setting id="alldebrid.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-2,) + eq(-3,true)" />
 		<setting id="alldebrid.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-3,) + eq(-4,true)" />
-		<setting id="alldebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,) + eq(-5,true)" />
-		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_adAcctMyAccounts)" visible="!eq(-5,) + eq(-6,true)" />
+		<setting id="ad_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-4,) + eq(-5,true)" />
+		<setting id="alldebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-5,) + eq(-6,true)" />
+		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_adAcctMyAccounts)" visible="!eq(-6,) + eq(-7,true)" />
 
 		<setting type="lsep" label="40057" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.13&amp;opensettings=true&amp;query2=7.11)" visible="eq(2,)" />
@@ -239,8 +240,9 @@
 		<setting id="premiumize.username" label="40006" type="text" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
 		<setting id="premiumize.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-2,) + eq(-3,true)" />
 		<setting id="premiumize.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-3,) + eq(-4,true)" />
-		<setting id="premiumize.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,) + eq(-5,true)" />
-		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_pmAcctMyAccounts)" visible="!eq(-5,) + eq(-6,true)" />
+		<setting id="pm_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-4,) + eq(-5,true)" />
+		<setting id="premiumize.server.notifications" type="bool" label="33051" default="true" visible="!eq(-5,) + eq(-6,true)" />
+		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_pmAcctMyAccounts)" visible="!eq(-6,) + eq(-7,true)" />
 
 		<setting type="lsep" label="40058" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.21&amp;opensettings=true&amp;query2=7.26)" visible="eq(2,)" />
@@ -252,8 +254,9 @@
 		<setting id="realdebrid.secret" label="realdebrid secret" type = "text" default="" visible="false" />
 		<setting id="realdebrid.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-5,) + eq(-6,true)" />
 		<setting id="realdebrid.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-6,) +eq(-7,true)" />
-		<setting id="realdebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-7,) + eq(-8,true)" />
-		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_rdAcctMyAccounts)" visible="!eq(-8,) + eq(-9,true)" />
+		<setting id="rd_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-7,) + eq(-8,true)" />
+		<setting id="realdebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-8,) + eq(-9,true)" />
+		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_rdAcctMyAccounts)" visible="!eq(-9,) + eq(-10,true)" />
 
 		<setting type="lsep" label="FANART.TV" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=2.1&amp;opensettings=true&amp;query2=7.38)" visible="eq(1,)" />

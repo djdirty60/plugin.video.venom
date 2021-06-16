@@ -3,8 +3,7 @@
 	Venom Add-on
 """
 
-try: import AddonSignals
-except: pass
+
 from hashlib import md5
 from json import dumps as jsdumps, loads as jsloads
 from sys import argv, exit as sysexit
@@ -19,6 +18,12 @@ from resources.lib.modules import playcount
 from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 LOGNOTICE = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1)) = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1))
+
+if control.setting('enable.upnext') == 'true':
+	if not control.condVisibility('System.HasAddon(script.module.addon.signals)'):
+		control.execute('InstallAddon(script.module.addon.signals)')
+	try: import AddonSignals
+	except: pass
 
 
 class Player(xbmc.Player):
@@ -392,6 +397,7 @@ class Player(xbmc.Player):
 
 		current_position = control.playlist.getposition()
 		next_url = control.playlist[current_position + 1].getPath()
+		# log_utils.log('next_url=%s' % next_url)
 
 		try: # Py2
 			from urlparse import parse_qsl

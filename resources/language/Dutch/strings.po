@@ -7,12 +7,12 @@
 # Translators: Robin Caluwe, 2017
 # Translators: Sedat B, 2017
 # Translators: Youko van der Blom, 2017
-# Translators: Wil83 
+# Translators: Wil83, 2021 
 msgid ""
 msgstr ""
 "Project-Id-Version: Venom\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2017-05-30 09:11+0000\n"
+"PO-Revision-Date: 2021-06-13 09:11+0000\n"
 "Last-Translator: Wil83\n"
 "Language-Team: Dutch (http://www.transifex.com/)\n"
 "MIME-Version: 1.0\n"
@@ -223,8 +223,8 @@ msgid "[B]VENOM[/B] : Viewtypes"
 msgstr "[B]VENIJN[/B] : Layout instellingen"
 
 msgctxt "#32050"
-msgid ""
-msgstr ""
+msgid "Enable cloud scraper"
+msgstr "Cloudschraper inschakelen"
 
 msgctxt "#32051"
 msgid "Remove 3D sources"

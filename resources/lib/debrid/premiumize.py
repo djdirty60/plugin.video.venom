@@ -20,6 +20,7 @@ BaseUrl = 'https://www.premiumize.me/api'
 folder_list_url = '%s/folder/list' % BaseUrl
 folder_rename_url = '%s/folder/rename' % BaseUrl
 folder_delete_url = '%s/folder/delete' % BaseUrl
+item_listall_url = '%s/item/listall' % BaseUrl
 item_details_url = '%s/item/details' % BaseUrl
 item_delete_url = '%s/item/delete' % BaseUrl
 item_rename_url = '%s/item/rename' % BaseUrl
@@ -363,6 +364,14 @@ class Premiumize:
 			else: url = folder_list_url
 			response = self._get(url)
 			if response: return response.get('content')
+		except:
+			log_utils.error()
+		return None
+
+	def my_files_all(self):
+		try:
+			response = self._get(item_listall_url)
+			if response: return response.get('files')
 		except:
 			log_utils.error()
 		return None
