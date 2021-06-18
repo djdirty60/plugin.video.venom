@@ -201,8 +201,8 @@
 				<orientation>horizontal</orientation>
 					<control type="image">
 						<left>0</left>
-						<top>10</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -211,8 +211,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>10</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -221,8 +221,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>10</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -231,8 +231,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -241,18 +241,18 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
-						<texture>source/x264.png</texture>
+						<texture>source/h264.png</texture>
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),AVC)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -261,8 +261,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -271,28 +271,48 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
-						<texture>source/dx50.png</texture>
+						<texture>source/avi.png</texture>
+						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),AVI)</visible>
+					</control>
+					<control type="image">
+						<left>0</left>
+						<top>0</top>
+						<width>100</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
+						<texture>source/mkv2.png</texture>
+						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),MKV)</visible>
+					</control>
+					<control type="image">
+						<left>0</left>
+						<top>0</top>
+						<width>100</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
+						<texture>source/divx.png</texture>
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DIVX)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
-						<texture>source/xvid2.png</texture>
+						<texture>source/xvid.png</texture>
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),XVID)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -301,8 +321,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -311,8 +331,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -321,8 +341,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -331,8 +351,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -341,8 +361,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -351,8 +371,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -361,8 +381,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -371,8 +391,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -381,8 +401,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -391,18 +411,18 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
-						<texture>audio/dts.png</texture>
+						<texture>audio/dts2.png</texture>
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-X) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -411,8 +431,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -421,8 +441,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -431,8 +451,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -441,8 +461,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -451,8 +471,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -461,8 +481,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
@@ -471,8 +491,8 @@
 					</control>
 					<control type="image">
 						<left>0</left>
-						<top>15</top>
-						<width>75</width>
+						<top>0</top>
+						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>

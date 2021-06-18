@@ -728,6 +728,7 @@ class Episodes:
 		upcoming_prependDate = control.setting('trakt.UpcomingProgress.prependDate') == 'true'
 		try: sysaction = items[0]['action']
 		except: sysaction = ''
+		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
 		multi_unwatchedEnabled = control.setting('multi.unwatched.enabled') == 'true'
 		playlistcreate = control.setting('auto.playlistcreate') == 'true'
 		disable_player_art = control.setting('disable.player.art') == 'true'
@@ -872,7 +873,7 @@ class Episodes:
 				except: item = control.item(label=labelProgress)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
-				if multi and multi_unwatchedEnabled:
+				if multi and (unwatchedEnabled and multi_unwatchedEnabled):
 					if 'ForceAirEnabled' not in i:
 						try:
 							count = getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
@@ -938,7 +939,7 @@ class Episodes:
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except: pass
-		if multi and multi_unwatchedEnabled: # Show multi episodes as show, in order to display unwatched count if enabled.
+		if multi and (unwatchedEnabled and multi_unwatchedEnabled): # Show multi episodes as show, in order to display unwatched count if enabled.
 			control.content(syshandle, 'tvshows')
 			control.directory(syshandle, cacheToDisc=True)
 			views.setView('tvshows', {'skin.estuary': 55, 'skin.confluence': 500})

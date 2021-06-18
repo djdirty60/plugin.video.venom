@@ -231,8 +231,8 @@ msgid "Remove 3D sources"
 msgstr "3D-bronnen verwijderen"
 
 msgctxt "#32052"
-msgid ""
-msgstr ""
+msgid "Ignore m2ts in cloud files"
+msgstr "Negeer m2ts in cloudbestanden"
 
 msgctxt "#32053"
 msgid "[I]Next Page[/I]"

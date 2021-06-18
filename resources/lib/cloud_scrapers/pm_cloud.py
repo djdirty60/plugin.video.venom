@@ -10,9 +10,10 @@ try: #Py2
 	from urllib import urlencode
 except ImportError: #Py3
 	from urllib.parse import parse_qs, urlencode
-from resources.lib.debrid import premiumize
-from resources.lib.modules.source_utils import supported_video_extensions
 from resources.lib.cloud_scrapers import cloud_utils
+from resources.lib.debrid import premiumize
+from resources.lib.modules.control import setting as getSetting
+from resources.lib.modules.source_utils import supported_video_extensions
 from fenomscrapers.modules import source_utils as fs_utils
 
 
@@ -74,8 +75,10 @@ class source:
 			log_utils.error('PM_CLOUD: ')
 			return sources
 
+		ignoreM2ts = getSetting('pm_cloud.ignore.m2ts') == 'true'
 		extras_filter = cloud_utils.extras_filter()
 		for item in cloud_files:
+			is_m2ts = False
 			try:
 				name = item.get('name', '')
 				path = item.get('path', '').lower()
@@ -84,22 +87,33 @@ class source:
 				rt = cloud_utils.release_title_format(name)
 				if any(value in rt for value in extras_filter): continue
 
-				if all(not bool(re.search(i, rt)) for i in query_list):
-					if 'tvshowtitle' in data:
-						season_folder_list = self.season_folder_list()
-						if all(not bool(re.search(i, path)) for i in season_folder_list): continue
-						episode_list = self.episode_list()
-						if all(not bool(re.search(i, rt)) for i in episode_list): continue
-					else: continue
+				if name.endswith('m2ts'):
+					if ignoreM2ts:  continue
+					name = item.get('path', '').split('/')[0]
+					if name in str(sources): continue
+					is_m2ts = True
+					m2ts_files = [i for i in cloud_files if name in i.get('path')]
+					largest = sorted(m2ts_files, key=lambda k: k['size'], reverse=True)[0]
+					url_id = largest.get('id', '')
+					size =  largest.get('size', '')
+				else:
+					if all(not bool(re.search(i, rt)) for i in query_list):
+						if 'tvshowtitle' in data:
+							season_folder_list = self.season_folder_list()
+							if all(not bool(re.search(i, path)) for i in season_folder_list): continue
+							episode_list = self.episode_list()
+							if all(not bool(re.search(i, rt)) for i in episode_list): continue
+						else: continue
+					url_id = item.get('id', '')
+					size =  item.get('size', '')
 
 				name_info = fs_utils.info_from_name(name, title, self.year, hdlr, episode_title)
-				url_id = item.get('id', '')
-
 				quality, info = fs_utils.get_release_quality(name_info, name)
 				try:
-					dsize, isize = fs_utils.convert_size(item['size'], to='GB')
+					dsize, isize = fs_utils.convert_size(size, to='GB')
 					info.insert(0, isize)
 				except: dsize = 0
+				if is_m2ts: info.append('M2TS')
 				info = ' | '.join(info)
 
 				sources.append({'provider': 'pm_cloud', 'source': 'cloud', 'debrid': 'Premiumize.me', 'seeders': '', 'hash': '', 'name': name, 'name_info': name_info,

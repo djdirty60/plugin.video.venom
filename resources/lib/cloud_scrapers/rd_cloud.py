@@ -10,9 +10,10 @@ try: #Py2
 	from urllib import urlencode
 except ImportError: #Py3
 	from urllib.parse import parse_qs, urlencode
-from resources.lib.debrid import realdebrid
-from resources.lib.modules.source_utils import supported_video_extensions
 from resources.lib.cloud_scrapers import cloud_utils
+from resources.lib.debrid import realdebrid
+from resources.lib.modules.control import setting as getSetting
+from resources.lib.modules.source_utils import supported_video_extensions
 from fenomscrapers.modules import source_utils as fs_utils
 
 
@@ -50,7 +51,6 @@ class source:
 
 	def sources(self, url, hostDict):
 		sources = []
-		is_m2ts = False
 		if not url: return sources
 		try:
 			data = parse_qs(url)
@@ -76,7 +76,9 @@ class source:
 			return sources
 
 		extras_filter = cloud_utils.extras_filter()
+		ignoreM2ts = getSetting('rd_cloud.ignore.m2ts') == 'true'
 		for folder in cloud_folders:
+			is_m2ts = False
 			try:
 				folder_name = folder.get('filename', '')
 				if not cloud_utils.cloud_check_title(title, aliases, folder_name): continue
@@ -97,19 +99,21 @@ class source:
 					if any(value in rt for value in extras_filter): continue
 
 					if name.endswith('m2ts'):
+						if ignoreM2ts:  continue
+						name = folder.get('filename', '')
+						if name in str(sources): continue
 						is_m2ts = True
 						largest = sorted(folder_files, key=lambda k: k['bytes'], reverse=True)[0]
 						index_pos = folder_files.index(largest)
-						name = folder.get('filename', '')
 						size = largest['bytes']
 						try: link = torrent_info['links'][index_pos]
 						except: link = torrent_info['links'][0]
-
 					else:
 						if all(not bool(re.search(i, rt)) for i in query_list):
 							if 'tvshowtitle' in data:
 								season_folder_list = self.season_folder_list()
-								if all(not bool(re.search(i, name)) for i in season_folder_list): continue
+								nl = name.lower()
+								if all(not bool(re.search(i, nl)) for i in season_folder_list): continue
 								episode_list = self.episode_list()
 								if all(not bool(re.search(i, rt)) for i in episode_list): continue
 							else: continue
@@ -174,5 +178,5 @@ class source:
 			return url
 		except:
 			from resources.lib.modules import log_utils
-			log_utils.error('AD_CLOUD: ')
+			log_utils.error('RD_CLOUD: ')
 			return None

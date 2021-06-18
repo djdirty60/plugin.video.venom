@@ -7,7 +7,8 @@ from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
 import re
 import threading
-from time import sleep
+# from time import sleep
+from time import time, sleep
 try: #Py2
 	from urlparse import urljoin
 except ImportError: #Py3
@@ -120,11 +121,13 @@ def re_auth(headers):
 				return False
 
 			token, refresh = result['access_token'], result['refresh_token']
-			control.setSetting(id='trakt.token', value=token)
-			control.setSetting(id='trakt.refresh', value=refresh)
-
+			expires = str(time() + 7776000)
+			control.setSetting('trakt.token', token)
+			control.setSetting('trakt.refresh', refresh)
+			control.setSetting('trakt.expires', expires)
 			control.addon('script.module.myaccounts').setSetting('trakt.token', token)
 			control.addon('script.module.myaccounts').setSetting('trakt.refresh', refresh)
+			control.addon('script.module.myaccounts').setSetting('trakt.expires', expires)
 			log_utils.log('Trakt Token Successfully Re-Authorized', level=log_utils.LOGDEBUG)
 			return True
 		else:
@@ -137,10 +140,11 @@ def authTrakt():
 	try:
 		if getTraktCredentialsInfo():
 			if control.yesnoDialog(control.lang(32511), control.lang(32512), '', 'Trakt'):
-				control.setSetting(id='trakt.isauthed', value='')
-				control.setSetting(id='trakt.username', value='')
-				control.setSetting(id='trakt.token', value='')
-				control.setSetting(id='trakt.refresh', value='')
+				control.setSetting('trakt.isauthed', '')
+				control.setSetting('trakt.username', '')
+				control.setSetting('trakt.token', '')
+				control.setSetting('trakt.refresh', '')
+				control.setSetting('trakt.expires', '')
 			raise Exception()
 		result = getTraktAsJson('/oauth/device/code', {'client_id': V2_API_KEY})
 		verification_url = (control.lang(32513) % result['verification_url'])
@@ -170,11 +174,13 @@ def authTrakt():
 		result = client.request(urljoin(BASE_URL, '/users/me'), headers=headers)
 		result = utils.json_loads_as_str(result)
 		username = result['username']
+		expires = str(time() + 7776000)
 
-		control.setSetting(id='trakt.isauthed', value='true')
-		control.setSetting(id='trakt.username', value=username)
-		control.setSetting(id='trakt.token', value=token)
-		control.setSetting(id='trakt.refresh', value=refresh)
+		control.setSetting('trakt.isauthed', 'true')
+		control.setSetting('trakt.username', username)
+		control.setSetting('trakt.token', token)
+		control.setSetting('trakt.refresh', refresh)
+		control.setSetting('trakt.expires', expires)
 		raise Exception()
 	except:
 		log_utils.error()

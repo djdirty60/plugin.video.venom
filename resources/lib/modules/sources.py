@@ -965,8 +965,9 @@ class Sources:
 			if t == '': t = source_utils.getFileType(url=source.get('url'))
 			list = [('[COLOR %s]url:[/COLOR]  %s' % (self.highlight_color, source.get('url')), source.get('url'))]
 			# "&" in magnets causes copy2clip to fail
-			if 'magnet:' not in source.get('url') and not source.get('direct'):
-				if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % self.highlight_color, ' ')]
+			# if 'magnet:' not in source.get('url') and not source.get('direct'):
+				# if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % self.highlight_color, ' ')]
+			if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % self.highlight_color, ' ')]
 			list += [('[COLOR %s]name:[/COLOR]  %s' % (self.highlight_color, source.get('name')), source.get('name'))]
 			if supported_platform: list += [('[COLOR %s]  -- Copy name To Clipboard[/COLOR]' % self.highlight_color, ' ')]
 			list += [('[COLOR %s]info:[/COLOR]  %s' % (self.highlight_color, t), ' ')]

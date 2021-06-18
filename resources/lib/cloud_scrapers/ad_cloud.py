@@ -10,9 +10,10 @@ try: #Py2
 	from urllib import urlencode
 except ImportError: #Py3
 	from urllib.parse import parse_qs, urlencode
-from resources.lib.debrid import alldebrid
-from resources.lib.modules.source_utils import supported_video_extensions
 from resources.lib.cloud_scrapers import cloud_utils
+from resources.lib.debrid import alldebrid
+from resources.lib.modules.control import setting as getSetting
+from resources.lib.modules.source_utils import supported_video_extensions
 from fenomscrapers.modules import source_utils as fs_utils
 
 
@@ -74,13 +75,15 @@ class source:
 			log_utils.error('AD_CLOUD: ')
 			return sources
 
+		ignoreM2ts = getSetting('ad_cloud.ignore.m2ts') == 'true'
 		extras_filter = cloud_utils.extras_filter()
 		for folder in cloud_folders:
+			is_m2ts = False
 			try:
 				folder_name = folder.get('filename')
 				if not cloud_utils.cloud_check_title(title, aliases, folder_name): continue
 				files = folder.get('links', '')
-				files = [i for i in files if i['filename'].lower().endswith(tuple(supported_video_extensions()))]
+				# files = [i for i in files if i['filename'].lower().endswith(tuple(supported_video_extensions()))]
 				if not files: continue
 			except:
 				from resources.lib.modules import log_utils
@@ -90,26 +93,39 @@ class source:
 			for file in files:
 				try:
 					name = file.get('filename', '')
+					if any(value in name for value in ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']): continue
 					path = folder.get('filename', '').lower()
 					rt = cloud_utils.release_title_format(name)
 					if any(value in rt for value in extras_filter): continue
-					if all(not bool(re.search(i, rt)) for i in query_list):
-						if 'tvshowtitle' in data:
-							season_folder_list = self.season_folder_list()
-							if all(not bool(re.search(i, path)) for i in season_folder_list): continue
-							episode_list = self.episode_list()
-							if all(not bool(re.search(i, rt)) for i in episode_list): continue
-						else: continue
+
+					if '.m2ts' in str(file.get('files')):
+						if ignoreM2ts:  continue
+						if name in str(sources): continue
+						is_m2ts = True
+						m2ts_files = [i for i in files if name == i.get('filename')]
+						largest = sorted(m2ts_files, key=lambda k: k['size'], reverse=True)[0]
+						link = largest.get('link', '')
+						size =  largest.get('size', '')
+					else:
+						if all(not bool(re.search(i, rt)) for i in query_list):
+							if 'tvshowtitle' in data:
+								season_folder_list = self.season_folder_list()
+								if all(not bool(re.search(i, path)) for i in season_folder_list): continue
+								episode_list = self.episode_list()
+								if all(not bool(re.search(i, rt)) for i in episode_list): continue
+							else: continue
+						link = file.get('link', '')
+						size = file.get('size', '')
 
 					name_info = fs_utils.info_from_name(name, title, self.year, hdlr, episode_title)
-					link = file.get('link', '')
 					hash = folder.get('hash', '')
 					seeders = folder.get('seeders', '')
 					quality, info = fs_utils.get_release_quality(name_info, name)
 					try:
-						dsize, isize = fs_utils.convert_size(file['size'], to='GB')
+						dsize, isize = fs_utils.convert_size(size, to='GB')
 						info.insert(0, isize)
 					except: dsize = 0
+					if is_m2ts: info.append('M2TS')
 					info = ' | '.join(info)
 
 					sources.append({'provider': 'ad_cloud', 'source': 'cloud', 'debrid': 'AllDebrid', 'seeders': seeders, 'hash': hash, 'name': name, 'name_info': name_info,

@@ -9,7 +9,8 @@ try: #Py2
 except ImportError: #Py3
 	from urllib.parse import unquote, unquote_plus
 
-HDR = ['.hdr.', 'hdr10', 'hdr.10', '2160p.bluray.remux', 'uhd.bluray.2160p', '2160p.uhd.bluray', '2160p.bluray.hevc.truehd', '2160p.remux']
+HDR = ['.hdr.', 'hdr10', 'hdr.10', '2160p.bluray.remux', 'uhd.bluray.2160p', '2160p.uhd.bluray', '2160p.bluray.hevc.truehd', '2160p.remux',
+			'2160p.bluray.hevc.dts.hd.ma']
 CODEC_H265 = ['hevc', 'h265', 'h.265', 'x265', 'x.265']
 CODEC_H264 = ['avc', 'h264', 'h.264', 'x264', 'x.264']
 CODEC_XVID = ['xvid', '.x.vid']
@@ -210,16 +211,25 @@ def copy2clip(txt):
 	if platform == "win32":
 		try:
 			from subprocess import check_call
-			cmd = "echo " + txt.strip() + "|clip"
+			# cmd = "echo " + txt.strip() + "|clip"
+			cmd = "echo " + txt.replace('&', '^&').strip() + "|clip" # "&" is a command seperator
 			return check_call(cmd, shell=True)
 		except:
 			from resources.lib.modules import log_utils
-			log_utils.error('Failure to copy to clipboard')
-	elif platform == "linux2":
+			log_utils.error('Windows: Failure to copy to clipboard')
+	elif platform == "darwin":
+		try:
+			from subprocess import check_call
+			cmd = "echo " + txt.strip() + "|pbcopy"
+			return check_call(cmd, shell=True)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error('Mac: Failure to copy to clipboard')
+	elif platform == "linux":
 		try:
 			from subprocess import Popen, PIPE
 			p = Popen(["xsel", "-pi"], stdin=PIPE)
 			p.communicate(input=txt)
 		except:
 			from resources.lib.modules import log_utils
-			log_utils.error('Failure to copy to clipboard')
+			log_utils.error('Linux: Failure to copy to clipboard')

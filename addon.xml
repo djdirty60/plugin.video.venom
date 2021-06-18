@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.7">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.8">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -32,10 +32,17 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v5.1.7 - June 16, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Cloud Scrapers have now been added for AD, PM, and RD. See Account Settings to
-    "Enable cloud scraper" for each of the three.[/I]
-[COLOR yellow]--[/COLOR][I] Dutch language .po file update.[/I]
+[B][COLOR red]Update - v5.1.8 - June 18, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Cloud Scrapers now support ".m2ts" file scraping. Please read the help file in "Accounts" settings,
+    beneath the option to enable, for further info.[/I]
+[COLOR yellow]--[/COLOR][I] There is a new option added to disable the scraping of ".m2ts" cloud files from item number
+    one above.[/I]
+[COLOR yellow]--[/COLOR][I] Source Select xml icons have all been changed to a higher resolution version and the display
+    size has been increased for ease of viewing.[/I]
+[COLOR yellow]--[/COLOR][I] The "TV Shows" setting to enable, or disable, Unwatched Count of Multi episodes did not respect
+    the parent object setting "Unwatched Count".  This is now fixed.[/I]
+[COLOR yellow]--[/COLOR][I] Note: My Accounts has been updated to v1.1.1 to assure Traktv token is synchronized with
+    Venom addon.  Please be sure to updated.[/I]
 		</news>
 	</extension>
 </addon>
