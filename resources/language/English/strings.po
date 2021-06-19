@@ -814,7 +814,7 @@ msgid ""
 msgstr ""
 
 msgctxt "#32328"
-msgid ""
+msgid "Playback Canceled"
 msgstr ""
 
 msgctxt "#32329"

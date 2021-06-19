@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.8">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.9">
 	<requires>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
@@ -32,17 +32,16 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v5.1.8 - June 18, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Cloud Scrapers now support ".m2ts" file scraping. Please read the help file in "Accounts" settings,
-    beneath the option to enable, for further info.[/I]
-[COLOR yellow]--[/COLOR][I] There is a new option added to disable the scraping of ".m2ts" cloud files from item number
-    one above.[/I]
-[COLOR yellow]--[/COLOR][I] Source Select xml icons have all been changed to a higher resolution version and the display
-    size has been increased for ease of viewing.[/I]
-[COLOR yellow]--[/COLOR][I] The "TV Shows" setting to enable, or disable, Unwatched Count of Multi episodes did not respect
-    the parent object setting "Unwatched Count".  This is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] Note: My Accounts has been updated to v1.1.1 to assure Traktv token is synchronized with
-    Venom addon.  Please be sure to updated.[/I]
+[B][COLOR red]Update - v5.1.9 - June 19, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added new setting to "Sources Options" called "Terminate on Cloud Sources".  Now if cloud
+    sources are found you can force the scrape process to terminate.[/I]
+[COLOR yellow]--[/COLOR][I] Resume dialog now utilizes the Kodi Matrix/19 new "yesnocustom" dialog.  Matrix users can
+    now chose from "Start from Beginning", "Resume" or "Cancel Playback". Leia users
+    can only see the first two options[/I]
+[COLOR yellow]--[/COLOR][I] I regret to inform user that the next release will drop Kodi 18 support.  I no longer desire to
+    maintain code to which I will never use again.  The Venom repo will be updated so
+    Kodi 18 users can still access an 18 version, but it will no longer be developed.
+    Matrix users will have access to a new github branch for future development.[/I]
 		</news>
 	</extension>
 </addon>

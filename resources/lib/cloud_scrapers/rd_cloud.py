@@ -19,7 +19,7 @@ from fenomscrapers.modules import source_utils as fs_utils
 
 class source:
 	def __init__(self):
-		self.priority = 1
+		self.priority = 0 # force cloud scraper to run first
 		self.language = ['en']
 
 	def movie(self, imdb, title, aliases, year):
@@ -99,8 +99,8 @@ class source:
 					if any(value in rt for value in extras_filter): continue
 
 					if name.endswith('m2ts'):
-						if ignoreM2ts:  continue
-						name = folder.get('filename', '')
+						if ignoreM2ts: continue
+						name = folder_name
 						if name in str(sources): continue
 						is_m2ts = True
 						largest = sorted(folder_files, key=lambda k: k['bytes'], reverse=True)[0]
@@ -116,7 +116,9 @@ class source:
 								if all(not bool(re.search(i, nl)) for i in season_folder_list): continue
 								episode_list = self.episode_list()
 								if all(not bool(re.search(i, rt)) for i in episode_list): continue
-							else: continue
+							else:
+								if all(not bool(re.search(i, folder_name)) for i in query_list): continue
+								name = folder_name
 						name = name.split('/')
 						name = name[len(name)-1]
 						index_pos = folder_files.index(file)

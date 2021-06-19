@@ -155,6 +155,7 @@
 		<setting id="progress.dialog" type="enum" label="32335" lvalues="32336|32337" default="0" />
 		<setting id="scrapers.timeout" type="slider" label="32312" default="60" range="10,60" option="int" />
 		<setting id="scraper.dialog.color" type="select" label="32164" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" />
+		<setting id="terminate.onCloud.sources" type="bool" label="Terminate on Cloud Sources" default="true" />
 		<setting id="preemptive.termination" type="bool" label="32654" default="false" />
 		<setting id="preemptive.limit" type="slider" label="32655" default="25" range="1,50" option="int" visible="eq(-1,true)" />
 		<setting id="preemptive.res" type="enum" label="32659" values="4K|1080p|720p|480p(SD)" default="2" visible="eq(-2,true)" />

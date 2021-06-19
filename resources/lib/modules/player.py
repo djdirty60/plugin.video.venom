@@ -84,6 +84,9 @@ class Player(xbmc.Player):
 			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = self.getMeta(meta)
 			runtime = meta.get('duration') if meta else 0
 			self.offset = Bookmarks().get(name=self.name, imdb=imdb, tmdb=tmdb, tvdb=tvdb, season=season, episode=episode, year=self.year, runtime=runtime)
+			if int(self.offset) < 0:
+				control.notification(message=32328)
+				return control.cancelPlayback()
 			item = control.item(path=url)
 			item.setUniqueIDs(self.ids)
 			if control.setting('disable.player.art') == 'true':
@@ -542,7 +545,9 @@ class Bookmarks:
 		label = '%02d:%02d:%02d' % (hours, minutes, seconds)
 		label = control.lang(32502) % label
 		if control.setting('bookmarks.auto') == 'false':
-			if control.yesnoDialog(label, scrobbble, '', str(name), control.lang(32503), control.lang(32501)): offset = '0'
+			select = control.yesnocustomDialog(label, scrobbble, '', str(name), 'Cancel Playback', control.lang(32503), control.lang(32501))
+			if select == 1: offset = '0'
+			elif select == -1 or select == 2: offset = '-1 '
 		return offset
 
 	def reset(self, current_time, media_length, name, year='0'):

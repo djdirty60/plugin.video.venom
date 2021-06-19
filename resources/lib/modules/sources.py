@@ -285,7 +285,7 @@ class Sources:
 			for i in range(len(items)):
 				try:
 					src_provider = items[i]['debrid'] if items[i].get('debrid') else ('%s - %s' % (items[i]['source'], items[i]['provider']))
-					label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'])# using "[CR]" has some weird delay with progressDialog.update()
+					label = '[COLOR %s]%s\n%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'], str(items[i]['size']) + ' GB')# using "[CR]" has some weird delay with progressDialog.update()
 					try:
 						if progressDialog.iscanceled(): break
 						progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -325,78 +325,88 @@ class Sources:
 		except:
 			log_utils.error('Error playItem: ')
 
-	def getSources(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, quality='HD', timeout=30):
-		progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
-		header = control.homeWindow.getProperty(self.labelProperty) + ': Scraping...'
-		progressDialog.create(header, '')
-
-		self.prepareSources()
-		sourceDict = self.sourceDict
-		progressDialog.update(0, control.lang(32600))
-
-		content = 'movie' if tvshowtitle is None else 'episode'
-		if content == 'movie': sourceDict = [(i[0], i[1], getattr(i[1], 'movie', None)) for i in sourceDict]
-		else: sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
-		sourceDict = [(i[0], i[1]) for i in sourceDict if i[2] is not None]
-		if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
-		sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
-		sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
-		aliases = []
+	def getSources(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, quality='HD', timeout=60):
 		try:
-			# meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
-			meta = self.meta
-			aliases = meta.get('aliases', [])
-		except: pass
-		threads = []
-		if content == 'movie':
-			trakt_aliases = self.getAliasTitles(imdb, content)
-			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
+			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
+			header = control.homeWindow.getProperty(self.labelProperty) + ': Scraping...'
+			progressDialog.create(header, '')
+
+			self.prepareSources()
+			sourceDict = self.sourceDict
+			progressDialog.update(0, control.lang(32600))
+
+			content = 'movie' if tvshowtitle is None else 'episode'
+			if content == 'movie': sourceDict = [(i[0], i[1], getattr(i[1], 'movie', None)) for i in sourceDict]
+			else: sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
+			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2] is not None]
+			if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
+			sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
+			sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
+			aliases = []
+			try:
+				# meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+				meta = self.meta
+				aliases = meta.get('aliases', [])
 			except: pass
-			aliases = jsdumps(aliases)
-			for i in sourceDict:
-				threads.append(workers.Thread(self.getMovieSource, title, aliases, year, imdb, i[0], i[1]))
-		else:
-			from fenomscrapers import pack_sources
-			self.packDict = providerscache.get(pack_sources, 192)
-			trakt_aliases = self.getAliasTitles(imdb, content)
-			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
+			threads = []
+			if content == 'movie':
+				trakt_aliases = self.getAliasTitles(imdb, content)
+				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
+				except: pass
+				aliases = jsdumps(aliases)
+				for i in sourceDict:
+					threads.append(workers.Thread(self.getMovieSource, title, aliases, year, imdb, i[0], i[1]))
+			else:
+				from fenomscrapers import pack_sources
+				self.packDict = providerscache.get(pack_sources, 192)
+				trakt_aliases = self.getAliasTitles(imdb, content)
+				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
+				except: pass
+				aliases = jsdumps(aliases)
+				for i in sourceDict:
+					threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
+
+			s = [i[0] + (i[1],) for i in zip(sourceDict, threads)]
+			s = [(i[3].getName(), i[0], i[2]) for i in s]
+			sourcelabelDict = dict([(i[0], i[1].upper()) for i in s])
+			[i.start() for i in threads]
+
+			sdc = control.getColor(control.setting('scraper.dialog.color'))
+			string1 = control.lang(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
+			string3 = control.lang(32406) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Remaining providers:[/COLOR] [COLOR %s]%s[/COLOR]"
+			string4 = control.lang(32407) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Unfiltered Total: [/COLOR]  [COLOR %s]%s[/COLOR]"
+
+			try: timeout = int(control.setting('scrapers.timeout'))
 			except: pass
-			aliases = jsdumps(aliases)
-			for i in sourceDict:
-				threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
-		s = [i[0] + (i[1],) for i in zip(sourceDict, threads)]
-		s = [(i[3].getName(), i[0], i[2]) for i in s]
-		sourcelabelDict = dict([(i[0], i[1].upper()) for i in s])
-		[i.start() for i in threads]
+			start_time = time()
+			end_time = start_time + timeout
+			quality = control.setting('hosts.quality') or '0'
+			line1 = line2 = line3 = ""
+			terminate_onCloud = str(control.setting('terminate.onCloud.sources'))
+			pre_emp = str(control.setting('preemptive.termination'))
+			pre_emp_limit = int(control.setting('preemptive.limit'))
+			pre_emp_res = str(control.setting('preemptive.res'))
+			source_4k = source_1080 = source_720 = source_sd = total = 0
+			total_format = '[COLOR %s][B]%s[/B][/COLOR]'
+			pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % \
+				(self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s')
+			control.hide()
+		except:
+			log_utils.error()
+			try: progressDialog.close()
+			except: pass
+			del progressDialog
+			return
 
-		sdc = control.getColor(control.setting('scraper.dialog.color'))
-		string1 = control.lang(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
-		string3 = control.lang(32406) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Remaining providers:[/COLOR] [COLOR %s]%s[/COLOR]"
-		string4 = control.lang(32407) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Unfiltered Total: [/COLOR]  [COLOR %s]%s[/COLOR]"
-
-		try: timeout = int(control.setting('scrapers.timeout'))
-		except: pass
-		start_time = time()
-		end_time = start_time + timeout
-
-		quality = control.setting('hosts.quality')
-		if quality == '': quality = '0'
-		line1 = line2 = line3 = ""
-
-		pre_emp = str(control.setting('preemptive.termination'))
-		pre_emp_limit = int(control.setting('preemptive.limit'))
-		pre_emp_res = str(control.setting('preemptive.res'))
-		source_4k = source_1080 = source_720 = source_sd = total = 0
-		total_format = '[COLOR %s][B]%s[/B][/COLOR]'
-		pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % \
-			(self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s')
-		control.hide()
 		while True:
 			try:
 				if control.monitor.abortRequested(): return sysexit()
 				try:
 					if progressDialog.iscanceled(): break
 				except: pass
+
+				if terminate_onCloud == 'true':
+					if len([e for e in self.scraper_sources if e['source'] == 'cloud']) > 0: break
 				if pre_emp == 'true':
 					if pre_emp_res == '0':
 						if (source_4k) >= pre_emp_limit: break
@@ -408,6 +418,7 @@ class Sources:
 						if (source_sd) >= pre_emp_limit: break
 					else:
 						if (source_sd) >= pre_emp_limit: break
+
 				if quality == '0':
 					source_4k = len([e for e in self.scraper_sources if e['quality'] == '4K'])
 					source_1080 = len([e for e in self.scraper_sources if e['quality'] == '1080p'])
@@ -826,7 +837,7 @@ class Sources:
 		for i in range(len(items)):
 			try:
 				src_provider = items[i]['debrid'] if items[i].get('debrid') else ('%s - %s' % (items[i]['source'], items[i]['provider']))
-				label = '[COLOR %s]%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name']) # using "[CR]" has some weird delay with progressDialog.update()
+				label = '[COLOR %s]%s\n%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'], str(items[i]['size']) + ' GB')# using "[CR]" has some weird delay with progressDialog.update()
 				try:
 					if progressDialog.iscanceled(): break
 					progressDialog.update(int((100 / float(len(items))) * i), label)

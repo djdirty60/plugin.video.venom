@@ -243,6 +243,12 @@ def yesnoDialog(line1, line2, line3, heading=addonInfo('name'), nolabel='', yesl
 		return dialog.yesno(heading, message, nolabel, yeslabel)
 	else: return dialog.yesno(heading, line1, line2, line3, nolabel, yeslabel)
 
+def yesnocustomDialog(line1, line2, line3, heading=addonInfo('name'), customlabel='', nolabel='', yeslabel=''):
+	if isPY3:
+		message = '%s\n%s\n%s' % (line1, line2, line3)
+		return dialog.yesnocustom(heading, message, customlabel, nolabel, yeslabel)
+	else: return dialog.yesno(heading, line1, line2, line3, nolabel, yeslabel)
+
 def selectDialog(list, heading=addonInfo('name')):
 	return dialog.select(heading, list)
 
