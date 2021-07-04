@@ -95,26 +95,34 @@
 		<setting id="multi.unwatched.enabled" type="bool" subsetting="true" label="32163" default="false" visible="eq(-1,true)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=multi.unwatched)" visible="eq(-2,true)" />
 		<setting id="tvshows.calendar.extended" type="bool" label="32023" default="false" />
-		<setting type="lsep" label="40025" />
-		<setting type="action" label="40027" action="InstallAddon(service.upnext)" option="close" visible="!System.HasAddon(service.upnext)" />
-		<setting id="enable.upnext" type="bool" default="false" label="40028" visible="System.HasAddon(service.upnext)" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=upnext)" />
-		<setting id="upnext.time" type="slider" subsetting="true" enable="eq(-2,true)" visible="eq(-2,true)" default="60" label="40029" option="int" range="10,60" />
+
+		<setting type="lsep" label="40027" />
+		<setting id="enable.playnext" type="bool" default="false" label="40028" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=playnext)" visible="eq(-1,true)" />
+		<setting id="playnext.time" type="slider" subsetting="true" visible="eq(-2,true)" default="60" label="40029" option="int" range="10,60" />
+		<setting id="playnext.default.action" type="select" label="40065" subsetting="true" visible="eq(-3,true)" lvalues="32176|32177|32178" default="0" />
+		<setting id="stillwatching.count" type="slider" subsetting="true" visible="eq(-4,true)" default="3" label="40026" option="int" range="2,10" />
+		<setting id="stillwatching.default.action" type="select" label="40025" subsetting="true" visible="eq(-5,true)" lvalues="32176|32177|32178" default="2" />
 		<setting id="auto.playlistcreate" type="bool" label="40030" default="true" />
-		<setting type="lsep" label="32375" />
-		<setting id="tvshows.networks.view" type="enum" label="32376" lvalues="32377|32378" default="1" />
+
+		<!-- <setting type="lsep" label="32375" /> -->
+		<!-- <setting id="tvshows.networks.view" type="enum" label="32376" lvalues="32377|32378" default="1" /> -->
 		<!-- <setting id="tvshows.networks.filter" type="select" label="32379" lvalues="32380|32381|32382|32383|32384|32385" default="4" enable="eq(-1, 1)" /> -->
+
 		<setting label="32004" type="lsep" />
-		<setting id="tvshows.direct" type="bool" label="35492" default="false" visible="!eq(-17,)" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=directProgress)" />
 		<setting id="sort.shows.type" type="select" label="35191" lvalues="33564|33039|35187|35188|35391|35392|35393" default="0" />
 		<setting id="sort.shows.order" type="enum" label="33679" lvalues="33649|33650" default="0" subsetting="true" enable="!eq(-1,0)" />
-		<setting id="sort.shows.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" visible="!eq(-20,)" />
+		<!-- <setting id="sort.shows.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" visible="!eq(-20,)" /> -->
+		<setting id="sort.shows.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" />
 		<setting id="sort.shows.watchlist.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
-		<setting id="sort.progress.type" type="select" label="35572" lvalues="33564|33039|35187|35188|35391|35392|35393" default="6" visible="!eq(-22,)" />
-		<setting id="sort.progress.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" visible="!eq(-21,)" enable="!eq(-1,0)" />
-		<setting id="sort.calendar.type" type="select" label="35573" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" visible="!eq(-24,)" />
-		<setting id="sort.calendar.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" visible="!eq(-23,)" enable="!eq(-1,0)" />
+		<!-- <setting id="sort.progress.type" type="select" label="35572" lvalues="33564|33039|35187|35188|35391|35392|35393" default="6" visible="!eq(-22,)" /> -->
+		<setting id="sort.progress.type" type="select" label="35572" lvalues="33564|33039|35187|35188|35391|35392|35393" default="6" />
+		<!-- <setting id="sort.progress.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" visible="!eq(-21,)" enable="!eq(-1,0)" /> -->
+		<setting id="sort.progress.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
+		<!-- <setting id="sort.calendar.type" type="select" label="35573" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" visible="!eq(-24,)" /> -->
+		<setting id="sort.calendar.type" type="select" label="35573" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" />
+		<!-- <setting id="sort.calendar.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" visible="!eq(-23,)" enable="!eq(-1,0)" /> -->
+		<setting id="sort.calendar.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
 		<setting id="tvshows.air.enabled" type="bool" label="35017" default="false" subsetting="false" />
 		<setting id="tvshows.air.zone" type="select" label="35018" lvalues="32314|35022|35023" default="0" subsetting="true" visible="eq(-1,true)" />
 		<setting id="tvshows.air.location" type="select" label="35019" lvalues="35024|35025|35026|35027" default="0" subsetting="true" visible="eq(-2,true)" />
@@ -201,16 +209,18 @@
 		<setting id="trakt.refresh" type="text" visible="false" label="" default="" />
 		<setting id="trakt.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,)" />
 		<setting id="trakt.general.notifications" type="bool" label="33052" default="true" visible="!eq(-5,)" />
-		<setting id="trakt.rating" type="enum" label="35187" lvalues="33564|35547" default="0" visible="!eq(-6,)" />
-		<setting id="trakt.scrobble" type="bool" label="32097" default="false" visible="!eq(-7,)" />
+		<setting id="tvshows.direct" type="bool" label="35492" default="false" visible="!eq(-6,)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=directProgress)" />
+		<setting id="trakt.rating" type="enum" label="35187" lvalues="33564|35547" default="0" visible="!eq(-8,)" />
+		<setting id="trakt.scrobble" type="bool" label="32097" default="false" visible="!eq(-9,)" />
 		<setting id="trakt.message1" type="text" label="32098" enable="false" />
-		<setting id="trakt.scrobble.notify" type="bool" label="32099" default="false" visible="!eq(-9,) + eq(-2,true)" />
-		<setting id="resume.source" type="enum" label="32095" lvalues="32314|32096" default="0" visible="!eq(-10,) + eq(-3,true)" />
-		<setting id="trakt.progress.showunaired" type="bool" label="32572" default="false" visible="!eq(-11,)" />
-		<setting id="trakt.UpcomingProgress.prependDate" type="bool" label="32573" default="true" visible="!eq(-12,)" />
+		<setting id="trakt.scrobble.notify" type="bool" label="32099" default="false" visible="!eq(-11,) + eq(-2,true)" />
+		<setting id="resume.source" type="enum" label="32095" lvalues="32314|32096" default="0" visible="!eq(-12,) + eq(-3,true)" />
+		<setting id="trakt.progress.showunaired" type="bool" label="32572" default="false" visible="!eq(-13,)" />
+		<setting id="trakt.UpcomingProgress.prependDate" type="bool" label="32573" default="true" visible="!eq(-14,)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=UpcomingProgressPrependDate)" />
 		<setting type="lsep" label="32645" />
-		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-15,)" />
+		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-17,)" />
 		<setting id="schedTraktTime" type="slider" label="32647" default="0" range="0,24" option="int" enable="eq(-1,true)" />
 		<setting id="trakt.message2" type="text" label="32648" default="" enable="false" />
 	</category>
@@ -363,6 +373,5 @@
 		<setting type="action" label="32613" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearCache)" />
 		<setting type="action" label="32614" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearSearch)" />
 		<setting type="action" label="32615" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearBookmarks)" />
-		<setting type="action" label="32505" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_UpNextSettings&amp;opensettings=true&amp;query=12.6)" />
 	</category>
 </settings>

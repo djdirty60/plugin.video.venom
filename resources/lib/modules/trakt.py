@@ -39,10 +39,11 @@ def getTrakt(url, post=None, extended=False):
 		if not url.startswith(BASE_URL): url = urljoin(BASE_URL, url)
 		if post: post = jsdumps(post)
 		if not getTraktCredentialsInfo():
-			result = client.request(url, post=post, headers=headers)
-			return result
+			return client.request(url, post=post, headers=headers)
 
-		headers['Authorization'] = 'Bearer %s' % control.setting('trakt.token')
+		# headers['Authorization'] = 'Bearer %s' % control.setting('trakt.token')
+		headers['Authorization'] = 'Bearer %s' % control.addon('script.module.myaccounts').getSetting('trakt.token')
+
 		result = client.request(url, post=post, headers=headers, output='extended', error=True)
 		# result = utils.byteify(result) # check if this is needed because client "as_bytes" should handle this
 		try: code = str(result[1]) # result[1] is already a str from client module
@@ -60,14 +61,12 @@ def getTrakt(url, post=None, extended=False):
 			log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
 			return None
 		elif result and code in ['429']:
-			if 'Retry-After' in result[2]:
-				# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (1000 calls every 5 minutes, doubt we'll ever hit that)
+			if 'Retry-After' in result[2]: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (1000 calls every 5 minutes, doubt we'll ever hit that)
 				throttleTime = result[2]['Retry-After']
 				control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message ang code 33674
 				control.sleep((int(throttleTime) + 1) * 1000)
 				return getTrakt(url, post=post, extended=extended)
 		elif result and code in ['401']: # Re-Auth token
-			log_utils.log('Re-Authenticating Trakt Token', level=log_utils.LOGDEBUG)
 			success = re_auth(headers)
 			if success: return getTrakt(url, post=post, extended=extended)
 		if result and code not in ['401', '405']:
@@ -94,8 +93,19 @@ def getTraktAsJson(url, post=None):
 
 def re_auth(headers):
 	try:
+		ma_token = control.addon('script.module.myaccounts').getSetting('trakt.token')
+		ma_refresh = control.addon('script.module.myaccounts').getSetting('trakt.refresh')
+		if ma_token != control.setting('trakt.token') or ma_refresh != control.setting('trakt.refresh', refresh):
+			log_utils.log('Syncing My Accounts Trakt Token', level=log_utils.LOGNOTICE)
+			from resources.lib.modules import my_accounts
+			my_accounts.syncMyAccounts(silent=True)
+			return True
+
+		log_utils.log('Re-Authenticating Trakt Token', level=log_utils.LOGNOTICE)
 		oauth = urljoin(BASE_URL, '/oauth/token')
-		opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': control.setting('trakt.refresh')}
+		# opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': control.setting('trakt.refresh')}
+		opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': control.addon('script.module.myaccounts').getSetting('trakt.refresh')}
+
 		result = client.request(oauth, post=jsdumps(opost), headers=headers, error=True)
 		# result = utils.byteify(result) # check if this is needed because client "as_bytes" should handle this
 		try: code = str(result[1])
@@ -778,14 +788,16 @@ def markSeasonAsNotWatched(imdb, tvdb, season):
 def markEpisodeAsWatched(imdb, tvdb, season, episode):
 	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
-	result = getTrakt('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
+	# result = getTrakt('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
+	result = getTrakt('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
 	seasonCount(imdb)
 	return result
 
 def markEpisodeAsNotWatched(imdb, tvdb, season, episode):
 	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
-	result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
+	# result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
+	result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
 	seasonCount(imdb)
 	return result
 
@@ -798,7 +810,6 @@ def getMovieTranslation(id, lang, full=False):
 		return item if full else item.get('title')
 	except:
 		log_utils.error()
-
 
 def getTVShowTranslation(id, lang, season=None, episode=None, full=False):
 	if season and episode: url = '/shows/%s/seasons/%s/episodes/%s/translations/%s' % (id, season, episode, lang)

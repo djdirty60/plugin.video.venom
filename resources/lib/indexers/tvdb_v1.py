@@ -215,7 +215,7 @@ def parseAll(tvdb, limit):
 
 # ### episode IDS
 			episodeIDS = {}
-			if control.setting('enable.upnext') == 'true':
+			if control.setting('enable.playnext') == 'true':
 				episodeIDS = trakt.getEpisodeSummary(imdb, season, episode, full=False) or {}
 				if episodeIDS != {}:
 					episodeIDS = episodeIDS.get('ids', {})
@@ -678,7 +678,7 @@ def _seasonCount(tvshowtitle, year, imdb, tvdb):
 			# episode = re.sub(r'[^0-9]', '', '%01d' % int(episode))
 
 			# episodeIDS = {}
-			# if control.setting('enable.upnext') == 'true':
+			# if control.setting('enable.playnext') == 'true':
 				# episodeIDS = trakt.getEpisodeSummary(imdb, season, episode, full=False) or {}
 				# if episodeIDS != {}:
 					# episodeIDS = episodeIDS.get('ids', {})

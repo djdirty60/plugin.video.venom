@@ -33,6 +33,7 @@ getLangString = xbmcaddon.Addon().getLocalizedString
 
 dialog = xbmcgui.Dialog()
 getCurrentDialogId = xbmcgui.getCurrentWindowDialogId()
+getCurrentWindowId = xbmcgui.getCurrentWindowId()
 homeWindow = xbmcgui.Window(10000)
 item = xbmcgui.ListItem
 progressDialog = xbmcgui.DialogProgress()

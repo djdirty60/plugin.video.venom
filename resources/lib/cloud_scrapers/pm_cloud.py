@@ -62,7 +62,6 @@ class source:
 			episode_title = data['title'] if 'tvshowtitle' in data else None
 			self.year = data['year']
 			hdlr = 'S%02dE%02d' % (int(data['season']), int(data['episode'])) if 'tvshowtitle' in data else self.year
-
 			self.season = str(data['season']) if 'tvshowtitle' in data else None
 			self.episode = str(data['episode']) if 'tvshowtitle' in data else None
 			query_list = self.episode_query_list() if 'tvshowtitle' in data else self.year_query_list()
@@ -70,20 +69,21 @@ class source:
 			cloud_files = premiumize.Premiumize().my_files_all()
 			cloud_files = [i for i in cloud_files if i['path'].lower().endswith(tuple(supported_video_extensions()))] # this only lets folder names thru with known video extensions..?
 			if not cloud_files: return sources
+			ignoreM2ts = getSetting('pm_cloud.ignore.m2ts') == 'true'
+			extras_filter = cloud_utils.extras_filter()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error('PM_CLOUD: ')
 			return sources
 
-		ignoreM2ts = getSetting('pm_cloud.ignore.m2ts') == 'true'
-		extras_filter = cloud_utils.extras_filter()
 		for item in cloud_files:
 			is_m2ts = False
 			try:
 				name = item.get('name', '')
+				invalids = ['.img', '.bin', '.dat', '.mpls', '.mpl', '.bdmv', '.bdm', '.disc']
+				if name.lower().endswith(tuple(invalids)): continue
 				path = item.get('path', '').lower()
 				if not cloud_utils.cloud_check_title(title, aliases, path): continue
-
 				rt = cloud_utils.release_title_format(name)
 				if any(value in rt for value in extras_filter): continue
 
@@ -106,6 +106,7 @@ class source:
 						else:
 							if all(not bool(re.search(i, path)) for i in query_list): continue
 							name = item.get('path', '').split('/')[0]
+							if item.get('size') < 52428800: continue
 					url_id = item.get('id', '')
 					size =  item.get('size', '')
 

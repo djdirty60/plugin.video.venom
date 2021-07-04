@@ -65,7 +65,7 @@ def log(msg, caller=None, level=LOGNOTICE):
 				f.write(line.rstrip('\r\n') + '\n')
 				# f.writelines([line1, line2]) ## maybe an option for the 2 lines without using "\n"
 		else:
-			xbmc.log('%s: %s' % (DEBUGPREFIX % debug_list[level], msg, level))
+			xbmc.log('%s: %s' % (DEBUGPREFIX % debug_list[level], msg), level)
 	except Exception as e:
 		import traceback
 		traceback.print_exc()

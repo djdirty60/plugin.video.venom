@@ -4,7 +4,7 @@
 """
 
 from xbmc import executebuiltin
-from xbmcgui import WindowXMLDialog, ListItem
+from xbmcgui import WindowXMLDialog, ListItem, ControlProgress
 
 
 class BaseDialog(WindowXMLDialog):
@@ -23,3 +23,9 @@ class BaseDialog(WindowXMLDialog):
 
 	def get_position(self, window_id):
 		return self.getControl(window_id).getSelectedPosition()
+
+	def getControlProgress(self, control_id):
+		control = self.getControl(control_id)
+		if not isinstance(control, ControlProgress):
+			raise AttributeError("Control with Id {} should be of type ControlProgress".format(control_id))
+		return control

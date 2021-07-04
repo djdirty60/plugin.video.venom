@@ -188,8 +188,6 @@ class Navigator:
 	def tools(self):
 		self.addDirectoryItem(32510, 'cache_Navigator', 'tools.png', 'DefaultAddonService.png', isFolder=True)
 		self.addDirectoryItem(32609, 'tools_openMyAccount', 'MyAccounts.png', 'DefaultAddonService.png', isFolder=False)
-		if control.condVisibility('System.HasAddon(service.upnext)'):
-			self.addDirectoryItem(32505, 'tools_UpNextSettings', 'UpNext.png', 'DefaultAddonProgram.png', isFolder=False)
 		self.addDirectoryItem(32506, 'tools_contextVenomSettings', 'icon.png', 'DefaultAddonProgram.png', isFolder=False)
 		#-- Providers - 4
 		self.addDirectoryItem(32651, 'tools_fenomscrapersSettings', 'fenomscrapers.png', 'DefaultAddonService.png', isFolder=False)

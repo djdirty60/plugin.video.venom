@@ -70,13 +70,13 @@ class source:
 			cloud_folders = alldebrid.AllDebrid().user_cloud()['magnets']
 			cloud_folders = [i for i in cloud_folders if i['statusCode'] == 4]
 			if not cloud_folders: return sources
+			ignoreM2ts = getSetting('ad_cloud.ignore.m2ts') == 'true'
+			extras_filter = cloud_utils.extras_filter()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error('AD_CLOUD: ')
 			return sources
 
-		ignoreM2ts = getSetting('ad_cloud.ignore.m2ts') == 'true'
-		extras_filter = cloud_utils.extras_filter()
 		for folder in cloud_folders:
 			is_m2ts = False
 			try:
@@ -93,7 +93,8 @@ class source:
 			for file in files:
 				try:
 					name = file.get('filename', '')
-					if any(value in name for value in ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']): continue
+					invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']
+					if name.lower().endswith(tuple(invalids)): continue
 					path = folder.get('filename', '').lower()
 					rt = cloud_utils.release_title_format(name)
 					if any(value in rt for value in extras_filter): continue

@@ -1,5 +1,6 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.1.9">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="5.2.0.0">
 	<requires>
+		<import addon="xbmc.python" version="3.0.0"/>
 		<import addon="context.venom" />
 		<import addon="script.module.myaccounts" />
 		<import addon="script.module.fenomscrapers" />
@@ -7,7 +8,6 @@
 		<import addon="script.module.beautifulsoup4" />
 		<import addon="script.module.metahandler" optional="true" />
 		<import addon="plugin.video.youtube" optional="true" />
-		<import addon="script.module.addon.signals" optional="true" />
 	</requires>
 	<extension library="venom.py" point="xbmc.python.pluginsource">
 		<provides>video</provides>

@@ -19,12 +19,6 @@ from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 LOGNOTICE = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1)) = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1))
 
-if control.setting('enable.upnext') == 'true':
-	if not control.condVisibility('System.HasAddon(script.module.addon.signals)'):
-		control.execute('InstallAddon(script.module.addon.signals)')
-	try: import AddonSignals
-	except: pass
-
 
 class Player(xbmc.Player):
 	def __init__(self):
@@ -35,10 +29,10 @@ class Player(xbmc.Player):
 		self.media_length = 0
 		self.current_time = 0
 		self.meta = {}
-		self.playback_started = False
-		self.scrobbled = False
 		self.playback_resumed = False
 		self.av_started = False
+		self.enable_playnext = control.setting('enable.playnext') == 'true'
+		self.playnext_time = int(control.setting('playnext.time'))
 
 	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta):
 		try:
@@ -68,7 +62,7 @@ class Player(xbmc.Player):
 			if self.media_type == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
 			else: self.user = str(self.tmdb_key)
 			self.lang = control.apiLanguage()['tvdb']
-			meta1 = meta
+			meta1 = dict((k, v) for k, v in control.iteritems(meta) if v is not None and v != '') if meta else None
 			meta2 = metacache.fetch([{'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}], self.lang, self.user)[0]
 			if meta2 != self.ids: meta2 = dict((k, v) for k, v in control.iteritems(meta2) if v is not None and v != '')
 			if meta1 is not None:
@@ -101,7 +95,9 @@ class Player(xbmc.Player):
 				else: item.setArt({'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
 			if 'castandart' in meta: item.setCast(meta.get('castandart', ''))
 			item.setInfo(type='video', infoLabels=control.metadataClean(meta))
-			# item.setProperty('IsPlayable', 'false')
+
+			item.setProperty('IsPlayable', 'true')
+
 			control.resolve(int(argv[1]), True, item)
 			control.homeWindow.setProperty('script.trakt.ids', jsdumps(self.ids))
 			self.keepAlive()
@@ -200,6 +196,15 @@ class Player(xbmc.Player):
 				log_utils.error()
 		return watched_percent
 
+	def getRemainingTime(self):
+		remaining_time = 0
+		if self.isPlayback():
+			try:
+				current_position = self.getTime()
+				remaining_time = int(self.media_length) - int(current_position)
+			except: pass
+		return remaining_time
+
 	def keepAlive(self):
 		pname = '%s.player.overlay' % control.addonInfo('id')
 		control.homeWindow.clearProperty(pname)
@@ -215,10 +220,7 @@ class Player(xbmc.Player):
 			xbmc.sleep(1000)
 		while self.isPlayingVideo():
 			try:
-				if not self.playback_started:
-					xbmc.sleep(1000)
-					continue
-				if not self.playback_started: self.start_playback()
+				if control.monitor.abortRequested(): return sysexit()
 				try:
 					self.current_time = self.getTime()
 					self.media_length = self.getTotalTime()
@@ -230,55 +232,28 @@ class Player(xbmc.Player):
 						if watcher and property != '5':
 							control.homeWindow.setProperty(pname, '5')
 							playcount.markMovieDuringPlayback(self.imdb, '5')
-						# elif watcher is False and property != '4': # removes any previousely watched indicator, NO
-							# control.homeWindow.setProperty(pname, '4')
-							# playcount.markMovieDuringPlayback(self.imdb, '4')
-					except: continue
+					except: pass
 					xbmc.sleep(2000)
 				elif self.media_type == 'episode':
 					try:
 						if watcher and property != '5':
 							control.homeWindow.setProperty(pname, '5')
 							playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '5')
-						# elif watcher is False and property != '4':# removes any previousely watched indicator, NO
-							# control.homeWindow.setProperty(pname, '4')
-							# playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '4')
-					except: continue
-					xbmc.sleep(2000)
+						if self.enable_playnext and not self.play_next_triggered:
+							if int(control.playlist.size()) > 1:
+								remaining_time = self.getRemainingTime()
+								if remaining_time < (self.playnext_time + 1) and remaining_time != 0:
+									xbmc.executebuiltin('RunPlugin(plugin://plugin.video.venom/?action=play_nextWindowXML)')
+									self.play_next_triggered = True
+					except: pass
+					xbmc.sleep(1000)
 			except:
 				log_utils.error()
 				xbmc.sleep(1000)
-				continue
 		control.homeWindow.clearProperty(pname)
-		# self.onPlayBackEnded() # check, seems kodi may at times not issue callback
+		# self.onPlayBackEnded() # check, seems kodi may at times not issue "onPlayBackEnded" callback
+		# self.test_PlayBackEnded()
 
-	def start_playback(self):
-		try:
-			if self.playback_started: return
-			if not self.isPlayback(): return
-			self.playback_started = True
-			self.current_time = self.getTime()
-			self.media_length = self.getTotalTime()
-
-			if self.media_type == 'episode' and control.setting('enable.upnext') == 'true':
-				if int(control.playlist.getposition()) == -1:
-					control.playlist.clear()
-					return
-				source_id = 'plugin.video.venom'
-				return_id = 'plugin.video.venom_play_action'
-				try:
-					if int(control.playlist.getposition()) < (control.playlist.size() - 1):
-						if self.media_type is None: return
-						next_info = self.next_info()
-						AddonSignals.sendSignal('upnext_data', next_info, source_id)
-						AddonSignals.registerSlot('upnextprovider', return_id, self.signals_callback)
-						# # Prescrape
-						# from resources.lib.modules import sources
-						# psources = sources.Sources().preScrape(title=next_info['next_episode']['title'], year=next_info['next_episode']['year'], imdb=next_info['next_episode']['tvshowimdb'], tvdb=next_info['next_episode']['tvshowid'], season=next_info['next_episode']['season'], episode=next_info['next_episode']['episode'], tvshowtitle=next_info['next_episode']['showtitle'], premiered=next_info['next_episode']['firstaired'])
-				except:
-					log_utils.error()
-		except:
-			log_utils.error()
 
 	def libForPlayback(self):
 		if self.DBID is None: return
@@ -309,7 +284,6 @@ class Player(xbmc.Player):
 			self.playback_resumed = True
 		if control.setting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
-		self.start_playback()
 		xbmc.log('[ plugin.video.venom ] onAVStarted callback', LOGNOTICE)
 
 	def onPlayBackStarted(self):
@@ -323,12 +297,12 @@ class Player(xbmc.Player):
 			self.playback_resumed = True
 		if control.setting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
-		self.start_playback()
 		xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', LOGNOTICE)
 
 	def onPlayBackStopped(self):
 		if self.media_length == 0: return
 		try:
+			control.homeWindow.clearProperty('venom.isplaying.playlist')
 			Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 			if control.setting('trakt.scrobble') == 'true':
 				Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode)
@@ -353,92 +327,70 @@ class Player(xbmc.Player):
 		# control.trigger_widget_refresh() # skinshortcuts handles widget refresh
 		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', LOGNOTICE)
 
+	def test_PlayBackEnded(self):
+		xbmc.log('[ plugin.video.venom ] test_PlayBackEnded', LOGNOTICE)
+
 	def onPlayBackError(self):
+		control.homeWindow.clearProperty('venom.isplaying.playlist')
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 		log_utils.error()
 		sysexit(1)
 		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', LOGNOTICE)
 
-	def signals_callback(self, data):
+class PlayNext(xbmc.Player):
+	def __init__(self):
+		super(PlayNext, self).__init__()
+		self.enable_playnext = control.setting('enable.playnext') == 'true'
+		self.stillwatching_count = int(control.setting('stillwatching.count'))
+		self.playing_file = None
+
+	def display_xml(self):
 		try:
-			log_utils.log('self.play_next_triggered = %s' % self.play_next_triggered)
-			log_utils.log('data = %s' % data)
-			if not self.play_next_triggered:
-				if not self.scrobbled:
-					try:
-						self.onPlayBackEnded()
-						self.scrobbled = True
-					except: pass
-				self.play_next_triggered = True
-				# Using a seek here as playnext causes Kodi gui to wig out. So we seek instead so it looks more graceful
-				log_utils.log('forced AddonSignals seek')
-				self.seekTime(self.media_length)
+			self.playing_file = self.getPlayingFile()
+		except:
+			log_utils.error("Kodi did not return a playing file, killing playnext xml's")
+			return
+		if control.playlist.size() > 0 and control.playlist.getposition() != (control.playlist.size() - 1):
+			if self.isStill_watching(): target = self.show_stillwatching_xml
+			elif self.enable_playnext: target = self.show_playnext_xml
+			else: return
+			if self.playing_file != self.getPlayingFile(): return
+			if not self.isPlayingVideo(): return
+			if control.getCurrentWindowId != 12005: return
+			target()
+
+	def isStill_watching(self):
+		still_watching = float(control.playlist.getposition() + 1) / self.stillwatching_count
+		if still_watching == 0: return False
+		return still_watching.is_integer()
+
+	def getNext_meta(self):
+		try:
+			current_position = control.playlist.getposition()
+			next_url = control.playlist[current_position + 1].getPath()
+			try: # Py2
+				from urlparse import parse_qsl
+			except ImportError: # Py3
+				from urllib.parse import parse_qsl
+			params = dict(parse_qsl(next_url.replace('?', '')))
+			next_meta = jsloads(params.get('meta'))
+			return next_meta
 		except:
 			log_utils.error()
 
-	def next_info(self):
-		current_info = self.meta
-		current_episode = {}
-		current_episode["episodeid"] = current_info.get('tmdb_epID', '')
-		current_episode["tvshowid"] = current_info.get('tvdb', '')
-		current_episode["title"] = current_info.get('title', '')
-		current_episode["art"] = {}
-		current_episode["art"]["thumb"] = current_info.get('thumb', '')
-		current_episode["art"]["tvshow.clearart"] = current_info.get('clearart', '')
-		current_episode["art"]["tvshow.clearlogo"] = current_info.get('clearlogo', '')
-		current_episode["art"]["tvshow.fanart"] = current_info.get('fanart', '')
-		current_episode["art"]["tvshow.landscape"] = current_info.get('fanart', '')
-		current_episode["art"]["tvshow.poster"] = current_info.get('poster', '')
-		current_episode["season"] = current_info.get('season', '')
-		current_episode["episode"] = current_info.get('episode', '')
-		current_episode["showtitle"] = current_info.get('tvshowtitle', '')
-		current_episode["plot"] = current_info.get('plot', '')
-		current_episode["playcount"] = current_info.get('playcount', '')
-		current_episode["rating"] = current_info.get('rating', '')
-		current_episode["firstaired"] = current_info.get('premiered', '')
-		current_episode["runtime"] = current_info.get('duration', '')
+	def show_playnext_xml(self):
+		from resources.lib.windows.playnext import PlayNextXML
+		window = PlayNextXML('playnext.xml', control.addonPath(control.addonId()), meta=self.getNext_meta())
+		window.run()
+		del window
+		self.play_next_triggered = True
 
-		current_position = control.playlist.getposition()
-		next_url = control.playlist[current_position + 1].getPath()
-		# log_utils.log('next_url=%s' % next_url)
-
-		try: # Py2
-			from urlparse import parse_qsl
-		except ImportError: # Py3
-			from urllib.parse import parse_qsl
-		params = dict(parse_qsl(next_url.replace('?', '')))
-		next_info = jsloads(params.get('meta'))
-
-		next_episode = {}
-		next_episode["episodeid"] = next_info.get('tmdb_epID', '')
-		next_episode["tvshowid"] = next_info.get('tvdb', '')
-		next_episode["title"] = next_info.get('title', '')
-		next_episode["art"] = {}
-		next_episode["art"]["thumb"] = next_info.get('thumb', '')
-		next_episode["art"]["tvshow.clearart"] = next_info.get('clearart', '')
-		next_episode["art"]["tvshow.clearlogo"] = next_info.get('clearlogo', '')
-		next_episode["art"]["tvshow.fanart"] = next_info.get('fanart', '')
-		next_episode["art"]["tvshow.landscape"] = next_info.get('fanart', '')
-		next_episode["art"]["tvshow.poster"] = next_info.get('poster', '')
-		next_episode["season"] = next_info.get('season', '')
-		next_episode["episode"] = next_info.get('episode', '')
-		next_episode["showtitle"] = next_info.get('tvshowtitle', '')
-		next_episode["plot"] = next_info.get('plot', '')
-		next_episode["playcount"] = next_info.get('playcount', '')
-		next_episode["rating"] = next_info.get('rating', '')
-		next_episode["firstaired"] = next_info.get('premiered', '')
-		next_episode["runtime"] = next_info.get('duration', '')
-
-		play_info = {}
-		play_info["item_id"] = next_info.get('tmdb_epID', '')
-
-		next_info = {
-			"current_episode": current_episode,
-			"next_episode": next_episode,
-			"play_info": play_info,
-			"notification_time": int(control.setting('upnext.time'))
-		}
-		return next_info
+	def show_stillwatching_xml(self):
+		from resources.lib.windows.playnext_stillwatching import StillWatchingXML
+		window = StillWatchingXML('playnext_stillwatching.xml', control.addonPath(control.addonId()), meta=self.getNext_meta())
+		window.run()
+		del window
+		self.play_next_triggered = True
 
 
 class Subtitles:

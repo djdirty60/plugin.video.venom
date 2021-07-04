@@ -1,0 +1,5 @@
+
+If enabled Episodes are [COLOR red][B]"hard coded to Auto Play"[/B][/COLOR].  Also note the UpNext addon has been removed
+as of v5.2.0.  There is a new Venom window xml to handle this internaly now and is more reliable.
+AddonSignals dependency has also been removed.  You must use the Kodi context menu option
+[COLOR red][B]"Play from Here"[/B][/COLOR] for continual playback and PlayNext popup notification.

@@ -7,8 +7,8 @@ class TextViewerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
 		super(TextViewerXML, self).__init__(self, args)
 		self.window_id = 2060
-		self.text = kwargs.get('text')
 		self.heading = kwargs.get('heading')
+		self.text = kwargs.get('text')
 
 	def onInit(self):
 		super(TextViewerXML, self).onInit()

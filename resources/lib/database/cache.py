@@ -288,7 +288,8 @@ def clear_local_bookmark(url): # clear all item specific bookmarks from kodi dat
 		dbcur.close() ; dbcon.close()
 
 def get_video_database_path():
-	database_path = control.absPath(control.joinPath(control.dataPath, '..', '..', 'Database', ))
+	database_path = control.absPath(control.joinPath(control.dataPath, '..', '..', 'Database', )) # doesn't work with mysql
+	# path_db = 'special://profile/Database/%s' % db_name
 	kodi_version = control.getKodiVersion()
 	if kodi_version == 17: database_path = control.joinPath(database_path, 'MyVideos107.db')
 	elif kodi_version == 18: database_path = control.joinPath(database_path, 'MyVideos116.db')

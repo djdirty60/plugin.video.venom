@@ -435,7 +435,7 @@ class libtvshows:
 		self.include_unknown = control.setting('library.include_unknown') or 'true'
 		self.date_time = datetime.utcnow()
 		if control.setting('library.importdelay') != 'true': self.date = self.date_time.strftime('%Y%m%d')
-		else: self.date = (self.date_time - timedelta(hours = 24)).strftime('%Y%m%d')
+		else: self.date = (self.date_time - timedelta(hours=24)).strftime('%Y%m%d')
 		self.block = False
 
 	def auto_tv_setup(self):

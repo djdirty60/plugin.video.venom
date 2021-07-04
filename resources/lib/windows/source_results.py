@@ -179,8 +179,8 @@ class SourceResultsXML(BaseDialog):
 			log_utils.error()
 
 	def set_properties(self):
+		if self.meta is None: return
 		try:
-			if self.meta is None: return
 			# self.setProperty('venom.mediatype', self.meta.get('mediatype', ''))
 			self.setProperty('venom.season', str(self.meta.get('season', '')))
 			if self.meta.get('season_poster'):	self.setProperty('venom.poster', self.meta.get('season_poster', ''))
@@ -192,13 +192,8 @@ class SourceResultsXML(BaseDialog):
 			# self.setProperty('venom.title', title)
 			self.setProperty('venom.plot', self.meta.get('plot', ''))
 			self.setProperty('venom.year', str(self.meta.get('year', '')))
-
 			new_date = tools.Time.convert(stringTime=str(self.meta.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')
-			# new_date = new_date.lstrip('0')
-			# new_date = new_date.replace('-0', '-')
-			# self.setProperty('venom.premiered', str(self.meta.get('premiered', '')))
 			self.setProperty('venom.premiered', new_date)
-
 			if self.meta.get('mpaa'): self.setProperty('venom.mpaa', self.meta.get('mpaa'))
 			else: self.setProperty('venom.mpaa', 'NA ')
 			if self.meta.get('duration'):

@@ -695,6 +695,50 @@ msgid ""
 msgstr ""
 
 msgctxt "#32168"
+msgid "Play Next"
+msgstr ""
+
+msgctxt "#32169"
+msgid "Play Now"
+msgstr ""
+
+msgctxt "#32170"
+msgid "Stop"
+msgstr ""
+
+msgctxt "#32171"
+msgid "Ends at:"
+msgstr ""
+
+msgctxt "#32172"
+msgid "Still there?"
+msgstr ""
+
+msgctxt "#32173"
+msgid "Continue watching"
+msgstr 
+
+msgctxt "#32174"
+msgid "Default Play Next Action in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] seconds"
+msgstr 
+
+msgctxt "#32175"
+msgid "Still Watching in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] seconds"
+msgstr ""
+
+msgctxt "#32176"
+msgid "Play"
+msgstr ""
+
+msgctxt "#32177"
+msgid "Stop"
+msgstr ""
+
+msgctxt "#32178"
+msgid "Pause"
+msgstr ""
+
+msgctxt "#32179"
 msgid ""
 msgstr ""
 
@@ -1522,7 +1566,7 @@ msgid ""
 msgstr ""
 
 msgctxt "#32505"
-msgid "[B][COLOR red]UpNext[/COLOR][/B] Settings"
+msgid ""
 msgstr ""
 
 msgctxt "#32506"
@@ -3721,23 +3765,23 @@ msgid "torrent file name"
 msgstr ""
 
 msgctxt "#40025"
-msgid "UpNext Settings"
+msgid "Still Watching default action"
 msgstr ""
 
 msgctxt "#40026"
-msgid ""
+msgid "Number of episodes till Still Watching?"
 msgstr ""
 
 msgctxt "#40027"
-msgid "Install UpNext Addon..."
+msgid "Continuous Episode Playback Settings"
 msgstr ""
 
 msgctxt "#40028"
-msgid "Enabled Up Next Addon Integration"
+msgid "Enable PlayNext popup"
 msgstr ""
 
 msgctxt "#40029"
-msgid "UpNext Notification Time"
+msgid "PlayNext Notification time"
 msgstr ""
 
 msgctxt "#40030"
@@ -3881,11 +3925,11 @@ msgid "Enable Christmas Collections"
 msgstr ""
 
 msgctxt "#40065"
-msgid "Enable UpNext Integration"
+msgid "PlayNext default action"
 msgstr ""
 
 msgctxt "#40066"
-msgid "UpNext Notification time"
+msgid ""
 msgstr ""
 
 msgctxt "#40067"

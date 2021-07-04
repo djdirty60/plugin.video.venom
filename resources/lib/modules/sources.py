@@ -94,7 +94,8 @@ class Sources:
 				self.mediatype = 'episode'
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
 			if rescrape: self.clr_item_providers(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
-			items = providerscache.get(self.getSources, 48, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered) # start passing aliases to avoid trakt request
+			items = providerscache.get(self.getSources, 48, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
+
 			if not items:
 				self.url = url
 				return self.errorForSources()
@@ -117,9 +118,8 @@ class Sources:
 			else: uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 
 			if select is None:
-				if episode is not None and control.setting('enable.upnext') == 'true': select = '1'
+				if episode is not None and control.setting('enable.playnext') == 'true': select = '1'
 				else: select = control.setting('play.mode')
-			else: select = select
 
 			title = tvshowtitle if tvshowtitle is not None else title
 			self.imdb=imdb ; self.tmdb = tmdb ; self.tvdb = tvdb ; self.title = title ; self.year = year
@@ -145,9 +145,7 @@ class Sources:
 			control.hide()
 			control.playlist.clear()
 			if not items:
-				control.sleep(200)
-				control.hide()
-				sysexit()
+				control.sleep(200) ; 	control.hide() ; sysexit()
 
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
 			self.imdb_user = control.setting('imdb.user').replace('ur', '')
@@ -157,7 +155,7 @@ class Sources:
 			if self.mediatype == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
 			else: self.user = str(self.tmdb_key)
 			self.lang = control.apiLanguage()['tvdb']
-			meta1 = meta
+			meta1 = dict((k, v) for k, v in control.iteritems(meta) if v is not None and v != '') if meta else None
 			meta2 = metacache.fetch([{'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}], self.lang, self.user)[0]
 			if meta2 != self.ids: meta2 = dict((k, v) for k, v in control.iteritems(meta2) if v is not None and v != '')
 			if meta1 is not None:
@@ -169,6 +167,8 @@ class Sources:
 				except: log_utils.error()
 			else: meta = meta2 if meta2 != self.ids else meta1
 ##################
+			self.poster = meta.get('poster') if meta else ''
+			self.fanart = meta.get('fanart') if meta else ''
 			self.meta = meta
 		except:
 			log_utils.error('Error sourceSelect(): ')
@@ -178,8 +178,7 @@ class Sources:
 			def cleanLibArt(art):
 				if not art: return ''
 				art = unquote(art.replace('image://', ''))
-				if art.endswith('/'):
-					art = art[:-1]
+				if art.endswith('/'): art = art[:-1]
 				return art
 			try:
 				if self.mediatype != 'movie': raise Exception()
@@ -193,12 +192,12 @@ class Sources:
 				else: raise Exception()
 				if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
 				if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
-				poster = cleanLibArt(meta.get('art').get('poster', ''))
-				fanart = cleanLibArt(meta.get('art').get('fanart', ''))
+				poster = cleanLibArt(meta.get('art').get('poster', '')) or self.poster
+				fanart = cleanLibArt(meta.get('art').get('fanart', '')) or self.fanart
 				clearart = cleanLibArt(meta.get('art').get('clearart', ''))
 				clearlogo = cleanLibArt(meta.get('art').get('clearlogo', ''))
 				discart = cleanLibArt(meta.get('art').get('discart'))
-				meta.update({'poster': poster, 'fanart': fanart, 'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart})
+				meta.update({'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb, 'poster': poster, 'fanart': fanart, 'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart})
 				return meta
 			except:
 				log_utils.error()
@@ -223,18 +222,19 @@ class Sources:
 				if 'mpaa' not in meta: meta.update({'mpaa': show_meta.get('mpaa')})
 				if 'premiered' not in meta: meta.update({'premiered': meta.get('firstaired')})
 				if 'year' not in meta: meta.update({'year': meta.get('firstaired')[:4]})
-				poster = cleanLibArt(meta.get('art').get('season.poster', ''))
-				fanart = cleanLibArt(meta.get('art').get('tvshow.fanart', ''))
+				poster = cleanLibArt(meta.get('art').get('season.poster', '')) or self.poster
+				fanart = cleanLibArt(meta.get('art').get('tvshow.fanart', '')) or self.poster
 				clearart = cleanLibArt(meta.get('art').get('tvshow.clearart', ''))
 				clearlogo = cleanLibArt(meta.get('art').get('tvshow.clearlogo', ''))
 				discart = cleanLibArt(meta.get('art').get('discart'))
-				meta.update({'poster': poster, 'fanart': fanart, 'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart})
+				meta.update({'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb, 'poster': poster, 'fanart': fanart, 'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart})
 				return meta
 			except:
 				log_utils.error()
 				meta = ''
 		if self.meta is None or 'videodb' in control.infoLabel('ListItem.FolderPath'):
 			self.meta = checkLibMeta()
+
 		try:
 			def sourcesDirMeta(metadata): # pass skin minimal meta needed
 				if not metadata: return metadata
@@ -269,6 +269,7 @@ class Sources:
 			imdb = meta['imdb'] if 'imdb' in meta else None
 			tmdb = meta['tmdb'] if 'tmdb' in meta else None
 			tvdb = meta['tvdb'] if 'tvdb' in meta else None
+
 			try:
 				chosen_source = jsloads(chosen_source)
 				source_index = items.index(chosen_source[0])
@@ -285,7 +286,8 @@ class Sources:
 			for i in range(len(items)):
 				try:
 					src_provider = items[i]['debrid'] if items[i].get('debrid') else ('%s - %s' % (items[i]['source'], items[i]['provider']))
-					label = '[COLOR %s]%s\n%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'], str(items[i]['size']) + ' GB')# using "[CR]" has some weird delay with progressDialog.update()
+					label = '[COLOR %s]%s[CR]%s[CR]%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'], str(round(items[i]['size'], 2)) + ' GB') # using "[CR]" has some weird delay with progressDialog.update() at times
+					control.sleep(100)
 					try:
 						if progressDialog.iscanceled(): break
 						progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -308,8 +310,9 @@ class Sources:
 
 					if not self.url: raise Exception()
 					if not any(x in self.url.lower() for x in self.extensions):
-						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
+						log_utils.log('Playback not supported for (playItem()): %s' % self.url, level=log_utils.LOGWARNING)
 						raise Exception()
+					log_utils.log('Playing url from playItem(): %s' % self.url, level=log_utils.LOGDEBUG)
 					try: progressDialog.close()
 					except: pass
 					del progressDialog
@@ -660,7 +663,7 @@ class Sources:
 
 	def alterSources(self, url, meta):
 		try:
-			if control.setting('play.mode') == '1' or (control.setting('enable.upnext') == 'true' and 'episode' in meta): url += '&select=0'
+			if control.setting('play.mode') == '1' or (control.setting('enable.playnext') == 'true' and 'episode' in meta): url += '&select=0'
 			else: url += '&select=1'
 			control.execute('PlayMedia(%s)' % url)
 		except:
@@ -837,7 +840,8 @@ class Sources:
 		for i in range(len(items)):
 			try:
 				src_provider = items[i]['debrid'] if items[i].get('debrid') else ('%s - %s' % (items[i]['source'], items[i]['provider']))
-				label = '[COLOR %s]%s\n%s\n%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'], str(items[i]['size']) + ' GB')# using "[CR]" has some weird delay with progressDialog.update()
+				label = '[COLOR %s]%s[CR]%s[CR]%s[/COLOR]' % (self.highlight_color, src_provider.upper(), items[i]['name'], str(round(items[i]['size'], 2)) + ' GB') # using "[CR]" has some weird delay with progressDialog.update() at times
+				control.sleep(100)
 				try:
 					if progressDialog.iscanceled(): break
 					progressDialog.update(int((100 / float(len(items))) * i), label)
@@ -846,9 +850,10 @@ class Sources:
 					if control.monitor.abortRequested(): return sysexit()
 					url = self.sourcesResolve(items[i])
 					if not any(x in url.lower() for x in self.extensions):
-						log_utils.log('Playback not supported for: %s' % self.url, __name__, log_utils.LOGDEBUG)
+						log_utils.log('Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
 						raise Exception()
 					if not u: u = url
+					log_utils.log('Playing url from (sourcesAutoPlay()): %s' % url, level=log_utils.LOGDEBUG)
 					if url: break
 				except: pass
 			except:
@@ -896,7 +901,8 @@ class Sources:
 				direct = item['direct']
 				call = [i[1] for i in self.sourceDict if i[0] == item['provider']][0]
 				if direct:
-					self.url = call.resolve(url)
+					url = call.resolve(url)
+					self.url = url
 					return url
 				else:
 					if debrid_provider == 'Real-Debrid':
@@ -1028,12 +1034,8 @@ class Sources:
 		self.tvdbProperty = 'plugin.video.venom.container.tvdb'
 		self.labelProperty = 'plugin.video.venom.container.label'
 
-
 		self.sourceDict = fs_sources()
-		self.sourceDict.extend(cloudSources()) # add cloud scrapers to sourceDict
-
-		# log_utils.log('self.sourceDict = %s' % self.sourceDict)
-
+		self.sourceDict.extend(cloudSources())
 
 		from resources.lib.debrid import premium_hosters
 		self.debrid_resolvers = debrid.debrid_resolvers()

@@ -70,13 +70,13 @@ class source:
 			cloud_folders = realdebrid.RealDebrid().user_torrents()
 			cloud_folders = [i for i in cloud_folders if i['status'] == 'downloaded']
 			if not cloud_folders: return sources
+			ignoreM2ts = getSetting('rd_cloud.ignore.m2ts') == 'true'
+			extras_filter = cloud_utils.extras_filter()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error('RD_CLOUD: ')
 			return sources
 
-		extras_filter = cloud_utils.extras_filter()
-		ignoreM2ts = getSetting('rd_cloud.ignore.m2ts') == 'true'
 		for folder in cloud_folders:
 			is_m2ts = False
 			try:
@@ -119,6 +119,8 @@ class source:
 							else:
 								if all(not bool(re.search(i, folder_name)) for i in query_list): continue
 								name = folder_name
+								if file.get('bytes') < 52428800: continue
+
 						name = name.split('/')
 						name = name[len(name)-1]
 						index_pos = folder_files.index(file)

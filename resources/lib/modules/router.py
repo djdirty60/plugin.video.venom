@@ -517,14 +517,6 @@ def router(params):
 		elif action == 'tools_contextVenomSettings':
 			control.openSettings('0.0', 'context.venom')
 			control.trigger_widget_refresh()
-		elif action == 'tools_UpNextSettings':
-			control.openSettings('0.0', 'service.upnext')
-			control.sleep(500)
-			while control.condVisibility('Window.IsVisible(addonsettings)'):
-				control.sleep(500)
-			control.sleep(100)
-			if params.get('opensettings') == 'true':
-				control.openSettings(query, 'plugin.video.venom')
 		elif action == 'tools_fenomscrapersSettings':
 			control.openSettings('0.0', 'script.module.fenomscrapers')
 		elif action == 'tools_traktManager':
@@ -556,6 +548,85 @@ def router(params):
 			rescrape = params.get('rescrape')
 			sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
 
+			# if episode and control.homeWindow.getProperty('venom.isplaying.playlist') != 'true':
+				# if int(episode) != 1: control.playlist.clear()
+			# import xbmc
+			# enable_playnext = control.setting('enable.playnext') == 'true'
+			# media_type = 'movie' if tvshowtitle is None else 'episode'
+			# rescrape = params.get('rescrape')
+			# select = params.get('select')
+			# if control.homeWindow.getProperty('venom.isplaying.playlist') == 'true' or enable_playnext is False or media_type == 'movie' or rescrape or select == '0':
+				# try:
+					# if control.homeWindow.getProperty('venom.isplaying.playlist') == 'true':
+						# xbmc.log('[ plugin.video.venom ] venom.isplaying.playlist = %s' % control.homeWindow.getProperty('venom.isplaying.playlist'), 1)
+					# from resources.lib.modules import sources
+					# premiered = params.get('premiered')
+					# meta = params.get('meta')
+					# xbmc.log('[ plugin.video.venom ] control.playlist.size() = %s' % control.playlist.size(), 1)
+					# xbmc.log('[ plugin.video.venom ] control.playlist.getposition() = %s' % control.playlist.getposition(), 1)
+					# xbmc.log('[ plugin.video.venom ] Calling....sources.Sources().play()', 1)
+					# if int(control.playlist.getposition()) == -1 or (int(control.playlist.getposition()) == (control.playlist.size() - 1)):
+						# control.homeWindow.clearProperty('venom.isplaying.playlist')
+					# sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
+				# except:
+					# import traceback
+					# traceback.print_exc()
+			# else:
+				# try:
+					# xbmc.log('[ plugin.video.venom ] control.playlist.size() = %s' % control.playlist.size(), 1)
+					# is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
+					# if is_widget:
+						# control.playlist.clear()
+						# control.cancelPlayback()
+
+					# # control.playlist.clear()
+					# # control.cancelPlayback()
+
+					# if control.playlist.size() <= 1:
+						# current_ep = episode
+						# xbmc.log('[ plugin.video.venom ] current_ep = %s' % current_ep, 1)
+						# from json import dumps as jsdumps
+						# from resources.lib.menus import episodes
+						# meta = params.get('meta')
+						# items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode, create_directory=False)
+						# control.playlist.clear()
+						# for i in items:
+							# title = i['title']
+							# systitle = quote_plus(title)
+							# year = i['year']
+							# imdb = i['imdb']
+							# tmdb = i['tmdb']
+							# tvdb = i['tvdb']
+							# season = i['season']
+							# episode = i['episode']
+							# tvshowtitle = i['tvshowtitle']
+							# systvshowtitle = quote_plus(tvshowtitle)
+							# premiered = i['premiered']
+							# sysmeta = quote_plus(jsdumps(i))
+							# url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select=1' % (
+													# systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
+							# try: item = control.item(label=title, offscreen=True)
+							# except: item = control.item(label=title)
+							# # item.setProperty('IsPlayable', 'true')
+							# control.playlist.add(url=url, listitem=item)
+					# control.homeWindow.setProperty('venom.isplaying.playlist', 'true')
+					# playlist_urls = [control.playlist[i].getPath() for i in range(control.playlist.size())]
+					# xbmc.log('[ plugin.video.venom ] control.playlist.size() = %s' % control.playlist.size(), 1)
+					# xbmc.log('[ plugin.video.venom ] playlist_urls = %s' % playlist_urls, 1)
+					# xbmc.log('[ plugin.video.venom ] Calling....control.player2().play(control.playlist)', 1)
+					# control.player2().play(control.playlist)
+					# return
+				# except:
+					# control.homeWindow.clearProperty('venom.isplaying.playlist')
+					# import traceback
+					# traceback.print_exc()
+
+		elif action == "play_nextWindowXML":
+			from resources.lib.modules.player import PlayNext
+			play_next = PlayNext()
+			play_next.display_xml()
+			del play_next
+
 		elif action == 'play_All': # context menu works same as "Play from Here"
 			control.player2().play(control.playlist) 
 
@@ -570,10 +641,6 @@ def router(params):
 				if type == 'unrestrict': control.player.play(alldebrid.AllDebrid().unrestrict_link(url.replace(' ', '%20')))
 				else: control.player.play(url.replace(' ', '%20'))
 			else: control.player.play(url.replace(' ', '%20'))
-
-		# elif action == 'play_SourceItem':
-			# from resources.lib.modules import sources
-			# sources.Sources().playItem(title, source)
 
 		elif action == 'play_EpisodesList': # global context option
 			from json import dumps as jsdumps
@@ -594,7 +661,7 @@ def router(params):
 				systvshowtitle = quote_plus(tvshowtitle)
 				premiered = i['premiered']
 				sysmeta = quote_plus(jsdumps(i))
-				url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select="1"' % (
+				url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select=1' % (
 										systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
 				try: item = control.item(label=title, offscreen=True)
 				except: item = control.item(label=title)

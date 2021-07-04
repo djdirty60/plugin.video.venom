@@ -695,6 +695,50 @@ msgid ""
 msgstr ""
 
 msgctxt "#32168"
+msgid "Play Next"
+msgstr "Weiter spielen"
+
+msgctxt "#32169"
+msgid "Play Now"
+msgstr "Jetzt spielen"
+
+msgctxt "#32170"
+msgid "Stop"
+msgstr "Halt"
+
+msgctxt "#32171"
+msgid "Ends at:"
+msgstr "Endet am:"
+
+msgctxt "#32172"
+msgid "Still there?"
+msgstr "Noch da?"
+
+msgctxt "#32173"
+msgid "Continue watching"
+msgstr "Weiter schauen"
+
+msgctxt "#32174"
+msgid "Default Play Next Action in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] seconds"
+msgstr "Standard-Wiedergabe nächste Aktion in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] Sekunden"
+
+msgctxt "#32175"
+msgid "Still Watching in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] seconds"
+msgstr "Schaue immer noch rein [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] Sekunden"
+
+msgctxt "#32176"
+msgid "Play"
+msgstr "abspielen"
+
+msgctxt "#32177"
+msgid "Stop"
+msgstr "Halt"
+
+msgctxt "#32178"
+msgid "Pause"
+msgstr "Pause"
+
+msgctxt "#32179"
 msgid ""
 msgstr ""
 
@@ -1522,8 +1566,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32505"
-msgid "[B][COLOR red]UpNext[/COLOR][/B] Settings"
-msgstr "[B][COLOR red]Als nächstes[/COLOR][/B] die Einstellungen"
+msgid ""
+msgstr ""
 
 msgctxt "#32506"
 msgid "[B][COLOR red]Venom Global Context[/COLOR][/B] Settings"
@@ -3721,24 +3765,24 @@ msgid "torrent file name"
 msgstr "Torrent-Dateiname"
 
 msgctxt "#40025"
-msgid "UpNext Settings"
-msgstr "UpNext-Einstellungen"
+msgid "Still Watching default action"
+msgstr "Standardaktion wird immer noch beobachtet"
 
 msgctxt "#40026"
-msgid ""
-msgstr ""
+msgid "Number of episodes till Still Watching?"
+msgstr "Anzahl der Folgen bis Sie noch sehen"
 
 msgctxt "#40027"
-msgid "Install UpNext Addon..."
-msgstr "UpNext-Add-on installieren..."
+msgid "Continuous Episode Playback Settings"
+msgstr "Einstellungen für die fortlaufende Episodenwiedergabe"
 
 msgctxt "#40028"
-msgid "Enabled Up Next Addon Integration"
-msgstr "Up Next Add-On-Integration aktiviert"
+msgid "Enable PlayNext popup"
+msgstr "PlayNext-Popup aktivieren"
 
 msgctxt "#40029"
-msgid "UpNext Notification Time"
-msgstr "UpNächste Benachrichtigungszeit"
+msgid "PlayNext Notification time"
+msgstr "PlayNext Benachrichtigungszeit"
 
 msgctxt "#40030"
 msgid "Auto Playlist Creation"
@@ -3881,12 +3925,12 @@ msgid "Enable Christmas Collections"
 msgstr "Weihnachtskollektionen aktivieren"
 
 msgctxt "#40065"
-msgid "Enable UpNext Integration"
-msgstr "UpNext-Integration aktivieren"
+msgid "PlayNext default action"
+msgstr "PlayNext-Standardaktion"
 
 msgctxt "#40066"
-msgid "UpNext Notification time"
-msgstr "UpNext Benachrichtigungszeit"
+msgid ""
+msgstr ""
 
 msgctxt "#40067"
 msgid "Clear Providers Cache After Changing Scraper Provider"
