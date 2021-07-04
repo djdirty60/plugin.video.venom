@@ -645,7 +645,7 @@ class Sources:
 			log_utils.error()
 		try: # showPacks scraper call
 			if self.dev_mode and self.dev_disable_show_packs: raise Exception()
-			if self.season_isAiring == 'true': raise Exception()
+			if self.season_isAiring == 'true': raise Exception() # need a "series_isAiring" to skip
 			if self.packDict and source in self.packDict:
 				if db_showPacks_valid: raise Exception()
 				sources = []

@@ -67,6 +67,7 @@ class source:
 			query_list = self.episode_query_list() if 'tvshowtitle' in data else self.year_query_list()
 			# log_utils.log('query_list = %s' % query_list)
 			cloud_files = premiumize.Premiumize().my_files_all()
+			if not cloud_files: return sources
 			cloud_files = [i for i in cloud_files if i['path'].lower().endswith(tuple(supported_video_extensions()))] # this only lets folder names thru with known video extensions..?
 			if not cloud_files: return sources
 			ignoreM2ts = getSetting('pm_cloud.ignore.m2ts') == 'true'

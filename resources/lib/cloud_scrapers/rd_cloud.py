@@ -68,6 +68,7 @@ class source:
 			query_list = self.episode_query_list() if 'tvshowtitle' in data else self.year_query_list()
 			# log_utils.log('query_list = %s' % query_list)
 			cloud_folders = realdebrid.RealDebrid().user_torrents()
+			if not cloud_folders: return sources
 			cloud_folders = [i for i in cloud_folders if i['status'] == 'downloaded']
 			if not cloud_folders: return sources
 			ignoreM2ts = getSetting('rd_cloud.ignore.m2ts') == 'true'

@@ -154,7 +154,7 @@ def getFileType(name_info=None, url=None):
 		elif 'pdtv' in fmt: type += ' PDTV /'
 		elif any(value in fmt for value in ['dvdscr', 'dvd.scr']): type += ' DVDSCR /'
 		elif any(value in fmt for value in ['screener', '.scr']): type += ' SCR /'
-		elif any(value in fmt for value in ['hdrip', 'hd.rip']): type += ' HDRIP /'
+		elif any(value in fmt for value in ['.hdrip', '.hd.rip']): type += ' HDRIP /'
 
 		if any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
 		if 'atmos' in fmt: type += ' ATMOS /'

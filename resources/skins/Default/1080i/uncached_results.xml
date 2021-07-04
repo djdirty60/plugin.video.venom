@@ -277,7 +277,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/avi.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),AVI)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),AVI)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -287,7 +287,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/mkv2.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),MKV)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MKV)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
@@ -327,7 +327,7 @@
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
 						<texture>source/m2ts.png</texture>
-						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),M2TS)</visible>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),M2TS)</visible>
 					</control>
 					<control type="image">
 						<left>0</left>
