@@ -1,4 +1,7 @@
 
+[B][COLOR red]Update - v6.0.2 - July 05, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed newsinfo pointer ref to new repo location.[/I]
+
 [B][COLOR red]Update - v6.0.1 - July 04, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue with Trakt re_auth() failing.[/I]
 
