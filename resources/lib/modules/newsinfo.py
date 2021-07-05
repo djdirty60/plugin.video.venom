@@ -4,14 +4,14 @@
 """
 
 try: #PY2
-	from urllib.request import urlopen, Request
-except ImportError: # PY3
 	from urllib2 import urlopen, Request
+except ImportError: # PY3
+	from urllib.request import urlopen, Request
 from resources.lib.modules.control import addonPath, addonId, joinPath
 from resources.lib.windows.textviewer import TextViewerXML
 
 venom_path = addonPath(addonId())
-news_file = 'https://raw.githubusercontent.com/123Venom/zips/master/plugin.video.venom/newsinfo.txt'
+news_file = 'https://raw.githubusercontent.com/123Venom/plugin.video.venom/matrix/newsinfo.txt'
 local_news = joinPath(venom_path, 'newsinfo.txt')
 
 
