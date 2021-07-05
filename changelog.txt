@@ -1,4 +1,8 @@
 
+[B][COLOR red]Update - v6.0.1 - July 04, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed issue with Trakt re_auth() failing.[/I]
+
+
 [B][COLOR red]Update - v6.0.0 - July 04, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] v6.0.0 is the first official release for Matrix only. There will be no further updates available
     for Leia.[/I]

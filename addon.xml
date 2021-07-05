@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.0.0">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.0.1">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0"/>
 		<import addon="context.venom" />
@@ -32,15 +32,8 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.0.0 - July 04, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] v6.0.0 is the first official release for Matrix only. There will be no further updates available
-    for Leia.[/I]
-[COLOR yellow]--[/COLOR][I] UpNext addon has been removed.  It is now replaced with a new "PlayNext" skin handled
-    internally.  See TVShows setting category for controlled options.  Please also read the
-    help file in this settings category for further info.  Addon signals dependency is also
-    removed.  If you have no other addons requiring these they can be safely removed.[/I]
-[COLOR yellow]--[/COLOR][I] Uncached Torrents xml was missing some source identification icons, this is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed player issue where item would occasionally not be marked as watched.[/I]
+[B][COLOR red]Update - v6.0.1 - July 04, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed issue with Trakt re_auth() failing.[/I]
 		</news>
 	</extension>
 </addon>
