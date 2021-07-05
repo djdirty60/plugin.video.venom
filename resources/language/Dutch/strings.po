@@ -220,7 +220,7 @@ msgstr "[B]INSTELLINGEN[/B] : Downloads"
 
 msgctxt "#32049"
 msgid "[B]VENOM[/B] : Viewtypes"
-msgstr "[B]VENIJN[/B] : Layout instellingen"
+msgstr "[B]VENOM[/B] : Layout instellingen"
 
 msgctxt "#32050"
 msgid "Enable cloud scraper"
@@ -572,7 +572,7 @@ msgstr "synchroniseren(opnieuw) met Mijn Accounts"
 
 msgctxt "#32137"
 msgid "[COLOR FFA0C12C] -- Help --[/COLOR]"
-msgstr "[COLOR FFA0C12C] -- Helpen --[/COLOR]"
+msgstr "[COLOR FFA0C12C] -- Help --[/COLOR]"
 
 msgctxt "#32138"
 msgid "[COLOR FFA0C12C] -- Dev Mode Help --[/COLOR]"
@@ -600,15 +600,15 @@ msgstr "Seizoenspakket schrapen uitschakelen"
 
 msgctxt "#32144"
 msgid "Disable season pack scraper filter"
-msgstr "Seizoenspakketschraperfilter uitschakelen"
+msgstr "Seizoen pakket schraper filter uitschakelen"
 
 msgctxt "#32145"
 msgid "Disable show pack scraping"
-msgstr "Showpack-schraperfilter uitschakelen"
+msgstr "Showpack schraper filter uitschakelen"
 
 msgctxt "#32146"
 msgid "Disable show pack scraper filter"
-msgstr "Showpack-schraperfilter uitschakelen"
+msgstr "Showpack schraper filter uitschakelen"
 
 msgctxt "#32147"
 msgid "Developer mode"
@@ -620,7 +620,7 @@ msgstr "$NUMBER[24]U vertraging vóór import"
 
 msgctxt "#32149"
 msgid "Create .strm files for TMDB Helper"
-msgstr "Maak .stem-bestanden voor TMDB Helper"
+msgstr "Maak .strm bestanden voor TMDB Helper"
 
 msgctxt "#32150"
 msgid "Acount Info from My Accounts"
@@ -704,11 +704,11 @@ msgstr "Nu afspelen"
 
 msgctxt "#32170"
 msgid "Stop"
-msgstr "Hou op"
+msgstr "Stop"
 
 msgctxt "#32171"
 msgid "Ends at:"
-msgstr "Eindigt bij:"
+msgstr "Eindigt om:"
 
 msgctxt "#32172"
 msgid "Still there?"
@@ -728,11 +728,11 @@ msgstr "Nog steeds aan het kijken[COLOR FFFF4081][B]$INFO[Player.TimeRemaining(s
 
 msgctxt "#32176"
 msgid "Play"
-msgstr "Speel"
+msgstr "Afspeel"
 
 msgctxt "#32177"
 msgid "Stop"
-msgstr "Hou op"
+msgstr "Stop"
 
 msgctxt "#32178"
 msgid "Pause"
