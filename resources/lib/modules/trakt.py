@@ -95,7 +95,7 @@ def re_auth(headers):
 	try:
 		ma_token = control.addon('script.module.myaccounts').getSetting('trakt.token')
 		ma_refresh = control.addon('script.module.myaccounts').getSetting('trakt.refresh')
-		if ma_token != control.setting('trakt.token') or ma_refresh != control.setting('trakt.refresh', refresh):
+		if ma_token != control.setting('trakt.token') or ma_refresh != control.setting('trakt.refresh'):
 			log_utils.log('Syncing My Accounts Trakt Token', level=log_utils.LOGNOTICE)
 			from resources.lib.modules import my_accounts
 			my_accounts.syncMyAccounts(silent=True)
