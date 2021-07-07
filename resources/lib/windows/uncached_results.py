@@ -4,10 +4,7 @@
 """
 
 from json import dumps as jsdumps
-try: #Py2
-	from urllib import quote_plus
-except ImportError: #Py3
-	from urllib.parse import quote_plus
+from urllib.parse import quote_plus
 from resources.lib.modules.control import joinPath, transPath, dialog
 from resources.lib.modules.source_utils import getFileType
 from resources.lib.windows.base import BaseDialog

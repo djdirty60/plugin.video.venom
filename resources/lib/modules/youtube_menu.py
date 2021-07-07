@@ -5,10 +5,7 @@
 
 import re
 from sys import argv
-try: #Py2
-	from urllib2 import urlopen, Request
-except ImportError: #Py3
-	from urllib.request import urlopen, Request
+from urllib.request import urlopen, Request
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import py_tools
@@ -42,8 +39,7 @@ class youtube_menu(object):
 	def addMenuItem(self, name, action, subid, iconimage, fanart, description='', isFolder=True):
 		try:
 			url = '%s?action=%s&id=%s' % (argv[0], action, subid)
-			try: liz = control.item(label=name, offscreen=True)
-			except: liz = control.item(label=name)
+			liz = control.item(label=name, offscreen=True)
 			liz.setArt({'icon': 'DefaultFolder.png', 'thumb': iconimage, 'fanart': fanart})
 			liz.setInfo(type='video', infoLabels={'title': name, 'plot': description})
 			control.addItem(handle=int(argv[1]), url=url, listitem=liz, isFolder=isFolder)
@@ -53,8 +49,7 @@ class youtube_menu(object):
 	def addSectionItem(self, name, iconimage, fanart):
 		try:
 			url = '%s?action=sectionItem' % argv[0]
-			try: liz = control.item(label=name, offscreen=True)
-			except: liz = control.item(label=name)
+			liz = control.item(label=name, offscreen=True)
 			liz.setArt({'icon': 'DefaultFolder.png', 'thumb': iconimage, 'fanart': fanart})
 			liz.setInfo(type='video', infoLabels={'title': name, 'plot': description})
 			control.addItem(handle=int(argv[1]), url=url, listitem=liz, isFolder=False)

@@ -10,7 +10,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import fanarttv
-from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, iteritems, trailer as control_trailer, yesnoDialog
+from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, trailer as control_trailer, yesnoDialog
 from resources.lib.modules import py_tools
 from resources.lib.modules import workers
 API_key = getSetting('tmdb.api.key')
@@ -132,7 +132,7 @@ class Movies:
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)
@@ -195,7 +195,7 @@ class Movies:
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)
@@ -419,7 +419,7 @@ class TVshows:
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)
@@ -482,7 +482,7 @@ class TVshows:
 				if not self.disable_fanarttv:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
-				values = dict((k,v) for k, v in iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values}
 				self.meta.append(meta)

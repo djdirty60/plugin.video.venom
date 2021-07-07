@@ -21,9 +21,6 @@ def getKodiVersion(full=False):
 	else: return int(xbmc.getInfoLabel("System.BuildVersion")[:2])
 
 pythonVersion = '{}.{}.{}'.format(version_info[0], version_info[1], version_info[2])
-isPY2 = version_info[0] == 2
-isPY3 = version_info[0] == 3
-
 addon = xbmcaddon.Addon
 AddonID = xbmcaddon.Addon().getAddonInfo('id')
 addonInfo = xbmcaddon.Addon().getAddonInfo
@@ -51,7 +48,7 @@ execute = xbmc.executebuiltin
 infoLabel = xbmc.getInfoLabel
 jsonrpc = xbmc.executeJSONRPC
 keyboard = xbmc.Keyboard
-legalFilename = xbmc.makeLegalFilename if getKodiVersion() < 19 else xbmcvfs.makeLegalFilename
+legalFilename = xbmcvfs.makeLegalFilename
 log = xbmc.log
 monitor_class = xbmc.Monitor
 monitor = monitor_class()
@@ -59,7 +56,7 @@ player = xbmc.Player()
 player2 = xbmc.Player
 playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 skin = xbmc.getSkinDir()
-transPath = xbmc.translatePath if getKodiVersion() < 19 else xbmcvfs.translatePath
+transPath = xbmcvfs.translatePath
 
 deleteDir = xbmcvfs.rmdir
 deleteFile = xbmcvfs.delete
@@ -87,12 +84,6 @@ cacheFile = joinPath(dataPath, 'cache.db')
 traktSyncFile = joinPath(dataPath, 'traktSync.db')
 trailer = 'plugin://plugin.video.youtube/play/?video_id=%s'
 
-if isPY3:
-	def iteritems(d, **kw):
-		return iter(d.items(**kw))
-else:
-	def iteritems(d, **kw):
-		return d.iteritems(**kw)
 
 def setting(id, fallback=None):
 	try: settings_dict = jsloads(homeWindow.getProperty('venom_settings'))
@@ -116,8 +107,10 @@ def make_settings_dict(): # service runs upon a setting change
 		for item in root:
 			dict_item = {}
 			setting_id = item.get('id')
-			if getKodiVersion() >= 18: setting_value = item.text
-			else: setting_value = item.get('value')
+			# if getKodiVersion() >= 18: setting_value = item.text
+			# else: setting_value = item.get('value')
+			setting_value = item.text
+
 			if setting_value is None: setting_value = ''
 			dict_item = {setting_id: setting_value}
 			settings_dict.update(dict_item)
@@ -134,19 +127,14 @@ def openSettings(query=None, id=addonInfo('id')):
 		execute('Addon.OpenSettings(%s)' % id)
 		if not query: return
 		c, f = query.split('.')
-		if getKodiVersion() >= 18:
-			execute('SetFocus(%i)' % (int(c) - 100))
-			execute('SetFocus(%i)' % (int(f) - 80))
-		else:
-			execute('SetFocus(%i)' % (int(c) + 100))
-			execute('SetFocus(%i)' % (int(f) + 200))
+		execute('SetFocus(%i)' % (int(c) - 100))
+		execute('SetFocus(%i)' % (int(f) - 80))
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
 
 def lang(language_id):
 	text = getLangString(language_id)
-	if getKodiVersion() < 19: text = text.encode('utf-8', 'replace')
 	return str(text)
 
 def sleep(time):  # Modified `sleep`(in milli secs) that honors a user exit request
@@ -239,16 +227,12 @@ def notification(title=None, message=None, icon=None, time=3000, sound=(setting(
 	return dialog.notification(heading, body, icon, time, sound)
 
 def yesnoDialog(line1, line2, line3, heading=addonInfo('name'), nolabel='', yeslabel=''):
-	if isPY3:
-		message = '%s\n%s\n%s' % (line1, line2, line3)
-		return dialog.yesno(heading, message, nolabel, yeslabel)
-	else: return dialog.yesno(heading, line1, line2, line3, nolabel, yeslabel)
+	message = '%s[CR]%s[CR]%s' % (line1, line2, line3)
+	return dialog.yesno(heading, message, nolabel, yeslabel)
 
 def yesnocustomDialog(line1, line2, line3, heading=addonInfo('name'), customlabel='', nolabel='', yeslabel=''):
-	if isPY3:
-		message = '%s\n%s\n%s' % (line1, line2, line3)
-		return dialog.yesnocustom(heading, message, customlabel, nolabel, yeslabel)
-	else: return dialog.yesno(heading, line1, line2, line3, nolabel, yeslabel)
+	message = '%s[CR]%s[CR]%s' % (line1, line2, line3)
+	return dialog.yesnocustom(heading, message, customlabel, nolabel, yeslabel)
 
 def selectDialog(list, heading=addonInfo('name')):
 	return dialog.select(heading, list)
@@ -275,7 +259,7 @@ def busy():
 
 def hide():
 	execute('Dialog.Close(busydialog)')
-	if getKodiVersion() >= 18: execute('Dialog.Close(busydialognocancel)')
+	execute('Dialog.Close(busydialognocancel)')
 
 def closeAll():
 	return execute('Dialog.Close(all,true)')
@@ -328,10 +312,10 @@ def apiLanguage(ret_name=None):
 	lang['youtube'] = name if name in youtube else 'en'
 	lang['tmdb'] = name if name in tmdb else 'en'
 	if ret_name:
-		lang['trakt'] = [i[0] for i in iteritems(langDict) if i[1] == lang['trakt']][0]
-		lang['tvdb'] = [i[0] for i in iteritems(langDict) if i[1] == lang['tvdb']][0]
-		lang['youtube'] = [i[0] for i in iteritems(langDict) if i[1] == lang['youtube']][0]
-		lang['tmdb'] = [i[0] for i in iteritems(langDict) if i[1] == lang['tmdb']][0]
+		lang['trakt'] = [i[0] for i in iter(langDict.items()) if i[1] == lang['trakt']][0]
+		lang['tvdb'] = [i[0] for i in iter(langDict.items()) if i[1] == lang['tvdb']][0]
+		lang['youtube'] = [i[0] for i in iter(langDict.items()) if i[1] == lang['youtube']][0]
+		lang['tmdb'] = [i[0] for i in iter(langDict.items()) if i[1] == lang['tmdb']][0]
 	return lang
 
 def autoTraktSubscription(tvshowtitle, year, imdb, tvdb): #---start adding TMDb to params
@@ -398,7 +382,7 @@ def metadataClean(metadata):
 					'director', 'mpaa', 'plot', 'plotoutline', 'title', 'originaltitle', 'sorttitle', 'duration', 'studio', 'tagline', 'writer',
 					'tvshowtitle', 'premiered', 'status', 'set', 'setoverview', 'tag', 'imdbnumber', 'code', 'aired', 'credits', 'lastplayed',
 					'album', 'artist', 'votes', 'path', 'trailer', 'dateadded', 'mediatype', 'dbid']
-	return {k: v for k, v in iteritems(metadata) if k in allowed}
+	return {k: v for k, v in iter(metadata.items()) if k in allowed}
 
 def strip_non_ascii_and_unprintable(text):
 	try:

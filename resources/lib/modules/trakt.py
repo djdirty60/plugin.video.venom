@@ -7,18 +7,13 @@ from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
 import re
 import threading
-# from time import sleep
 from time import time, sleep
-try: #Py2
-	from urlparse import urljoin
-except ImportError: #Py3
-	from urllib.parse import urljoin
+from urllib.parse import urljoin
 from resources.lib.database import cache, traktsync
 from resources.lib.modules import cleandate
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import py_tools
 from resources.lib.modules import utils
 
 BASE_URL = 'https://api.trakt.tv'
@@ -49,8 +44,8 @@ def getTrakt(url, post=None, extended=False):
 		try: code = str(result[1]) # result[1] is already a str from client module
 		except: code = ''
 
-		if code.startswith('5') or (result and isinstance(result, py_tools.string_types) and '<html' in result) or not result: # covers Maintenance html responses ["Bad Gateway", "We're sorry, but something went wrong (500)"])
-			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGNOTICE)
+		if code.startswith('5') or (result and isinstance(result, str) and '<html' in result) or not result: # covers Maintenance html responses ["Bad Gateway", "We're sorry, but something went wrong (500)"])
+			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGINFO)
 			control.notification(title=32315, message=33676)
 			return None
 		elif result and code in ['423']:
@@ -84,7 +79,7 @@ def getTraktAsJson(url, post=None):
 			r , res_headers = r[0], r[1]
 		if not r: return
 		r = utils.json_loads_as_str(r)
-		res_headers = dict((k.lower(), v) for k, v in control.iteritems(res_headers))
+		res_headers = dict((k.lower(), v) for k, v in iter(res_headers.items()))
 		if 'x-sort-by' in res_headers and 'x-sort-how' in res_headers:
 			r = sort_list(res_headers['x-sort-by'], res_headers['x-sort-how'], r)
 		return r
@@ -96,12 +91,12 @@ def re_auth(headers):
 		ma_token = control.addon('script.module.myaccounts').getSetting('trakt.token')
 		ma_refresh = control.addon('script.module.myaccounts').getSetting('trakt.refresh')
 		if ma_token != control.setting('trakt.token') or ma_refresh != control.setting('trakt.refresh'):
-			log_utils.log('Syncing My Accounts Trakt Token', level=log_utils.LOGNOTICE)
+			log_utils.log('Syncing My Accounts Trakt Token', level=log_utils.LOGINFO)
 			from resources.lib.modules import my_accounts
 			my_accounts.syncMyAccounts(silent=True)
 			return True
 
-		log_utils.log('Re-Authenticating Trakt Token', level=log_utils.LOGNOTICE)
+		log_utils.log('Re-Authenticating Trakt Token', level=log_utils.LOGINFO)
 		oauth = urljoin(BASE_URL, '/oauth/token')
 		# opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': control.setting('trakt.refresh')}
 		opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': control.addon('script.module.myaccounts').getSetting('trakt.refresh')}
@@ -111,12 +106,12 @@ def re_auth(headers):
 		try: code = str(result[1])
 		except: code = ''
 
-		if code.startswith('5') or (result and isinstance(result, py_tools.string_types) and '<html' in result) or not result: # covers Maintenance html responses ["Bad Gateway", "We're sorry, but something went wrong (500)"])
-			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGNOTICE)
+		if code.startswith('5') or (result and isinstance(result, str) and '<html' in result) or not result: # covers Maintenance html responses ["Bad Gateway", "We're sorry, but something went wrong (500)"])
+			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGINFO)
 			control.notification(title=32315, message=33676)
 			return False
 		elif result and code in ['423']:
-			log_utils.log('Locked User Account - Contact Trakt Support: %s' % str(result[0]), level=log_utils.LOGWARNING)
+			log_utils.log('Locked User Account - Contact Trakt Support: %s' % str(result[0]), level=log_utils.LOGINFO)
 			control.notification(title=32315, message=33675)
 			return False
 

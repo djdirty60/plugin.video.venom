@@ -39,7 +39,8 @@ def get_request(url):
 	else:
 		if getSetting('debug.level') != '1': return None
 		from resources.lib.modules import log_utils
-		title = client.parseDOM(result.text, 'title')[0]
+		from resources.lib.modules.client import parseDOM
+		title = parseDOM(result.text, 'title')[0]
 		log_utils.log('requests.get() failed - FANART.TV URL: %s (%s)' % (url, title), level=log_utils.LOGDEBUG)
 
 def parse_art(img):

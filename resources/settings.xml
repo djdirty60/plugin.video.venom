@@ -13,9 +13,8 @@
 		<setting id="page.item.limit" type="slider" label="32011" default="20" range="10,60" option="int" />
 		<setting id="fanart" type="bool" label="32318" default="true" />
 		<setting id="disable.fanarttv" type="bool" label="32012" default="false" />
-		<setting type="action" label="32612" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMeta)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disableFanartTV)" />
-		<setting id="disable.player.art" type="bool" label="35525" default="false" enable="!eq(-3,true)" />
+		<setting type="action" label="32612" subsetting="true" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMeta)" />
 		<setting id="hidecinema" type="bool" label="32571" default="false" />
 		<setting id="hidecinema.rollback" type="slider" label="40063" enable="eq(-1,true)" default="6" range="1,12" option="int" />
 		<setting id="movie.unaired.identify" type="select" label="35526" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" />
@@ -103,25 +102,16 @@
 		<setting id="playnext.default.action" type="select" label="40065" subsetting="true" visible="eq(-3,true)" lvalues="32176|32177|32178" default="0" />
 		<setting id="stillwatching.count" type="slider" subsetting="true" visible="eq(-4,true)" default="3" label="40026" option="int" range="2,10" />
 		<setting id="stillwatching.default.action" type="select" label="40025" subsetting="true" visible="eq(-5,true)" lvalues="32176|32177|32178" default="2" />
-		<setting id="auto.playlistcreate" type="bool" label="40030" default="true" />
-
-		<!-- <setting type="lsep" label="32375" /> -->
-		<!-- <setting id="tvshows.networks.view" type="enum" label="32376" lvalues="32377|32378" default="1" /> -->
-		<!-- <setting id="tvshows.networks.filter" type="select" label="32379" lvalues="32380|32381|32382|32383|32384|32385" default="4" enable="eq(-1, 1)" /> -->
+		<!-- <setting id="auto.playlistcreate" type="bool" label="40030" default="true" /> -->
 
 		<setting label="32004" type="lsep" />
 		<setting id="sort.shows.type" type="select" label="35191" lvalues="33564|33039|35187|35188|35391|35392|35393" default="0" />
 		<setting id="sort.shows.order" type="enum" label="33679" lvalues="33649|33650" default="0" subsetting="true" enable="!eq(-1,0)" />
-		<!-- <setting id="sort.shows.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" visible="!eq(-20,)" /> -->
 		<setting id="sort.shows.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" />
 		<setting id="sort.shows.watchlist.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
-		<!-- <setting id="sort.progress.type" type="select" label="35572" lvalues="33564|33039|35187|35188|35391|35392|35393" default="6" visible="!eq(-22,)" /> -->
 		<setting id="sort.progress.type" type="select" label="35572" lvalues="33564|33039|35187|35188|35391|35392|35393" default="6" />
-		<!-- <setting id="sort.progress.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" visible="!eq(-21,)" enable="!eq(-1,0)" /> -->
 		<setting id="sort.progress.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
-		<!-- <setting id="sort.calendar.type" type="select" label="35573" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" visible="!eq(-24,)" /> -->
 		<setting id="sort.calendar.type" type="select" label="35573" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" />
-		<!-- <setting id="sort.calendar.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" visible="!eq(-23,)" enable="!eq(-1,0)" /> -->
 		<setting id="sort.calendar.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
 		<setting id="tvshows.air.enabled" type="bool" label="35017" default="false" subsetting="false" />
 		<setting id="tvshows.air.zone" type="select" label="35018" lvalues="32314|35022|35023" default="0" subsetting="true" visible="eq(-1,true)" />
@@ -155,6 +145,8 @@
 		<setting type="lsep" label="32125" />
 		<setting id="play.mode" type="select" label="32331" lvalues="32333|32334" default="0" />
 		<setting id="cf.disable" type="bool" label="32364" default="false" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disable_cloudflare)" />
+
 		<setting id="imdb.year.check" type="bool" label="32017" default="true" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdbYearCheck)" />
 

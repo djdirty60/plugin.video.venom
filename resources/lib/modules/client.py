@@ -12,28 +12,14 @@ from resources.lib.database import cache
 from resources.lib.modules import dom_parser
 from resources.lib.modules import py_tools
 from resources.lib.modules import workers
-try: #Py2
-	import cookielib
-	from cStringIO import StringIO
-	from HTMLParser import HTMLParser
-	import urllib2
-	from urllib import quote_plus, urlencode
-	from urlparse import parse_qs, urlparse, urljoin
-	unescape = HTMLParser().unescape
-	HTTPError = urllib2.HTTPError
-except ImportError: #Py3
-	from http import cookiejar as cookielib
-	from html import unescape
-	from io import BytesIO as StringIO
-	import urllib.request as urllib2
-	from urllib.parse import quote_plus, urlencode, parse_qs, urlparse, urljoin
-	from urllib.response import addinfourl
-	from urllib.error import HTTPError
+from http import cookiejar as cookielib
+from html import unescape
+from io import BytesIO as StringIO
+import urllib.request as urllib2
+from urllib.parse import quote_plus, urlencode, parse_qs, urlparse, urljoin
+from urllib.response import addinfourl
+from urllib.error import HTTPError
 
-if py_tools.isPY2:
-	_str = str
-	def bytes(b, encoding="ascii"):
-		return _str(b)
 
 def request(url, close=True, redirect=True, error=False, proxy=None, post=None, headers=None, mobile=False, XHR=False, limit=None,
 					referer=None, cookie=None, compression=True, output='', timeout='30', verifySsl=True, flare=True, ignoreErrors=None, as_bytes=False):
@@ -45,7 +31,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 
 		if isinstance(post, dict):
 			post = bytes(urlencode(post), encoding='utf-8')
-		elif isinstance(post, str) and py_tools.isPY3:
+		elif isinstance(post, str):
 			post = bytes(post, encoding='utf-8')
 
 		handlers = []
@@ -300,12 +286,8 @@ def _basic_request(url, headers=None, post=None, timeout='30', limit=None):
 def _add_request_header(_request, headers):
 	try:
 		if not headers: headers = {}
-		if py_tools.isPY3:
-			scheme = _request.type
-			host = _request.host
-		else:
-			scheme = _request.get_type()
-			host = _request.get_host()
+		scheme = _request.type
+		host = _request.host
 		referer = headers.get('Referer') if 'Referer' in headers else '%s://%s/' % (scheme, host)
 		_request.add_unredirected_header('Host', host)
 		_request.add_unredirected_header('Referer', referer)
@@ -331,7 +313,7 @@ def _get_result(response, limit=None):
 def parseDOM(html, name='', attrs=None, ret=False):
 	try:
 		if attrs:
-			attrs = dict((key, re.compile(value + ('$' if value else ''))) for key, value in py_tools.iteritems(attrs))
+			attrs = dict((key, re.compile(value + ('$' if value else ''))) for key, value in iter(attrs.items()))
 		results = dom_parser.parse_dom(html, name, attrs, ret)
 		if ret: results = [result.attrs[ret.lower()] for result in results]
 		else: results = [result.content for result in results]
@@ -389,9 +371,6 @@ def randomagent():
 
 def agent():
 	return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36' # works on glodls
-	# return 'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko' # fails for glodls, (compatible, MSIE) removed
-	#return 'Mozilla/5.0 (Windows NT 6.2; Win64; x64; Trident/7.0; rv:11.0) like Gecko' # works on glodls
-
 
 class cfcookie:
 	def __init__(self):

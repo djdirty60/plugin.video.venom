@@ -3,10 +3,7 @@
 	Venom Add-on
 """
 
-try: #Py2
-	from urllib import quote_plus
-except ImportError: #Py3
-	from urllib.parse import quote_plus
+from urllib.parse import quote_plus
 from resources.lib.modules import control
 
 def router(params):
@@ -605,8 +602,7 @@ def router(params):
 							# sysmeta = quote_plus(jsdumps(i))
 							# url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select=1' % (
 													# systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
-							# try: item = control.item(label=title, offscreen=True)
-							# except: item = control.item(label=title)
+							# item = control.item(label=title, offscreen=True)
 							# # item.setProperty('IsPlayable', 'true')
 							# control.playlist.add(url=url, listitem=item)
 					# control.homeWindow.setProperty('venom.isplaying.playlist', 'true')
@@ -663,8 +659,7 @@ def router(params):
 				sysmeta = quote_plus(jsdumps(i))
 				url = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&select=1' % (
 										systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, premiered, sysmeta)
-				try: item = control.item(label=title, offscreen=True)
-				except: item = control.item(label=title)
+				item = control.item(label=title, offscreen=True)
 				control.playlist.add(url=url, listitem=item)
 			control.player2().play(control.playlist)
 

@@ -7,11 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps
 import re
 from sys import argv
-try: #Py2
-	from urllib import quote_plus
-	from urlparse import parse_qsl, urlparse
-except ImportError: #Py3
-	from urllib.parse import quote_plus, parse_qsl, urlparse
+from urllib.parse import quote_plus, parse_qsl, urlparse
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
@@ -806,7 +802,7 @@ class Collections:
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: values.update(extended_art)
-			values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)
 			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
@@ -819,7 +815,6 @@ class Collections:
 			control.hide() ; control.notification(title=32000, message=33049)
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
-		disable_player_art = control.setting('disable.player.art') == 'true'
 		play_mode = control.setting('play.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
@@ -844,7 +839,7 @@ class Collections:
 						label = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, label)
 				except: pass
 				sysname, systitle = quote_plus(label), quote_plus(title)
-				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
+				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
@@ -856,8 +851,6 @@ class Collections:
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				if disable_player_art and play_mode == '1': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
-					for k in ('clearart', 'clearlogo', 'discart'): meta.pop(k, None)
 				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape, 'clearlogo': meta.get('clearlogo', ''),
 								'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', ''), 'keyart': meta.get('keyart', '')})
 				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
@@ -891,8 +884,7 @@ class Collections:
 ####################################
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
-				try: item = control.item(label=label, offscreen=True)
-				except: item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb})
@@ -923,8 +915,7 @@ class Collections:
 					page = '  [I](%s)[/I]' % url_params.get('page')
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				url = '%s?action=collections&url=%s' % (sysaddon, quote_plus(url))
-				try: item = control.item(label=nextMenu, offscreen=True)
-				except: item = control.item(label=nextMenu)
+				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
@@ -948,8 +939,7 @@ class Collections:
 		if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 		if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
 		cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-		try: item = control.item(label=name, offscreen=True)
-		except: item = control.item(label=name)
+		item = control.item(label=name, offscreen=True)
 		item.setProperty('IsPlayable', 'false')
 		item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 		item.addContextMenuItems(cm)

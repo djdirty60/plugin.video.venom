@@ -7,10 +7,7 @@ from json import loads as jsloads
 from random import choice
 import re
 from sys import argv
-try: #Py2
-	from urllib import quote_plus
-except ImportError: #Py3
-	from urllib.parse import quote_plus
+from urllib.parse import quote_plus
 from resources.lib.modules import client
 from resources.lib.modules import control
 
@@ -33,8 +30,7 @@ class Trailer:
 			title = control.infoLabel('ListItem.Title')
 			if not title: title = control.infoLabel('ListItem.Label')
 			icon = control.infoLabel('ListItem.Icon')
-			try: item = control.item(label=title, offscreen=True)
-			except: item = control.item(label=title)
+			item = control.item(label=title, offscreen=True)
 			item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'thumb': icon,})
 			item.setInfo(type='video', infoLabels={'title': title})

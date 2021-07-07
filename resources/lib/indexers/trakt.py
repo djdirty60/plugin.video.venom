@@ -3,19 +3,10 @@
 	Venom Add-on
 """
 
-# import datetime
 from json import loads as jsloads
 import re
-# import sys
-try:
-	from urllib import urlencode
-	from urlparse import parse_qsl, urlparse, urlsplit
-except:
-	from urllib.parse import urlencode, parse_qsl, urlparse, urlsplit
-
-# from resources.lib.database import cache, metacache
+from urllib.parse import urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.modules import client
-# from resources.lib.modules import playcount
 from resources.lib.modules import trakt
 from resources.lib.modules import workers
 

@@ -4,10 +4,7 @@
 """
 
 from sys import argv, exit as sysexit
-try: #Py2
-	from urllib import quote_plus
-except ImportError:  #Py3
-	from urllib.parse import quote_plus
+from urllib.parse import quote_plus
 from resources.lib.modules import control
 from resources.lib.modules.trakt import getTraktCredentialsInfo, getTraktIndicatorsInfo
 
@@ -303,8 +300,7 @@ class Navigator:
 			title = control.lang(32059)
 			url = '%s?action=tools_addView&content=%s' % (argv[0], content)
 			poster, banner, fanart = control.addonPoster(), control.addonBanner(), control.addonFanart()
-			try: item = control.item(label=title, offscreen=True)
-			except: item = control.item(label=title)
+			item = control.item(label=title, offscreen=True)
 			item.setInfo(type='video', infoLabels = {'title': title})
 			item.setArt({'icon': poster, 'thumb': poster, 'poster': poster, 'fanart': fanart, 'banner': banner})
 			item.setProperty('IsPlayable', 'false')
@@ -436,8 +432,7 @@ class Navigator:
 		if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
 		if isSearch: cm.append(('Clear Search Phrase', 'RunPlugin(%s?action=cache_clearSearchPhrase&source=%s&name=%s)' % (sysaddon, table, quote_plus(name))))
 		cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-		try: item = control.item(label=name, offscreen=True)
-		except: item = control.item(label=name)
+		item = control.item(label=name, offscreen=True)
 		item.addContextMenuItems(cm)
 		if isPlayable: item.setProperty('IsPlayable', 'true')
 		else: item.setProperty('IsPlayable', 'false')

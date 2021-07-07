@@ -7,10 +7,7 @@ from json import dumps as jsdumps, loads as jsloads
 import re
 import requests
 from sys import argv, exit as sysexit
-try: #Py2
-	from urllib import quote_plus
-except ImportError: #Py3
-	from urllib.parse import quote_plus
+from urllib.parse import quote_plus
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -182,7 +179,8 @@ class AllDebrid:
 			url = 'magnet/upload'
 			url_append = '&magnet=%s' % magnet
 			result = self._get(url, url_append)
-			result = result['magnets'][0]
+			try: result = result['magnets'][0]
+			except: return None
 			log_utils.log('AllDebrid: Sending MAGNET URL %s to the AllDebrid cloud' % magnet, __name__, log_utils.LOGDEBUG)
 			try: return result.get('id', "")
 			except: return None
@@ -341,24 +339,30 @@ class AllDebrid:
 		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter
 		try:
 			file_url = None
+			media_id = None
+			failed_reason = 'Unknown'
 			correct_files = []
 			extensions = supported_video_extensions()
 			extras_filtering_list = extras_filter()
 			transfer_id = self.create_transfer(magnet_url)
 			transfer_info = self.list_transfer(transfer_id)
 			# log_utils.log('transfer_info=%s' % transfer_info)
-
 			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == '']
 			invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']
 			valid_results = [i for i in transfer_info.get('links') if not any(i.get('filename').lower().endswith(x) for x in invalids) and not i.get('link', '') == '']
-			# log_utils.log('valid_results=%s' % valid_results)
 			if len(valid_results) == 0: return
 
 			if season:
 				for item in valid_results:
+					if '.m2ts' in str(item.get('files')):
+						log_utils.log('AllDebrid: Can not resolve .m2ts season disk episode', level=log_utils.LOGDEBUG)
+						failed_reason = '.m2ts season disk incapable of determining episode'
+						continue
 					if seas_ep_filter(season, episode, item['filename']):
 						correct_files.append(item)
-					if len(correct_files) == 0: continue
+					if len(correct_files) == 0:
+						failed_reason = 'no matching episode found'
+						continue
 					episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', ep_title.replace('\'', '')).lower()
 					for i in correct_files:
 						compare_link = seas_ep_filter(season, episode, i['filename'], split=True)
@@ -370,12 +374,15 @@ class AllDebrid:
 				media_id = max(valid_results, key=lambda x: x.get('size')).get('link', None)
 				# log_utils.log('media_id=%s' % media_id)
 			if not self.store_to_cloud: self.delete_transfer(transfer_id)
+			if not media_id:
+				log_utils.log('AllDebrid: FAILED TO RESOLVE MAGNET %s : (%s)' % (magnet_url, failed_reason), __name__, log_utils.LOGWARNING)
+				return None
 			file_url = self.unrestrict_link(media_id)
 			if not file_url:
-				log_utils.log('AllDebrid: FAILED TO RESOLVE MAGNET %s : ' % magnet_url, __name__, log_utils.LOGWARNING)
+				log_utils.log('AllDebrid: FAILED TO UNRESTRICT MAGNET %s : ' % magnet_url, __name__, log_utils.LOGWARNING)
 			return file_url
 		except:
-			log_utils.error('AllDebrid Error RESOLVE MAGNET %s : ' % magnet_url)
+			log_utils.error('AllDebrid: Error RESOLVE MAGNET %s : ' % magnet_url)
 			if transfer_id: self.delete_transfer(transfer_id)
 			return None
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# created by Venom (6-13-2021)
 """
 	Venom Add-on
 """
@@ -39,6 +40,7 @@ def cloud_check_title(title, aliases, release_title):
 		# title = re.sub(r'[^A-Za-z0-9\s\.-]+', '', title)
 		title_list.append(title)
 		release_title = release_title_format(release_title).replace('!', '').replace('(', '').replace(')', '').replace('&', 'and') # converts to .lower()
+		release_title = re.split(r'(?:19|20)[0-9]{2}', release_title)[0] # split by 4 digit year
 		if all(cleantitle.get(i) not in cleantitle.get(release_title) for i in title_list): match = False
 		return match
 	except:

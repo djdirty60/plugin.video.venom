@@ -6,7 +6,7 @@
 from time import time
 try: from sqlite3 import dbapi2 as db
 except ImportError: from pysqlite2 import dbapi2 as db
-from resources.lib.modules.control import existsPath, dataPath, makeFile, metacacheFile, iteritems
+from resources.lib.modules.control import existsPath, dataPath, makeFile, metacacheFile
 
 
 def fetch(items, lang='en', user=''):
@@ -45,7 +45,7 @@ def fetch(items, lang='en', user=''):
 				update = (abs(t2 - t1) / 3600) >= 720
 				if update: continue
 				item = eval(match[5])
-				item = dict((k, v) for k, v in iteritems(item) if v is not None and v != '')
+				item = dict((k, v) for k, v in iter(item.items()) if v is not None and v != '')
 				items[i].update(item)
 				items[i].update({'metacache': True})
 		except:

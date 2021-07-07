@@ -5,11 +5,7 @@
 """
 
 import re
-try: #Py2
-	from urlparse import parse_qs
-	from urllib import urlencode
-except ImportError: #Py3
-	from urllib.parse import parse_qs, urlencode
+from urllib.parse import parse_qs, urlencode
 from resources.lib.cloud_scrapers import cloud_utils
 from resources.lib.debrid import premiumize
 from resources.lib.modules.control import setting as getSetting
@@ -92,6 +88,7 @@ class source:
 					if ignoreM2ts: continue
 					name = item.get('path', '').split('/')[0]
 					if name in str(sources): continue
+					if all(not bool(re.search(i, rt)) for i in query_list): continue # check if this newly added causes any movie titles that do not have the year to get dropped
 					is_m2ts = True
 					m2ts_files = [i for i in cloud_files if name in i.get('path')]
 					largest = sorted(m2ts_files, key=lambda k: k['size'], reverse=True)[0]

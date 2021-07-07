@@ -6,10 +6,7 @@
 from datetime import datetime, timedelta
 from json import loads as jsloads
 import re
-try: #Py2
-	from urlparse import urlparse
-except ImportError: #Py3
-	from urllib.parse import urlparse
+from urllib.parse import urlparse
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import fanarttv
 from resources.lib.modules import client
@@ -180,7 +177,7 @@ class Movies:
 						values.update(extended_art)
 						meta.update(values)
 
-				values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '')
+				values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '')
 				self.list.append(values)
 
 				if 'next' in meta.get('item'): del meta['item']['next'] # next can not exist in metacache
@@ -362,7 +359,7 @@ class Movies:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: item.update(extended_art)
 			if not item.get('landscape'): item.update({'landscape': fanart3})
-			item = dict((k, v) for k, v in control.iteritems(item) if v is not None and and v != '')
+			item = dict((k, v) for k, v in iter(item.items()) if v is not None and and v != '')
 			self.list[i].update(item)
 			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': item}
 			self.meta.append(meta)

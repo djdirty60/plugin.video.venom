@@ -6,10 +6,7 @@
 import re
 import requests
 from sys import argv, exit as sysexit
-try: #Py2
-	from urllib import quote_plus, unquote
-except ImportError: #Py3
-	from urllib.parse import quote_plus, unquote
+from urllib.parse import quote_plus, unquote
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -378,10 +375,8 @@ class RealDebrid:
 			extras_filtering_list = extras_filter()
 			info_hash = info_hash.lower()
 			torrent_files = self._get(check_cache_url + '/' + info_hash)
-			# log_utils.log('torrent_files=%s' % torrent_files, __name__)
 			if not info_hash in torrent_files: return None
 			torrent_id = self.add_magnet(magnet_url) # add_magent() returns id
-			# log_utils.log('torrent_id=%s' % torrent_id, __name__)
 			torrent_files = torrent_files[info_hash]['rd']
 			# log_utils.log('torrent_files=%s' % torrent_files, __name__)
 			torrent_files = [item for item in torrent_files if self.video_only(item, extensions)]
@@ -390,13 +385,15 @@ class RealDebrid:
 				m2ts_check = self.m2ts_check(torrent_files)
 				if m2ts_check:
 					m2ts_key, torrent_files = self.m2ts_key_value(torrent_files) 
-				# log_utils.log('m2ts_check=%s' % m2ts_check)
 			for item in torrent_files:
 				try:
 					correct_file_check = False
 					item_values = [i['filename'] for i in item.values()]
 					if season:
 						for value in item_values:
+							if '.m2ts' in value:
+								log_utils.log('Real-Debrid: Can not resolve .m2ts season disk episode', level=log_utils.LOGDEBUG)
+								continue
 							correct_file_check = seas_ep_filter(season, episode, value)
 							# log_utils.log('correct_file_check=%s' % correct_file_check)
 							if correct_file_check: break
@@ -471,10 +468,10 @@ class RealDebrid:
 				if not self.store_to_cloud: self.delete_torrent(torrent_id)
 				return file_url
 			else:
-				log_utils.log('Real-Debrid FAILED TO RESOLVE MAGNET : %s' % magnet_url, __name__, log_utils.LOGWARNING)
+				log_utils.log('Real-Debrid: FAILED TO RESOLVE MAGNET : %s' % magnet_url, __name__, log_utils.LOGWARNING)
 			self.delete_torrent(torrent_id)
 		except:
-			log_utils.error('Real-Debrid Error RESOLVE MAGNET %s : ' % magnet_url)
+			log_utils.error('Real-Debrid: Error RESOLVE MAGNET %s : ' % magnet_url)
 			if torrent_id: self.delete_torrent(torrent_id)
 			return None
 
@@ -687,7 +684,7 @@ class RealDebrid:
 				if item_length < total_min_length:
 					total_max_size, total_min_length = max_filesize, item_length
 					dict_item = item
-					key = int([k for k,v in control.iteritems(item) if v['filesize'] == max_filesize][0])
+					key = int([k for k,v in iter(item.items()) if v['filesize'] == max_filesize][0])
 		return key, [dict_item,]
 
 	def valid_url(self, host):

@@ -17,7 +17,7 @@ from resources.lib.modules import log_utils
 from resources.lib.modules import playcount
 from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
-LOGNOTICE = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1)) = 2 if control.getKodiVersion() < 19 else 1 # (2 in 18, deprecated in 19 use LOGINFO(1))
+LOGINFO = 1
 
 
 class Player(xbmc.Player):
@@ -62,9 +62,9 @@ class Player(xbmc.Player):
 			if self.media_type == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
 			else: self.user = str(self.tmdb_key)
 			self.lang = control.apiLanguage()['tvdb']
-			meta1 = dict((k, v) for k, v in control.iteritems(meta) if v is not None and v != '') if meta else None
+			meta1 = dict((k, v) for k, v in iter(meta.items()) if v is not None and v != '') if meta else None
 			meta2 = metacache.fetch([{'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}], self.lang, self.user)[0]
-			if meta2 != self.ids: meta2 = dict((k, v) for k, v in control.iteritems(meta2) if v is not None and v != '')
+			if meta2 != self.ids: meta2 = dict((k, v) for k, v in iter(meta2.items()) if v is not None and v != '')
 			if meta1 is not None:
 				try:
 					if len(meta2) > len(meta1):
@@ -74,30 +74,30 @@ class Player(xbmc.Player):
 				except: log_utils.error()
 			else: meta = meta2 if meta2 != self.ids else meta1
 ##################
+			self.poster = meta.get('poster') if meta else ''
+			self.fanart = meta.get('fanart') if meta else ''
 			self.meta = meta
 			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = self.getMeta(meta)
 			runtime = meta.get('duration') if meta else 0
 			self.offset = Bookmarks().get(name=self.name, imdb=imdb, tmdb=tmdb, tvdb=tvdb, season=season, episode=episode, year=self.year, runtime=runtime)
-			if int(self.offset) < 0:
+			# if int(float(self.offset)) < 0:
+			if self.offset == '-1':
+				log_utils.log('User requested playback cancel', level=log_utils.LOGDEBUG)
 				control.notification(message=32328)
 				return control.cancelPlayback()
+
 			item = control.item(path=url)
 			item.setUniqueIDs(self.ids)
-			if control.setting('disable.player.art') == 'true':
-				for k in ('clearart', 'clearlogo', 'discart'): meta.pop(k, None)
+
 			if self.media_type == 'episode':
-				if control.setting('disable.player.art') == 'true':
-					item.setArt({'thumb': thumb, 'tvshow.poster': season_poster, 'season.poster': season_poster, 'tvshow.fanart': fanart})
-				else:
-					item.setArt({'tvshow.clearart': clearart, 'tvshow.clearlogo': clearlogo, 'tvshow.discart': discart, 'thumb': thumb, 'tvshow.poster': season_poster, 'season.poster': season_poster, 'tvshow.fanart': fanart})
+				item.setArt({'tvshow.clearart': clearart, 'tvshow.clearlogo': clearlogo, 'tvshow.discart': discart, 'thumb': thumb, 'tvshow.poster': season_poster, 'season.poster': season_poster, 'tvshow.fanart': fanart})
 			else:
-				if control.setting('disable.player.art') == 'true': item.setArt({'thumb': thumb, 'poster': poster, 'fanart': fanart})
-				else: item.setArt({'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
+				item.setArt({'clearart': clearart, 'clearlogo': clearlogo, 'discart': discart, 'thumb': thumb, 'poster': poster, 'fanart': fanart})
+
 			if 'castandart' in meta: item.setCast(meta.get('castandart', ''))
 			item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 
 			item.setProperty('IsPlayable', 'true')
-
 			control.resolve(int(argv[1]), True, item)
 			control.homeWindow.setProperty('script.trakt.ids', jsdumps(self.ids))
 			self.keepAlive()
@@ -125,16 +125,32 @@ class Player(xbmc.Player):
 		except:
 			log_utils.error()
 		try:
+			def cleanLibArt(art):
+				from urllib.parse import unquote
+				if not art: return ''
+				art = unquote(art.replace('image://', ''))
+				if art.endswith('/'): art = art[:-1]
+				return art
+			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = '', '', '', '', '', '', '', '', {'title': self.name}
 			if self.media_type != 'movie': raise Exception()
-			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
+			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
 			meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['movies']
 			t = cleantitle.get(self.title.replace('&', 'and'))
 			years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
 			meta = [i for i in meta if str(i['year']) in years and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
+			if meta: meta = meta[0]
+			else: raise Exception()
 			if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
 			if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
-			for k, v in control.iteritems(meta):
+			thumb = cleanLibArt(meta.get('art').get('thumb', ''))
+			poster = cleanLibArt(meta.get('art').get('poster', '')) or self.poster
+			fanart = cleanLibArt(meta.get('art').get('fanart', '')) or self.fanart
+			banner = cleanLibArt(meta.get('art').get('banner', ''))
+			clearart = cleanLibArt(meta.get('art').get('clearart', ''))
+			clearlogo = cleanLibArt(meta.get('art').get('clearlogo', ''))
+			discart = cleanLibArt(meta.get('art').get('discart'))
+			for k, v in iter(meta.items()):
 				if type(v) == list:
 					try: meta[k] = str(' / '.join([i for i in v]))
 					except: meta[k] = ''
@@ -143,25 +159,37 @@ class Player(xbmc.Player):
 					except: meta[k] = str(v)
 			if 'plugin' not in control.infoLabel('Container.PluginName'):
 				self.DBID = meta.get('movieid')
-			poster = thumb = meta.get('thumbnail')
-			return (poster, thumb, '', '', '', '', '', '', meta)
+			return (poster, thumb, '', fanart, banner, clearart, clearlogo, discart, meta)
 		except:
 			log_utils.error()
 		try:
 			if self.media_type != 'episode': raise Exception()
-			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "year", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
+			show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
+			show_meta = py_tools.ensure_text(show_meta, errors='ignore')
+			show_meta = jsloads(show_meta)['result']['tvshows']
+			t = cleantitle.get(self.title.replace('&', 'and'))
+			show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
+			if show_meta: show_meta = show_meta[0]
+			else: raise Exception()
+			tvshowid = show_meta['tvshowid']
+			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
 			meta = py_tools.ensure_text(meta, errors='ignore')
-			meta = jsloads(meta)['result']['tvshows']
-			t = cleantitle.get(self.title)
-			meta = [i for i in meta if self.year == str(i['year']) and t == cleantitle.get(i['title'])][0]
-			tvshowid = meta['tvshowid']
-			poster = meta['thumbnail']
-			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
-			meta = py_tools.ensure_text(meta, errors='ignore')
-			meta = jsloads(meta)['result']['episodes'][0]
+			meta = jsloads(meta)['result']['episodes']
+			if meta: meta = meta[0]
+			else: raise Exception()
 			if 'mediatype' not in meta: meta.update({'mediatype': 'episode'})
 			if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
-			for k, v in control.iteritems(meta):
+			if 'mpaa' not in meta: meta.update({'mpaa': show_meta.get('mpaa')})
+			if 'premiered' not in meta: meta.update({'premiered': meta.get('firstaired')})
+			if 'year' not in meta: meta.update({'year': meta.get('firstaired')[:4]})
+			thumb = cleanLibArt(meta.get('art').get('thumb', ''))
+			season_poster = poster = cleanLibArt(meta.get('art').get('season.poster', '')) or self.poster
+			fanart = cleanLibArt(meta.get('art').get('tvshow.fanart', '')) or self.poster
+			banner = cleanLibArt(meta.get('art').get('tvshow.banner', ''))
+			clearart = cleanLibArt(meta.get('art').get('tvshow.clearart', ''))
+			clearlogo = cleanLibArt(meta.get('art').get('tvshow.clearlogo', ''))
+			discart = cleanLibArt(meta.get('art').get('discart'))
+			for k, v in iter(meta.items()):
 				if type(v) == list:
 					try: meta[k] = str(' / '.join([i for i in v]))
 					except: meta[k] = ''
@@ -170,11 +198,9 @@ class Player(xbmc.Player):
 					except: meta[k] = str(v)
 			if 'plugin' not in control.infoLabel('Container.PluginName'):
 				self.DBID = meta.get('episodeid')
-			thumb = meta['thumbnail']
-			return (poster, thumb, '', '', '', '', '', '', meta)
+			return (poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta)
 		except:
 			log_utils.error()
-			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = '', '', '', '', '', '', '', '', {'title': self.name}
 			return (poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta)
 
 	def getWatchedPercent(self):
@@ -254,7 +280,6 @@ class Player(xbmc.Player):
 		# self.onPlayBackEnded() # check, seems kodi may at times not issue "onPlayBackEnded" callback
 		# self.test_PlayBackEnded()
 
-
 	def libForPlayback(self):
 		if self.DBID is None: return
 		try:
@@ -284,7 +309,7 @@ class Player(xbmc.Player):
 			self.playback_resumed = True
 		if control.setting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
-		xbmc.log('[ plugin.video.venom ] onAVStarted callback', LOGNOTICE)
+		xbmc.log('[ plugin.video.venom ] onAVStarted callback', LOGINFO)
 
 	def onPlayBackStarted(self):
 		control.sleep(5000)
@@ -297,7 +322,7 @@ class Player(xbmc.Player):
 			self.playback_resumed = True
 		if control.setting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
-		xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', LOGNOTICE)
+		xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', LOGINFO)
 
 	def onPlayBackStopped(self):
 		if self.media_length == 0: return
@@ -315,7 +340,7 @@ class Player(xbmc.Player):
 			# control.sleep(500)
 		# control.playlist.clear()
 		# control.trigger_widget_refresh() # skinshortcuts handles widget refresh
-		xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGNOTICE)
+		xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGINFO)
 
 	def onPlayBackEnded(self):
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
@@ -325,17 +350,17 @@ class Player(xbmc.Player):
 			# control.refresh()
 			# control.sleep(500)
 		# control.trigger_widget_refresh() # skinshortcuts handles widget refresh
-		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', LOGNOTICE)
+		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', LOGINFO)
 
 	def test_PlayBackEnded(self):
-		xbmc.log('[ plugin.video.venom ] test_PlayBackEnded', LOGNOTICE)
+		xbmc.log('[ plugin.video.venom ] test_PlayBackEnded', LOGINFO)
 
 	def onPlayBackError(self):
 		control.homeWindow.clearProperty('venom.isplaying.playlist')
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 		log_utils.error()
 		sysexit(1)
-		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', LOGNOTICE)
+		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', LOGINFO)
 
 class PlayNext(xbmc.Player):
 	def __init__(self):
@@ -366,12 +391,9 @@ class PlayNext(xbmc.Player):
 
 	def getNext_meta(self):
 		try:
+			from urllib.parse import parse_qsl
 			current_position = control.playlist.getposition()
 			next_url = control.playlist[current_position + 1].getPath()
-			try: # Py2
-				from urlparse import parse_qsl
-			except ImportError: # Py3
-				from urllib.parse import parse_qsl
 			params = dict(parse_qsl(next_url.replace('?', '')))
 			next_meta = jsloads(params.get('meta'))
 			return next_meta
@@ -396,8 +418,7 @@ class PlayNext(xbmc.Player):
 class Subtitles:
 	def get(self, name, imdb, season, episode):
 		import gzip, codecs
-		try: from cStringIO import StringIO
-		except ImportError: from io import BytesIO as StringIO
+		from io import BytesIO
 		import xmlrpclib, re, base64
 		try:
 			langDict = {'Afrikaans': 'afr', 'Albanian': 'alb', 'Arabic': 'ara', 'Armenian': 'arm', 'Basque': 'baq', 'Bengali': 'ben', 'Bosnian': 'bos', 'Breton': 'bre', 'Bulgarian': 'bul', 'Burmese': 'bur', 'Catalan': 'cat', 'Chinese': 'chi', 'Croatian': 'hrv', 'Czech': 'cze', 'Danish': 'dan', 'Dutch': 'dut', 'English': 'eng', 'Esperanto': 'epo', 'Estonian': 'est', 'Finnish': 'fin', 'French': 'fre', 'Galician': 'glg', 'Georgian': 'geo', 'German': 'ger', 'Greek': 'ell', 'Hebrew': 'heb', 'Hindi': 'hin', 'Hungarian': 'hun', 'Icelandic': 'ice', 'Indonesian': 'ind', 'Italian': 'ita', 'Japanese': 'jpn', 'Kazakh': 'kaz', 'Khmer': 'khm', 'Korean': 'kor', 'Latvian': 'lav', 'Lithuanian': 'lit', 'Luxembourgish': 'ltz', 'Macedonian': 'mac', 'Malay': 'may', 'Malayalam': 'mal', 'Manipuri': 'mni', 'Mongolian': 'mon', 'Montenegrin': 'mne', 'Norwegian': 'nor', 'Occitan': 'oci', 'Persian': 'per', 'Polish': 'pol', 'Portuguese': 'por,pob', 'Portuguese(Brazil)': 'pob,por', 'Romanian': 'rum', 'Russian': 'rus', 'Serbian': 'scc', 'Sinhalese': 'sin', 'Slovak': 'slo', 'Slovenian': 'slv', 'Spanish': 'spa', 'Swahili': 'swa', 'Swedish': 'swe', 'Syriac': 'syr', 'Tagalog': 'tgl', 'Tamil': 'tam', 'Telugu': 'tel', 'Thai': 'tha', 'Turkish': 'tur', 'Ukrainian': 'ukr', 'Urdu': 'urd'}
@@ -441,7 +462,7 @@ class Subtitles:
 			content = [filter[0]['IDSubtitleFile'],]
 			content = server.DownloadSubtitles(token, content)
 			content = base64.b64decode(content['data'][0]['data'])
-			content = gzip.GzipFile(fileobj=StringIO(content)).read()
+			content = gzip.GzipFile(fileobj=BytesIO(content)).read()
 			subtitle = control.transPath('special://temp/')
 			subtitle = control.joinPath(subtitle, 'TemporarySubs.%s.srt' % lang)
 			codepage = codePageDict.get(lang, '')
@@ -499,7 +520,7 @@ class Bookmarks:
 		if control.setting('bookmarks.auto') == 'false':
 			select = control.yesnocustomDialog(label, scrobbble, '', str(name), 'Cancel Playback', control.lang(32503), control.lang(32501))
 			if select == 1: offset = '0'
-			elif select == -1 or select == 2: offset = '-1 '
+			elif select == -1 or select == 2: offset = '-1'
 		return offset
 
 	def reset(self, current_time, media_length, name, year='0'):

@@ -2162,7 +2162,7 @@ msgid "Min. Pre-emptive Res."
 msgstr ""
 
 msgctxt "#32660"
-msgid "Resume Point Saved..."
+msgid "Local Resume Point Saved..."
 msgstr ""
 
 msgctxt "#32661"

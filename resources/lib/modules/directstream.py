@@ -7,11 +7,7 @@ from binascii import b2a_hex
 from json import loads as jsloads
 from os import urandom
 import re
-try: #Py2
-	from urllib import unquote, urlencode
-	from urlparse import parse_qsl, parse_qs, urlparse
-except ImportError: #Py3
-	from urllib.parse import unquote, urlencode, parse_qsl, parse_qs, urlparse
+from urllib.parse import unquote, urlencode, parse_qsl, parse_qs, urlparse
 from resources.lib.modules import client
 
 

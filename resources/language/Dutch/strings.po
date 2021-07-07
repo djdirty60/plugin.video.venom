@@ -2162,8 +2162,8 @@ msgid "Min. Pre-emptive Res."
 msgstr "Min. Preventief onderzoek."
 
 msgctxt "#32660"
-msgid "Resume Point Saved..."
-msgstr "Hervattingspunt opgeslagen..."
+msgid "Local Resume Point Saved..."
+msgstr "Lokaal hervattingspunt opgeslagen..."
 
 msgctxt "#32661"
 msgid "Importing Trakt Collection..."

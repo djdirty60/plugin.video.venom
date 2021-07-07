@@ -5,10 +5,7 @@
 
 import re
 import requests
-try: #Py2
-	from urllib import quote_plus
-except ImportError: #Py3
-	from urllib.parse import quote_plus
+from urllib.parse import quote_plus
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleantitle
@@ -347,7 +344,7 @@ class tvshows:
 
 				showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 				if not showSeasons: return
-				showSeasons = dict((k, v) for k, v in control.iteritems(showSeasons) if v is not None and v != '') # removes empty keys so .update() doesn't over-write good meta
+				showSeasons = dict((k, v) for k, v in iter(showSeasons.items()) if v is not None and v != '') # removes empty keys so .update() doesn't over-write good meta
 				values.update(showSeasons)
 				if not values.get('imdb'): values['imdb'] = imdb
 				if not values.get('tmdb'): values['tmdb'] = tmdb
@@ -357,7 +354,7 @@ class tvshows:
 					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values} # DO NOT move this after "values = dict()" below or it becomes the same object and "del meta['item']['next']" removes it from both
-				values = dict((k,v) for k, v in control.iteritems(values) if v is not None and v != '')
+				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '')
 				self.list.append(values)
 				if 'next' in meta.get('item'): del meta['item']['next'] # next can not exist in metacache
 				self.meta.append(meta)

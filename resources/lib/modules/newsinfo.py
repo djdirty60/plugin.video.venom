@@ -3,10 +3,7 @@
 	Venom Add-on
 """
 
-try: #PY2
-	from urllib2 import urlopen, Request
-except ImportError: # PY3
-	from urllib.request import urlopen, Request
+from urllib.request import urlopen, Request
 from resources.lib.modules.control import addonPath, addonId, joinPath
 from resources.lib.windows.textviewer import TextViewerXML
 

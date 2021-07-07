@@ -2162,8 +2162,8 @@ msgid "Min. Pre-emptive Res."
 msgstr "Min. Wywłaszcz. Res."
 
 msgctxt "#32660"
-msgid "Resume Point Saved..."
-msgstr "Wznów punkt zapisany..."
+msgid "Local Resume Point Saved..."
+msgstr "Zapisano lokalny punkt wznowienia..."
 
 msgctxt "#32661"
 msgid "Importing Trakt Collection..."

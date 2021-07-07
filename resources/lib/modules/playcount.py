@@ -3,7 +3,7 @@
 	Venom Add-on
 """
 
-from resources.lib.modules.control import setting as getSetting, refresh as containerRefresh, addonInfo, progressDialogBG, monitor, iteritems
+from resources.lib.modules.control import setting as getSetting, refresh as containerRefresh, addonInfo, progressDialogBG, monitor
 from resources.lib.modules import trakt
 
 traktIndicators = trakt.getTraktIndicatorsInfo()
@@ -20,7 +20,6 @@ def getMovieIndicators(refresh=False):
 			indicators = trakt.cachesyncMovies(timeout=timeout)
 			return indicators
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
@@ -37,7 +36,6 @@ def getTVShowIndicators(refresh=False):
 			indicators = trakt.cachesyncTVShows(timeout=timeout)
 			return indicators
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
@@ -54,7 +52,6 @@ def getSeasonIndicators(imdb, refresh=False):
 			indicators = trakt.cachesyncSeason(imdb=imdb, timeout=timeout)
 			return indicators
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			indicators = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			return indicators
@@ -179,7 +176,6 @@ def markMovieDuringPlayback(imdb, watched):
 			# if trakt.getTraktAddonMovieInfo():
 				# trakt.markMovieAsNotWatched(imdb)
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('movie', name='', imdb_id=imdb)
@@ -197,7 +193,6 @@ def markEpisodeDuringPlayback(imdb, tvdb, season, episode, watched):
 			# if trakt.getTraktAddonEpisodeInfo():
 				# trakt.markEpisodeAsNotWatched(imdb, tvdb, season, episode)
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('tvshow', name='', imdb_id=imdb)
@@ -213,7 +208,6 @@ def movies(name, imdb, watched):
 			if int(watched) == 5: trakt.watch(name=name, imdb=imdb, refresh=True)
 			else: trakt.unwatch(name=name, imdb=imdb, refresh=True)
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('movie', name=name, imdb_id=imdb)
@@ -229,7 +223,6 @@ def episodes(name, imdb, tvdb, season, episode, watched):
 			if int(watched) == 5: trakt.watch(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=True)
 			else: trakt.unwatch(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode, refresh=True)
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			metaget.get_meta('tvshow', name=name, imdb_id=imdb)
@@ -250,7 +243,6 @@ def tvshows(tvshowtitle, imdb, tvdb, season, watched):
 			if watched == 5: trakt.watch(name=tvshowtitle, imdb=imdb, tvdb=tvdb, season=season, refresh=True)
 			else: trakt.unwatch(name=tvshowtitle, imdb=imdb, tvdb=tvdb, season=season, refresh=True)
 		else:
-			# from metahandler import metahandlers
 			check_metahandler()
 			from resources.lib.menus import episodes
 			from sys import exit as sysexit
@@ -290,7 +282,6 @@ def tvshows(tvshowtitle, imdb, tvdb, season, watched):
 def tvshowsUpdate(imdb, tvdb):
 	try:
 		if traktIndicators: return
-		# from metahandler import metahandlers
 		check_metahandler()
 		from resources.lib.menus import episodes
 
@@ -311,7 +302,7 @@ def tvshowsUpdate(imdb, tvdb):
 		countSeason = 0
 		metaget.get_seasons('', imdb, seasons.keys()) # Must be called to initialize the database.
 
-		for key, value in iteritems(seasons):
+		for key, value in iter(seasons.items()):
 			countEpisode = 0
 			for i in value:
 				countEpisode += int(metaget._get_watched_episode({'imdb_id': i['imdb'], 'season': i['season'], 'episode': i['episode'], 'premiered': ''}) == 5)

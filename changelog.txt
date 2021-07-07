@@ -1,6 +1,21 @@
 
+[B][COLOR red]Update - v6.0.3 - July 07, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Removed setting option to disable extended artwork in player.  This caused a number
+    of issues and I felt it was best served to remove it.[/I]
+[COLOR yellow]--[/COLOR][I] Removed setting option to disable extended artwork in player.  This caused a number
+    of issues and I felt it was best served to remove it.[/I]
+[COLOR yellow]--[/COLOR][I] Removed Auto playlist creation.  This is no longer used.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue with library playback missing artwork when AutoPlay method was chosen.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Venom service version check still pointing to old repo.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed resume issue when set to saved local resume points due to new yesnocustom dialog.[/I]
+[COLOR yellow]--[/COLOR][I] Allot of py2 code has now been removed, and more to follow.[/I]
+[COLOR yellow]--[/COLOR][I] Few tweaks to cloud scrapers that prevent false positive early scrape termination.[/I]
+[COLOR yellow]--[/COLOR][I] A number of settings called help files have been updated, please review them.[/I]
+
+
 [B][COLOR red]Update - v6.0.2 - July 05, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed newsinfo pointer ref to new repo location.[/I]
+
 
 [B][COLOR red]Update - v6.0.1 - July 04, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue with Trakt re_auth() failing.[/I]
@@ -15,6 +30,7 @@
     removed.  If you have no other addons requiring these they can be safely removed.[/I]
 [COLOR yellow]--[/COLOR][I] Uncached Torrents xml was missing some source identification icons, this is now fixed.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed player issue where item would occasionally not be marked as watched.[/I]
+
 
 [B][COLOR red]Update - v5.1.9 - June 19, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added new setting to "Sources Options" called "Terminate on Cloud Sources".  Now if cloud

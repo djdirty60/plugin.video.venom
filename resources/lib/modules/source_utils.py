@@ -4,10 +4,8 @@
 """
 
 import re
-try: #Py2
-	from urllib import unquote, unquote_plus
-except ImportError: #Py3
-	from urllib.parse import unquote, unquote_plus
+from urllib.parse import unquote, unquote_plus
+
 
 HDR = ['.hdr.', 'hdr10', 'hdr.10', '2160p.bluray.remux', 'uhd.bluray.2160p', '2160p.uhd.bluray', '2160p.bluray.hevc.truehd', '2160p.remux',
 			'2160p.bluray.hevc.dts.hd.ma']

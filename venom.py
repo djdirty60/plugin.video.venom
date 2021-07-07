@@ -4,10 +4,7 @@
 """
 
 from sys import argv
-try: #Py2
-	from urlparse import parse_qsl
-except ImportError: #Py3
-	from urllib.parse import parse_qsl
+from urllib.parse import parse_qsl
 from resources.lib.modules import router
 
 if __name__ == '__main__':

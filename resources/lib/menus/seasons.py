@@ -7,10 +7,7 @@ from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
-try: #Py2
-	from urllib import quote_plus
-except ImportError: #Py3
-	from urllib.parse import quote_plus
+from urllib.parse import quote_plus
 from resources.lib.database import cache
 from resources.lib.indexers import tmdb as tmdb_indexer
 from resources.lib.modules import cleangenre
@@ -137,7 +134,7 @@ class Seasons:
 					if i['unaired'] == 'true': label = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, label)
 				except: pass
 				systitle = quote_plus(title)
-				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
+				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				# setting mediatype to "season" causes "Infomation" and "play trailer" to not be available in some skins
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
@@ -179,8 +176,7 @@ class Seasons:
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
 				url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta, season)
-				try: item = control.item(label=label, offscreen=True)
-				except: item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				if unwatchedEnabled:

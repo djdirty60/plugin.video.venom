@@ -7,11 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
-try: #Py2
-	from urllib import quote_plus, urlencode
-	from urlparse import parse_qsl, urlparse, urlsplit
-except ImportError: #Py3
-	from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
+from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
@@ -717,28 +713,24 @@ class Episodes:
 		except: traktProgress = False
 		if traktProgress and control.setting('tvshows.direct') == 'false': progressMenu = control.lang(32015)
 		else: progressMenu = control.lang(32016)
-		if traktProgress: multi = True
+		if traktProgress: isMultiList = True
 		else:
 			try: multi = [i['tvshowtitle'] for i in items]
 			except: multi = []
-			multi = True if len([x for y, x in enumerate(multi) if x not in multi[:y]]) > 1 else False
+			isMultiList = True if len([x for y, x in enumerate(multi) if x not in multi[:y]]) > 1 else False
 			try:
-				if '/users/me/history/' in items[0]['next']: multi = True
+				if '/users/me/history/' in items[0]['next']: isMultiList = True
 			except: pass
 		upcoming_prependDate = control.setting('trakt.UpcomingProgress.prependDate') == 'true'
 		try: sysaction = items[0]['action']
 		except: sysaction = ''
 		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
 		multi_unwatchedEnabled = control.setting('multi.unwatched.enabled') == 'true'
-		playlistcreate = control.setting('auto.playlistcreate') == 'true'
-		disable_player_art = control.setting('disable.player.art') == 'true'
 		try: airEnabled = control.setting('tvshows.air.enabled') if 'ForceAirEnabled' not in items[0] else 'true'
 		except: airEnabled = 'false'
 		play_mode = control.setting('play.mode')
 		enable_playnext = control.setting('enable.playnext') == 'true'
-
-		isPlayable = 'false' if enable_playnext else 'true'
-
+		# isPlayable = 'false' if enable_playnext else 'true'
 		indicators = getTVShowIndicators(refresh=True)
 		isFolder = False if sysaction != 'episodes' else True
 		if airEnabled == 'true':
@@ -763,7 +755,7 @@ class Episodes:
 				if 'label' not in i: i['label'] = title
 				if (not i['label'] or i['label'] == '0'): label = '%sx%02d . %s %s' % (season, int(episode), 'Episode', episode)
 				else: label = '%sx%02d . %s' % (season, int(episode), i['label'])
-				if multi: label = '%s - %s' % (tvshowtitle, py_tools.ensure_str(label))
+				if isMultiList: label = '%s - %s' % (tvshowtitle, py_tools.ensure_str(label))
 				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
 				except: labelProgress = label
 				try:
@@ -784,7 +776,7 @@ class Episodes:
 						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
 					except: pass
 				systitle, systvshowtitle, syspremiered = quote_plus(title), quote_plus(tvshowtitle), quote_plus(premiered)
-				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
+				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'episode', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
@@ -827,8 +819,6 @@ class Episodes:
 				icon = meta.get('icon') or season_poster or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				if disable_player_art and (play_mode == '1' or enable_playnext): # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
-					for k in ('clearart', 'clearlogo'): meta.pop(k, None)
 				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb, 'banner': banner,
 						'clearlogo': meta.get('clearlogo', ''), 'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': thumb})
 				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
@@ -858,7 +848,7 @@ class Episodes:
 					url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s&art=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode, sysart)
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, syslabelProgress, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, syslabelProgress)))
-				if multi:
+				if isMultiList:
 					cm.append((tvshowBrowserMenu, 'Container.Update(%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s,return)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysart)))
 				if not isFolder:
 					if traktProgress: cm.append((progressMenu, 'Container.Update(%s)' % Folderurl))
@@ -872,11 +862,10 @@ class Episodes:
 ####################################
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', syslabelProgress, year, imdb)})
-				try: item = control.item(label=labelProgress, offscreen=True)
-				except: item = control.item(label=labelProgress)
+				item = control.item(label=labelProgress, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
-				if multi and (unwatchedEnabled and multi_unwatchedEnabled):
+				if isMultiList and (unwatchedEnabled and multi_unwatchedEnabled):
 					if 'ForceAirEnabled' not in i:
 						try:
 							count = getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
@@ -888,11 +877,7 @@ class Episodes:
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 						except: pass
 
-
 				item.setProperty('IsPlayable', 'true')
-				# item.setProperty('IsPlayable', isPlayable)
-
-
 				item.setProperty('tvshow.tmdb_id', tmdb)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				blabel = tvshowtitle + ' S%02dE%02d' % (int(season), int(episode))
@@ -920,7 +905,8 @@ class Episodes:
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
-				if playlistcreate: control.playlist.add(url=url, listitem=item)
+				# if not traktProgress or not isMultiList:
+					# if playlistcreate: control.playlist.add(url=url, listitem=item)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
@@ -939,15 +925,14 @@ class Episodes:
 					page = '  [I](%s)[/I]' % page
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				if '/users/me/history/' in url: url = '%s?action=calendar&url=%s' % (sysaddon, quote_plus(url))
-				try: item = control.item(label=nextMenu, offscreen=True)
-				except: item = control.item(label=nextMenu)
+				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except: pass
-		if multi and (unwatchedEnabled and multi_unwatchedEnabled): # Show multi episodes as show, in order to display unwatched count if enabled.
+		if isMultiList and (unwatchedEnabled and multi_unwatchedEnabled): # Show multi episodes as show, in order to display unwatched count if enabled.
 			control.content(syshandle, 'tvshows')
 			control.directory(syshandle, cacheToDisc=True)
 			views.setView('tvshows', {'skin.estuary': 55, 'skin.confluence': 500})
@@ -977,8 +962,7 @@ class Episodes:
 				cm = []
 				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-				try: item = control.item(label=name, offscreen=True)
-				except: item = control.item(label=name)
+				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 				item.addContextMenuItems(cm)

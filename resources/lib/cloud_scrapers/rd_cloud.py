@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
-# created by Venom (6-13-2021)
+# created by Venom (updated 7-04-2021)
 """
 	Venom Add-on
 """
 
 import re
-try: #Py2
-	from urlparse import parse_qs
-	from urllib import urlencode
-except ImportError: #Py3
-	from urllib.parse import parse_qs, urlencode
+from urllib.parse import parse_qs, urlencode
 from resources.lib.cloud_scrapers import cloud_utils
 from resources.lib.debrid import realdebrid
 from resources.lib.modules.control import setting as getSetting
@@ -103,6 +99,7 @@ class source:
 						if ignoreM2ts: continue
 						name = folder_name
 						if name in str(sources): continue
+						if all(not bool(re.search(i, rt)) for i in query_list): continue  # check if this newly added causes any movie titles that do not have the year to get dropped
 						is_m2ts = True
 						largest = sorted(folder_files, key=lambda k: k['bytes'], reverse=True)[0]
 						index_pos = folder_files.index(largest)

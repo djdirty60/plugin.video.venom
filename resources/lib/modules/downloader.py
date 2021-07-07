@@ -5,12 +5,8 @@
 
 import os
 import re
-try: #Py2
-	from urlparse import parse_qsl, urlparse
-	from urllib2 import urlopen, Request
-except ImportError: #Py3
-	from urllib.parse import parse_qsl, urlparse
-	from urllib.request import urlopen, Request
+from urllib.parse import parse_qsl, urlparse
+from urllib.request import urlopen, Request
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 # from resources.lib.modules.source_utils import supported_video_extensions

@@ -9,11 +9,7 @@ import re
 import _strptime # import _strptime to workaround python 2 bug with threads
 from sys import exit as sysexit, platform as sys_platform
 from time import time, sleep
-try: #Py2
-	from urllib import quote_plus, unquote
-	from urlparse import parse_qsl
-except ImportError: #Py3
-	from urllib.parse import quote_plus, parse_qsl, unquote
+from urllib.parse import quote_plus, parse_qsl, unquote
 try: from sqlite3 import dbapi2 as database
 except ImportError: from pysqlite2 import dbapi2 as database
 from resources.lib.database import metacache, providerscache
@@ -155,9 +151,9 @@ class Sources:
 			if self.mediatype == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
 			else: self.user = str(self.tmdb_key)
 			self.lang = control.apiLanguage()['tvdb']
-			meta1 = dict((k, v) for k, v in control.iteritems(meta) if v is not None and v != '') if meta else None
+			meta1 = dict((k, v) for k, v in iter(meta.items()) if v is not None and v != '') if meta else None
 			meta2 = metacache.fetch([{'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}], self.lang, self.user)[0]
-			if meta2 != self.ids: meta2 = dict((k, v) for k, v in control.iteritems(meta2) if v is not None and v != '')
+			if meta2 != self.ids: meta2 = dict((k, v) for k, v in iter(meta2.items()) if v is not None and v != '')
 			if meta1 is not None:
 				try:
 					if len(meta2) > len(meta1):
@@ -239,7 +235,7 @@ class Sources:
 			def sourcesDirMeta(metadata): # pass skin minimal meta needed
 				if not metadata: return metadata
 				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode']
-				return {k: v for k, v in control.iteritems(metadata) if k in allowed}
+				return {k: v for k, v in iter(metadata.items()) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
 
 			if items == uncached_items:
@@ -1164,10 +1160,8 @@ class Sources:
 		if len(torrent_List) == 0: return
 		def base32_to_hex(hash):
 			from base64 import b32decode
-			from resources.lib.modules import py_tools
 			log_utils.log('RD base32 hash: %s' % hash, __name__, log_utils.LOGDEBUG)
-			if py_tools.isPY3: hex = b32decode(hash).hex()
-			else: hex = b32decode(hash).encode('hex') 
+			hex = b32decode(hash).hex()
 			log_utils.log('RD base32_to_hex: %s' % hex, __name__, log_utils.LOGDEBUG)
 			return hex
 		try:

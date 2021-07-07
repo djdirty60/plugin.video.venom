@@ -10,11 +10,7 @@ import _strptime # import _strptime to workaround python 2 bug with threads
 from sys import argv, exit as sysexit
 try: from sqlite3 import dbapi2 as database
 except: from pysqlite2 import dbapi2 as database
-try: #Py2
-	from urlparse import parse_qsl
-	from urllib import quote_plus
-except ImportError: #Py3
-	from urllib.parse import parse_qsl, quote_plus
+from urllib.parse import parse_qsl, quote_plus
 from resources.lib.modules import control
 from resources.lib.modules import cleantitle
 from resources.lib.modules import library_sources
@@ -51,7 +47,7 @@ class lib_tools:
 	def write_file(path, content):
 		try:
 			path = control.legalFilename(path)
-			if not isinstance(content, py_tools.string_types):
+			if not isinstance(content, str):
 				content = py_tools.ensure_str(content)
 			file = control.openFile(path, 'w')
 			file.write(str(content))

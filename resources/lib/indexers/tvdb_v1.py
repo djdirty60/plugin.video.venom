@@ -8,14 +8,9 @@ from datetime import datetime
 import re
 import requests # seems faster than urlli2.urlopen
 import zipfile
-try: # Py2
-	# from urllib2 import urlopen
-	from urllib import quote_plus
-	from cStringIO import StringIO
-except ImportError: # Py3
-	# from urllib.request import urlopen
-	from urllib.parse import quote_plus
-	from io import BytesIO as StringIO
+# from urllib.request import urlopen
+from urllib.parse import quote_plus
+from io import BytesIO as StringIO
 from resources.lib.database import cache
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client

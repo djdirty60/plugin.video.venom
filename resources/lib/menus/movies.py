@@ -7,11 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
-try: #Py2
-	from urllib import quote_plus, urlencode
-	from urlparse import parse_qsl, urlparse, urlsplit
-except ImportError: #Py3
-	from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
+from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
@@ -717,7 +713,7 @@ class Movies:
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: values.update(extended_art)
-			values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)
 			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
@@ -730,7 +726,6 @@ class Movies:
 			control.hide() ; control.notification(title=32001, message=33049)
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
-		disable_player_art = control.setting('disable.player.art') == 'true'
 		play_mode = control.setting('play.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
@@ -745,6 +740,11 @@ class Movies:
 		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
 		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
 		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
+
+
+		from resources.lib.modules import log_utils
+
+
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -763,7 +763,7 @@ class Movies:
 						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_time)
 					except: pass
 				sysname, systitle = quote_plus(label), quote_plus(title)
-				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
+				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
@@ -775,8 +775,6 @@ class Movies:
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
-				if disable_player_art and play_mode == '1': # setResolvedUrl uses the selected ListItem so pop keys out here if user wants no player art
-					for k in ('clearart', 'clearlogo', 'discart'): meta.pop(k, None)
 				art.update({'icon': icon, 'thumb': thumb, 'banner': banner, 'poster': poster, 'fanart': fanart, 'landscape': landscape, 'clearlogo': meta.get('clearlogo', ''),
 								'clearart': meta.get('clearart', ''), 'discart': meta.get('discart', ''), 'keyart': meta.get('keyart', '')})
 				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3', 'trailer'): meta.pop(k, None)
@@ -810,8 +808,7 @@ class Movies:
 ####################################
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
-				try: item = control.item(label=labelProgress, offscreen=True)
-				except: item = control.item(label=labelProgress)
+				item = control.item(label=labelProgress, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb})
@@ -846,8 +843,7 @@ class Movies:
 					url = '%s?action=moviePage&url=%s' % (sysaddon, quote_plus(url))
 				elif u in self.tmdb_link:
 					url = '%s?action=tmdbmoviePage&url=%s' % (sysaddon, quote_plus(url))
-				try: item = control.item(label=nextMenu, offscreen=True)
-				except: item = control.item(label=nextMenu)
+				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
@@ -887,8 +883,7 @@ class Movies:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_moviesToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-				try: item = control.item(label=name, offscreen=True)
-				except: item = control.item(label=name)
+				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 				item.addContextMenuItems(cm)

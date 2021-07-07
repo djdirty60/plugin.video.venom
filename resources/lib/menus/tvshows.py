@@ -7,11 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
-try: #Py2
-	from urllib import quote_plus, urlencode
-	from urlparse import parse_qsl, urlparse, urlsplit
-except ImportError: #Py3
-	from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
+from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
@@ -706,7 +702,7 @@ class TVshows:
 			if not self.disable_fanarttv:
 				extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 				if extended_art: values.update(extended_art)
-			values = dict((k, v) for k, v in control.iteritems(values) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)
 			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
@@ -738,7 +734,7 @@ class TVshows:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
 				title = i.get('tvshowtitle') or i.get('title')
 				systitle = quote_plus(title)
-				meta = dict((k, v) for k, v in control.iteritems(i) if v is not None and v != '')
+				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				if unwatchedEnabled: trakt.seasonCount(imdb) # pre-cache season counts for the listed shows
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
@@ -785,8 +781,7 @@ class TVshows:
 				else: url = '%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)
 				if trailer: meta.update({'trailer': trailer})
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', systitle, year, imdb)})
-				try: item = control.item(label=title, offscreen=True)
-				except: item = control.item(label=title)
+				item = control.item(label=title, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				if unwatchedEnabled:
@@ -826,8 +821,7 @@ class TVshows:
 					url = '%s?action=tmdbTvshowPage&url=%s' % (sysaddon, quote_plus(url))
 				elif u in self.tvmaze_link:
 					url = '%s?action=tvmazeTvshowPage&url=%s' % (sysaddon, quote_plus(url))
-				try: item = control.item(label=nextMenu, offscreen=True)
-				except: item = control.item(label=nextMenu)
+				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
@@ -868,8 +862,7 @@ class TVshows:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowsToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-				try: item = control.item(label=name, offscreen=True)
-				except: item = control.item(label=name)
+				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
 				item.addContextMenuItems(cm)

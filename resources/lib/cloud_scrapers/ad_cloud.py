@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
-# created by Venom (6-13-2021)
+# created by Venom (updated 7-04-2021)
 """
 	Venom Add-on
 """
 
 import re
-try: #Py2
-	from urlparse import parse_qs
-	from urllib import urlencode
-except ImportError: #Py3
-	from urllib.parse import parse_qs, urlencode
+from urllib.parse import parse_qs, urlencode
 from resources.lib.cloud_scrapers import cloud_utils
 from resources.lib.debrid import alldebrid
 from resources.lib.modules.control import setting as getSetting
@@ -59,6 +55,7 @@ class source:
 			title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
 			title = title.replace('&', 'and').replace('Special Victims Unit', 'SVU')
 			aliases = data['aliases']
+
 			episode_title = data['title'] if 'tvshowtitle' in data else None
 			self.year = data['year']
 			hdlr = 'S%02dE%02d' % (int(data['season']), int(data['episode'])) if 'tvshowtitle' in data else self.year
@@ -103,6 +100,7 @@ class source:
 					if '.m2ts' in str(file.get('files')):
 						if ignoreM2ts: continue
 						if name in str(sources): continue
+						if all(not bool(re.search(i, rt)) for i in query_list): continue  # check if this newly added causes any movie titles that do not have the year to get dropped
 						is_m2ts = True
 						m2ts_files = [i for i in files if name == i.get('filename')]
 						largest = sorted(m2ts_files, key=lambda k: k['size'], reverse=True)[0]
