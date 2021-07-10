@@ -617,6 +617,10 @@ def router(params):
 					# import traceback
 					# traceback.print_exc()
 
+		elif action == "play_preScrapeNext":
+			from resources.lib.modules.player import PlayNext
+			PlayNext().prescrapeNext()
+
 		elif action == "play_nextWindowXML":
 			from resources.lib.modules.player import PlayNext
 			play_next = PlayNext()

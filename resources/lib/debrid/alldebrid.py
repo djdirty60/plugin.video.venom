@@ -347,10 +347,12 @@ class AllDebrid:
 			transfer_id = self.create_transfer(magnet_url)
 			transfer_info = self.list_transfer(transfer_id)
 			# log_utils.log('transfer_info=%s' % transfer_info)
-			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == '']
+			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == ''] #.m2ts file extension is not in "filename" so this fails
 			invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']
 			valid_results = [i for i in transfer_info.get('links') if not any(i.get('filename').lower().endswith(x) for x in invalids) and not i.get('link', '') == '']
-			if len(valid_results) == 0: return
+			if len(valid_results) == 0:
+				failed_reason = 'No valid video extension found'
+				raise Exception()
 
 			if season:
 				for item in valid_results:
@@ -382,7 +384,8 @@ class AllDebrid:
 				log_utils.log('AllDebrid: FAILED TO UNRESTRICT MAGNET %s : ' % magnet_url, __name__, log_utils.LOGWARNING)
 			return file_url
 		except:
-			log_utils.error('AllDebrid: Error RESOLVE MAGNET %s : ' % magnet_url)
+			if failed_reason != 'Unknown': log_utils.log('AllDebrid: Error RESOLVE MAGNET %s : (%s)' % (magnet_url, failed_reason))
+			else: log_utils.error('AllDebrid: Error RESOLVE MAGNET %s : ' % magnet_url)
 			if transfer_id: self.delete_transfer(transfer_id)
 			return None
 

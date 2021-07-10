@@ -50,7 +50,6 @@ class SyncMyAccounts:
 
 class ReuseLanguageInvokerCheck:
 	def run(self):
-		if control.getKodiVersion() < 18: return
 		control.log('[ plugin.video.venom ]  ReuseLanguageInvokerCheck Service Starting...', LOGINFO)
 		try:
 			import xml.etree.ElementTree as ET

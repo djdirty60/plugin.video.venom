@@ -691,7 +691,7 @@ msgid "Enable Episode File Size Limit"
 msgstr "Włącz limit rozmiaru pliku odcinka"
 
 msgctxt "#32167"
-msgid ""
+msgid "Limit wyszukiwania tytułów (filmy i programy telewizyjne)"
 msgstr ""
 
 msgctxt "#32168"

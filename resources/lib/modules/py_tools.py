@@ -12,15 +12,12 @@ from sys import version_info
 # class_types = type,
 # text_type = str
 # binary_type = bytes
-# def iteritems(d, **kw):
-	# return iter(d.items(**kw))
+
 
 def ensure_text(s, encoding='utf-8', errors='strict'):
 	try:
-		# if isinstance(s, binary_type):
 		if isinstance(s, bytes):
 			return s.decode(encoding, errors)
-		# elif isinstance(s, text_type):
 		elif isinstance(s, str):
 			return s
 	except:
@@ -29,10 +26,10 @@ def ensure_text(s, encoding='utf-8', errors='strict'):
 		return s
 
 def ensure_str(s, encoding='utf-8', errors='strict'):
-	from resources.lib.modules import log_utils
 	try:
 		if not isinstance(s, (str, bytes)):
-			return log_utils.log("not expecting type '%s'" % type(s), __name__, log_utils.LOGDEBUG)
+			from resources.lib.modules import log_utils
+			return log_utils.log('not expecting type : "%s"' % type(s), __name__, log_utils.LOGDEBUG)
 		# if isPY2 and isinstance(s, text_type):
 			# s = s.encode(encoding, errors)
 		# elif isPY3 and isinstance(s, binary_type):
@@ -40,6 +37,7 @@ def ensure_str(s, encoding='utf-8', errors='strict'):
 			s = s.decode(encoding, errors)
 		return s
 	except:
+		from resources.lib.modules import log_utils
 		log_utils.error()
 		return s
 

@@ -25,7 +25,14 @@ def get(title):
 
 def normalize(title):
 	try:
+
+		from resources.lib.modules import log_utils
+		log_utils.log('type(title)=%s' % type(title))
+
 		title = ''.join(c for c in unicodedata.normalize('NFKD', py_tools.ensure_text(py_tools.ensure_str(title))) if unicodedata.category(c) != 'Mn')
+		# params['query'] = unicodedata.normalize('NFKC', title) # from TMDb Helper
+		# title = ''.join(c for c in unicodedata.normalize('NFD', title) if unicodedata.category(c) != 'Mn')
+
 		return str(title)
 	except:
 		from resources.lib.modules import log_utils

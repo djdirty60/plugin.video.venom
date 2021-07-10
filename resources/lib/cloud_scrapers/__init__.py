@@ -13,6 +13,7 @@ def cloudSources():
 		sourceFolderLocation = os.path.dirname(__file__)
 		for loader, module_name, is_pkg in walk_packages([sourceFolderLocation]):
 			if is_pkg: continue
+			if 'cloud_utils' in module_name: continue
 			if enabledCheck(module_name):
 				try:
 					module = loader.find_module(module_name).load_module(module_name)
@@ -20,18 +21,20 @@ def cloudSources():
 				except Exception as e:
 					if debug_enabled:
 						from resources.lib.modules import log_utils
-						log_utils.log('Error: Loading module: "%s": %s' % (module_name, e), level=log_utils.LOGWARNING)
+						log_utils.log('Error: Loading cloud scraper module: "%s": %s' % (module_name, e), level=log_utils.LOGWARNING)
 		return sourceDict
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
 		return []
 
-def enabledCheck(module_name):
+def enabledCheck(cloud_scraper):
+	parent_dict = {'ad_cloud': 'alldebrid', 'pm_cloud': 'premiumize', 'rd_cloud': 'realdebrid'}
 	try:
-		if getSetting(module_name + '.enabled') == 'true': return True
+		parent_setting = parent_dict[cloud_scraper]
+		if getSetting(parent_setting + '.enable') == 'true' and getSetting(cloud_scraper + '.enabled') == 'true': return True
 		else: return False
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
-		return True
+		return False

@@ -26,8 +26,8 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 	try:
 		if not url: return None
 		if url.startswith('//'): url = 'http:' + url
-		try: url = py_tools.ensure_text(url, errors='ignore')
-		except: pass
+		# try: url = py_tools.ensure_text(url, errors='ignore')
+		# except: pass
 
 		if isinstance(post, dict):
 			post = bytes(urlencode(post), encoding='utf-8')

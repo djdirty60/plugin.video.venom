@@ -730,7 +730,6 @@ class Episodes:
 		except: airEnabled = 'false'
 		play_mode = control.setting('play.mode')
 		enable_playnext = control.setting('enable.playnext') == 'true'
-		# isPlayable = 'false' if enable_playnext else 'true'
 		indicators = getTVShowIndicators(refresh=True)
 		isFolder = False if sysaction != 'episodes' else True
 		if airEnabled == 'true':

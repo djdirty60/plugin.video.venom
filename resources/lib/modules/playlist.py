@@ -69,7 +69,7 @@ def playListItems():
 	limits =jsloads(result)['result']['limits']
 	total = limits['total']
 	if int(total) <= 0: return []
-	result = py_tools.ensure_text(result, errors='ignore')
+	# result = py_tools.ensure_text(result, errors='ignore')
 	result = jsloads(result)['result']['items']
 	try: return [i['label'] for i in result]
 	except: return []

@@ -37,7 +37,9 @@ class Sources:
 		self.sources = []
 		self.scraper_sources = []
 		self.uncached_chosen = False
+		self.isPrescrape = False
 		self.sourceFile = control.providercacheFile
+		self.enable_playnext = control.setting('enable.playnext') == 'true'
 		self.dev_mode = control.setting('dev.mode.enable') == 'true'
 		self.dev_disable_single = control.setting('dev.disable.single') == 'true'
 		# self.dev_disable_single_filter = control.setting('dev.disable.single.filter') == 'true'
@@ -56,6 +58,15 @@ class Sources:
 			control.notification(message=33034)
 			return
 		try:
+			preResolved_nextUrl = control.homeWindow.getProperty('venom.preResolved_nextUrl')
+			if preResolved_nextUrl != '':
+				log_utils.log('Playing preResolved_nextUrl=%s' % preResolved_nextUrl)
+				control.homeWindow.clearProperty('venom.preResolved_nextUrl')
+				try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
+				except: pass
+				from resources.lib.modules import player
+				return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, preResolved_nextUrl, meta)
+
 			if title: title = self.getTitle(title)
 			if tvshowtitle: tvshowtitle = self.getTitle(tvshowtitle)
 			control.homeWindow.clearProperty(self.metaProperty)
@@ -89,8 +100,8 @@ class Sources:
 			if tvshowtitle is not None: # get "total_seasons" and "season_isAiring" for Pack scrapers. 1st=passed meta, 2nd=matacache check, 3rd=request
 				self.mediatype = 'episode'
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
-			if rescrape: self.clr_item_providers(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
-			items = providerscache.get(self.getSources, 48, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
+			if rescrape: self.clr_item_providers(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
+			items = providerscache.get(self.getSources, 48, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
 
 			if not items:
 				self.url = url
@@ -99,14 +110,16 @@ class Sources:
 			filter = [] ; uncached_items = []
 			if control.setting('torrent.remove.uncached') == 'true':
 				uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
-				filter += [i for i in items if not re.match(r'^uncached.*torrent', i['source'])]
+				# filter += [i for i in items if not re.match(r'^uncached.*torrent', i['source'])]
+				filter += [i for i in items if i not in uncached_items]
 				if filter: pass
 				elif not filter:
 					if control.yesnoDialog('No cached torrents returned. Would you like to view the uncached torrents to cache yourself?', '', ''):
 						control.cancelPlayback()
 						select = '0'
 						self.uncached_chosen = True
-						filter += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
+						# filter += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
+						filter += uncached_items
 				items = filter
 				if not items:
 					self.url = url
@@ -114,7 +127,8 @@ class Sources:
 			else: uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 
 			if select is None:
-				if episode is not None and control.setting('enable.playnext') == 'true': select = '1'
+				# if episode is not None and control.setting('enable.playnext') == 'true': select = '1'
+				if episode is not None and self.enable_playnext: select = '1'
 				else: select = control.setting('play.mode')
 
 			title = tvshowtitle if tvshowtitle is not None else title
@@ -179,7 +193,7 @@ class Sources:
 			try:
 				if self.mediatype != 'movie': raise Exception()
 				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
-				meta = py_tools.ensure_text(meta, errors='ignore')
+				# meta = py_tools.ensure_text(meta, errors='ignore')
 				meta = jsloads(meta)['result']['movies']
 				t = cleantitle.get(self.title.replace('&', 'and'))
 				years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
@@ -201,7 +215,7 @@ class Sources:
 			try:
 				if self.mediatype != 'episode': raise Exception()
 				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
-				show_meta = py_tools.ensure_text(show_meta, errors='ignore')
+				# show_meta = py_tools.ensure_text(show_meta, errors='ignore')
 				show_meta = jsloads(show_meta)['result']['tvshows']
 				t = cleantitle.get(self.title.replace('&', 'and'))
 				show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
@@ -209,7 +223,7 @@ class Sources:
 				else: raise Exception()
 				tvshowid = show_meta['tvshowid']
 				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
-				meta = py_tools.ensure_text(meta, errors='ignore')
+				# meta = py_tools.ensure_text(meta, errors='ignore')
 				meta = jsloads(meta)['result']['episodes']
 				if meta: meta = meta[0]
 				else: raise Exception()
@@ -324,7 +338,84 @@ class Sources:
 		except:
 			log_utils.error('Error playItem: ')
 
-	def getSources(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, quality='HD', timeout=60):
+	def getSources(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta=None, preScrape=False):
+		if preScrape:
+			self.isPrescrape = True
+			if tvshowtitle is not None:
+				self.mediatype = 'episode'
+				self.meta = meta
+				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
+			return self.getSources_silent(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
+		else:
+			return self.getSources_dialog(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
+
+	def getSources_silent(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=60):
+		try:
+			self.prepareSources()
+			sourceDict = self.sourceDict
+			content = 'movie' if tvshowtitle is None else 'episode'
+			if content == 'movie': sourceDict = [(i[0], i[1], getattr(i[1], 'movie', None)) for i in sourceDict]
+			else: sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
+			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2] is not None]
+			if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
+			sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
+			sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
+			aliases = []
+			try:
+				# meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
+				meta = self.meta
+				aliases = meta.get('aliases', [])
+			except: pass
+			threads = []
+			if content == 'movie':
+				trakt_aliases = self.getAliasTitles(imdb, content)
+				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
+				except: pass
+				aliases = jsdumps(aliases)
+				for i in sourceDict:
+					threads.append(workers.Thread(self.getMovieSource, title, aliases, year, imdb, i[0], i[1]))
+			else:
+				from fenomscrapers import pack_sources
+				self.packDict = providerscache.get(pack_sources, 192)
+				trakt_aliases = self.getAliasTitles(imdb, content)
+				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
+				except: pass
+				aliases = jsdumps(aliases)
+				for i in sourceDict:
+					threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
+
+			s = [i[0] + (i[1],) for i in zip(sourceDict, threads)]
+			s = [(i[3].getName(), i[0], i[2]) for i in s]
+			sourcelabelDict = dict([(i[0], i[1].upper()) for i in s])
+			[i.start() for i in threads]
+
+			start_time = time()
+			end_time = start_time + timeout
+		except:
+			log_utils.error()
+			return
+
+		while True:
+			try:
+				if control.monitor.abortRequested(): return sysexit()
+				try:
+					info = [sourcelabelDict[x.getName()] for x in threads if x.is_alive() == True]
+					if len(info) == 0: break
+					current_time = time()
+					if end_time < current_time: break
+				except:
+					log_utils.error()
+					break
+				control.sleep(100)
+			except:
+				log_utils.error()
+		del threads[:] # Make sure any remaining providers are stopped.
+		self.sources.extend(self.scraper_sources)
+		if len(self.sources) > 0:
+			self.sourcesFilter()
+		return self.sources
+
+	def getSources_dialog(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=60):
 		try:
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
 			header = control.homeWindow.getProperty(self.labelProperty) + ': Scraping...'
@@ -465,6 +556,35 @@ class Sources:
 		self.sources.extend(self.scraper_sources)
 		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
+
+	def preResolve(self, next_sources, next_meta):
+		try:
+			control.homeWindow.setProperty(self.metaProperty, jsdumps(next_meta))
+			if control.setting('autoplay.sd') == 'true': next_sources = [i for i in next_sources if not i['quality'] in ['4K', '1080p', '720p']]
+			uncached_filter = [i for i in next_sources if re.match(r'^uncached.*torrent', i['source'])]
+			next_sources = [i for i in next_sources if i not in uncached_filter]
+		except:
+			log_utils.error()
+		u = ''
+		for i in range(len(next_sources)):
+			try:
+				control.sleep(100)
+				try:
+					if control.monitor.abortRequested(): return sysexit()
+					url = self.sourcesResolve(next_sources[i])
+					if not url:
+						log_utils.log('preResolve failed for : next_sources[i]=%s' % str(next_sources[i]))
+						continue
+					if not any(x in url.lower() for x in self.extensions):
+						log_utils.log('preResolve Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
+						raise Exception()
+					if not u: u = url
+					log_utils.log('PreResolved url : %s' % url)
+					if url: break
+				except: pass
+			except:
+				log_utils.error()
+		control.homeWindow.setProperty('venom.preResolved_nextUrl', u)
 
 	def prepareSources(self):
 		try:
@@ -657,19 +777,10 @@ class Sources:
 		finally:
 			dbcon.close() ; dbcon.close()
 
-	def alterSources(self, url, meta):
-		try:
-			if control.setting('play.mode') == '1' or (control.setting('enable.playnext') == 'true' and 'episode' in meta): url += '&select=0'
-			else: url += '&select=1'
-			control.execute('PlayMedia(%s)' % url)
-		except:
-			log_utils.error()
-
 	def sourcesFilter(self):
-		control.busy()
+		if not self.isPrescrape: control.busy()
 		quality = control.setting('hosts.quality') or '0'
-		if control.setting('remove.duplicates') == 'true':
-			self.sources = self.filter_dupes()
+		if control.setting('remove.duplicates') == 'true': self.sources = self.filter_dupes()
 		if self.mediatype == 'movie':
 			if control.setting('source.enable.msizelimit') == 'true':
 				try:
@@ -708,8 +819,6 @@ class Sources:
 		self.sources = [i for i in self.sources if not i in local]
 		direct = [i for i in self.sources if i['direct'] == True] # acct scrapers (skips cache check)
 		self.sources = [i for i in self.sources if not i in direct]
-		# cloud = [i for i in self.sources if i['source'] == 'cloud'] # don't need this atm, cloud scrapers set "direct: True" so they're add to "direct" above to skip cache check
-		# self.sources = [i for i in self.sources if not i in cloud]
 
 		from copy import deepcopy
 		deepcopy_sources = deepcopy(self.sources)
@@ -748,7 +857,6 @@ class Sources:
 		if threads:
 			[i.start() for i in threads]
 			[i.join() for i in threads]
-		# self.filter += cloud
 		self.filter += direct
 		self.filter += local
 		self.sources = self.filter
@@ -782,12 +890,10 @@ class Sources:
 		filter += [i for i in self.sources if i['quality'] == 'CAM']
 		self.sources = filter
 
-
 		filter = [] # new filter to place cloud files first
 		filter += [i for i in self.sources if i['source'] == 'cloud'] 
 		filter += [i for i in self.sources if i['source'] != 'cloud']
 		self.sources = filter
-
 
 		self.sources = self.sources[:4000]
 		control.hide()
@@ -821,7 +927,8 @@ class Sources:
 			if not larger: #sublist['name'] len() was larger so do not append
 				filter.append(i)
 		header = control.homeWindow.getProperty(self.labelProperty)
-		control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
+		if not self.enable_playnext:
+			control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
 		log_utils.log('Removed %s duplicate sources for (%s) from list' % (len(self.sources) - len(filter), control.homeWindow.getProperty(self.labelProperty)), level=log_utils.LOGDEBUG)
 		return filter
 
@@ -994,6 +1101,14 @@ class Sources:
 			return
 		except:
 			log_utils.error('Error sourceInfo: ' )
+
+	def alterSources(self, url, meta):
+		try:
+			if control.setting('play.mode') == '1' or (self.enable_playnext and 'episode' in meta): url += '&select=0'
+			else: url += '&select=1'
+			control.execute('PlayMedia(%s)' % url)
+		except:
+			log_utils.error()
 
 	def errorForSources(self):
 		try:
@@ -1183,8 +1298,8 @@ class Sources:
 		except:
 			log_utils.error()
 
-	def clr_item_providers(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered):
-		providerscache.remove(self.getSources, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered) # function cache removal of selected item ONLY
+	def clr_item_providers(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered):
+		providerscache.remove(self.getSources, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered) # function cache removal of selected item ONLY
 		try:
 			dbcon = database.connect(self.sourceFile)
 			dbcur = dbcon.cursor()

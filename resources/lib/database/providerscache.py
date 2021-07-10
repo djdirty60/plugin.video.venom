@@ -19,7 +19,9 @@ def get(function, duration, *args):
 	:param args: Optional arguments for the provided function
 	"""
 	try:
-		key = _hash_function(function, args)
+		rev_args = args[:9] # discard extra args after "premiered" in getSources() from hash/key so preScrape cache key is the same.
+		key = _hash_function(function, rev_args)
+
 		cache_result = cache_get(key)
 		if cache_result:
 			result = literal_eval(cache_result['value'])
@@ -131,6 +133,8 @@ def _hash_function(function_instance, *args):
 
 def _get_function_name(function_instance):
 	return re_sub(r'.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', repr(function_instance))
+# function=<function Sources.getConstants.<locals>.cache_prDict at 0x000001AE601D0AF0>
+# function=<bound method Sources.getSources of <resources.lib.modules.sources.Sources object at 0x000001AE66533670>>
 
 def _generate_md5(*args):
 	md5_hash = md5()

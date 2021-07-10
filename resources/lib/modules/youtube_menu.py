@@ -22,7 +22,7 @@ class youtube_menu(object):
 			req.add_header('User-Agent', self.agent)
 			response = urlopen(req)
 			link=response.read()
-			link = py_tools.ensure_text(link, errors='ignore')
+			# link = py_tools.ensure_text(link, errors='ignore')
 			response.close()
 			return link
 		except:

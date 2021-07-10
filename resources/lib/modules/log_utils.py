@@ -7,7 +7,7 @@ from datetime import datetime
 import inspect
 import unicodedata
 import xbmc
-from resources.lib.modules.control import getKodiVersion, transPath, setting as getSetting, lang, joinPath, existsPath
+from resources.lib.modules.control import transPath, setting as getSetting, lang, joinPath, existsPath
 from resources.lib.modules import py_tools
 
 LOGDEBUG = xbmc.LOGDEBUG #(0 in 19)  only prints when venom logging set to "Debug"
@@ -86,7 +86,14 @@ def error(message=None, exception=True):
 
 def normalize(title):
 	try:
+
+		xbmc.log('[ plugin.video.venom ] type(title)=%s' % type(title), 1)
+
 		return ''.join(c for c in unicodedata.normalize('NFKD', py_tools.ensure_text(py_tools.ensure_str(title))) if unicodedata.category(c) != 'Mn')
+		# return unicodedata.normalize('NFKC', title) # from TMDb Helper
+		# return ''.join(c for c in unicodedata.normalize('NFD', title) if unicodedata.category(c) != 'Mn')
+		# return u''.join(c for c in unicodedata.normalize('NFKD', ensure_text(title)) if c in printable)
+
 	except:
 		error()
 		return title

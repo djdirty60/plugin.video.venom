@@ -691,7 +691,7 @@ msgid "Enable Episode File Size Limit"
 msgstr "Limiet voor afleveringsbestandsgrootte inschakelen"
 
 msgctxt "#32167"
-msgid ""
+msgid "Titel Zoeklimiet (films en tv-programma's)"
 msgstr ""
 
 msgctxt "#32168"

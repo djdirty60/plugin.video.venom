@@ -24,13 +24,14 @@ class Player(xbmc.Player):
 	def __init__(self):
 		xbmc.Player.__init__(self)
 		self.play_next_triggered = False
+		self.preScrape_triggered = False
+		self.playback_resumed = False
+		self.av_started = False
 		self.media_type = None
 		self.offset = '0'
 		self.media_length = 0
 		self.current_time = 0
 		self.meta = {}
-		self.playback_resumed = False
-		self.av_started = False
 		self.enable_playnext = control.setting('enable.playnext') == 'true'
 		self.playnext_time = int(control.setting('playnext.time'))
 
@@ -134,7 +135,7 @@ class Player(xbmc.Player):
 			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = '', '', '', '', '', '', '', '', {'title': self.name}
 			if self.media_type != 'movie': raise Exception()
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
-			meta = py_tools.ensure_text(meta, errors='ignore')
+			# meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['movies']
 			t = cleantitle.get(self.title.replace('&', 'and'))
 			years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
@@ -165,7 +166,7 @@ class Player(xbmc.Player):
 		try:
 			if self.media_type != 'episode': raise Exception()
 			show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
-			show_meta = py_tools.ensure_text(show_meta, errors='ignore')
+			# show_meta = py_tools.ensure_text(show_meta, errors='ignore')
 			show_meta = jsloads(show_meta)['result']['tvshows']
 			t = cleantitle.get(self.title.replace('&', 'and'))
 			show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
@@ -173,7 +174,7 @@ class Player(xbmc.Player):
 			else: raise Exception()
 			tvshowid = show_meta['tvshowid']
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
-			meta = py_tools.ensure_text(meta, errors='ignore')
+			# meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['episodes']
 			if meta: meta = meta[0]
 			else: raise Exception()
@@ -267,11 +268,16 @@ class Player(xbmc.Player):
 							playcount.markEpisodeDuringPlayback(self.imdb, self.tvdb, self.season, self.episode, '5')
 						if self.enable_playnext and not self.play_next_triggered:
 							if int(control.playlist.size()) > 1:
+								if self.preScrape_triggered == False:
+									xbmc.executebuiltin('RunPlugin(plugin://plugin.video.venom/?action=play_preScrapeNext)')
+									self.preScrape_triggered = True
 								remaining_time = self.getRemainingTime()
 								if remaining_time < (self.playnext_time + 1) and remaining_time != 0:
 									xbmc.executebuiltin('RunPlugin(plugin://plugin.video.venom/?action=play_nextWindowXML)')
 									self.play_next_triggered = True
-					except: pass
+					except:
+						log_utils.error()
+						pass
 					xbmc.sleep(1000)
 			except:
 				log_utils.error()
@@ -327,7 +333,8 @@ class Player(xbmc.Player):
 	def onPlayBackStopped(self):
 		if self.media_length == 0: return
 		try:
-			control.homeWindow.clearProperty('venom.isplaying.playlist')
+			control.homeWindow.clearProperty('venom.isplaying.playlist') # not used atm
+			control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 			Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 			if control.setting('trakt.scrobble') == 'true':
 				Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode)
@@ -413,6 +420,27 @@ class PlayNext(xbmc.Player):
 		window.run()
 		del window
 		self.play_next_triggered = True
+
+	def prescrapeNext(self):
+		try:
+			if control.playlist.size() > 0 and control.playlist.getposition() != (control.playlist.size() - 1):
+				from resources.lib.modules import sources
+				from resources.lib.database import providerscache
+				next_meta=self.getNext_meta()
+				title = next_meta.get('title')
+				year = next_meta.get('year')
+				imdb = next_meta.get('imdb')
+				tmdb = next_meta.get('tmdb')
+				tvdb = next_meta.get('tvdb')
+				season = next_meta.get('season')
+				episode = next_meta.get('episode')
+				tvshowtitle = next_meta.get('tvshowtitle')
+				premiered = next_meta.get('premiered')
+				next_sources = providerscache.get(sources.Sources().getSources, 48, title, year, imdb, tmdb, tvdb, str(season), str(episode), tvshowtitle, premiered, next_meta, True)
+				if not self.isPlayingVideo(): return
+				sources.Sources().preResolve(next_sources, next_meta)
+		except:
+			log_utils.error()
 
 
 class Subtitles:

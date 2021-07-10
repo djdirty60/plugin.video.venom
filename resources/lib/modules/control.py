@@ -16,10 +16,6 @@ import xbmcplugin
 import xbmcvfs
 import xml.etree.ElementTree as ET
 
-def getKodiVersion(full=False):
-	if full: return xbmc.getInfoLabel("System.BuildVersion")
-	else: return int(xbmc.getInfoLabel("System.BuildVersion")[:2])
-
 pythonVersion = '{}.{}.{}'.format(version_info[0], version_info[1], version_info[2])
 addon = xbmcaddon.Addon
 AddonID = xbmcaddon.Addon().getAddonInfo('id')
@@ -84,6 +80,9 @@ cacheFile = joinPath(dataPath, 'cache.db')
 traktSyncFile = joinPath(dataPath, 'traktSync.db')
 trailer = 'plugin://plugin.video.youtube/play/?video_id=%s'
 
+def getKodiVersion(full=False):
+	if full: return xbmc.getInfoLabel("System.BuildVersion")
+	else: return int(xbmc.getInfoLabel("System.BuildVersion")[:2])
 
 def setting(id, fallback=None):
 	try: settings_dict = jsloads(homeWindow.getProperty('venom_settings'))
@@ -107,10 +106,7 @@ def make_settings_dict(): # service runs upon a setting change
 		for item in root:
 			dict_item = {}
 			setting_id = item.get('id')
-			# if getKodiVersion() >= 18: setting_value = item.text
-			# else: setting_value = item.get('value')
 			setting_value = item.text
-
 			if setting_value is None: setting_value = ''
 			dict_item = {setting_id: setting_value}
 			settings_dict.update(dict_item)
@@ -220,7 +216,7 @@ def notification(title=None, message=None, icon=None, time=3000, sound=(setting(
 	else: heading = str(title)
 	if isinstance(message, int): body = lang(message)
 	else: body = str(message)
-	if icon is None or icon == '' or icon == 'default': icon = addonIcon()
+	if not icon or icon == 'default': icon = addonIcon()
 	elif icon == 'INFO': icon = xbmcgui.NOTIFICATION_INFO
 	elif icon == 'WARNING': icon = xbmcgui.NOTIFICATION_WARNING
 	elif icon == 'ERROR': icon = xbmcgui.NOTIFICATION_ERROR
@@ -253,9 +249,12 @@ def context(items=None, labels=None):
 		else: return False
 	else: return dialog.contextmenu(labels)
 
+
+####################################################
+# --- Built-in
+####################################################
 def busy():
-	if getKodiVersion() >= 18: return execute('ActivateWindow(busydialognocancel)')
-	else: return execute('ActivateWindow(busydialog)')
+	return execute('ActivateWindow(busydialognocancel)')
 
 def hide():
 	execute('Dialog.Close(busydialog)')
@@ -266,6 +265,15 @@ def closeAll():
 
 def closeOk():
 	return execute('Dialog.Close(okdialog,true)')
+
+def refresh():
+	return execute('Container.Refresh')
+
+def queueItem():
+	return execute('Action(Queue)')
+
+def refreshRepos():
+	return execute('UpdateAddonRepos')
 ########################
 
 def cancelPlayback():
@@ -277,12 +285,6 @@ def cancelPlayback():
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
-
-def refresh():
-	return execute('Container.Refresh')
-
-def queueItem():
-	return execute('Action(Queue)')
 
 def apiLanguage(ret_name=None):
 	langDict = {'Bulgarian': 'bg', 'Chinese': 'zh', 'Croatian': 'hr', 'Czech': 'cs', 'Danish': 'da', 'Dutch': 'nl', 'English': 'en', 'Finnish': 'fi',

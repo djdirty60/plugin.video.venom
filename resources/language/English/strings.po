@@ -691,7 +691,7 @@ msgid "Enable Episode File Size Limit"
 msgstr ""
 
 msgctxt "#32167"
-msgid ""
+msgid "Title Search limit (Movies and TVShows)"
 msgstr ""
 
 msgctxt "#32168"
