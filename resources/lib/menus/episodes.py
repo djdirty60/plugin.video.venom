@@ -14,7 +14,6 @@ from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverlay, getShowCount
-from resources.lib.modules import py_tools
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
@@ -394,7 +393,7 @@ class Episodes:
 				values['added'] = item.get('show').get('updated_at')
 				try: values['lastplayed'] = item.get('last_watched_at')
 				except: values['lastplayed'] = ''
-				values['tvshowtitle'] = py_tools.ensure_str(item['show']['title'])
+				values['tvshowtitle'] = item['show']['title']
 				if not values['tvshowtitle']: continue
 				ids = item.get('show', {}).get('ids', {})
 				values['imdb'] = str(ids.get('imdb', '')) if ids.get('imdb') else ''
@@ -520,14 +519,14 @@ class Episodes:
 		for item in items:
 			try:
 				if 'show' not in item or 'episode' not in item: continue
-				title = py_tools.ensure_str(item['episode']['title'])
+				title = item['episode']['title']
 				if not title: continue
 				try:
 					season = item['episode']['season']
 					episode = item['episode']['number']
 				except: continue
 				if not self.showspecials and season == 0: continue
-				tvshowtitle = py_tools.ensure_str(item.get('show').get('title'))
+				tvshowtitle = item.get('show').get('title')
 				if not tvshowtitle: continue
 				year = str(item.get('show').get('year'))
 				try: progress = max(0, min(1, item['progress'] / 100.0))
@@ -554,7 +553,6 @@ class Episodes:
 				votes = str(format(int(item.get('episode').get('votes')),',d'))
 				mpaa = item.get('show').get('certification')
 				plot = item['episode']['overview'] or item['show']['overview']
-				plot = py_tools.ensure_str(plot)
 				if self.lang != 'en':
 					try:
 						trans_item = trakt.getTVShowTranslation(imdb, lang=self.lang, season=season, episode=episode,  full=True)
@@ -629,7 +627,7 @@ class Episodes:
 				if not item['show']['language']: continue
 				if 'english' not in item['show']['language'].lower(): continue
 				if limit and 'scripted' not in item['show']['type'].lower(): continue
-				values['title'] = py_tools.ensure_str(item.get('name'))
+				values['title'] = item.get('name')
 				values['season'] = item['season']
 				if not values['season']: continue
 				if not self.showspecials and values['season'] == 0: continue
@@ -754,7 +752,7 @@ class Episodes:
 				if 'label' not in i: i['label'] = title
 				if (not i['label'] or i['label'] == '0'): label = '%sx%02d . %s %s' % (season, int(episode), 'Episode', episode)
 				else: label = '%sx%02d . %s' % (season, int(episode), i['label'])
-				if isMultiList: label = '%s - %s' % (tvshowtitle, py_tools.ensure_str(label))
+				if isMultiList: label = '%s - %s' % (tvshowtitle, label)
 				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
 				except: labelProgress = label
 				try:

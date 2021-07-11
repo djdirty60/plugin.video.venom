@@ -10,11 +10,10 @@ from sys import version_info
 from time import sleep
 from resources.lib.database import cache
 from resources.lib.modules import dom_parser
-from resources.lib.modules import py_tools
 from resources.lib.modules import workers
-from http import cookiejar as cookielib
+from http import cookiejar
 from html import unescape
-from io import BytesIO as StringIO
+from io import BytesIO
 import urllib.request as urllib2
 from urllib.parse import quote_plus, urlencode, parse_qs, urlparse, urljoin
 from urllib.response import addinfourl
@@ -26,8 +25,6 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 	try:
 		if not url: return None
 		if url.startswith('//'): url = 'http:' + url
-		# try: url = py_tools.ensure_text(url, errors='ignore')
-		# except: pass
 
 		if isinstance(post, dict):
 			post = bytes(urlencode(post), encoding='utf-8')
@@ -41,7 +38,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			urllib2.install_opener(opener)
 
 		if output == 'cookie' or output == 'extended' or close is not True:
-			cookies = cookielib.LWPCookieJar()
+			cookies = cookiejar.LWPCookieJar()
 			handlers += [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
 			opener = urllib2.build_opener(*handlers)
 			urllib2.install_opener(opener)
@@ -141,7 +138,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 					cf_result = response.read(5242880)
 					try: encoding = response.headers["Content-Encoding"]
 					except: encoding = None
-					if encoding == 'gzip': cf_result = gzip.GzipFile(fileobj=StringIO(cf_result)).read()
+					if encoding == 'gzip': cf_result = gzip.GzipFile(fileobj=BytesIO(cf_result)).read()
 
 					if flare and 'cloudflare' in str(response.info()).lower():
 						from resources.lib.modules import log_utils
@@ -226,9 +223,9 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			else: result = response.read(5242880)
 		try: encoding = response.headers["Content-Encoding"]
 		except: encoding = None
-		if encoding == 'gzip': result = gzip.GzipFile(fileobj=StringIO(result)).read()
+		if encoding == 'gzip': result = gzip.GzipFile(fileobj=BytesIO(result)).read()
 		if not as_bytes:
-			result = py_tools.ensure_text(result, errors='ignore')
+			result = result.decode('utf-8')
 
 		if not as_bytes and 'sucuri_cloudproxy_js' in result: # who da fuck?
 			su = sucuri().get(result)
@@ -241,7 +238,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			else: result = response.read(5242880)
 			try: encoding = response.headers["Content-Encoding"]
 			except: encoding = None
-			if encoding == 'gzip': result = gzip.GzipFile(fileobj=StringIO(result)).read()
+			if encoding == 'gzip': result = gzip.GzipFile(fileobj=BytesIO(result)).read()
 
 		if not as_bytes and 'Blazingfast.io' in result and 'xhr.open' in result: # who da fuck?
 			netloc = '%s://%s' % (urlparse(url).scheme, urlparse(url).netloc)
@@ -304,7 +301,7 @@ def _get_result(response, limit=None):
 		else: result = response.read(5242880)
 		try: encoding = response.headers["Content-Encoding"]
 		except: encoding = None
-		if encoding == 'gzip': result = gzip.GzipFile(fileobj=StringIO(result)).read()
+		if encoding == 'gzip': result = gzip.GzipFile(fileobj=BytesIO(result)).read()
 		return result
 	except:
 		from resources.lib.modules import log_utils
@@ -396,7 +393,7 @@ class cfcookie:
 				result = response.read(5242880)
 				try: encoding = response.headers["Content-Encoding"]
 				except: encoding = None
-				if encoding == 'gzip': result = gzip.GzipFile(fileobj=StringIO(result)).read()
+				if encoding == 'gzip': result = gzip.GzipFile(fileobj=BytesIO(result)).read()
 
 			jschl = re.findall(r'name\s*=\s*["\']jschl_vc["\']\s*value\s*=\s*["\'](.+?)["\']/>', result, re.I)[0]
 			init = re.findall(r'setTimeout\(function\(\){\s*.*?.*:(.*?)};', result, re.I)[-1]
@@ -417,7 +414,7 @@ class cfcookie:
 				passval = re.findall(r'name\s*=\s*["\']pass["\']\s*value\s*=\s*["\'](.*?)["\']', result, re.I)[0]
 				query = '%s/cdn-cgi/l/chk_jschl?pass=%s&jschl_vc=%s&jschl_answer=%s' % (netloc, quote_plus(passval), jschl, answer)
 				sleep(6)
-			cookies = cookielib.LWPCookieJar()
+			cookies = cookiejar.LWPCookieJar()
 			handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
 			opener = urllib2.build_opener(*handlers)
 			opener = urllib2.install_opener(opener)

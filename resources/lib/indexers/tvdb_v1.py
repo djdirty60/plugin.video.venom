@@ -4,24 +4,20 @@
 """
 
 from datetime import datetime
-# import time
 import re
 import requests # seems faster than urlli2.urlopen
 import zipfile
 # from urllib.request import urlopen
 from urllib.parse import quote_plus
-from io import BytesIO as StringIO
+from io import BytesIO
 from resources.lib.database import cache
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import py_tools
-
 
 lang = control.apiLanguage()['tvdb']
 api_key = control.setting('tvdb.api.key')
-
 imdb_user = control.setting('imdb.user').replace('ur', '')
 user = str(imdb_user) + str(api_key)
 
@@ -29,7 +25,6 @@ baseUrl = 'https://thetvdb.com'
 info_link = '%s/api/%s/series/%s/%s.xml' % (baseUrl, api_key, '%s', '%s')
 all_info_link = '%s/api/%s/series/%s/all/%s.xml' % (baseUrl, api_key, '%s', '%s')
 zip_link = '%s/api/%s/series/%s/all/%s.zip' % (baseUrl, api_key, '%s', '%s')
-
 by_imdb = '%s/api/GetSeriesByRemoteID.php?imdbid=%s' % (baseUrl, '%s')
 by_seriesname = '%s/api/GetSeries.php?seriesname=%s' % (baseUrl, '%s')
 imageUrl = '%s/banners/' % baseUrl
@@ -45,22 +40,22 @@ def getZip(tvdb, art_xml=None, actors_xml=None):
 	try:
 		# data = urlopen(url, timeout=30).read()
 		data = requests.get(url, timeout=30, verify=True).content # test .content vs. .text
-		zip = zipfile.ZipFile(StringIO(data))
-		result = py_tools.six_decode(zip.read('%s.xml' % lang))
+		zip = zipfile.ZipFile(BytesIO(data))
+		result = zip.read('%s.xml' % lang).decode('utf-8')
 		if not art_xml and not actors_xml:
 			zip.close()
 			return result
 		elif art_xml and not actors_xml:
-			artwork = py_tools.six_decode(zip.read('banners.xml'))
+			artwork = zip.read('banners.xml').decode('utf-8')
 			zip.close()
 			return (result, artwork)
 		elif actors_xml and not art_xml:
-			actors = py_tools.six_decode(zip.read('actors.xml'))
+			actors = zip.read('actors.xml').decode('utf-8')
 			zip.close()
 			return (result, actors)
 		else:
-			artwork = py_tools.six_decode(zip.read('banners.xml'))
-			actors = py_tools.six_decode(zip.read('actors.xml'))
+			artwork = zip.read('banners.xml').decode('utf-8')
+			actors = zip.read('actors.xml').decode('utf-8')
 			zip.close()
 			return (result, artwork, actors)
 	except:
@@ -80,7 +75,7 @@ def parseAll(tvdb, limit):
 			# url = zip_link % (tvdb, lang)
 			# # data = urlopen(url, timeout=30).read()
 			# data = requests.get(url, timeout=30).content # test .content vs. .text
-			# zip = zipfile.ZipFile(StringIO(data))
+			# zip = zipfile.ZipFile(BytesIO(data))
 			# result2 = zip.read('%s.xml' % lang)
 			# zip.close()
 		# else: result2 = result
@@ -146,7 +141,6 @@ def parseAll(tvdb, limit):
 		castandart = parseActors(actors)
 		label = client.replaceHTMLCodes(client.parseDOM(item, 'SeriesName')[0])
 		plot = client.replaceHTMLCodes(client.parseDOM(item, 'Overview')[0])
-		plot = py_tools.ensure_str(plot)
 	except:
 		log_utils.error()
 
@@ -190,7 +184,6 @@ def parseAll(tvdb, limit):
 	for item in episodes:
 		try:
 			title = client.replaceHTMLCodes(client.parseDOM(item, 'EpisodeName')[0])
-			title = py_tools.ensure_str(title)
 			premiered = client.replaceHTMLCodes(client.parseDOM(item, 'FirstAired')[0]) or ''
 			# Show Unaired items.
 			unaired = ''
@@ -231,13 +224,12 @@ def parseAll(tvdb, limit):
 
 			rating = client.replaceHTMLCodes(client.parseDOM(item, 'Rating')[0])
 			director = client.replaceHTMLCodes(client.parseDOM(item, 'Director')[0])
-			director = ' / '.join([x for x in director.split('|') if x != '']) # check if this needs ensure_str()
+			director = ' / '.join([x for x in director.split('|') if x != ''])
 			writer = client.replaceHTMLCodes(client.parseDOM(item, 'Writer')[0]) 
-			writer = ' / '.join([x for x in writer.split('|') if x != '']) # check if this needs ensure_str()
+			writer = ' / '.join([x for x in writer.split('|') if x != ''])
 			label = client.replaceHTMLCodes(client.parseDOM(item, 'EpisodeName')[0])
 
 			episodeplot = client.replaceHTMLCodes(client.parseDOM(item, 'Overview')[0]) or plot
-			episodeplot = py_tools.ensure_str(episodeplot)
 
 			try: seasoncount = counts[season]
 			except: seasoncount = None
@@ -283,7 +275,6 @@ def getSeries_by_id(tvdb):
 		except: imdb = ''
 
 		title = client.replaceHTMLCodes(client.parseDOM(item, 'SeriesName')[0])
-		title = py_tools.ensure_str(title)
 
 		year = client.parseDOM(item, 'FirstAired')[0]
 		year = re.compile(r'(\d{4})').findall(year)[0]
@@ -301,7 +292,6 @@ def getSeries_by_id(tvdb):
 		mpaa = client.parseDOM(item, 'ContentRating')[0]
 
 		plot = client.replaceHTMLCodes(client.parseDOM(item, 'Overview')[0])
-		plot = py_tools.ensure_str(plot)
 
 		status = client.parseDOM(item, 'Status')[0]
 		if not status: status = 'Ended'
@@ -362,8 +352,8 @@ def parseActors(actors):
 		for actor in root.iter('Actor'):
 			person = [name.text for name in actor]
 			image = person[1]
-			name = py_tools.ensure_str(client.replaceHTMLCodes(person[2])) or ''
-			role = py_tools.ensure_str(client.replaceHTMLCodes(person[3])) or ''
+			name = client.replaceHTMLCodes(person[2]) or ''
+			role = client.replaceHTMLCodes(person[3]) or ''
 			try: castandart.append({'name': name, 'role': role, 'thumbnail': ((imageUrl + image) if image else '')})
 			except: pass
 			if len(castandart) == 150: break # cast seems to have a limit and a show like "Survivor" has 500+ actors and breaks
@@ -378,7 +368,7 @@ def getSeries_ByIMDB(title, year, imdb):
 		url = by_imdb % imdb
 		result = client.request(url, timeout='10')
 		# result = requests.get(url, timeout=10).content # test .content vs. .text
-		# result = py_tools.six_decode(result)
+		# result = result.decode('utf-8')
 		result = re.sub(r'[^\x00-\x7F]+', '', result)
 		result = client.replaceHTMLCodes(result)
 		result = client.parseDOM(result, 'Series')
@@ -401,7 +391,7 @@ def getSeries_ByName(title, year):
 		url = by_seriesname % (quote_plus(title))
 		result = client.request(url, timeout='10')
 		# result = requests.get(url, timeout=10).content # test .content vs. .text
-		# result = py_tools.six_decode(result)
+		# result = result.decode('utf-8')
 		result = re.sub(r'[^\x00-\x7F]+', '', result)
 		result = client.replaceHTMLCodes(result)
 		result = client.parseDOM(result, 'Series')
@@ -451,7 +441,7 @@ def get_counts(tvdb):
 	try:
 		result = client.request(url, timeout='10')
 		# result = requests.get(url, timeout=10).content # test .content vs. .text
-		# result = py_tools.six_decode(result)
+		# result = result.decode('utf-8')
 		result = result.split('<Episode>')
 		episodes = [i for i in result if '<EpisodeNumber>' in i]
 		if control.setting('tv.specials') == 'true':
@@ -724,9 +714,9 @@ def _seasonCount(tvshowtitle, year, imdb, tvdb):
 			# mpaa = client.parseDOM(item2, 'ContentRating')[0]
 
 			# director = client.replaceHTMLCodes(client.parseDOM(item, 'Director')[0])
-			# director = ' / '.join([x for x in director.split('|') if x != '']) # check if this needs ensure_str()
+			# director = ' / '.join([x for x in director.split('|') if x != ''])
 			# writer = client.replaceHTMLCodes(client.parseDOM(item, 'Writer')[0]) 
-			# writer = ' / '.join([x for x in writer.split('|') if x != '']) # check if this needs ensure_str()
+			# writer = ' / '.join([x for x in writer.split('|') if x != ''])
 
 			## castandart = parseActors(actors) or []
 			# castandart = cache.get(parseActors, 96, actors) or []

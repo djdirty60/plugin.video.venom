@@ -8,7 +8,6 @@ from sys import argv
 from urllib.request import urlopen, Request
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import py_tools
 
 
 class youtube_menu(object):
@@ -21,8 +20,7 @@ class youtube_menu(object):
 			req = Request(menuFile)
 			req.add_header('User-Agent', self.agent)
 			response = urlopen(req)
-			link=response.read()
-			# link = py_tools.ensure_text(link, errors='ignore')
+			link = response.read().decode('utf-8')
 			response.close()
 			return link
 		except:

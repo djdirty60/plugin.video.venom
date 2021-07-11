@@ -12,7 +12,6 @@ from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 from resources.lib.modules import workers
 
@@ -284,7 +283,7 @@ class tvshows:
 				item = get_request(url) 
 				values['content'] = item.get('type', '').lower()
 				values['mediatype'] = 'tvshow'
-				values['title'] = py_tools.ensure_str(item.get('name'))
+				values['title'] = item.get('name')
 				values['originaltitle'] = values['title']
 				values['tvshowtitle'] = values['title']
 				values['premiered'] = str(item.get('premiered', '')) if item.get('premiered') else ''
@@ -301,7 +300,7 @@ class tvshows:
 				if values['genre'] == []: values['genre'] = 'NA'
 				values['duration'] = int(item.get('runtime', '')) * 60 if item.get('runtime') else ''
 				values['rating'] = str(item.get('rating').get('average', '')) if item.get('rating').get('average') else ''
-				values['plot'] = client.cleanHTML(py_tools.ensure_str(item['summary'])) if item.get('summary') else ''
+				values['plot'] = client.cleanHTML(item['summary'])
 				values['status'] = item.get('status', '')
 				values['castandart'] = []
 				for person in item['_embedded']['cast']:

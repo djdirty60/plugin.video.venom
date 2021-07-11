@@ -11,7 +11,6 @@ from urllib3.util.retry import Retry
 from resources.lib.database import cache, metacache
 from resources.lib.indexers import fanarttv
 from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, trailer as control_trailer, yesnoDialog
-from resources.lib.modules import py_tools
 from resources.lib.modules import workers
 API_key = getSetting('tmdb.api.key')
 if not API_key: API_key = '3320855e65a9758297fec4f7c9717698'
@@ -252,8 +251,8 @@ class Movies:
 			meta['imdb'] = str(result.get('imdb_id', '')) if result.get('imdb_id') else ''
 			meta['imdbnumber'] = meta['imdb']
 			meta['original_language'] = result.get('original_language', '')
-			meta['originaltitle'] = py_tools.ensure_str(result.get('original_title', ''))
-			meta['plot'] = py_tools.ensure_str(result.get('overview', '')) if result.get('overview') else ''
+			meta['originaltitle'] = result.get('original_title', '')
+			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			# try: meta['studio'] = result.get('production_companies', {})[0]['name'] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
@@ -267,7 +266,7 @@ class Movies:
 			meta['spoken_languages'] = result.get('spoken_languages')
 			meta['status'] = result['status']
 			# meta['tagline'] = result.get('tagline', '')
-			meta['title'] = py_tools.ensure_str(result.get('title'))
+			meta['title'] = result.get('title')
 			meta['rating'] = str(result.get('vote_average', ''))
 			meta['votes'] = result.get('vote_count', '')
 			crew = result.get('credits', {}).get('crew')
@@ -536,7 +535,7 @@ class TVshows:
 			meta['in_production'] = result.get('in_production') # do not use for "season_isAiring", this is show wide and "season_isAiring" is season specific for season pack scraping.
 			meta['last_air_date'] = result.get('last_air_date', '')
 			meta['last_episode_to_air'] = result.get('last_episode_to_air', '')
-			meta['tvshowtitle'] = py_tools.ensure_str(result.get('name'))
+			meta['tvshowtitle'] = result.get('name')
 			# meta['next_episode_to_air'] = results.get('next_episode_to_air', '')
 			try: meta['studio'] = result.get('networks', {})[0].get('name')
 			except: meta['studio'] = ''
@@ -545,8 +544,8 @@ class TVshows:
 			try: meta['origin_country'] = result.get('origin_country')[0]
 			except: meta['origin_country'] = ''
 			meta['original_language'] = result.get('original_language')
-			meta['originaltitle'] = py_tools.ensure_str(result.get('original_name'))
-			meta['plot'] = py_tools.ensure_str(result.get('overview', '')) if result.get('overview') else ''
+			meta['originaltitle'] = result.get('original_name')
+			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			meta['seasons'] = result.get('seasons')
@@ -638,8 +637,8 @@ class TVshows:
 				try: episode_meta['writer'] = ', '.join([w['name'] for w in [y for y in crew if y['job'] == 'Writer']]) # movies also contains "screenplay", "author", "novel". See if any apply for shows
 				except: episode_meta['writer'] = ''
 				episode_meta['tmdb_epID'] = episode['id']
-				episode_meta['title'] = py_tools.ensure_str(episode['name'])
-				episode_meta['plot'] = py_tools.ensure_str(episode.get('overview', '')) if episode.get('overview') else ''
+				episode_meta['title'] = episode['name']
+				episode_meta['plot'] = episode.get('overview', '') if episode.get('overview') else ''
 				episode_meta['code'] = episode['production_code']
 				episode_meta['season'] = episode['season_number']
 				episode_meta['thumb'] = '%s%s' % (fanart_path, episode['still_path']) if episode.get('still_path') else ''
@@ -649,7 +648,7 @@ class TVshows:
 			meta['season_isAiring'] = 'true' if unaired_count > 0 else 'false' # I think this should be in episodes module where it has access to "showSeasons" meta for "status"
 			meta['seasoncount'] = len(result.get('episodes')) #seasoncount = number of episodes for given season
 			# meta['tvseasontitle'] = result['name'] # seasontitle ?
-			meta['plot'] = py_tools.ensure_str(result.get('overview', '')) if result.get('overview') else '' # Kodi season level Information seems no longer available in 19
+			meta['plot'] = result.get('overview', '') if result.get('overview') else '' # Kodi season level Information seems no longer available in 19
 			meta['tmdb'] = tmdb
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			meta['season_poster'] = meta['poster']

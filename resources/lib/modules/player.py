@@ -3,7 +3,6 @@
 	Venom Add-on
 """
 
-
 from hashlib import md5
 from json import dumps as jsdumps, loads as jsloads
 from sys import argv, exit as sysexit
@@ -15,7 +14,6 @@ from resources.lib.modules import control
 from resources.lib.modules import cleantitle
 from resources.lib.modules import log_utils
 from resources.lib.modules import playcount
-from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 LOGINFO = 1
 
@@ -135,7 +133,6 @@ class Player(xbmc.Player):
 			poster, thumb, season_poster, fanart, banner, clearart, clearlogo, discart, meta = '', '', '', '', '', '', '', '', {'title': self.name}
 			if self.media_type != 'movie': raise Exception()
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
-			# meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['movies']
 			t = cleantitle.get(self.title.replace('&', 'and'))
 			years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
@@ -166,7 +163,6 @@ class Player(xbmc.Player):
 		try:
 			if self.media_type != 'episode': raise Exception()
 			show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
-			# show_meta = py_tools.ensure_text(show_meta, errors='ignore')
 			show_meta = jsloads(show_meta)['result']['tvshows']
 			t = cleantitle.get(self.title.replace('&', 'and'))
 			show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
@@ -174,7 +170,6 @@ class Player(xbmc.Player):
 			else: raise Exception()
 			tvshowid = show_meta['tvshowid']
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
-			# meta = py_tools.ensure_text(meta, errors='ignore')
 			meta = jsloads(meta)['result']['episodes']
 			if meta: meta = meta[0]
 			else: raise Exception()
@@ -284,7 +279,6 @@ class Player(xbmc.Player):
 				xbmc.sleep(1000)
 		control.homeWindow.clearProperty(pname)
 		# self.onPlayBackEnded() # check, seems kodi may at times not issue "onPlayBackEnded" callback
-		# self.test_PlayBackEnded()
 
 	def libForPlayback(self):
 		if self.DBID is None: return
@@ -319,7 +313,7 @@ class Player(xbmc.Player):
 
 	def onPlayBackStarted(self):
 		control.sleep(5000)
-		if self.av_started: return
+		if self.av_started: return xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', LOGINFO)
 		for i in range(0, 500):
 			if self.isPlayback(): break
 			else: control.sleep(1000)
@@ -331,10 +325,10 @@ class Player(xbmc.Player):
 		xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', LOGINFO)
 
 	def onPlayBackStopped(self):
-		if self.media_length == 0: return
 		try:
-			control.homeWindow.clearProperty('venom.isplaying.playlist') # not used atm
+			# control.homeWindow.clearProperty('venom.isplaying.playlist') # not used atm
 			control.homeWindow.clearProperty('venom.preResolved_nextUrl')
+			if self.media_length == 0: return xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGINFO)
 			Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 			if control.setting('trakt.scrobble') == 'true':
 				Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode)
@@ -359,15 +353,14 @@ class Player(xbmc.Player):
 		# control.trigger_widget_refresh() # skinshortcuts handles widget refresh
 		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', LOGINFO)
 
-	def test_PlayBackEnded(self):
-		xbmc.log('[ plugin.video.venom ] test_PlayBackEnded', LOGINFO)
-
 	def onPlayBackError(self):
-		control.homeWindow.clearProperty('venom.isplaying.playlist')
+		# control.homeWindow.clearProperty('venom.isplaying.playlist') # not used atm
+		control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 		log_utils.error()
-		sysexit(1)
 		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', LOGINFO)
+		sysexit(1)
+
 
 class PlayNext(xbmc.Player):
 	def __init__(self):
@@ -437,9 +430,11 @@ class PlayNext(xbmc.Player):
 				tvshowtitle = next_meta.get('tvshowtitle')
 				premiered = next_meta.get('premiered')
 				next_sources = providerscache.get(sources.Sources().getSources, 48, title, year, imdb, tmdb, tvdb, str(season), str(episode), tvshowtitle, premiered, next_meta, True)
-				if not self.isPlayingVideo(): return
+				if not self.isPlayingVideo(): return control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 				sources.Sources().preResolve(next_sources, next_meta)
+			else: control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 		except:
+			control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 			log_utils.error()
 
 

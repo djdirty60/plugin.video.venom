@@ -12,7 +12,6 @@ from resources.lib.indexers import fanarttv
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 
 
@@ -75,7 +74,6 @@ class Movies:
 		for item in items:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
-				title = py_tools.ensure_str(title)
 
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
 				try: year = re.findall(r'(\d{4})', year[0])[0]
@@ -145,7 +143,7 @@ class Movies:
 				except: director = ''
 				director = client.parseDOM(director, 'a')
 				director = ' / '.join(director)
-				director = client.replaceHTMLCodes(director) # check if this needs ensure_str()
+				director = client.replaceHTMLCodes(director)
 
 				plot = ''
 				try: plot = client.parseDOM(item, 'p', attrs = {'class': 'text-muted'})[0]
@@ -266,7 +264,6 @@ class Movies:
 				log_utils.error()
 				return
 			title = item.get('title') or self.list[i]['title']
-			title = py_tools.ensure_str(title)
 			originaltitle = title
 
 #add these so sources module may not have to make a trakt api request
@@ -316,7 +313,7 @@ class Movies:
 			else: mpaa = self.list[i]['mpaa']
 
 			if 'plot' not in self.list[i] or not self.list[i]['plot']:
-				plot = py_tools.ensure_str(item.get('overview'))
+				plot = item.get('overview')
 			else: plot = self.list[i]['plot']
 
 			try:

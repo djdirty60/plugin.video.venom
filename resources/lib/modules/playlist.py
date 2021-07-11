@@ -6,7 +6,6 @@
 from json import loads as jsloads
 import xbmc
 from resources.lib.modules import control
-from resources.lib.modules import py_tools
 
 Id = xbmc.PLAYLIST_VIDEO
 videoplaylist = 10028
@@ -69,7 +68,6 @@ def playListItems():
 	limits =jsloads(result)['result']['limits']
 	total = limits['total']
 	if int(total) <= 0: return []
-	# result = py_tools.ensure_text(result, errors='ignore')
 	result = jsloads(result)['result']['items']
 	try: return [i['label'] for i in result]
 	except: return []

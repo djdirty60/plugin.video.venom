@@ -14,7 +14,6 @@ from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules.playcount import getMovieIndicators, getMovieOverlay
-from resources.lib.modules import py_tools
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
@@ -263,7 +262,6 @@ class Movies:
 			lst = []
 			delete_option = False
 			for (id, term) in dbcur.fetchall():
-				term = py_tools.ensure_str(term) # new
 				if term not in str(lst):
 					delete_option = True
 					navigator.Navigator().addDirectoryItem(term, 'movieSearchterm&name=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='movies')
@@ -492,7 +490,7 @@ class Movies:
 			try:
 				values = item
 				values['next'] = next 
-				values['title'] = py_tools.ensure_str(item.get('title'))
+				values['title'] = item.get('title')
 				values['originaltitle'] = values['title']
 				try: values['premiered'] = item.get('released', '')[:10]
 				except: values['premiered'] = ''
@@ -512,7 +510,7 @@ class Movies:
 				values['rating'] = item.get('rating')
 				values['votes'] = item['votes']
 				values['mpaa'] = item.get('certification', '')
-				values['plot'] = py_tools.ensure_str(item.get('overview'))
+				values['plot'] = item.get('overview')
 				values['poster'] = ''
 				values['fanart'] = ''
 				try: values['trailer'] = control.trailer % item['trailer'].split('v=')[1]
@@ -583,7 +581,6 @@ class Movies:
 		for item in items:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
-				title = py_tools.ensure_str(title)
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
 				try: year = re.findall(r'(\d{4})', year[0])[0]
 				except: continue

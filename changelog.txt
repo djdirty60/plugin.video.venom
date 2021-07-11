@@ -1,7 +1,14 @@
 
+[B][COLOR red]Update - v6.0.5 - July 11, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed Youtube menu not loading.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where preResolved_nextUrl was not cleared from windows property when
+    previous item was stopped before Kodi registered .getTotalTime().[/I]
+[COLOR yellow]--[/COLOR][I] Remaining py2 code is now removed.[/I]
+
+
 [B][COLOR red]Update - v6.0.4 - July 10, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added preScrape and preResolve background task to continual playback.  This only
-    occurs when "PlayNext" is enabled[/I]
+    occurs when "PlayNext" is enabled.[/I]
 [COLOR yellow]--[/COLOR][I] Movie and TVshow Search now has it's own page item limit under general settings.[/I]
 [COLOR yellow]--[/COLOR][I] New Help file for Trakt Scrobble.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed issue where disabling parent debrid provider still left cloud scraper in a run state.

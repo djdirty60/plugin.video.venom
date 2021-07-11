@@ -14,7 +14,6 @@ from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules.playcount import getTVShowIndicators, getTVShowOverlay, getShowCount
-from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 from resources.lib.modules import workers
@@ -223,7 +222,6 @@ class TVshows:
 			lst = []
 			delete_option = False
 			for (id, term) in dbcur.fetchall():
-				term = py_tools.ensure_str(term) # new
 				if term not in str(lst):
 					delete_option = True
 					navigator.Navigator().addDirectoryItem(term, 'tvSearchterm&name=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='tvshow')
@@ -466,7 +464,7 @@ class TVshows:
 			try:
 				values = item
 				values['next'] = next 
-				values['title'] = py_tools.ensure_str(item.get('title'))
+				values['title'] = item.get('title')
 				values['originaltitle'] = values['title']
 				values['tvshowtitle'] = values['title']
 				try: values['premiered'] = item.get('first_aired', '')[:10]
@@ -488,7 +486,7 @@ class TVshows:
 				values['duration'] = int(item.get('runtime') * 60) if item.get('runtime') else ''
 				values['total_episodes'] = item.get('aired_episodes', '')
 				values['mpaa'] = item.get('certification', '')
-				values['plot'] = py_tools.ensure_str(item.get('overview'))
+				values['plot'] = item.get('overview')
 				values['poster'] = ''
 				values['fanart'] = ''
 				try: values['trailer'] = control.trailer % item['trailer'].split('v=')[1]
@@ -564,7 +562,6 @@ class TVshows:
 		for item in items:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
-				title = py_tools.ensure_str(title)
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
 				year += client.parseDOM(item, 'span', attrs = {'class': 'year_type'})
 				year = re.findall(r'(\d{4})', year[0])[0]

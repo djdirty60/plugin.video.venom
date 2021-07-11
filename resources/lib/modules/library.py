@@ -15,7 +15,6 @@ from resources.lib.modules import control
 from resources.lib.modules import cleantitle
 from resources.lib.modules import library_sources
 from resources.lib.modules import log_utils
-from resources.lib.modules import py_tools
 
 folder_setup = False
 service_update = control.setting('library.service.update') == 'true'
@@ -48,7 +47,7 @@ class lib_tools:
 		try:
 			path = control.legalFilename(path)
 			if not isinstance(content, str):
-				content = py_tools.ensure_str(content)
+				content = str(content)
 			file = control.openFile(path, 'w')
 			file.write(str(content))
 			file.close()
@@ -130,7 +129,6 @@ class lib_tools:
 				paths.append(speical_tvShows_LibraryFolder)
 			paths = [i.rstrip('/').rstrip('\\') for i in paths]
 			result = control.jsonrpc('{"jsonrpc": "2.0", "method": "Files.GetSources", "params": {"media" : "video"}, "id": 1}')
-			# result = py_tools.ensure_text(result, errors='ignore')
 			result = jsloads(result)['result']['sources']
 			for i in result:
 				if i['file'].rstrip('/').rstrip('\\') in paths:
@@ -292,7 +290,6 @@ class libmovies:
 				if not self.dupe_chk == 'true': raise Exception()
 				id = [imdb, tmdb] if tmdb else [imdb]
 				lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["imdbnumber", "title", "originaltitle", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
-				# lib = py_tools.ensure_text(lib, errors='ignore')
 				lib = jsloads(lib)['result']['movies']
 				lib = [i for i in lib if str(i['imdbnumber']) in id or (cleantitle.get(title) in [cleantitle.get(i['title']), cleantitle.get(i['originaltitle'])] and str(i['year']) == year)]
 			except: lib = []
@@ -519,13 +516,10 @@ class libtvshows:
 				try:
 					if self.dupe_chk != 'true': raise Exception()
 					id = [items[0]['imdb'], items[0]['tvdb']] # imdbnumber is all that it compares from kodi library
-					# lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["imdbnumber", "title", "year"]}, "id": 1}')
 					lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties": ["imdbnumber", "title", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
-					# lib = py_tools.ensure_text(lib, errors='ignore')
 					lib = jsloads(lib)['result']['tvshows']
 					lib = [i['title'] for i in lib if str(i['imdbnumber']) in id or (i['title'] == items[0]['tvshowtitle'] and str(i['year']) == items[0]['year'])][0]
 					lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % lib)
-					# lib = py_tools.ensure_text(lib, errors='ignore')
 					lib = jsloads(lib)['result']['episodes']
 					lib = ['S%02dE%02d' % (int(i['season']), int(i['episode'])) for i in lib]
 					items = [i for i in items if not 'S%02dE%02d' % (int(i['season']), int(i['episode'])) in lib]
@@ -717,7 +711,6 @@ class libepisodes:
 		try:
 			lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties": ["imdbnumber", "title", "year"]}, "id": 1 }')
 			# lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties": ["imdbnumber", "title", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
-			# lib = py_tools.ensure_text(lib, errors='ignore')
 			lib = jsloads(lib)['result']['tvshows']
 		except:
 			log_utils.error()
@@ -773,7 +766,6 @@ class libepisodes:
 				if item['tmdb']: id += [item['tmdb']]
 				ep = [x['title'] for x in lib if str(x['imdbnumber']) in id or (x['title'] == item['tvshowtitle'] and str(x['year']) == item['year'])][0]
 				ep = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % ep)
-				# ep = py_tools.ensure_text(ep, errors='ignore')
 				ep = jsloads(ep).get('result', {}).get('episodes', {})
 				ep = [{'season': int(i['season']), 'episode': int(i['episode'])} for i in ep]
 				ep = sorted(ep, key = lambda x: (x['season'], x['episode']))[-1]

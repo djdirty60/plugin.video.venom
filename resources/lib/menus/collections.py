@@ -14,7 +14,6 @@ from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules.playcount import getMovieIndicators, getMovieOverlay
-from resources.lib.modules import py_tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 from resources.lib.modules import workers
@@ -724,7 +723,6 @@ class Collections:
 		for item in items:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
-				title = py_tools.ensure_str(title)
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
 				try: year = re.findall(r'(\d{4})', year[0])[0]
 				except: continue

@@ -5,7 +5,6 @@
 
 import re
 from collections import namedtuple
-from resources.lib.modules import py_tools
 
 DomMatch = namedtuple('DOMMatch', ['attrs', 'content'])
 re_type = type(re.compile(r''))
@@ -114,11 +113,6 @@ def parse_dom(html, name='', attrs=None, req=False, exclude_comments=False):
 		name = name.strip()
 		if isinstance(html, str) or isinstance(html, DomMatch):
 			html = [html]
-		# elif isinstance(html, bytes) and py_tools.isPY2:
-			# try: html = [html.decode("utf-8")]  # Replace with chardet thingy
-			# except:
-				# try: html = [html.decode("utf-8", "replace")]
-				# except: html = [html]
 		elif not isinstance(html, list): return ''
 
 		if not name: return ''

@@ -22,9 +22,7 @@ from resources.lib.modules import source_utils
 from resources.lib.modules import trakt
 from resources.lib.modules import workers
 from resources.lib.cloud_scrapers import cloudSources
-
 from fenomscrapers import sources as fs_sources
-from resources.lib.windows.source_results import SourceResultsXML
 
 
 class Sources:
@@ -52,7 +50,9 @@ class Sources:
 
 	def play(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape=None):
 		gdriveEnabled = control.addon('script.module.fenomscrapers').getSetting('gdrive.cloudflare_url') != ''
-		if not self.debrid_resolvers and not gdriveEnabled:
+		easynewsEnabled = control.addon('script.module.fenomscrapers').getSetting('easynews.user') != ''
+		furkEnabled = control.addon('script.module.fenomscrapers').getSetting('furk.user_name') != ''
+		if not self.debrid_resolvers and not gdriveEnabled and not easynewsEnabled and not furkEnabled:
 			control.sleep(200)
 			control.hide()
 			control.notification(message=33034)
@@ -60,7 +60,7 @@ class Sources:
 		try:
 			preResolved_nextUrl = control.homeWindow.getProperty('venom.preResolved_nextUrl')
 			if preResolved_nextUrl != '':
-				log_utils.log('Playing preResolved_nextUrl=%s' % preResolved_nextUrl)
+				log_utils.log('Playing preResolved_nextUrl=%s' % preResolved_nextUrl, level=log_utils.LOGDEBUG)
 				control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 				try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
 				except: pass
@@ -110,7 +110,6 @@ class Sources:
 			filter = [] ; uncached_items = []
 			if control.setting('torrent.remove.uncached') == 'true':
 				uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
-				# filter += [i for i in items if not re.match(r'^uncached.*torrent', i['source'])]
 				filter += [i for i in items if i not in uncached_items]
 				if filter: pass
 				elif not filter:
@@ -118,7 +117,6 @@ class Sources:
 						control.cancelPlayback()
 						select = '0'
 						self.uncached_chosen = True
-						# filter += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 						filter += uncached_items
 				items = filter
 				if not items:
@@ -127,7 +125,6 @@ class Sources:
 			else: uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 
 			if select is None:
-				# if episode is not None and control.setting('enable.playnext') == 'true': select = '1'
 				if episode is not None and self.enable_playnext: select = '1'
 				else: select = control.setting('play.mode')
 
@@ -152,6 +149,7 @@ class Sources:
 
 	def sourceSelect(self, title, items, uncached_items, meta):
 		try:
+			from resources.lib.windows.source_results import SourceResultsXML
 			control.hide()
 			control.playlist.clear()
 			if not items:
@@ -184,7 +182,6 @@ class Sources:
 			log_utils.error('Error sourceSelect(): ')
 
 		def checkLibMeta(): # check Kodi db for meta for library playback.
-			from resources.lib.modules import py_tools
 			def cleanLibArt(art):
 				if not art: return ''
 				art = unquote(art.replace('image://', ''))
@@ -193,7 +190,6 @@ class Sources:
 			try:
 				if self.mediatype != 'movie': raise Exception()
 				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
-				# meta = py_tools.ensure_text(meta, errors='ignore')
 				meta = jsloads(meta)['result']['movies']
 				t = cleantitle.get(self.title.replace('&', 'and'))
 				years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
@@ -215,7 +211,6 @@ class Sources:
 			try:
 				if self.mediatype != 'episode': raise Exception()
 				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
-				# show_meta = py_tools.ensure_text(show_meta, errors='ignore')
 				show_meta = jsloads(show_meta)['result']['tvshows']
 				t = cleantitle.get(self.title.replace('&', 'and'))
 				show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
@@ -223,7 +218,6 @@ class Sources:
 				else: raise Exception()
 				tvshowid = show_meta['tvshowid']
 				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
-				# meta = py_tools.ensure_text(meta, errors='ignore')
 				meta = jsloads(meta)['result']['episodes']
 				if meta: meta = meta[0]
 				else: raise Exception()
@@ -353,9 +347,7 @@ class Sources:
 		try:
 			self.prepareSources()
 			sourceDict = self.sourceDict
-			content = 'movie' if tvshowtitle is None else 'episode'
-			if content == 'movie': sourceDict = [(i[0], i[1], getattr(i[1], 'movie', None)) for i in sourceDict]
-			else: sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
+			sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
 			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2] is not None]
 			if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
 			sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
@@ -366,23 +358,16 @@ class Sources:
 				meta = self.meta
 				aliases = meta.get('aliases', [])
 			except: pass
+
 			threads = []
-			if content == 'movie':
-				trakt_aliases = self.getAliasTitles(imdb, content)
-				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
-				except: pass
-				aliases = jsdumps(aliases)
-				for i in sourceDict:
-					threads.append(workers.Thread(self.getMovieSource, title, aliases, year, imdb, i[0], i[1]))
-			else:
-				from fenomscrapers import pack_sources
-				self.packDict = providerscache.get(pack_sources, 192)
-				trakt_aliases = self.getAliasTitles(imdb, content)
-				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
-				except: pass
-				aliases = jsdumps(aliases)
-				for i in sourceDict:
-					threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
+			from fenomscrapers import pack_sources
+			self.packDict = providerscache.get(pack_sources, 192)
+			trakt_aliases = self.getAliasTitles(imdb, 'episode')
+			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
+			except: pass
+			aliases = jsdumps(aliases)
+			for i in sourceDict:
+				threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
 
 			s = [i[0] + (i[1],) for i in zip(sourceDict, threads)]
 			s = [(i[3].getName(), i[0], i[2]) for i in s]
@@ -565,6 +550,7 @@ class Sources:
 			next_sources = [i for i in next_sources if i not in uncached_filter]
 		except:
 			log_utils.error()
+			return control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 		u = ''
 		for i in range(len(next_sources)):
 			try:
@@ -573,13 +559,13 @@ class Sources:
 					if control.monitor.abortRequested(): return sysexit()
 					url = self.sourcesResolve(next_sources[i])
 					if not url:
-						log_utils.log('preResolve failed for : next_sources[i]=%s' % str(next_sources[i]))
+						log_utils.log('preResolve failed for : next_sources[i]=%s' % str(next_sources[i]), level=log_utils.LOGWARNING)
 						continue
 					if not any(x in url.lower() for x in self.extensions):
 						log_utils.log('preResolve Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
 						raise Exception()
 					if not u: u = url
-					log_utils.log('PreResolved url : %s' % url)
+					log_utils.log('PreResolved url : %s' % url, level=log_utils.LOGDEBUG)
 					if url: break
 				except: pass
 			except:
