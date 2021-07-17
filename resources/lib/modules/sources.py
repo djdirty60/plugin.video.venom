@@ -46,7 +46,7 @@ class Sources:
 		self.dev_disable_show_packs = control.setting('dev.disable.show.packs') == 'true'
 		self.dev_disable_show_filter = control.setting('dev.disable.show.filter') == 'true'
 		self.extensions = source_utils.supported_video_extensions()
-		self.highlight_color = control.getColor(control.setting('highlight.color'))
+		self.highlight_color = control.getHighlightColor()
 
 	def play(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape=None):
 		gdriveEnabled = control.addon('script.module.fenomscrapers').getSetting('gdrive.cloudflare_url') != ''
@@ -193,7 +193,12 @@ class Sources:
 				meta = jsloads(meta)['result']['movies']
 				t = cleantitle.get(self.title.replace('&', 'and'))
 				years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
+				# Maybe needed alias title check?
+				# aliases = self.getAliasTitles(self.imdb, 'movie')
+				# aliases = [cleantitle.get(x.get('title').replace('&', 'and')) for x in aliases]
+				# aliases.append(t)
 				meta = [i for i in meta if str(i['year']) in years and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
+				# meta = [i for i in meta if str(i['year']) in years and (cleantitle.get(i['title'].replace('&', 'and')) in aliases) or (cleantitle.get(i['originaltitle'].replace('&', 'and')) in aliases)]
 				if meta: meta = meta[0]
 				else: raise Exception()
 				if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})

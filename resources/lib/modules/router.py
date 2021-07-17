@@ -112,6 +112,10 @@ def router(params):
 		from resources.lib.menus import movies
 		movies.Movies().userlists()
 
+	elif action == 'movies_traktUnfinishedManager':
+		from resources.lib.menus import movies
+		movies.Movies().unfinishedManager()
+
 	####################################################
 	#---Collections
 	####################################################
@@ -249,6 +253,10 @@ def router(params):
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().originals()
 
+	elif action == 'shows_traktHiddenManager':
+		from resources.lib.menus import tvshows
+		tvshows.TVshows().traktHiddenManager()
+
 	####################################################
 	#---SEASONS
 	####################################################
@@ -284,6 +292,10 @@ def router(params):
 	elif action == 'episodesUserlists':
 		from resources.lib.menus import episodes
 		episodes.Episodes().userlists()
+
+	elif action == 'episodes_traktUnfinishedManager':
+		from resources.lib.menus import episodes
+		episodes.Episodes().unfinishedManager()
 
 	####################################################
 	#---Premium Services
@@ -468,6 +480,9 @@ def router(params):
 		elif action == 'tools_toolNavigator':
 			from resources.lib.menus import navigator
 			navigator.Navigator().tools()
+		elif action == 'tools_traktToolsNavigator':
+			from resources.lib.menus import navigator
+			navigator.Navigator().traktTools()
 		elif action == 'tools_searchNavigator':
 			from resources.lib.menus import navigator
 			navigator.Navigator().search()

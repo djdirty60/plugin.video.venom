@@ -458,7 +458,7 @@ class Premiumize:
 					except: progress = 'UNKNOWN'
 				if type == 'folder':
 					isFolder = True if status == 'finished' else False
-					status_str = '[COLOR %s]%s[/COLOR]' % (control.getColor(control.setting('highlight.color')), status.capitalize())
+					status_str = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), status.capitalize())
 					label = '%02d | [B]%s[/B] - %s | [B]%s[/B] | [I]%s [/I]' % (count, status_str, str(progress) + '%', folder_str, name)
 					url = '%s?action=pm_MyFiles&id=%s&name=%s' % (sysaddon, item['folder_id'], quote_plus(name))
 

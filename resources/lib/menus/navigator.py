@@ -183,6 +183,7 @@ class Navigator:
 		self.endDirectory()
 
 	def tools(self):
+		if self.traktCredentials: self.addDirectoryItem(35060, 'tools_traktToolsNavigator', 'tools.png', 'DefaultAddonService.png', isFolder=True)
 		self.addDirectoryItem(32510, 'cache_Navigator', 'tools.png', 'DefaultAddonService.png', isFolder=True)
 		self.addDirectoryItem(32609, 'tools_openMyAccount', 'MyAccounts.png', 'DefaultAddonService.png', isFolder=False)
 		self.addDirectoryItem(32506, 'tools_contextVenomSettings', 'icon.png', 'DefaultAddonProgram.png', isFolder=False)
@@ -213,6 +214,12 @@ class Navigator:
 		self.addDirectoryItem(32613, 'cache_clearCache', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.addDirectoryItem(32614, 'cache_clearSearch', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.addDirectoryItem(32615, 'cache_clearBookmarks', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		self.endDirectory()
+
+	def traktTools(self):
+		self.addDirectoryItem(35057, 'shows_traktHiddenManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		self.addDirectoryItem(35058, 'episodes_traktUnfinishedManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		self.addDirectoryItem(35059, 'movies_traktUnfinishedManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.endDirectory()
 
 	def library(self):

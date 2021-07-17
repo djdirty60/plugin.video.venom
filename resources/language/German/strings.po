@@ -739,8 +739,12 @@ msgid "Pause"
 msgstr "Pause"
 
 msgctxt "#32179"
-msgid ""
-msgstr ""
+msgid "OK"
+msgstr "OK"
+
+msgctxt "#32180"
+msgid "Cancel"
+msgstr "Stornieren"
 
 
 
@@ -3076,6 +3080,34 @@ msgstr ""
 msgctxt "#35053"
 msgid "Period"
 msgstr "Zeitraum"
+
+msgctxt "#35054"
+msgid "IMDb list sorting"
+msgstr "IMDb-Listensortierung"
+
+msgctxt "#35055"
+msgid "My Movies and list sort options"
+msgstr "Meine Filme und Listensortieroptionen"
+
+msgctxt "#35056"
+msgid "My TVShows and list sort options"
+msgstr "Meine TV-Sendungen und Listensortieroptionen"
+
+msgctxt "#35057"
+msgid "[COLOR %s][B]Hidden Progress Manager[/B][/COLOR]"
+msgstr "[COLOR %s][B]Hidden Progress Manager[/B][/COLOR]"
+
+msgctxt "#35058"
+msgid "[COLOR %s][B]Unfinsihed Episodes Progress Manager[/B][/COLOR]"
+msgstr Menedżer postępu niedokończonych odcinków"
+
+msgctxt "#35059"
+msgid "[COLOR %s][B]Unfinished Movies Progress Manager[/B][/COLOR]"
+msgstr "Fortschrittsmanager für unfertige Filme"
+
+msgctxt "#35060"
+msgid "[COLOR %s][B]Trakt Management Tools[/B][/COLOR]"
+msgstr "Trakt-Management-Tools"
 
 
 

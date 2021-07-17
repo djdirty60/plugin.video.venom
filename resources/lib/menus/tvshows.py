@@ -47,10 +47,10 @@ class TVshows:
 		self.rating_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=5000,&release_date=,date[0]&sort=user_rating,desc&count=%s&start=1' % self.page_limit
 		self.views_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&release_date=,date[0]&sort=num_votes,desc&count=%s&start=1' % self.page_limit
 		self.person_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&role=%s&sort=year,desc&count=%s&start=1' % ('%s', self.page_limit)
-		self.genre_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&genres=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
-		self.keyword_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&keywords=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
-		self.language_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
-		self.certification_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&certificates=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
+		self.genre_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&genres=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.keyword_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&keywords=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.language_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&production_status=released&primary_language=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.certification_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&certificates=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
 		self.imdbwatchlist_link = 'https://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user # only used to get users watchlist ID
 		self.imdbwatchlist2_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=tvSeries,tvMiniSeries&start=1' % ('%s', self.imdb_sort(type='shows.watchlist'))
 		self.imdblists_link = 'https://www.imdb.com/user/ur%s/lists?tab=all&sort=mdfd&order=desc&filter=titles' % self.imdb_user
@@ -70,6 +70,9 @@ class TVshows:
 		self.trakttrending_link = 'https://api.trakt.tv/shows/trending?page=1&limit=%s' % self.page_limit
 		self.traktpopular_link = 'https://api.trakt.tv/shows/popular?page=1&limit=%s' % self.page_limit
 		self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/shows?limit=40'
+		self.progress_link = 'https://api.trakt.tv/sync/watched/shows?extended=noseasons'
+		self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
+
 		self.tvmaze_link = 'https://www.tvmaze.com'
 		self.tmdb_key = control.setting('tmdb.api.key')
 		if self.tmdb_key == '' or self.tmdb_key is None:
@@ -117,7 +120,7 @@ class TVshows:
 				self.list = cache.get(self.imdb_list, 96, url)
 				if idx: self.worker()
 			if self.list is None: self.list = []
-			if idx and create_directory: self.tvshowDirectory(self.list)
+			if create_directory: self.tvshowDirectory(self.list)
 			return self.list
 		except:
 			from resources.lib.modules import log_utils
@@ -166,6 +169,36 @@ class TVshows:
 				control.hide()
 				if self.notifications: control.notification(title=32002, message=33049)
 
+	def traktHiddenManager(self, idx=True):
+		control.busy()
+		try:
+			if trakt.getActivity() > cache.timeout(self.trakt_list, self.progress_link, self.trakt_user): raise Exception()
+			self.list = cache.get(self.trakt_list, 24, self.progress_link, self.trakt_user)
+		except:
+			self.list = cache.get(self.trakt_list, 0, self.progress_link, self.trakt_user)
+		try:
+			hidden = cache.get(trakt.getTrakt, 0, self.hiddenprogress_link) # if this gets cached and user hides an item it's not instantly removed.
+			hidden = jsloads(hidden)
+			hidden = [str(i['show']['ids']['tvdb']) for i in hidden]
+			for i in self.list: i.update({'isHidden': 'true'}) if i['tvdb'] in hidden else i.update({'isHidden': ''})
+			if idx: self.worker()
+			self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
+			self.list = sorted(self.list, key=lambda k: k['isHidden'], reverse=True)
+			control.hide()
+			from resources.lib.windows.trakthidden_manager import TraktHiddenManagerXML
+			window = TraktHiddenManagerXML('trakthidden_manager.xml', control.addonPath(control.addonId()), results=self.list)
+			chosen_hide, chosen_unhide = window.run()
+			del window
+			if chosen_unhide:
+				success = trakt.unHideItems(chosen_unhide)
+				if success: control.notification(title='Trakt Hidden Progress Manager', message='Successfully Unhid %s Item%s' % (len(chosen_unhide), 's' if len(chosen_unhide) >1 else ''))
+			if chosen_hide:
+				success = trakt.hideItems(chosen_hide)
+				if success: control.notification(title='Trakt Hidden Progress Manager', message='Successfully Hid %s Item%s' % (len(chosen_hide), 's' if len(chosen_hide) >1 else ''))
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
 	def sort(self, type='shows'):
 		try:
 			if not self.list: return
@@ -198,12 +231,13 @@ class TVshows:
 
 	def imdb_sort(self, type='shows'):
 		sort = int(control.setting('sort.%s.type' % type))
-		imdb_sort = 'list_order'
+		imdb_sort = 'list_order' if type == 'shows.watchlist' else 'moviemeter'
 		if sort == 1: imdb_sort = 'alpha'
-		if sort in [2, 3]: imdb_sort = 'user_rating'
+		if sort == 2: imdb_sort = 'user_rating'
+		if sort == 3: imdb_sort = 'num_votes'
 		if sort == 4: imdb_sort = 'release_date'
 		if sort in [5, 6]: imdb_sort = 'date_added'
-		imdb_sort_order = ',asc' if int(control.setting('sort.%s.order' % type)) == 0 else ',desc'
+		imdb_sort_order = ',asc' if (int(control.setting('sort.%s.order' % type)) == 0 or sort == 0) else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
 
@@ -430,7 +464,9 @@ class TVshows:
 		try:
 			dupes = []
 			q = dict(parse_qsl(urlsplit(url).query))
-			q.update({'extended': 'full'})
+			extended = q.get('extended', '')
+			if extended and extended != 'full': q.update({'extended': '%s,%s' % ('full', extended)})
+			else: q.update({'extended': 'full'})
 			q = (urlencode(q)).replace('%2C', ',')
 			u = url.replace('?' + urlparse(url).query, '') + '?' + q
 			if '/related' in u: u = u + '&limit=20'
@@ -480,12 +516,10 @@ class TVshows:
 				if values['tvdb'] in dupes: return
 				dupes.append(values['tvdb'])
 				values['studio'] = item.get('network')
-				values['genre'] = []
-				for x in item['genres']: values['genre'].append(x.title())
-				if not values['genre']: values['genre'] = 'NA'
+				values['genre'] = ' / '.join([x.title() for x in item.get('genres', {})]) or 'NA'
 				values['duration'] = int(item.get('runtime') * 60) if item.get('runtime') else ''
 				values['total_episodes'] = item.get('aired_episodes', '')
-				values['mpaa'] = item.get('certification', '')
+				values['mpaa'] = item.get('certification', '') or 'NA'
 				values['plot'] = item.get('overview')
 				values['poster'] = ''
 				values['fanart'] = ''

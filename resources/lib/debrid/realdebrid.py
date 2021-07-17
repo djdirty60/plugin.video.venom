@@ -188,7 +188,7 @@ class RealDebrid:
 				try:
 					cm = []
 					isFolder = True if item['status'] == 'downloaded' else False
-					status = '[COLOR %s]%s[/COLOR]' % (control.getColor(control.setting('highlight.color')), item['status'].capitalize())
+					status = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), item['status'].capitalize())
 					folder_name = control.strip_non_ascii_and_unprintable(item['filename'])
 					label = '%02d | [B]%s[/B] - %s | [B]%s[/B] | [I]%s [/I]' % (count, status, str(item['progress']) + '%', folder_str, folder_name)
 					url = '%s?action=rd_BrowseUserTorrents&id=%s' % (sysaddon, item['id']) if isFolder else None

@@ -43,7 +43,7 @@ class Movies:
 		self.user = str(self.tmdb_key)
 		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
 		self.unairedcolor = control.getColor(control.setting('movie.unaired.identify'))
-		self.highlight_color = control.getColor(control.setting('highlight.color'))
+		self.highlight_color = control.getHighlightColor()
 		self.tmdb_link = 'https://api.themoviedb.org'
 		self.tmdb_popular_link = 'https://api.themoviedb.org/3/movie/popular?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_toprated_link = 'https://api.themoviedb.org/3/movie/top_rated?api_key=%s&page=1'
@@ -57,7 +57,7 @@ class Movies:
 		self.persons_link = 'https://www.imdb.com/search/name?count=100&name='
 		self.personlist_link = 'https://www.imdb.com/search/name?count=100&gender=male,female'
 		self.person_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&role=%s&sort=year,desc&count=%s&start=1' % ('%s', self.page_limit)
-		self.keyword_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&keywords=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
+		self.keyword_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&keywords=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(), self.page_limit)
 		self.oscars_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_winners&sort=year,desc&count=%s&start=1' % self.page_limit
 		self.oscarsnominees_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_nominees&sort=year,desc&count=%s&start=1' % self.page_limit
 		self.theaters_link = 'https://www.imdb.com/search/title?title_type=feature&num_votes=500,&release_date=date[90],date[0]&languages=en&sort=release_date,desc&count=%s&start=1' % self.page_limit
@@ -67,17 +67,17 @@ class Movies:
 			self.mostpopular_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&groups=top_1000&release_date=,date[%s]&sort=moviemeter,asc&count=%s&start=1' % (hidecinema_rollback, self.page_limit )
 			self.mostvoted_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&release_date=,date[%s]&sort=num_votes,desc&count=%s&start=1' % (hidecinema_rollback, self.page_limit )
 			self.featured_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&release_date=,date[%s]&sort=moviemeter,asc&count=%s&start=1' % (hidecinema_rollback, self.page_limit )
-			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,date[%s]&genres=%s&sort=moviemeter,asc&count=%s&start=1' % (hidecinema_rollback, '%s', self.page_limit)
-			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&release_date=,date[%s]&count=%s&start=1' % ('%s', hidecinema_rollback, self.page_limit)
-			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&sort=moviemeter,asc&release_date=,date[%s]&count=%s&start=1' % ('%s', hidecinema_rollback, self.page_limit)
+			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,date[%s]&genres=%s&sort=%s&count=%s&start=1' % (hidecinema_rollback, '%s', self.imdb_sort(type='imdbmovies'), self.page_limit)
+			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&release_date=,date[%s]&sort=%s&count=%s&start=1' % ('%s', hidecinema_rollback, self.imdb_sort(type='imdbmovies'), self.page_limit)
+			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&release_date=,date[%s]&sort=%s&count=%s&start=1' % ('%s', hidecinema_rollback, self.imdb_sort(type='imdbmovies'), self.page_limit)
 			self.imdbboxoffice_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&sort=boxoffice_gross_us,desc&release_date=,date[%s]&count=%s&start=1' % (hidecinema_rollback, self.page_limit)
 		else:
 			self.mostpopular_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&groups=top_1000&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
 			self.mostvoted_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&sort=num_votes,desc&count=%s&start=1' % self.page_limit
 			self.featured_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=1000,&production_status=released&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
-			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,date[0]&genres=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
-			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
-			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', self.page_limit)
+			self.genre_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie,documentary&num_votes=100,&release_date=,date[0]&genres=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbmovies'), self.page_limit)
+			self.language_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&primary_language=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbmovies'), self.page_limit)
+			self.certification_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&num_votes=100,&production_status=released&certificates=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbmovies'), self.page_limit)
 			self.imdbboxoffice_link = 'https://www.imdb.com/search/title?title_type=feature,tv_movie&production_status=released&sort=boxoffice_gross_us,desc&count=%s&start=1' % self.page_limit
 		self.imdbwatchlist_link = 'https://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user # only used to get users watchlist ID
 		self.imdbwatchlist2_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=movie,short,video,tvShort,tvMovie,tvSpecial&start=1' % ('%s', self.imdb_sort(type='movies.watchlist'))
@@ -171,30 +171,40 @@ class Movies:
 				control.hide()
 				if self.notifications: control.notification(title=32001, message=33049)
 
-	def unfinished(self, url, idx=True):
+	def unfinished(self, url, idx=True, create_directory=True):
 		self.list = []
 		try:
 			try: url = getattr(self, url + '_link')
 			except: pass
-			activity = trakt.getPausedActivity()
 			if url == self.traktunfinished_link :
 				try:
-					if activity > cache.timeout(self.trakt_list, self.traktunfinished_link, self.trakt_user):
-						raise Exception()
+					if trakt.getPausedActivity() > cache.timeout(self.trakt_list, self.traktunfinished_link, self.trakt_user): raise Exception()
 					self.list = cache.get(self.trakt_list, 720, self.traktunfinished_link , self.trakt_user)
 				except:
 					self.list = cache.get(self.trakt_list, 0, self.traktunfinished_link , self.trakt_user)
 				if idx: self.worker()
-			if idx:
 				self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
-				self.movieDirectory(self.list, unfinished=True, next=False)
-			return self.list
+				if self.list is None: self.list = []
+				if create_directory: self.movieDirectory(self.list, unfinished=True, next=False)
+				return self.list
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 			if not self.list:
 				control.hide()
 				if self.notifications: control.notification(title=32001, message=33049)
+
+	def unfinishedManager(self):
+		control.busy()
+		list = self.unfinished(url='traktunfinished', create_directory=False)
+		control.hide()
+		from resources.lib.windows.traktmovieprogress_manager import TraktMovieProgressManagerXML
+		window = TraktMovieProgressManagerXML('traktmovieprogress_manager.xml', control.addonPath(control.addonId()), results=list)
+		selected_items = window.run()
+		del window
+		if selected_items:
+			success = trakt.scrobbleResetItems(imdb_ids=selected_items, refresh=False, widgetRefresh=True)
+			if success: control.notification(title='Trakt Playback Progress Manager', message='Successfuly Removed %s Item%s' % (len(selected_items), 's' if len(selected_items) >1 else ''))
 
 	def sort(self, type='movies'):
 		try:
@@ -228,12 +238,13 @@ class Movies:
 
 	def imdb_sort(self, type='movies'):
 		sort = int(control.setting('sort.%s.type' % type))
-		imdb_sort = 'list_order'
+		imdb_sort = 'list_order' if type == 'movies.watchlist' else 'moviemeter'
 		if sort == 1: imdb_sort = 'alpha'
-		if sort in [2, 3]: imdb_sort = 'user_rating'
+		if sort == 2: imdb_sort = 'user_rating'
+		if sort == 3: imdb_sort = 'num_votes'
 		if sort == 4: imdb_sort = 'release_date'
 		if sort in [5, 6]: imdb_sort = 'date_added'
-		imdb_sort_order = ',asc' if int(control.setting('sort.%s.order' % type)) == 0 else ',desc'
+		imdb_sort_order = ',asc' if (int(control.setting('sort.%s.order' % type)) == 0 or sort == 0) else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
 
@@ -503,9 +514,8 @@ class Movies:
 				values['tmdb'] = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
 				values['tvdb'] = ''
 				# values['studio'] = item.get('network', '') # do not set, some skins show studio icons in place of thumb and looks like dog shit
-				values['genre'] = []
-				for x in item['genres']: values['genre'].append(x.title())
-				if not values['genre']: values['genre'] = 'NA'
+				try: values['genre'] = ' / '.join([x.title() for x in item.get('genres')]) or 'NA'
+				except: values['genre'] = 'NA'
 				values['duration'] = int(item.get('runtime') * 60) if item.get('runtime') else ''
 				values['rating'] = item.get('rating')
 				values['votes'] = item['votes']
@@ -694,6 +704,7 @@ class Movies:
 			values.update(movie_meta)
 			if 'rating' in self.list[i] and self.list[i]['rating']: del values['rating'] #prefer trakt rating and votes if set
 			if 'votes' in self.list[i] and self.list[i]['votes']: del values['votes'] 
+			if 'year' in self.list[i] and self.list[i]['year'] != values.get('year'): del values['year'] 
 			if not imdb: imdb = values.get('imdb', '')
 			if not values.get('imdb'): values['imdb'] = imdb
 			if not values.get('tmdb'): values['tmdb'] = tmdb

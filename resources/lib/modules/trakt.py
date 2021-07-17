@@ -27,7 +27,7 @@ headers = {'Content-Type': 'application/json', 'trakt-api-key': V2_API_KEY, 'tra
 REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 databaseName = control.cacheFile
 databaseTable = 'trakt'
-highlight_color = control.getColor(control.setting('highlight.color'))
+highlight_color = control.getHighlightColor()
 
 def getTrakt(url, post=None, extended=False):
 	try:
@@ -40,7 +40,6 @@ def getTrakt(url, post=None, extended=False):
 		headers['Authorization'] = 'Bearer %s' % control.addon('script.module.myaccounts').getSetting('trakt.token')
 
 		result = client.request(url, post=post, headers=headers, output='extended', error=True)
-		# result = utils.byteify(result) # check if this is needed because client "as_bytes" should handle this
 		try: code = str(result[1]) # result[1] is already a str from client module
 		except: code = ''
 
@@ -58,7 +57,7 @@ def getTrakt(url, post=None, extended=False):
 		elif result and code in ['429']:
 			if 'Retry-After' in result[2]: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (1000 calls every 5 minutes, doubt we'll ever hit that)
 				throttleTime = result[2]['Retry-After']
-				control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message ang code 33674
+				control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message lang code 33674
 				control.sleep((int(throttleTime) + 1) * 1000)
 				return getTrakt(url, post=post, extended=extended)
 		elif result and code in ['401']: # Re-Auth token
@@ -194,8 +193,7 @@ def getTraktCredentialsInfo():
 	username = control.setting('trakt.username').strip()
 	token = control.setting('trakt.token')
 	refresh = control.setting('trakt.refresh')
-	if (username == '' or token == '' or refresh == ''):
-		return False
+	if (username == '' or token == '' or refresh == ''): return False
 	return True
 
 def getTraktIndicatorsInfo():
@@ -322,21 +320,56 @@ def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
 	except:
 		log_utils.error()
 
+def unHideItems(tvdb_ids):
+	if not tvdb_ids: return
+	success = None
+	try:
+		sections = ['progress_watched', 'calendar']
+		ids = []
+		for id in tvdb_ids: ids.append({"ids": {"tvdb": int(id)}})
+		post = {"shows": ids}
+		for section in sections:
+			success = getTrakt('users/hidden/%s/remove' % section, post=post)
+			control.sleep(1000)
+		if success: return True
+	except:
+		log_utils.error()
+		return False
+
+def hideItems(tvdb_ids):
+	if not tvdb_ids: return
+	success = None
+	try:
+		sections = ['progress_watched', 'calendar']
+		ids = []
+		for id in tvdb_ids: ids.append({"ids": {"tvdb": int(id)}})
+		post = {"shows": ids}
+		for section in sections:
+			success =getTrakt('users/hidden/%s' % section, post=post)
+			control.sleep(1000)
+		if success: return True
+	except:
+		log_utils.error()
+		return False
+
 def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
-	sections = ['progress_watched', 'calendar']
-	sections_display = [control.lang(40072), control.lang(40073)]
-	selection = control.selectDialog([i for i in sections_display], heading=control.addonInfo('name') + ' - ' + control.lang(40074))
-	if selection == -1: return
-	control.busy()
-	section = sections[selection]
-	if episode: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
-	else: post = {"movies": [{"ids": {"imdb": imdb}}]}
-	getTrakt('users/hidden/%s' % section, post=post)[0]
-	control.hide()
-	if refresh: control.refresh()
-	control.trigger_widget_refresh()
-	if control.setting('trakt.general.notifications') == 'true':
-		control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
+	try:
+		sections = ['progress_watched', 'calendar']
+		sections_display = [control.lang(40072), control.lang(40073)]
+		selection = control.selectDialog([i for i in sections_display], heading=control.addonInfo('name') + ' - ' + control.lang(40074))
+		if selection == -1: return
+		control.busy()
+		section = sections[selection]
+		if episode: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
+		else: post = {"movies": [{"ids": {"imdb": imdb}}]}
+		getTrakt('users/hidden/%s' % section, post=post)[0]
+		control.hide()
+		if refresh: control.refresh()
+		control.trigger_widget_refresh()
+		if control.setting('trakt.general.notifications') == 'true':
+			control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
+	except:
+		log_utils.error()
 
 def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True, watched=None):
 	lists = []
@@ -356,7 +389,9 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 		if control.condVisibility('System.HasAddon(script.trakt)'):
 			items += [(control.lang(33653) % highlight_color, 'rate')]
 			items += [(control.lang(33654) % highlight_color, 'unrate')]
-		items += [(control.lang(40075) % (highlight_color, media_type), 'hideItem')]
+		if tvdb:
+			items += [(control.lang(40075) % (highlight_color, media_type), 'hideItem')]
+			items += [(control.lang(35057) % highlight_color, 'hiddenManager')]
 		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
 			if media_type == 'Movie' or episode:
 				items += [(control.lang(40076) % highlight_color, 'scrobbleReset')]
@@ -394,6 +429,8 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 				unrate(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
 			elif items[select][1] == 'hideItem':
 				hideItem(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode)
+			elif items[select][1] == 'hiddenManager':
+				control.execute('RunPlugin(plugin://plugin.video.venom/?action=shows_traktHiddenManager)')
 			elif items[select][1] == 'scrobbleReset':
 				scrobbleReset(imdb=imdb, tvdb=tvdb, season=season, episode=episode, widgetRefresh=True)
 			else:
@@ -478,6 +515,20 @@ def getActivity():
 		activity.append(i['seasons']['hidden_at']) # added 4/02/21
 		activity.append(i['lists']['liked_at'])
 		activity.append(i['lists']['updated_at'])
+		activity = [int(cleandate.iso_2_utc(i)) for i in activity]
+		activity = sorted(activity, key=int)[-1]
+		return activity
+	except:
+		log_utils.error()
+
+def getHiddenActivity():
+	try:
+		i = getTraktAsJson('/sync/last_activities')
+		if not i: return 0
+		activity = []
+		activity.append(i['movies']['hidden_at'])
+		activity.append(i['shows']['hidden_at'])
+		activity.append(i['seasons']['hidden_at'])
 		activity = [int(cleandate.iso_2_utc(i)) for i in activity]
 		activity = sorted(activity, key=int)[-1]
 		return activity
@@ -997,6 +1048,40 @@ def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True, widg
 			control.notification(message=32131)
 	except:
 		log_utils.error()
+
+def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=False):
+	control.busy()
+	try:
+		type = 'movie' if not tvdb_dicts else 'episode'
+		if type == 'movie':
+			for imdb in imdb_ids:
+				success = getTrakt('/scrobble/start', {"movie": {"ids": {"imdb": imdb}}, "progress": 0})
+				items = [{'type': 'movie', 'movie': {'ids': {'imdb': imdb}}}]
+				timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+				items[0].update({'paused_at': timestamp})
+				traktsync.delete_bookmark(items)
+				control.sleep(1000)
+		else:
+			for dict in tvdb_dicts:
+				imdb = dict.get('imdb')
+				tvdb = dict.get('tvdb')
+				season = dict.get('season')
+				episode = dict.get('episode')
+				items = [{'type': 'episode', 'episode': {'season': season, 'number': episode}, 'show': {'ids': {'imdb': imdb, 'tvdb': tvdb}}}]
+				success = getTrakt('/scrobble/start', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": 0})
+				timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+				items[0].update({'paused_at': timestamp})
+				traktsync.delete_bookmark(items)
+				control.sleep(1000)
+		control.hide()
+		if refresh: control.refresh()
+		if widgetRefresh:
+			control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
+		if success: return True
+		else: return False
+	except:
+		log_utils.error()
+		return False
 
 def sync_progress():
 	try:

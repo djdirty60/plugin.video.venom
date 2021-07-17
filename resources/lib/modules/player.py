@@ -31,7 +31,7 @@ class Player(xbmc.Player):
 		self.current_time = 0
 		self.meta = {}
 		self.enable_playnext = control.setting('enable.playnext') == 'true'
-		self.playnext_time = int(control.setting('playnext.time'))
+		self.playnext_time = int(control.setting('playnext.time')) or 60
 
 	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta):
 		try:

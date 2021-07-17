@@ -331,6 +331,14 @@ def getColor(n):
 	color = colorChart[int(n)]
 	return color
 
+def getHighlightColor():
+	n = setting('highlight.color')
+	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
+						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor']
+	if not n: n = '8'
+	color = colorChart[int(n)]
+	return color
+
 def getSourceHighlightColor():
 	n = setting('sources.highlight.color')
 	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',

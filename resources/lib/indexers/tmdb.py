@@ -239,13 +239,10 @@ class Movies:
 		try:
 			meta['mediatype'] = 'movie'
 # adult
-
 			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
 # belongs_to_collection
 # budget
-			meta['genre'] = []
-			for x in result['genres']: meta['genre'].append(x.get('name'))
-			if not meta['genre']: meta['genre'] = 'NA'
+			meta['genre'] = ' / '.join([x['name'] for x in result.get('genres', {})]) or 'NA'
 # homepage
 			meta['tmdb'] = str(result.get('id', '')) if result.get('id') else ''
 			meta['imdb'] = str(result.get('imdb_id', '')) if result.get('imdb_id') else ''

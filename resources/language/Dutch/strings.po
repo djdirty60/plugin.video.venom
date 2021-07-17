@@ -739,8 +739,12 @@ msgid "Pause"
 msgstr "Pauze"
 
 msgctxt "#32179"
-msgid ""
-msgstr ""
+msgid "OK"
+msgstr "OK"
+
+msgctxt "#32180"
+msgid "Cancel"
+msgstr "annuleren"
 
 
 
@@ -3076,6 +3080,34 @@ msgstr "12 uur"
 msgctxt "#35053"
 msgid "Period"
 msgstr "Periode"
+
+msgctxt "#35054"
+msgid "IMDb list sorting"
+msgstr "IMDb lijst sorteren sort"
+
+msgctxt "#35055"
+msgid "My Movies and list sort options"
+msgstr "Mijn films en lijstsorteeropties"
+
+msgctxt "#35056"
+msgid "My TVShows and list sort options"
+msgstr "Mijn tv-programma's en sorteeropties voor lijsten"
+
+msgctxt "#35057"
+msgid "[COLOR %s][B]Hidden Progress Manager[/B][/COLOR]"
+msgstr "[COLOR %s][B]Verborgen Voortgangsmanager[/B][/COLOR]"
+
+msgctxt "#35058"
+msgid "[COLOR %s][B]Unfinsihed Episodes Progress Manager[/B][/COLOR]"
+msgstr "[COLOR %s][B]Onvoltooide afleveringen voortgangsmanager[/B][/COLOR]"
+
+msgctxt "#35059"
+msgid "[COLOR %s][B]Unfinished Movies Progress Manager[/B][/COLOR]"
+msgstr "[COLOR %s][B]Onvoltooide Films Progress Manager[/B][/COLOR]"
+
+msgctxt "#35060"
+msgid "[COLOR %s][B]Trakt Management Tools[/B][/COLOR]"
+msgstr "[COLOR %s][B]Trakt-beheertools[/B][/COLOR]"
 
 
 

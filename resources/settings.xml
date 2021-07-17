@@ -21,7 +21,10 @@
 		<setting id="movie.unaired.identify" type="select" label="35526" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" />
 		<setting id="notification.sound" type="bool" label="35527" default="false" />
 		<setting id="general.checkAddonUpdates" type="bool" label="35524" default="true" />
-		<setting type="lsep" label="32003" />
+		<setting type="lsep" label="35055" />
+		<setting id="sort.imdbmovies.type" type="select" label="35054" lvalues="33564|33039|35187|35188|35391|35392|35393" default="0" />
+		<setting id="sort.imdbmovies.order" type="enum" label="33679" lvalues="33649|33650" default="0" subsetting="true" enable="!eq(-1,0)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdb_sorting)" />
 		<setting id="sort.movies.type" type="select" label="35190" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" />
 		<setting id="sort.movies.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
 		<setting id="sort.movies.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" />
@@ -105,7 +108,10 @@
 		<setting id="stillwatching.default.action" type="select" label="40025" subsetting="true" visible="eq(-5,true)" lvalues="32176|32177|32178" default="2" />
 		<!-- <setting id="auto.playlistcreate" type="bool" label="40030" default="true" /> -->
 
-		<setting label="32004" type="lsep" />
+		<setting label="35056" type="lsep" />
+		<setting id="sort.imdbshows.type" type="select" label="35054" lvalues="33564|33039|35187|35188|35391|35392|35393" default="0" />
+		<setting id="sort.imdbshows.order" type="enum" label="33679" lvalues="33649|33650" default="0" subsetting="true" enable="!eq(-1,0)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdb_sorting)" />
 		<setting id="sort.shows.type" type="select" label="35191" lvalues="33564|33039|35187|35188|35391|35392|35393" default="0" />
 		<setting id="sort.shows.order" type="enum" label="33679" lvalues="33649|33650" default="0" subsetting="true" enable="!eq(-1,0)" />
 		<setting id="sort.shows.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" />
@@ -147,7 +153,6 @@
 		<setting id="play.mode" type="select" label="32331" lvalues="32333|32334" default="0" />
 		<setting id="cf.disable" type="bool" label="32364" default="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disable_cloudflare)" />
-
 		<setting id="imdb.year.check" type="bool" label="32017" default="true" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdbYearCheck)" />
 
@@ -178,7 +183,7 @@
 		<setting id="remove.cam.sources" type="bool" label="32160" default="false" />
 		<setting id="remove.sd.sources" type="bool" label="32161" default="false" />
 		<setting id="remove.3D.sources" type="bool" label="32051" default="true" />
-		<setting id="torrent.min.seeders" type="slider" label="32638" default="1" range="1,100" option="int" visible="false" /> <!-- Hard coded by Fenomscrapers so not visible for now-->
+		<setting id="torrent.min.seeders" type="slider" label="32638" default="1" range="1,100" option="int" visible="false" /> <!-- Hard coded by Fenomscrapers so not visible for now -->
 		<setting id="torrent.remove.uncached" type="bool" label="32162" default="true" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=removeUncached)" />
 

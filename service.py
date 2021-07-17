@@ -34,8 +34,7 @@ class SettingsMonitor(control.monitor_class):
 		control.monitor_class.__init__(self)
 		control.log('[ plugin.video.venom ]  Settings Monitor Service Starting...', LOGINFO)
 
-	def onSettingsChanged(self):
-		# Kodi callback when the addon settings are changed
+	def onSettingsChanged(self): 	# Kodi callback when the addon settings are changed
 		window.clearProperty('venom_settings')
 		control.sleep(50)
 		refreshed = control.make_settings_dict()
@@ -120,7 +119,7 @@ class VersionIsUpdateCheck:
 			if isUpdate == 'true':
 				control.homeWindow.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clear_db_version = '5.0.4' # set to desired version to force any db clearing needed
+				clear_db_version = '6.0.6' # set to desired version to force any db clearing needed
 				if curVersion == clear_db_version:
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
 				control.log('[ plugin.video.venom ]  Plugin updated to v%s' % curVersion, LOGINFO)

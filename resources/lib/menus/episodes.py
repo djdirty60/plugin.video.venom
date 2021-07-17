@@ -52,9 +52,9 @@ class Episodes:
 		self.showunaired = control.setting('showunaired') == 'true'
 		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
 		self.showspecials = control.setting('tv.specials') == 'true'
-		self.highlight_color = control.getColor(control.setting('highlight.color'))
+		self.highlight_color = control.getHighlightColor()
 
-	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, idx=True, create_directory=True):
+	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, create_directory=True):
 		self.list = []
 		try:
 			if season is None and episode is None: # for "flatten" setting
@@ -91,7 +91,7 @@ class Episodes:
 				control.hide()
 				if self.notifications: control.notification(title=32326, message=33049)
 
-	def unfinished(self, url):
+	def unfinished(self, url, create_directory=True):
 		self.list = []
 		try:
 			try: url = getattr(self, url + '_link')
@@ -105,7 +105,7 @@ class Episodes:
 					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
 				if self.list is None: self.list = []
 				self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
-				self.episodeDirectory(self.list, unfinished=True, next=False)
+				if create_directory: self.episodeDirectory(self.list, unfinished=True, next=False)
 				return self.list
 		except:
 			from resources.lib.modules import log_utils
@@ -113,6 +113,18 @@ class Episodes:
 			if not self.list:
 				control.hide()
 				if self.notifications: control.notification(title=32326, message=33049)
+
+	def unfinishedManager(self):
+		control.busy()
+		list = self.unfinished(url='traktunfinished', create_directory=False)
+		control.hide()
+		from resources.lib.windows.traktepisodeprogress_manager import TraktEpisodeProgressManagerXML
+		window = TraktEpisodeProgressManagerXML('traktepisodeprogress_manager.xml', control.addonPath(control.addonId()), results=list)
+		selected_items = window.run()
+		del window
+		if selected_items:
+			success = trakt.scrobbleResetItems(imdb_ids=None, tvdb_dicts=selected_items, refresh=False, widgetRefresh=True)
+			if success: control.notification(title='Trakt Playback Progress Manager', message='Successfuly Removed %s Item%s' % (len(selected_items), 's' if len(selected_items) >1 else ''))
 
 	def upcoming_progress(self, url):
 		self.list = []
@@ -220,7 +232,7 @@ class Episodes:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 
-	def calendars(self, idx=True):
+	def calendars(self, create_directory=True):
 		m = control.lang(32060).split('|')
 		try: months = [
 					(m[0], 'January'), (m[1], 'February'), (m[2], 'March'), (m[3], 'April'), (m[4], 'May'), (m[5], 'June'), (m[6], 'July'),
@@ -238,7 +250,7 @@ class Episodes:
 				url = self.calendar_link % (self.date_time - timedelta(days=i)).strftime('%Y-%m-%d')
 				self.list.append({'name': name, 'url': url, 'image': 'calendar.png', 'icon': 'DefaultYear.png', 'action': 'calendar'})
 			except: pass
-		if idx: self.addDirectory(self.list)
+		if create_directory: self.addDirectory(self.list)
 		return self.list
 
 	def userlists(self):
@@ -542,9 +554,8 @@ class Episodes:
 				except: lastplayed = ''
 				paused_at = item.get('paused_at', '')
 				studio = item.get('show').get('network')
-				genre = []
-				for i in item['show']['genres']: genre.append(i.title())
-				if genre == []: genre = 'NA'
+				try: genre = ' / '.join([x.title() for x in item.get('show', {}).get('genres')]) or 'NA'
+				except: genre = 'NA'
 				try: duration = int(item['episode']['runtime']) * 60
 				except:
 					try:duration = int(item.get('show').get('runtime')) * 60

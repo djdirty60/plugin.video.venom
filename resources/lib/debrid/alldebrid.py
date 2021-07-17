@@ -256,7 +256,7 @@ class AllDebrid:
 				else: active = False
 				folder_name = control.strip_non_ascii_and_unprintable(item['filename'])
 				id = item['id']
-				status_str = '[COLOR %s]%s[/COLOR]' % (control.getColor(control.setting('highlight.color')), item['status'].capitalize())
+				status_str = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), item['status'].capitalize())
 				if active: label = '%02d | [B]%s[/B] - %s | [B]%s[/B]' % (count, status_str, str(percent) + '%', folder_name)
 				else: label = '%02d | [B]%s[/B] | [B]%s[/B] | [I]%s [/I]' % (count, status_str, folder_str, folder_name)
 				if status_code == 4:
@@ -289,7 +289,7 @@ class AllDebrid:
 				cm = []
 				folder_name = control.strip_non_ascii_and_unprintable(item['filename'])
 				id = item['id']
-				status_str = '[COLOR %s]%s[/COLOR]' % (control.getColor(control.setting('highlight.color')), item['status'].capitalize())
+				status_str = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), item['status'].capitalize())
 				label = '%02d | [B]%s[/B] | [B]%s[/B] | [I]%s [/I]' % (count, status_str, folder_str, folder_name)
 				url = '%s?action=ad_BrowseUserCloud&source=%s' % (sysaddon, quote_plus(jsdumps(item)))
 				cm.append((deleteMenu % 'Transfer', 'RunPlugin(%s?action=ad_DeleteTransfer&id=%s&name=%s)' %
