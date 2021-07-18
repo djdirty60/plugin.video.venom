@@ -169,6 +169,13 @@ class Episodes:
 				except:
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct)
 				self.sort(type='progress')
+				# place new season ep1's at top of list for 1 week
+				prior_week = int(re.sub(r'[^0-9]', '', (self.date_time - timedelta(days=7)).strftime('%Y-%m-%d')))
+				sorted_list = []
+				top_items = [i for i in self.list if i['episode'] == 1 and (int(re.sub(r'[^0-9]', '', str(i['premiered']))) >= prior_week)]
+				sorted_list.extend(top_items)
+				sorted_list.extend([i for i in self.list if i not in top_items])
+				self.list = sorted_list
 			elif self.trakt_link in url and url == self.mycalendar_link:
 				self.list = cache.get(self.trakt_episodes_list, 0.3, url, self.trakt_user, self.lang)
 				self.sort(type='calendar')
@@ -837,7 +844,7 @@ class Episodes:
 					overlay = int(getEpisodeOverlay(indicators, imdb, tvdb, season, episode))
 					watched = (overlay == 5)
 					if self.traktCredentials:
-						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&watched=%s)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode, watched)))
+						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&watched=%s&unfinished=%s)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode, watched, unfinished)))
 					if watched:
 						meta.update({'playcount': 1, 'overlay': 5})
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Episode&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&query=4)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode)))

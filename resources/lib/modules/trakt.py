@@ -355,14 +355,19 @@ def hideItems(tvdb_ids):
 def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	try:
 		sections = ['progress_watched', 'calendar']
-		sections_display = [control.lang(40072), control.lang(40073)]
+		sections_display = [control.lang(40072), control.lang(40073), control.lang(32181)]
 		selection = control.selectDialog([i for i in sections_display], heading=control.addonInfo('name') + ' - ' + control.lang(40074))
 		if selection == -1: return
 		control.busy()
-		section = sections[selection]
 		if episode: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
 		else: post = {"movies": [{"ids": {"imdb": imdb}}]}
-		getTrakt('users/hidden/%s' % section, post=post)[0]
+		if selection in [0, 1]:
+			section = sections[selection]
+			getTrakt('users/hidden/%s' % section, post=post)
+		else:
+			for section in sections:
+				getTrakt('users/hidden/%s' % section, post=post)
+				control.sleep(1000)
 		control.hide()
 		if refresh: control.refresh()
 		control.trigger_widget_refresh()
@@ -371,13 +376,12 @@ def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True
 	except:
 		log_utils.error()
 
-def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True, watched=None):
+def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True, watched=None, unfinished=False):
 	lists = []
 	try:
 		if season: season = int(season)
 		if episode: episode = int(episode)
 		media_type = 'Show' if tvdb else 'Movie'
-
 		if watched is not None:
 			if watched is True:
 				items = [(control.lang(33652) % highlight_color, 'unwatch')]
@@ -392,6 +396,9 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 		if tvdb:
 			items += [(control.lang(40075) % (highlight_color, media_type), 'hideItem')]
 			items += [(control.lang(35057) % highlight_color, 'hiddenManager')]
+		if unfinished is True:
+			if episode: items += [(control.lang(35058) % highlight_color, 'unfinishedEpisodeManager')]
+			elif media_type == 'Movie': items += [(control.lang(35059) % highlight_color, 'unfinishedMovieManager')]
 		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
 			if media_type == 'Movie' or episode:
 				items += [(control.lang(40076) % highlight_color, 'scrobbleReset')]
@@ -431,6 +438,10 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 				hideItem(name=name, imdb=imdb, tvdb=tvdb, season=season, episode=episode)
 			elif items[select][1] == 'hiddenManager':
 				control.execute('RunPlugin(plugin://plugin.video.venom/?action=shows_traktHiddenManager)')
+			elif items[select][1] == 'unfinishedEpisodeManager':
+				control.execute('RunPlugin(plugin://plugin.video.venom/?action=episodes_traktUnfinishedManager)')
+			elif items[select][1] == 'unfinishedMovieManager':
+				control.execute('RunPlugin(plugin://plugin.video.venom/?action=movies_traktUnfinishedManager)')
 			elif items[select][1] == 'scrobbleReset':
 				scrobbleReset(imdb=imdb, tvdb=tvdb, season=season, episode=episode, widgetRefresh=True)
 			else:

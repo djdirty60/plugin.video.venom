@@ -746,6 +746,18 @@ msgctxt "#32180"
 msgid "Cancel"
 msgstr "Stornieren"
 
+msgctxt "#32181"
+msgid "Watched Progress and Calendar"
+msgstr "Beobachteter Fortschritt und Kalender"
+
+msgctxt "#32182"
+msgid ""
+msgstr ""
+
+msgctxt "#32183"
+msgid ""
+msgstr ""
+
 
 
 

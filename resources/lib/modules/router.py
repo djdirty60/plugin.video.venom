@@ -534,7 +534,8 @@ def router(params):
 		elif action == 'tools_traktManager':
 			from resources.lib.modules import trakt
 			watched = (params.get('watched') == 'True') if params.get('watched') else None
-			trakt.manager(name, imdb, tvdb, season, episode, watched=watched)
+			unfinished = (params.get('unfinished') == 'True') if params.get('unfinished') else False
+			trakt.manager(name, imdb, tvdb, season, episode, watched=watched, unfinished=unfinished)
 		elif action == 'tools_cachesyncMovies':
 			from resources.lib.modules import trakt
 			trakt.cachesyncMovies(int(params.get('timeout')))

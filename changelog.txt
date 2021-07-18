@@ -1,4 +1,29 @@
 
+[B][COLOR red]Update - v6.0.7 - July 18, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Trakt Manager's [B]"Hide Item"[/B] now allows you to hide from both [B]"Watched Progress"[/B] and
+    [B]"Calendar"[/B] in one click.  There is now a new third option added for this.[/I]
+[COLOR yellow]--[/COLOR][I] The new [B]Trakt Manager Tools[/B] options for [B]Unfinished Movies Progress Manager[/B] and
+    [B]Unfinished Episode Progress Manager[/B] is now available in the [B]Trakt Manager[/B] when viewing
+    these [B]Unfinished[/B] lists.[/I]
+[COLOR yellow]--[/COLOR][I] [B]"My TVShows - Progress"[/B] will now bring any newly aired season-episode1 items to the top of
+    the list for a period of 7 days after it's air date.  A perfect example when this comes in handy is for
+    a show like [B]"Dexter"[/B].  When Season9-Episode1 airs in November this item for me will be on the
+    bottom since it was last watched years ago.  Now a newly aired season will get placed to the top for
+    ease of access for 7 days.[/I]
+[COLOR yellow]--[/COLOR][I] Receiving some reports of non loading menu lists in v6.0.6 update.  That version update had a hard
+    coded clearing of cache and metacache.  It seems that for some this process did not occur and results
+    in this non loading of menus. The new [B]"Trakt Management Tools"[/B] required a metacache change.
+    Please manually clear cache and metacache if you are experiencing this issue.[/I]
+
+
+[B][COLOR red]Update - v6.0.6 - July 17, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] IMDb lists now has a dedicated setting for listItem sorting, for Movies see [B]General[/B] category and
+    for TVShows see [B]TVShows[/B] category.  This new sort option currently is for [B]Genre, Language,[/B]
+    and [B]Certificates[/B] only at this time.[/I]
+[COLOR yellow]--[/COLOR][I] Added new [B]Trakt Management Tools[/B].  You can now manage your [B]Hidden Progress[/B] Items as
+    well as your [B]Trakt Playback Progress[/B].  See Main menu [B]Tools[/B] category.[/I]
+
+
 [B][COLOR red]Update - v6.0.5 - July 11, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Youtube menu not loading.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed issue where preResolved_nextUrl was not cleared from windows property when
