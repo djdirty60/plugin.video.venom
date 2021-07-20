@@ -298,44 +298,48 @@ class TVshows:
 		k.doModal()
 		q = k.getText().strip() if k.isConfirmed() else None
 		if not q: return
-		url = self.persons_link + quote_plus(q)
-		self.persons(url)
+		# url = self.persons_link + quote_plus(q)
+		# control.execute('Container.Update(%s?action=tvPersons&url=%s)' % (argv[0], quote_plus(url)))
 
 	def persons(self, url):
-		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
-		else: self.list = cache.get(self.imdb_person_list, 1, url)
-		if len(self.list) == 0:
-			control.hide()
-			control.notification(title=32010, message=33049)
-		for i in range(0, len(self.list)):
-			self.list[i].update({'icon': 'DefaultActor.png', 'action': 'tvshows'})
-		self.addDirectory(self.list)
-		return self.list
+		try:
+			if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
+			else: self.list = cache.get(self.imdb_person_list, 1, url)
+			if self.list is None:
+				control.hide() ; control.notification(title=32010, message=33049)
+				return
+			for i in range(0, len(self.list)):
+				self.list[i].update({'content': 'files', 'icon': 'DefaultActor.png', 'action': 'tvshows'})
+			self.addDirectory(self.list)
+			return self.list
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
 
 	def genres(self):
 		genres = [
 			('Action', 'action', True), ('Adventure', 'adventure', True), ('Animation', 'animation', True), ('Anime', 'anime', False),
 			('Biography', 'biography', True), ('Comedy', 'comedy', True), ('Crime', 'crime', True), ('Drama', 'drama', True),
 			('Family', 'family', True), ('Fantasy', 'fantasy', True), ('Game-Show', 'game_show', True), ('History', 'history', True),
-			('Horror', 'horror', True), ('Music ', 'music', True), ('Musical', 'musical', True), ('Mystery', 'mystery', True),
-			('News', 'news', True), ('Reality-TV', 'reality_tv', True), ('Romance', 'romance', True), ('Science Fiction', 'sci_fi', True),
+			('Horror', 'horror', True), ('Music', 'music', True), ('Musical', 'musical', True), ('Mystery', 'mystery', True),
+			('News', 'news', True), ('Reality', 'reality_tv', True), ('Romance', 'romance', True), ('Science Fiction', 'sci_fi', True),
 			('Sport', 'sport', True), ('Talk-Show', 'talk_show', True), ('Thriller', 'thriller', True), ('War', 'war', True), ('Western', 'western', True)]
 		for i in genres:
-			self.list.append({'name': cleangenre.lang(i[0], self.lang), 'url': self.genre_link % i[1] if i[2] else self.keyword_link % i[1], 'image': 'genres.png', 'icon': 'DefaultGenre.png', 'action': 'tvshows'})
+			self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': self.genre_link % i[1] if i[2] else self.keyword_link % i[1], 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
 	def networks(self):
 		networks = tmdb_indexer.TVshows().get_networks()
 		for i in networks:
-			self.list.append({'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': 'DefaultNetwork.png', 'action': 'tmdbTvshows'})
+			self.list.append({'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
 	def originals(self):
 		originals = tmdb_indexer.TVshows().get_originals()
 		for i in originals:
-			self.list.append({'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': 'DefaultNetwork.png', 'action': 'tmdbTvshows'})
+			self.list.append({'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -359,14 +363,13 @@ class TVshows:
 			('Youth Audience (TV-14)', 'TV-13', 'TV-14'),
 			('Mature Audience (TV-MA)', 'TV-MA')]
 		for i in certificates:
-			self.list.append({'name': str(i[0]), 'url': self.certification_link % self.certificatesFormat(i[1]), 'image': 'certificates.png', 'icon': 'DefaultTVShows.png', 'action': 'tvshows'})
+			self.list.append({'name': str(i[0]), 'url': self.certification_link % self.certificatesFormat(i[1]), 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
 	def certificatesFormat(self, certificates):
 		base = 'US%3A'
-		if not isinstance(certificates, (tuple, list)):
-			certificates = [certificates]
+		if not isinstance(certificates, (tuple, list)): certificates = [certificates]
 		return ','.join([base + i.upper() for i in certificates])
 
 	def tvshowsListToLibrary(self, url):
@@ -876,12 +879,23 @@ class TVshows:
 		queueMenu, playRandom, addToLibrary = control.lang(32065), control.lang(32535), control.lang(32551)
 		for i in items:
 			try:
+				content = i.get('content', '') or 'addons'
 				name = i['name']
-				if i['image'].startswith('http'): thumb = i['image']
-				elif artPath: thumb = control.joinPath(artPath, i['image'])
-				else: thumb = addonThumb
-				icon = i.get('icon', 0)
-				if not icon: icon = 'DefaultFolder.png'
+				if i['image'].startswith('http'): poster = i['image']
+				elif artPath: poster = control.joinPath(artPath, i['image'])
+				else: poster = addonThumb
+
+				if content == 'genres':
+					genreIconPath = control.genreIconPath()
+					genrePosterPath = control.genrePosterPath()
+					icon = control.joinPath(genreIconPath, i['icon']) or 'DefaultFolder.png'
+					poster = control.joinPath(genrePosterPath, i['image']) or addonThumb
+					content = ''
+				else:
+					icon = i['icon']
+					if i['icon'].startswith('http'): pass
+					elif not i['icon'].startswith('Default'): icon = control.joinPath(artPath, i['icon'])
+
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
@@ -895,11 +909,11 @@ class TVshows:
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
-				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
+				item.setArt({'icon': icon, 'poster': poster, 'thumb': icon, 'fanart': control.addonFanart(), 'banner': poster})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-		control.content(syshandle, 'addons')
+		control.content(syshandle, content)  # some skins use the own poster for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)

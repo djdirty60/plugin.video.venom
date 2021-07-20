@@ -308,7 +308,8 @@ def clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=
 		if clr_cache: cache_clear()
 		if clr_search: cache_clear_search()
 		if clr_bookmarks: cache_clear_bookmarks()
-		control.notification(message='Venom version update complete')
+		control.notification(message='Forced cache clear for version update complete.')
+		control.log('[ plugin.video.venom ]  Forced cache clear for version update complete.', 1)
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -331,12 +332,12 @@ def update_cache_version():
 		curVersion = control.addon('plugin.video.venom').getAddonInfo('version')
 		if oldVersion != curVersion:
 			with open(versionFile, 'w') as fh: 	fh.write(curVersion)
-			return True
-		else: return False
+			return oldVersion, True
+		else: return oldVersion, False
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
-		return False
+		return oldVersion, False
 
 def get_cache_version():
 	versionFile = control.joinPath(control.dataPath, 'cache.v')

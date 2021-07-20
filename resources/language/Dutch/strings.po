@@ -1586,8 +1586,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32506"
-msgid "[B][COLOR red]Venom Global Context[/COLOR][/B] Settings"
-msgstr "[B][COLOR red]Wereldwijde context van Venom[/COLOR][/B] Instellingen"
+msgid "[B]Venom Global Context[/B] Settings"
+msgstr "[B]Wereldwijde context van Venom[/B] Instellingen"
 
 msgctxt "#32507"
 msgid ""
@@ -1982,8 +1982,8 @@ msgid "Unaired Season/Episode Color"
 msgstr "Niet Uitgezonden seizoen/aflevering kleur"
 
 msgctxt "#32609"
-msgid "[B][COLOR red]My Accounts[/COLOR][/B] Settings"
-msgstr "[B][COLOR red]Mijn accounts[/COLOR][/B] Instellingen"
+msgid "[B]My Accounts[/B] Settings"
+msgstr "[B]Mijn accounts[/B] Instellingen"
 
 msgctxt "#32610"
 msgid "Clear [COLOR yellow]All [/COLOR]Cache..."
@@ -2142,8 +2142,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32651"
-msgid "[B][COLOR red]Fenom Scrapers[/COLOR][/B] Settings"
-msgstr "[B][COLOR red]Fenom Schrapers[/COLOR][/B] instellingen"
+msgid "[B]Fenom Scrapers[/B] Settings"
+msgstr "[B]Fenom Schrapers[/B] instellingen"
 
 msgctxt "#32652"
 msgid "Title Already Exists in Library"
@@ -3118,8 +3118,8 @@ msgid "[COLOR %s][B]Unfinished Movies Progress Manager[/B][/COLOR]"
 msgstr "[COLOR %s][B]Onvoltooide Films Progress Manager[/B][/COLOR]"
 
 msgctxt "#35060"
-msgid "[COLOR %s][B]Trakt Management Tools[/B][/COLOR]"
-msgstr "[COLOR %s][B]Trakt-beheertools[/B][/COLOR]"
+msgid "[B]Trakt Management Tools[/B]"
+msgstr "[B]Trakt-beheertools[/B]"
 
 
 

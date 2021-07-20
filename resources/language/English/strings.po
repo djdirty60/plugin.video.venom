@@ -1586,7 +1586,7 @@ msgid ""
 msgstr ""
 
 msgctxt "#32506"
-msgid "[B][COLOR red]Venom Global Context[/COLOR][/B] Settings"
+msgid "[B]Venom Global Context[/B] Settings"
 msgstr ""
 
 msgctxt "#32507"
@@ -1982,7 +1982,7 @@ msgid "Unaired Season/Episode Color"
 msgstr ""
 
 msgctxt "#32609"
-msgid "[B][COLOR red]My Accounts[/COLOR][/B] Settings"
+msgid "[B]My Accounts[/B] Settings"
 msgstr ""
 
 msgctxt "#32610"
@@ -2142,7 +2142,7 @@ msgid ""
 msgstr ""
 
 msgctxt "#32651"
-msgid "[B][COLOR red]Fenom Scrapers[/COLOR][/B] Settings"
+msgid "[B]Fenom Scrapers[/B] Settings"
 msgstr ""
 
 msgctxt "#32652"
@@ -3118,7 +3118,7 @@ msgid "[COLOR %s][B]Unfinished Movies Progress Manager[/B][/COLOR]"
 msgstr ""
 
 msgctxt "#35060"
-msgid "[COLOR %s][B]Trakt Management Tools[/B][/COLOR]"
+msgid "[B]Trakt Management Tools[/B]"
 msgstr ""
 
 

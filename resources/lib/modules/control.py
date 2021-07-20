@@ -166,6 +166,14 @@ def artPath():
 	theme = appearance()
 	return joinPath(xbmcaddon.Addon('plugin.video.venom').getAddonInfo('path'), 'resources', 'artwork', theme)
 
+def genreIconPath():
+	theme = appearance()
+	return joinPath(xbmcaddon.Addon('plugin.video.venom').getAddonInfo('path'), 'resources', 'artwork', 'genre_media', 'icons')
+
+def genrePosterPath():
+	theme = appearance()
+	return joinPath(xbmcaddon.Addon('plugin.video.venom').getAddonInfo('path'), 'resources', 'artwork', 'genre_media', 'posters')
+
 def appearance():
 	appearance = setting('appearance.1').lower()
 	return appearance
@@ -352,11 +360,10 @@ def getMenuEnabled(menu_title):
 	if (is_enabled == '' or is_enabled == 'false'): return False
 	return True
 
-def trigger_widget_refresh(): # should prob make this run only on "isVenom_widget"
+def trigger_widget_refresh():
 	import time
 	timestr = time.strftime("%Y%m%d%H%M%S", time.gmtime())
 	homeWindow.setProperty("widgetreload", timestr)
-	# homeWindow.setProperty('widgetreload-tvshows', timestr) # does not appear used
 	homeWindow.setProperty('widgetreload-episodes', timestr)
 	homeWindow.setProperty('widgetreload-movies', timestr)
 	# execute('UpdateLibrary(video,/fake/path/to/force/refresh/on/home)') # make sure this is ok coupled with above

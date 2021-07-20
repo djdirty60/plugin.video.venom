@@ -364,7 +364,7 @@ class Collections:
 		self.addDirectoryItem('DC Comics', 'collections&url=dcmovies', 'boxsets.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Marvel Comics', 'collections&url=marvelmovies', 'boxsets.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Superheroes', 'collections_Superhero', 'boxsets.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('Kids Collections', 'collections_Kids', 'boxsets.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Kids Collections', 'collections_Kids', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
 
 	def collections_Boxset(self):
@@ -566,26 +566,26 @@ class Collections:
 		self.endDirectory()
 
 	def collections_martial_arts_actors(self):
-		self.addDirectoryItem('Brandon Lee', 'collections&url=brandonlee', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Bruce Lee', 'collections&url=brucelee2', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Chuck Norris', 'collections&url=chucknorris', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Chow Yun-Fat', 'collections&url=chowyunfat', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Donnie Yen', 'collections&url=donnieyen', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Gary Daniels', 'collections&url=garydaniels', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Jackie Chan', 'collections&url=jackiechan', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Jason Statham', 'collections&url=jasonstatham', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Jean-Claude Van Damme', 'collections&url=vandamme', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Jet Li', 'collections&url=jetli', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Mark Dacascos', 'collections&url=markdacascos', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Michael Jai White', 'collections&url=michaeljaiwhite', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Philip Ng', 'collections&url=philipng', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Rain', 'collections&url=rain', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Robin Shou', 'collections&url=robinshou', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Scott Adkins', 'collections&url=scottadkins', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Steven Seagal', 'collections&url=stevenseagal', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Tiger Chen', 'collections&url=tigerchen', 'people.png', 'DefaultActor.png')
-		self.addDirectoryItem('Tony Jaa', 'collections&url=tonyjaa', 'people.png', 'DefaultActor.png')
-		self.endDirectory()
+		self.addDirectoryItem('Brandon Lee', 'collections&url=brandonlee', 'https://i.postimg.cc/y8yBGNsG/Brandon-Lee.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Bruce Lee', 'collections&url=brucelee2', 'https://i.postimg.cc/rmcfP8yf/bruce-lee-Biography.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Chuck Norris', 'collections&url=chucknorris', 'https://i.postimg.cc/ZKkx7bfp/Chuck-Norris.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Chow Yun-Fat', 'collections&url=chowyunfat', 'https://i.postimg.cc/159f5bXb/Chow-Yun-Fat.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Donnie Yen', 'collections&url=donnieyen', 'https://i.postimg.cc/SsFK0vHT/Donnie-Yen.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Gary Daniels', 'collections&url=garydaniels', 'https://i.postimg.cc/nrdZLRwt/Gary-Daniels.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Jackie Chan', 'collections&url=jackiechan', 'https://i.postimg.cc/90kSSvnz/Jackie-Chan.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Jason Statham', 'collections&url=jasonstatham', 'https://i.postimg.cc/K8SpMrSX/Jason-Statham-2019.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Jean-Claude Van Damme', 'collections&url=vandamme', 'https://i.postimg.cc/HLSfXc9Q/Jean-Claude-Van-Damme.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Jet Li', 'collections&url=jetli', 'https://i.postimg.cc/hGGYD4Rh/Jet-Li.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Mark Dacascos', 'collections&url=markdacascos', 'https://i.postimg.cc/4NJQkLgx/Mark-Dacascos.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Michael Jai White', 'collections&url=michaeljaiwhite', 'https://i.postimg.cc/hPyTFKs2/Michael-Jai-White.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Philip Ng', 'collections&url=philipng', 'https://i.postimg.cc/Kz8myhJ5/Philip-Ng.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Rain', 'collections&url=rain', 'https://i.postimg.cc/sDmdsNG6/Rain.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Robin Shou', 'collections&url=robinshou', 'https://i.postimg.cc/qMjY96WW/Robin-Shou.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Scott Adkins', 'collections&url=scottadkins', 'https://i.postimg.cc/50SpLZVD/Scott-Adkins.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Steven Seagal', 'collections&url=stevenseagal', 'https://i.postimg.cc/0Qhm6n6h/Steven-Seagal.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Tiger Chen', 'collections&url=tigerchen', 'https://i.postimg.cc/gkzcVRv7/Tiger-Chen.jpg', 'DefaultActor.png')
+		self.addDirectoryItem('Tony Jaa', 'collections&url=tonyjaa', 'https://i.postimg.cc/Bn80pCtm/Tony-Jaa.jpg', 'DefaultActor.png')
+		self.endDirectory(content_type='files')
 
 	def collections_Kids(self):
 		self.addDirectoryItem('Disney Collection', 'collections&url=disneymovies', 'collectiondisney.png', 'DefaultVideoPlaylists.png')
@@ -927,23 +927,29 @@ class Collections:
 		control.sleep(500)
 		views.setView('movies', {'skin.estuary': 55, 'skin.confluence': 500})
 
-	def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True):
-		if isinstance(name, int): name = control.lang(name)
-		sysaddon, syshandle = argv[0], int(argv[1])
-		artPath = control.artPath()
-		thumb = control.joinPath(artPath, thumb) if artPath else icon
-		url = '%s?action=%s' % (sysaddon, query) if isAction else query
-		cm = []
-		if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
-		if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
-		cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-		item = control.item(label=name, offscreen=True)
-		item.setProperty('IsPlayable', 'false')
-		item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
-		item.addContextMenuItems(cm)
-		control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
+	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True):
+		try:
+			if isinstance(name, int): name = control.lang(name)
+			sysaddon, syshandle = argv[0], int(argv[1])
+			artPath = control.artPath()
+			if not icon.startswith('Default'): icon = control.joinPath(artPath, icon)
+			if poster.startswith('http'): poster = poster
+			else: poster = control.joinPath(artPath, poster) if artPath else icon
+			url = '%s?action=%s' % (sysaddon, query) if isAction else query
+			cm = []
+			if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
+			if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
+			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
+			item = control.item(label=name, offscreen=True)
+			item.setProperty('IsPlayable', 'false')
+			item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
+			item.addContextMenuItems(cm)
+			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
 
-	def endDirectory(self):
+	def endDirectory(self, content_type='addons'):
 		syshandle = int(argv[1])
-		control.content(syshandle, 'addons')
+		control.content(syshandle, content_type)
 		control.directory(syshandle, cacheToDisc=True)

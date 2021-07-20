@@ -331,7 +331,9 @@ def unHideItems(tvdb_ids):
 		for section in sections:
 			success = getTrakt('users/hidden/%s/remove' % section, post=post)
 			control.sleep(1000)
-		if success: return True
+			if 'plugin.video.venom' in control.infoLabel('Container.PluginName'): control.refresh()
+			control.trigger_widget_refresh()
+			return True
 	except:
 		log_utils.error()
 		return False
@@ -347,7 +349,10 @@ def hideItems(tvdb_ids):
 		for section in sections:
 			success =getTrakt('users/hidden/%s' % section, post=post)
 			control.sleep(1000)
-		if success: return True
+		if success:
+			if 'plugin.video.venom' in control.infoLabel('Container.PluginName'): control.refresh()
+			control.trigger_widget_refresh()
+			return True
 	except:
 		log_utils.error()
 		return False
@@ -1050,13 +1055,11 @@ def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True, widg
 		items[0].update({'paused_at': timestamp})
 		traktsync.delete_bookmark(items)
 		control.hide()
-		if refresh: control.refresh()
-		if widgetRefresh:
-			control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
 		if success:
+			if refresh: control.refresh()
+			if widgetRefresh: control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
 			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32082)
-		else:
-			control.notification(message=32131)
+		else: control.notification(message=32131)
 	except:
 		log_utils.error()
 
@@ -1065,6 +1068,7 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 	try:
 		type = 'movie' if not tvdb_dicts else 'episode'
 		if type == 'movie':
+			total_items = len(imdb_ids)
 			for imdb in imdb_ids:
 				success = getTrakt('/scrobble/start', {"movie": {"ids": {"imdb": imdb}}, "progress": 0})
 				items = [{'type': 'movie', 'movie': {'ids': {'imdb': imdb}}}]
@@ -1073,6 +1077,7 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 				traktsync.delete_bookmark(items)
 				control.sleep(1000)
 		else:
+			total_items = len(tvdb_dicts)
 			for dict in tvdb_dicts:
 				imdb = dict.get('imdb')
 				tvdb = dict.get('tvdb')
@@ -1085,10 +1090,11 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 				traktsync.delete_bookmark(items)
 				control.sleep(1000)
 		control.hide()
-		if refresh: control.refresh()
-		if widgetRefresh:
-			control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
-		if success: return True
+		if success:
+			if refresh: control.refresh()
+			if widgetRefresh: 	control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
+			control.notification(title='Trakt Playback Progress Manager', message='Successfuly Removed %s Item%s' % (total_items, 's' if total_items >1 else ''))
+			return True
 		else: return False
 	except:
 		log_utils.error()

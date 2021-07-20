@@ -114,14 +114,24 @@ class VersionIsUpdateCheck:
 	def run(self):
 		try:
 			from resources.lib.database import cache
-			isUpdate = 'false'
-			if cache.update_cache_version(): isUpdate = 'true'
-			if isUpdate == 'true':
+			isUpdate = False
+			oldVersion, isUpdate = cache.update_cache_version()
+			if isUpdate:
 				control.homeWindow.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clear_db_version = '6.0.6' # set to desired version to force any db clearing needed
-				if curVersion == clear_db_version:
+				clearDB_version = '6.0.6' # set to desired version to force any db clearing needed
+				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', ''))  <= int(curVersion.replace('.', '')))
+				if do_cacheClear:
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
+
+				# write_UDsettings_version = '6.0.6' # set to desired version to force writting new UD settings.xml for added setting
+				# do_UDsettings_write = (int(oldVersion.replace('.', '')) < int(write_UDsettings_version.replace('.', ''))  <= int(curVersion.replace('.', '')))
+				# if do_UDsettings_write:
+					# control.setSetting('trakt.message2', '') # force a settings write for any added settings may have been added in new version
+					# control.log('[ plugin.video.venom ]  Forced new User Data settings.xml saved', LOGINFO)
+
+				control.setSetting('trakt.message2', '') # force a settings write for any added settings may have been added in new version
+				control.log('[ plugin.video.venom ]  Forced new User Data settings.xml saved', LOGINFO)
 				control.log('[ plugin.video.venom ]  Plugin updated to v%s' % curVersion, LOGINFO)
 		except:
 			log_utils.error()

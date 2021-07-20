@@ -203,8 +203,8 @@ class Movies:
 		selected_items = window.run()
 		del window
 		if selected_items:
-			success = trakt.scrobbleResetItems(imdb_ids=selected_items, refresh=False, widgetRefresh=True)
-			if success: control.notification(title='Trakt Playback Progress Manager', message='Successfuly Removed %s Item%s' % (len(selected_items), 's' if len(selected_items) >1 else ''))
+			refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+			trakt.scrobbleResetItems(imdb_ids=selected_items, refresh=refresh, widgetRefresh=True)
 
 	def sort(self, type='movies'):
 		try:
@@ -316,16 +316,16 @@ class Movies:
 		q = k.getText().strip() if k.isConfirmed() else None
 		if not q: return
 		url = self.persons_link + quote_plus(q)
-		self.persons(url)
+		control.execute('Container.Update(%s?action=moviePersons&url=%s)' % (argv[0], quote_plus(url)))
 
 	def persons(self, url):
 		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
 		else: self.list = cache.get(self.imdb_person_list, 1, url)
-		if len(self.list) == 0:
-			control.hide()
-			control.notification(title=32010, message=33049)
+		if self.list is None:
+			control.hide() ; control.notification(title=32010, message=33049)
+			return
 		for i in range(0, len(self.list)):
-			self.list[i].update({'icon': 'DefaultActor.png', 'action': 'movies'})
+			self.list[i].update({'content': 'files', 'icon': 'DefaultActor.png', 'action': 'movies'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -335,11 +335,11 @@ class Movies:
 			('Biography', 'biography', True), ('Comedy', 'comedy', True), ('Crime', 'crime', True),
 			('Documentary', 'documentary', True), ('Drama', 'drama', True), ('Family', 'family', True),
 			('Fantasy', 'fantasy', True), ('Film-Noir', 'film-noir', True), ('History', 'history', True),
-			('Horror', 'horror', True), ('Music ', 'music', True), ('Musical', 'musical', True),
+			('Horror', 'horror', True), ('Music', 'music', True), ('Musical', 'musical', True),
 			('Mystery', 'mystery', True), ('Romance', 'romance', True), ('Science Fiction', 'sci-fi', True),
 			('Sport', 'sport', True), ('Thriller', 'thriller', True), ('War', 'war', True), ('Western', 'western', True)]
 		for i in genres:
-			self.list.append({'name': cleangenre.lang(i[0], self.lang), 'url': self.genre_link % i[1] if i[2] else self.keyword_link % i[1], 'image': 'genres.png', 'icon': 'DefaultGenre.png', 'action': 'movies' })
+			self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': self.genre_link % i[1] if i[2] else self.keyword_link % i[1], 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'movies' })
 		self.addDirectory(self.list)
 		return self.list
 
@@ -362,7 +362,7 @@ class Movies:
 			('Parental Restriction (R)', 'R'),
 			('Mature Audience (NC-17)', 'NC-17')]
 		for i in certificates:
-			self.list.append({'name': str(i[0]), 'url': self.certification_link % self.certificatesFormat(i[1]), 'image': 'certificates.png', 'icon': 'DefaultMovies.png', 'action': 'movies'})
+			self.list.append({'name': str(i[0]), 'url': self.certification_link % self.certificatesFormat(i[1]), 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'movies'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -741,10 +741,8 @@ class Movies:
 		indicators = getMovieIndicators(refresh=True)
 		if play_mode == '1': playbackMenu = control.lang(32063)
 		else: playbackMenu = control.lang(32064)
-		if trakt.getTraktIndicatorsInfo():
-			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
-		else:
-			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
+		if trakt.getTraktIndicatorsInfo(): watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
+		else: watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
 		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
 		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
@@ -870,12 +868,21 @@ class Movies:
 		queueMenu, playRandom, addToLibrary = control.lang(32065), control.lang(32535), control.lang(32551)
 		for i in items:
 			try:
+				content = i.get('content', '') or 'addons'
 				name = i['name']
-				if i['image'].startswith('http'): thumb = i['image']
-				elif artPath: thumb = control.joinPath(artPath, i['image'])
-				else: thumb = addonThumb
-				icon = i.get('icon', 0)
-				if not icon: icon = 'DefaultFolder.png'
+				if i['image'].startswith('http'): poster = i['image']
+				elif artPath: poster = control.joinPath(artPath, i['image'])
+				else: poster = addonThumb
+				if content == 'genres':
+					genreIconPath = control.genreIconPath()
+					genrePosterPath = control.genrePosterPath()
+					icon = control.joinPath(genreIconPath, name + '.png') or 'DefaultFolder.png'
+					poster = control.joinPath(genrePosterPath, name + '.jpg') or addonThumb
+					content = ''
+				else:
+					icon = i['icon']
+					if i['icon'].startswith('http'): pass
+					elif not i['icon'].startswith('Default'): icon = control.joinPath(artPath, i['icon'])
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
@@ -889,11 +896,11 @@ class Movies:
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
-				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
+				item.setArt({'icon': icon, 'poster': poster, 'thumb': icon, 'fanart': control.addonFanart(), 'banner': poster})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-		control.content(syshandle, 'addons')
+		control.content(syshandle, content)  # some skins use the own poster for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)

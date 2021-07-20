@@ -1586,8 +1586,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32506"
-msgid "[B][COLOR red]Venom Global Context[/COLOR][/B] Settings"
-msgstr "[B][COLOR red]Globalny kontekst jadu[/COLOR][/B] Ustawienia"
+msgid "[B]Venom Global Context[/B] Settings"
+msgstr "[B]Globalny kontekst jadu[/B] Ustawienia"
 
 msgctxt "#32507"
 msgid ""
@@ -1982,8 +1982,8 @@ msgid "Unaired Season/Episode Color"
 msgstr "Niewyemitowany kolor sezonu/odcinka"
 
 msgctxt "#32609"
-msgid "[B][COLOR red]My Accounts[/COLOR][/B] Settings"
-msgstr "[B][COLOR red]Moje konta[/COLOR][/B] Ustawienia"
+msgid "[B]My Accounts[/B] Settings"
+msgstr "[B]Moje konta[/B] Ustawienia"
 
 msgctxt "#32610"
 msgid "Clear [COLOR yellow]All [/COLOR]Cache..."
@@ -2142,8 +2142,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32651"
-msgid "[B][COLOR red]Fenom Scrapers[/COLOR][/B] Settings"
-msgstr "[B][COLOR red]Skrobaki Fenom[/COLOR][/B] Ustawienia"
+msgid "[B]Fenom Scrapers[/B] Settings"
+msgstr "[B]Skrobaki Fenom[/B] Ustawienia"
 
 msgctxt "#32652"
 msgid "Title Already Exists in Library"
@@ -3118,8 +3118,8 @@ msgid "[COLOR %s][B]Unfinished Movies Progress Manager[/B][/COLOR]"
 msgstr "Menedżer postępu niedokończonych filmów"
 
 msgctxt "#35060"
-msgid "[COLOR %s][B]Trakt Management Tools[/B][/COLOR]"
-msgstr "Narzędzia do zarządzania trasami"
+msgid "[B]Trakt Management Tools[/B]"
+msgstr "[B]Narzędzia do zarządzania trasami[/B]"
 
 
 

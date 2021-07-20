@@ -123,8 +123,8 @@ class Episodes:
 		selected_items = window.run()
 		del window
 		if selected_items:
-			success = trakt.scrobbleResetItems(imdb_ids=None, tvdb_dicts=selected_items, refresh=False, widgetRefresh=True)
-			if success: control.notification(title='Trakt Playback Progress Manager', message='Successfuly Removed %s Item%s' % (len(selected_items), 's' if len(selected_items) >1 else ''))
+			refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+			trakt.scrobbleResetItems(imdb_ids=None, tvdb_dicts=selected_items, refresh=refresh, widgetRefresh=True)
 
 	def upcoming_progress(self, url):
 		self.list = []
@@ -172,7 +172,7 @@ class Episodes:
 				# place new season ep1's at top of list for 1 week
 				prior_week = int(re.sub(r'[^0-9]', '', (self.date_time - timedelta(days=7)).strftime('%Y-%m-%d')))
 				sorted_list = []
-				top_items = [i for i in self.list if i['episode'] == 1 and (int(re.sub(r'[^0-9]', '', str(i['premiered']))) >= prior_week)]
+				top_items = [i for i in self.list if i['episode'] == 1 and i['premiered'] and (int(re.sub(r'[^0-9]', '', str(i['premiered']))) >= prior_week)]
 				sorted_list.extend(top_items)
 				sorted_list.extend([i for i in self.list if i not in top_items])
 				self.list = sorted_list
@@ -965,12 +965,13 @@ class Episodes:
 		queueMenu = control.lang(32065)
 		for i in items:
 			try:
+				content = i.get('content', '') or 'addons'
 				name = i['name']
-				if i['image'].startswith('http'): thumb = i['image']
-				elif artPath: thumb = control.joinPath(artPath, i['image'])
-				else: thumb = addonThumb
-				icon = i.get('icon', 0)
-				if not icon: icon = 'DefaultFolder.png'
+				if i['image'].startswith('http'): poster = i['image']
+				elif artPath: poster = control.joinPath(artPath, i['image'])
+				else: poster = addonThumb
+				icon = i.get('icon', '') or 'DefaultFolder.png'
+				if not icon.startswith('Default'): icon = control.joinPath(self.artPath, icon)
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
@@ -979,11 +980,11 @@ class Episodes:
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
-				item.setArt({'icon': icon, 'poster': thumb, 'thumb': thumb, 'fanart': control.addonFanart(), 'banner': thumb})
+				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-		control.content(syshandle, 'addons')
+		control.content(syshandle, content)  # some skins use the own poster for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)

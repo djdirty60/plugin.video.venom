@@ -1,50 +1,39 @@
 
+[B][COLOR red]Update - v6.0.8 - July 20, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added new genre icon and poster pack per request.[/I]
+[COLOR yellow]--[/COLOR][I] Added actor profile pics to the Martial Arts section.[/I]
+[COLOR yellow]--[/COLOR][I] Added new service check for future updates in hope to cure any cache clearing and missing saved settings from occuring.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where Trakt progress failed to load if Show Unaired episodes were also included.[/I]
+
+
 [B][COLOR red]Update - v6.0.7 - July 18, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Trakt Manager's [B]"Hide Item"[/B] now allows you to hide from both [B]"Watched Progress"[/B] and
-    [B]"Calendar"[/B] in one click.  There is now a new third option added for this.[/I]
-[COLOR yellow]--[/COLOR][I] The new [B]Trakt Manager Tools[/B] options for [B]Unfinished Movies Progress Manager[/B] and
-    [B]Unfinished Episode Progress Manager[/B] is now available in the [B]Trakt Manager[/B] when viewing
-    these [B]Unfinished[/B] lists.[/I]
-[COLOR yellow]--[/COLOR][I] [B]"My TVShows - Progress"[/B] will now bring any newly aired season-episode1 items to the top of
-    the list for a period of 7 days after it's air date.  A perfect example when this comes in handy is for
-    a show like [B]"Dexter"[/B].  When Season9-Episode1 airs in November this item for me will be on the
-    bottom since it was last watched years ago.  Now a newly aired season will get placed to the top for
-    ease of access for 7 days.[/I]
-[COLOR yellow]--[/COLOR][I] Receiving some reports of non loading menu lists in v6.0.6 update.  That version update had a hard
-    coded clearing of cache and metacache.  It seems that for some this process did not occur and results
-    in this non loading of menus. The new [B]"Trakt Management Tools"[/B] required a metacache change.
-    Please manually clear cache and metacache if you are experiencing this issue.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Manager's [B]"Hide Item"[/B] now allows you to hide from both [B]"Watched Progress"[/B] and [B]"Calendar"[/B] in one click.  There is now a new third option added for this.[/I]
+[COLOR yellow]--[/COLOR][I] The new [B]Trakt Manager Tools[/B] options for [B]Unfinished Movies Progress Manager[/B] and [B]Unfinished Episode Progress Manager[/B] is now available in the [B]Trakt Manager[/B] when viewing these [B]Unfinished[/B] lists.[/I]
+[COLOR yellow]--[/COLOR][I] [B]"My TVShows - Progress"[/B] will now bring any newly aired season-episode1 items to the top of the list for a period of 7 days after it's air date.  A perfect example when this comes in handy is for a show like [B]"Dexter"[/B].  When Season9-Episode1 airs in November this item for me will be on the bottom since it was last watched years ago.  Now a newly aired season will get placed to the top for ease of access for 7 days.[/I]
+[COLOR yellow]--[/COLOR][I] Receiving some reports of non loading menu lists in v6.0.6 update.  That version update had a hard coded clearing of cache and metacache.  It seems that for some this process did not occur and results in this non loading of menus. The new [B]"Trakt Management Tools"[/B] required a metacache change.  Please manually clear cache and metacache if you are experiencing this issue.[/I]
 
 
 [B][COLOR red]Update - v6.0.6 - July 17, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] IMDb lists now has a dedicated setting for listItem sorting, for Movies see [B]General[/B] category and
-    for TVShows see [B]TVShows[/B] category.  This new sort option currently is for [B]Genre, Language,[/B]
-    and [B]Certificates[/B] only at this time.[/I]
-[COLOR yellow]--[/COLOR][I] Added new [B]Trakt Management Tools[/B].  You can now manage your [B]Hidden Progress[/B] Items as
-    well as your [B]Trakt Playback Progress[/B].  See Main menu [B]Tools[/B] category.[/I]
+[COLOR yellow]--[/COLOR][I] IMDb lists now has a dedicated setting for listItem sorting, for Movies see [B]General[/B] category and for TVShows see [B]TVShows[/B] category.  This new sort option currently is for [B]Genre, Language,[/B] and [B]Certificates[/B] only at this time.[/I]
+[COLOR yellow]--[/COLOR][I] Added new [B]Trakt Management Tools[/B].  You can now manage your [B]Hidden Progress[/B] Items as well as your [B]Trakt Playback Progress[/B].  See Main menu [B]Tools[/B] category.[/I]
 
 
 [B][COLOR red]Update - v6.0.5 - July 11, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Youtube menu not loading.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where preResolved_nextUrl was not cleared from windows property when
-    previous item was stopped before Kodi registered .getTotalTime().[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where preResolved_nextUrl was not cleared from windows property when previous item was stopped before Kodi registered .getTotalTime().[/I]
 [COLOR yellow]--[/COLOR][I] Remaining py2 code is now removed.[/I]
 
 
 [B][COLOR red]Update - v6.0.4 - July 10, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added preScrape and preResolve background task to continual playback.  This only
-    occurs when "PlayNext" is enabled.[/I]
+[COLOR yellow]--[/COLOR][I] Added preScrape and preResolve background task to continual playback.  This only occurs when "PlayNext" is enabled.[/I]
 [COLOR yellow]--[/COLOR][I] Movie and TVshow Search now has it's own page item limit under general settings.[/I]
 [COLOR yellow]--[/COLOR][I] New Help file for Trakt Scrobble.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where disabling parent debrid provider still left cloud scraper in a run state.
-    This is now fixed and both parent and child setting is taken into account.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where disabling parent debrid provider still left cloud scraper in a run state.  This is now fixed and both parent and child setting is taken into account.[/I]
 
 
 [B][COLOR red]Update - v6.0.3 - July 07, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Removed setting option to disable extended artwork in player.  This caused a number
-    of issues and I felt it was best served to remove it.[/I]
-[COLOR yellow]--[/COLOR][I] Removed setting option to disable extended artwork in player.  This caused a number
-    of issues and I felt it was best served to remove it.[/I]
+[COLOR yellow]--[/COLOR][I] Removed setting option to disable extended artwork in player.  This caused a number of issues and I felt it was best served to remove it.[/I]
+[COLOR yellow]--[/COLOR][I] Removed setting option to disable extended artwork in player.  This caused a number of issues and I felt it was best served to remove it.[/I]
 [COLOR yellow]--[/COLOR][I] Removed Auto playlist creation.  This is no longer used.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed issue with library playback missing artwork when AutoPlay method was chosen.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Venom service version check still pointing to old repo.[/I]
@@ -63,155 +52,104 @@
 
 
 [B][COLOR red]Update - v6.0.0 - July 04, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] v6.0.0 is the first official release for Matrix only. There will be no further updates available
-    for Leia.[/I]
-[COLOR yellow]--[/COLOR][I] UpNext addon has been removed.  It is now replaced with a new "PlayNext" skin handled
-    internally.  See TVShows setting category for controlled options.  Please also read the
-    help file in this settings category for further info.  Addon signals dependency is also
-    removed.  If you have no other addons requiring these they can be safely removed.[/I]
+[COLOR yellow]--[/COLOR][I] v6.0.0 is the first official release for Matrix only. There will be no further updates available for Leia.[/I]
+[COLOR yellow]--[/COLOR][I] UpNext addon has been removed.  It is now replaced with a new "PlayNext" skin handled internally.  See TVShows setting category for controlled options.  Please also read the help file in this settings category for further info.  Addon signals dependency is also removed.  If you have no other addons requiring these they can be safely removed.[/I]
 [COLOR yellow]--[/COLOR][I] Uncached Torrents xml was missing some source identification icons, this is now fixed.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed player issue where item would occasionally not be marked as watched.[/I]
 
 
 [B][COLOR red]Update - v5.1.9 - June 19, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added new setting to "Sources Options" called "Terminate on Cloud Sources".  Now if cloud
-    sources are found you can force the scrape process to terminate.[/I]
-[COLOR yellow]--[/COLOR][I] Resume dialog now utilizes the Kodi Matrix/19 new "yesnocustom" dialog.  Matrix users can
-    now chose from "Start from Beginning", "Resume" or "Cancel Playback".  Leia users
-    can only see the first two options[/I]
-[COLOR yellow]--[/COLOR][I] I regret to inform user that the next release will drop Kodi 18 support.  I no longer desire to
-    maintain code to which I will never use again.  The Venom repo will be updated so
-    Kodi 18 users can still access an 18 version, but it will no longer be developed.
-    Matrix users will have access to a new github branch for future development.[/I]
+[COLOR yellow]--[/COLOR][I] Added new setting to "Sources Options" called "Terminate on Cloud Sources".  Now if cloud sources are found you can force the scrape process to terminate.[/I]
+[COLOR yellow]--[/COLOR][I] Resume dialog now utilizes the Kodi Matrix/19 new "yesnocustom" dialog.  Matrix users can now chose from "Start from Beginning", "Resume" or "Cancel Playback".  Leia users can only see the first two options[/I]
+[COLOR yellow]--[/COLOR][I] I regret to inform user that the next release will drop Kodi 18 support.  I no longer desire to maintain code to which I will never use again.  The Venom repo will be updated so Kodi 18 users can still access an 18 version, but it will no longer be developed.  Matrix users will have access to a new github branch for future development.[/I]
 
 
 [B][COLOR red]Update - v5.1.8 - June 18, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Cloud Scrapers now support ".m2ts" file scraping. Please read the help file in "Accounts" settings,
-    beneath the option to enable, for further info.[/I]
-[COLOR yellow]--[/COLOR][I] There is a new option added to disable the scraping of ".m2ts" cloud files from item number
-    one above.[/I]
-[COLOR yellow]--[/COLOR][I] Source Select xml icons have all been changed to a higher resolution version and the display
-    size has been increased for ease of viewing.[/I]
-[COLOR yellow]--[/COLOR][I] The "TV Shows" setting to enable, or disable, Unwatched Count of Multi episodes did not respect
-    the parent object setting "Unwatched Count".  This is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] Note: My Accounts has been updated to v1.1.1 to assure Traktv token is synchronized with
-    Venom addon.  Please be sure to updated.[/I]
+[COLOR yellow]--[/COLOR][I] Cloud Scrapers now support ".m2ts" file scraping. Please read the help file in "Accounts" settings, beneath the option to enable, for further info.[/I]
+[COLOR yellow]--[/COLOR][I] There is a new option added to disable the scraping of ".m2ts" cloud files from item number one above.[/I]
+[COLOR yellow]--[/COLOR][I] Source Select xml icons have all been changed to a higher resolution version and the display size has been increased for ease of viewing.[/I]
+[COLOR yellow]--[/COLOR][I] The "TV Shows" setting to enable, or disable, Unwatched Count of Multi episodes did not respect the parent object setting "Unwatched Count".  This is now fixed.[/I]
+[COLOR yellow]--[/COLOR][I] Note: My Accounts has been updated to v1.1.1 to assure Traktv token is synchronized with Venom addon.  Please be sure to updated.[/I]
 
 
 [B][COLOR red]Update - v5.1.7 - June 16, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Cloud Scrapers have now been added for AD, PM, and RD. See Account Settings to
-    "Enable cloud scraper" for each of the three.[/I]
+[COLOR yellow]--[/COLOR][I] Cloud Scrapers have now been added for AD, PM, and RD. See Account Settings to "Enable cloud scraper" for each of the three.[/I]
 [COLOR yellow]--[/COLOR][I] Dutch language .po file update.[/I]
 
 
 [B][COLOR red]Update - v5.1.6 - June 12, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Changed "View Uncached Torrents" button due to Estuary skin text runoff.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed duplicate lines in Scrape Progress Dialog on Leia.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed Episode downloads being saved to a folder name of the episode title.  This is now
-    changed to use tvshowtitle instead.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Episode downloads being saved to a folder name of the episode title.  This is now changed to use tvshowtitle instead.[/I]
 
 
 [B][COLOR red]Update - v5.1.5 - June 12, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Please Note I have re-opened github issues. Hopefully I do not regret it!!  Conduct yourself
-    accordingly and hopefully I can help in my spare time.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed, Search Movie and Tvshow title search, loading virtual keyboard a second time upon any
-    CM action used on the query results.  Also choosing cancel on the virtual keyboard no
-    longer results in an infinite busy dialog.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt Manager now respects your global "Highlight Color" from General category Setting for text
-    items, default Red is now gone.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt Manager now sets "watched" and "unwatched" listItem options based on received playcount.
-     No longer will both "mark as watched" and "mark as unwatched" be seen at the same
-    time.  The Venom Global Context Menu addon has also been updated for this change.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt Manager "rate" and "unrate" listItem options are now only available if the trakt addon
-    is installed.[/I]
-[COLOR yellow]--[/COLOR][I] All language translation .po file have now been updated.  Any requested changes please
-    issue PR.[/I]
-[COLOR yellow]--[/COLOR][I] Meta API language changes fixed to now respect setting.  This is still a work in progress so please
-    issue PR for further changes.[/I]
-[COLOR yellow]--[/COLOR][I] Progress scrape dialog now respects the global "Highlight Color" from General category Setting for
-    fixed text, default cyan is now gone. The "Scraper Dialog Highlight Color" setting respects variable text.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed meta retrieval from Kodi library when supplied TMDb meta vs. IMDb meta differs for year check.
-    This is seen when scraping for example "Flashback" from library item. IMDb reports
-    2020 while TMDb reports 2021 for year released. Now a year +1 and -1 check is
-    conducted for the match and the Kodi library meta is now retrieved..[/I]
+[COLOR yellow]--[/COLOR][I] Please Note I have re-opened github issues. Hopefully I do not regret it!!  Conduct yourself accordingly and hopefully I can help in my spare time.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed, Search Movie and Tvshow title search, loading virtual keyboard a second time upon any CM action used on the query results.  Also choosing cancel on the virtual keyboard no longer results in an infinite busy dialog.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Manager now respects your global "Highlight Color" from General category Setting for text items, default Red is now gone.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Manager now sets "watched" and "unwatched" listItem options based on received playcount.  No longer will both "mark as watched" and "mark as unwatched" be seen at the same time.  The Venom Global Context Menu addon has also been updated for this change.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Manager "rate" and "unrate" listItem options are now only available if the trakt addon is installed.[/I]
+[COLOR yellow]--[/COLOR][I] All language translation .po file have now been updated.  Any requested changes please issue PR.[/I]
+[COLOR yellow]--[/COLOR][I] Meta API language changes fixed to now respect setting.  This is still a work in progress so please issue PR for further changes.[/I]
+[COLOR yellow]--[/COLOR][I] Progress scrape dialog now respects the global "Highlight Color" from General category Setting for fixed text, default cyan is now gone. The "Scraper Dialog Highlight Color" setting respects variable text.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed meta retrieval from Kodi library when supplied TMDb meta vs. IMDb meta differs for year check.  This is seen when scraping for example "Flashback" from library item. IMDb reports 2020 while TMDb reports 2021 for year released. Now a year +1 and -1 check is conducted for the match and the Kodi library meta is now retrieved..[/I]
 [COLOR yellow]--[/COLOR][I] Fixed widget refresh issue when global CM Trakt Manager is used.[/I]
-[COLOR yellow]--[/COLOR][I] Source filtering options now have a separate settings for Min. and Max. file size limits for Movies as
-    well as Episodes.[/I]
+[COLOR yellow]--[/COLOR][I] Source filtering options now have a separate settings for Min. and Max. file size limits for Movies as well as Episodes.[/I]
 
 
 [B][COLOR red]Update - v5.1.4 - June 07, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Skin changes: The new "View Uncached Torrents" button made clearlogo look off center, this is
-    now fix.[/I]
+[COLOR yellow]--[/COLOR][I] Skin changes: The new "View Uncached Torrents" button made clearlogo look off center, this is now fix.[/I]
 [COLOR yellow]--[/COLOR][I] Skin changes: The secondary line is now Bold when in focus.[/I]
-[COLOR yellow]--[/COLOR][I] Skin changes: The Info icons have be recentered and the space between has been incrreased
-    for better visibility.[/I]
+[COLOR yellow]--[/COLOR][I] Skin changes: The Info icons have be recentered and the space between has been incrreased for better visibility.[/I]
 [COLOR yellow]--[/COLOR][I] Playback from "Browse Debrid Pack" is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] There was a rare case where the Progress dialog during Resolving was empty and caused an
-    infinite loop.  This is now fixed.[/I]
+[COLOR yellow]--[/COLOR][I] There was a rare case where the Progress dialog during Resolving was empty and caused an infinite loop.  This is now fixed.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed settings page missing "Alldebrid" due to typo in ID.[/I]
 
 
 [B][COLOR red]Update - v5.1.3 - June 06, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Direct links not playing.[/I]
-[COLOR yellow]--[/COLOR][I] Some complaints that the new window xml is a little to brite and hard on the eyes. I added
-    new Source Select Highlight color option to settings.  See Source Options.[/I]
+[COLOR yellow]--[/COLOR][I] Some complaints that the new window xml is a little to brite and hard on the eyes. I added new Source Select Highlight color option to settings.  See Source Options.[/I]
 
 
 [B][COLOR red]Update - v5.1.2 - June 05, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed  local bookmarks and Trakt scrobble resume not working.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Marked as watched during playback not working.[/I]
-[COLOR yellow]--[/COLOR][I] Added "View Uncached Torrents" button to the "Source Select" skin. Right arrow to acess,
-    left arrow to return focus to the "Source Select" list.[/I]
+[COLOR yellow]--[/COLOR][I] Added "View Uncached Torrents" button to the "Source Select" skin. Right arrow to acess, left arrow to return focus to the "Source Select" list.[/I]
 [COLOR yellow]--[/COLOR][I] Viewing Uncached Torrents now has it's own skin.[/I]
 
 
 [B][COLOR red]Update - v5.1.1 - June 03, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added "SEEDERS: xx" count to the Source Select secondary line for uncached torrents.[/I]
 [COLOR yellow]--[/COLOR][I] Added "HOSTER" to the Source Select secondary line for hosters.[/I]
-[COLOR yellow]--[/COLOR][I] Added missed "en-US" to the TMDB indexer api request.  This helps bring in some missing
-    poster and fanart artwork.[/I]
+[COLOR yellow]--[/COLOR][I] Added missed "en-US" to the TMDB indexer api request.  This helps bring in some missing poster and fanart artwork.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed bogus "Key Error" log entry for "debrid_abv" method.[/I]
 
 
 [B][COLOR red]Update - v5.1.0 - June 02, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] New Windows xml style Source Select.[/I]
-[COLOR yellow]--[/COLOR][I] Dialog Source Select has been removed from settings.  The options are now only
-    "Source Select (Window xml skin)" or "AutoPlay".[/I]
-[COLOR yellow]--[/COLOR][I] Due to the changes above it is important that you open Venom's settings and set the option
-    for "Default movie/episode) select action".  This has a new ID and is need to be saved to
-    the userdata settings.xml.[/I]
-[COLOR yellow]--[/COLOR][I] Color settings for torrents, hosters, and direct links has been removed in favor of the contrast skin
-    theme chosen.  I may listen to a few small tweaks of this.[/I]
+[COLOR yellow]--[/COLOR][I] Dialog Source Select has been removed from settings.  The options are now only "Source Select (Window xml skin)" or "AutoPlay".[/I]
+[COLOR yellow]--[/COLOR][I] Due to the changes above it is important that you open Venom's settings and set the option for "Default movie/episode) select action".  This has a new ID and is need to be saved to the userdata settings.xml.[/I]
+[COLOR yellow]--[/COLOR][I] Color settings for torrents, hosters, and direct links has been removed in favor of the contrast skin theme chosen.  I may listen to a few small tweaks of this.[/I]
 [COLOR yellow]--[/COLOR][I] TMDb Helper will need updated player files if you are using that.  They will be available shortly.[/I]
-[COLOR yellow]--[/COLOR][I] A complete new system has been added for meta retrieval during the scrape process to satisfy
-    the required artwork for the skin.  From widgets, or inside Venom, there will be no overhead
-    added as the needed meta is already available.  If you are a library user the needed meta is
-    now pulled from the Kodi db so I encourage you to use the TMDb scraper, from the official
-    Kodi repo, and enable fanart.tv for the extended artwork, which I pull out of the db during
-    this process.[/I]
+[COLOR yellow]--[/COLOR][I] A complete new system has been added for meta retrieval during the scrape process to satisfy the required artwork for the skin.  From widgets, or inside Venom, there will be no overhead added as the needed meta is already available.  If you are a library user the needed meta is now pulled from the Kodi db so I encourage you to use the TMDb scraper, from the official Kodi repo, and enable fanart.tv for the extended artwork, which I pull out of the db during this process.[/I]
 
 
 [B][COLOR red]Update - v5.0.7 - May 26, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed multiple issues with Matrix skins requiring "tvshow.clearart" and "tvshow.clearlogo" at
-    season and episode level vs. simply "clearart" and "clearlogo".[/I]
-[COLOR yellow]--[/COLOR][I] All "Help", "Changelog", and "NewsInfo" files have been converted to window xml's to pave the
-    way for complete transition to windows xml's throughout. Slow migration over to new setup.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed multiple issues with Matrix skins requiring "tvshow.clearart" and "tvshow.clearlogo" at season and episode level vs. simply "clearart" and "clearlogo".[/I]
+[COLOR yellow]--[/COLOR][I] All "Help", "Changelog", and "NewsInfo" files have been converted to window xml's to pave the way for complete transition to windows xml's throughout. Slow migration over to new setup.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed 24hr Delay setting not working for Library integration.[/I]
 
 
 [B][COLOR red]Update - v5.0.6 - May 19, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Cam and SD filtering now has their own separate setting. SD quality will only be removed when
-    setting is in use if better quality does in fact exist.[/I]
-[COLOR yellow]--[/COLOR][I] Source playback will now strictly use "setResolvedURL" for playback method due to changes in
-    Matrix 19.1[/I]
+[COLOR yellow]--[/COLOR][I] Cam and SD filtering now has their own separate setting. SD quality will only be removed when setting is in use if better quality does in fact exist.[/I]
+[COLOR yellow]--[/COLOR][I] Source playback will now strictly use "setResolvedURL" for playback method due to changes in Matrix 19.1[/I]
 [COLOR yellow]--[/COLOR][I] Venom now uses a router method call from plugin default for speed.[/I]
 
 
 [B][COLOR red]Update - v5.0.5 - May 14, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed RD failed resolving issue when "&" or "%" exists in meta title.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed RD failed resolving issue when "error" existed in the meta title. Thanks noizex!! [/I]
-[COLOR yellow]--[/COLOR][I] Change duplicate source removal that upon hash match will keep the match with longer title
-    portion of the magnet.  This results in reassuring the kept source is the one containing more file info.[/I]
+[COLOR yellow]--[/COLOR][I] Change duplicate source removal that upon hash match will keep the match with longer title portion of the magnet.  This results in reassuring the kept source is the one containing more file info.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed episode count when unwatched counts for multi list is enabled.[/I]
 
 
@@ -219,38 +157,22 @@
 [COLOR yellow]--[/COLOR][I] Added "keyart" from fanarttv for skins supporting it.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Trakt Collection sync to library setting greyed out.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Library Automated folder setup not working.[/I]
-[COLOR yellow]--[/COLOR][I] Change RD to only revoke auth under invalid account response only!  Previously a
-    "Temporarily Down For Maintenance" response would trigger a revoke of RD account.[/I]
-[COLOR yellow]--[/COLOR][I] Now reformatting Trakt utc to match your local time for Trakt History and Trakt Upcoming
-    Progress.[/I]
+[COLOR yellow]--[/COLOR][I] Change RD to only revoke auth under invalid account response only!  Previously a "Temporarily Down For Maintenance" response would trigger a revoke of RD account.[/I]
+[COLOR yellow]--[/COLOR][I] Now reformatting Trakt utc to match your local time for Trakt History and Trakt Upcoming Progress.[/I]
 [COLOR yellow]--[/COLOR][I] Trakt History now respects the page item limit.[/I]
 [COLOR yellow]--[/COLOR][I] Prepend date setting now includes both date and air time in abbreviated format.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where unmarking Season1 watched status, when it was lone remaining season,
-    would not remove the seasons watched status.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed missing unwatched episode counts to satisfy AuraMod and avoid AuraMod marking as
-    watched when it is not.  This is more an AuraMod bug workaround.[/I]
-[COLOR yellow]--[/COLOR][I] The above item has added a new meta dict key and upon doing so it is required the cache
-    and meta be cleared.  This version will automate clearing those for you.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where unmarking Season1 watched status, when it was lone remaining season, would not remove the seasons watched status.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed missing unwatched episode counts to satisfy AuraMod and avoid AuraMod marking as watched when it is not.  This is more an AuraMod bug workaround.[/I]
+[COLOR yellow]--[/COLOR][I] The above item has added a new meta dict key and upon doing so it is required the cache and meta be cleared.  This version will automate clearing those for you.[/I]
 
 
 [B][COLOR red]Update - v5.0.3 - May 02, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added "item.setProperty ('SpecialSort', 'bottom')" to all Next items for skins supporting a
-    random sort order and keeping the Next indicator at the bottom of the list items.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed "Upcoming Progress" list item not displayed when the premiered date matched your
-    system date.  Now the Trakt air time for the given day is taken into account.  If your
-    system clock is less than the episode air time then the item is now considered unaired
-    and displayed.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed "Progress" list item not displayed when the premiered date matched your system date.
-    Now the Trakt air time for the given day is taken into account. If your system clock is
-    greater than the episode air time then the item is now considered aired and displayed.[/I]
-[COLOR yellow]--[/COLOR][I] Added setting to "prepend premiered date" to Upcoming Episodes". See help file beneath
-    setting in Trakt category for more info[/I]
-[COLOR yellow]--[/COLOR][I] Fixed Search where random phrases may return multiple same title cases.  This occurred
-    where Trakt id lookup may return similar titles that were in base search request.  This
-    match is now resolved to show the main returned item[/I]
-[COLOR yellow]--[/COLOR][I] Trakt history for Movies and Episodes is now paginated to 40 items per page allowing full
-    advancement to your complete history.  The Trakt date with utc timestamp is appended
-    to label.[/I]
+[COLOR yellow]--[/COLOR][I] Added "item.setProperty ('SpecialSort', 'bottom')" to all Next items for skins supporting a random sort order and keeping the Next indicator at the bottom of the list items.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed "Upcoming Progress" list item not displayed when the premiered date matched your system date.  Now the Trakt air time for the given day is taken into account.  If your system clock is less than the episode air time then the item is now considered unaired and displayed.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed "Progress" list item not displayed when the premiered date matched your system date.  Now the Trakt air time for the given day is taken into account. If your system clock is greater than the episode air time then the item is now considered aired and displayed.[/I]
+[COLOR yellow]--[/COLOR][I] Added setting to "prepend premiered date" to Upcoming Episodes". See help file beneath setting in Trakt category for more info[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Search where random phrases may return multiple same title cases.  This occurred where Trakt id lookup may return similar titles that were in base search request.  This match is now resolved to show the main returned item[/I]
+[COLOR yellow]--[/COLOR][I] Trakt history for Movies and Episodes is now paginated to 40 items per page allowing full advancement to your complete history.  The Trakt date with utc timestamp is appended to label.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed ".setProperties()" issue breaking Kodi 17.[/I]
 
 
@@ -271,8 +193,7 @@
 [COLOR yellow]--[/COLOR][I] Added new "Upcoming Progress" list to "My TV Shows". [/I]
 [COLOR yellow]--[/COLOR][I] Fixed missing encode issue for Leia that resulted in some dropped episodes.[/I]
 [COLOR yellow]--[/COLOR][I] Added "status" writes to library database for ease of future debugging needs.[/I]
-[COLOR yellow]--[/COLOR][I] Changed Trakt "lastplayed" value to retain timestamp reported from Trakt response.  This now
-    allows more accurate sorting for a given day with the time now factored in.[/I]
+[COLOR yellow]--[/COLOR][I] Changed Trakt "lastplayed" value to retain timestamp reported from Trakt response.  This now allows more accurate sorting for a given day with the time now factored in.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed fanart setting still passing artwork to skin when disabled.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed "offscreen" issue not available in older than Leia versions.[/I]
 
@@ -280,8 +201,7 @@
 [B][COLOR red]Update - v5.0.0 - April 18, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] TVShow meta provider is now switched from TVDb to TMDb throughout the addon.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed disable player artwork under autoplay configuration.[/I]
-[COLOR yellow]--[/COLOR][I] Added new window property to set the playback method chosen in settings.  This now allows the
-    Venom global context menu addon to recognize the playback method on the fly without
+[COLOR yellow]--[/COLOR][I] Added new window property to set the playback method chosen in settings.  This now allows the Venom global context menu addon to recognize the playback method on the fly without
     the need to reload skin, or wait for a widget refresh.[/I]
 [COLOR yellow]--[/COLOR][I] New library setting allows .strm files to be created for TMDB Helper.[/I]
 [COLOR yellow]--[/COLOR][I] Alias title checking of source results has been improved for more alias matches.[/I]
@@ -301,11 +221,8 @@
 
 [B][COLOR red]Update - v4.4.4 - March 11, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Note TMDBHelper player files have been updated.  Be sure to update via the TMDBHelper settings.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed TMDBHelper playback of library files(.strm) when TMDBHelper is set to
-    "Automatically play local files".[/I]
-[COLOR yellow]--[/COLOR][I] Few tweaks to some annoying folder and file names used for library integration. Ex. "&" was replaced
-    with an underscore, now replaced with the word "and".  Apostrophes in names
-    were being replaces with a "."(dot), now just removed.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed TMDBHelper playback of library files(.strm) when TMDBHelper is set to "Automatically play local files".[/I]
+[COLOR yellow]--[/COLOR][I] Few tweaks to some annoying folder and file names used for library integration. Ex. "&" was replaced with an underscore, now replaced with the word "and".  Apostrophes in names were being replaces with a "."(dot), now just removed.[/I]
 
 
 [B][COLOR red]Update - v4.4.3 - March 10, 2021[/COLOR][/B]
@@ -319,50 +236,36 @@
 
 [B][COLOR red]Update - v4.4.1 - March 06, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Matrix(py3) compatibility update.[/I]
-[COLOR yellow]--[/COLOR][I] Added copy to clipboard feature.  This is accessible from the context menu in source select list.  Now
-    you can copy to clipboard url's, file names, and magnet hashes.[/I]
+[COLOR yellow]--[/COLOR][I] Added copy to clipboard feature.  This is accessible from the context menu in source select list.  Now you can copy to clipboard url's, file names, and magnet hashes.[/I]
 
 
 [B][COLOR red]Update - v4.4.0 - Feb. 18, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed renumbering of source select list for direct links when "remove uncached torrents" setting is used.
-    Direct links are from EasyNews, Filepursuit, Furk, GDrive, Library, and Ororo.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed renumbering of source select list for direct links when "remove uncached torrents" setting is used.  Direct links are from EasyNews, Filepursuit, Furk, GDrive, Library, and Ororo.[/I]
 
 
 [B][COLOR red]Update - v4.3.9 - Feb. 17, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added BASE32 to HEX conversion for RD cache checking of magnets with BASE32 encoded hash.
-    AD and PM do this conversion.[/I]
-[COLOR yellow]--[/COLOR][I] With the new TORRENTTM scraper added to FenomScrapers please clear provider cache.  The cache
-    holds the list of pack capable scrapers and requires a fresh fetch of the updated list.[/I]
+[COLOR yellow]--[/COLOR][I] Added BASE32 to HEX conversion for RD cache checking of magnets with BASE32 encoded hash.  AD and PM do this conversion.[/I]
+[COLOR yellow]--[/COLOR][I] With the new TORRENTTM scraper added to FenomScrapers please clear provider cache.  The cache holds the list of pack capable scrapers and requires a fresh fetch of the updated list.[/I]
 
 
 [B][COLOR red]Update - v4.3.8 - Feb. 14, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed issue with RD cache check where scrapers may return invalid magnets less than 40 characters in
-    hash length.  RD terminates the response upon receiving such an invalid magnet.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue with RD cache check where scrapers may return invalid magnets less than 40 characters in hash length.  RD terminates the response upon receiving such an invalid magnet.[/I]
 [COLOR yellow]--[/COLOR][I] Added new "Additional Link Info" to context menu when viewing source select list.[/I]
-[COLOR yellow]--[/COLOR][I] Source Select has been changed to now present user with a YesNo dialog option to view the uncached
-    torrents if no cached torrents were returned.  This now makes it much easier to cache
-    items yourself via context menu.[/I]
-[COLOR yellow]--[/COLOR][I] The Torrent Settings category has been removed.  There is no longer an option for AD, PM, and RD to
-    enable or disable cache checking. There is now one setting that applies to all 3 if enabled.
-    The new setting was moved to "Source Options" category and is found under
+[COLOR yellow]--[/COLOR][I] Source Select has been changed to now present user with a YesNo dialog option to view the uncached torrents if no cached torrents were returned.  This now makes it much easier to cache items yourself via context menu.[/I]
+[COLOR yellow]--[/COLOR][I] The Torrent Settings category has been removed.  There is no longer an option for AD, PM, and RD to enable or disable cache checking. There is now one setting that applies to all 3 if enabled.  The new setting was moved to "Source Options" category and is found under
     "Sources Filtering Options".  There is also a "HELP" link for additional info there as well.[/I]
 
 
 [B][COLOR red]Update - v4.3.7 - Jan. 23, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Changed scraper timeout to default 60secs. Should help resolve issue with slower devices returning
-    "no sources".[/I]
-[COLOR yellow]--[/COLOR][I] Venom logging now has new option "log Level". You can now set this for "Normal" or
-    "Debug(Extra Info)".  Normal will only log code errors while Debug will log additional Info I
-    may require to trace bugs.[/I]
+[COLOR yellow]--[/COLOR][I] Changed scraper timeout to default 60secs. Should help resolve issue with slower devices returning "no sources".[/I]
+[COLOR yellow]--[/COLOR][I] Venom logging now has new option "log Level". You can now set this for "Normal" or "Debug(Extra Info)".  Normal will only log code errors while Debug will log additional Info I may require to trace bugs.[/I]
 [COLOR yellow]--[/COLOR][I] Background progress dialog was hidden under some configurations, this is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] VERY important you read the "News and Info!!" of possible coming changes for end of March that
-    will effect many exo fork users.[/I]
+[COLOR yellow]--[/COLOR][I] VERY important you read the "News and Info!!" of possible coming changes for end of March that will effect many exo fork users.[/I]
 
 
 [B][COLOR red]Update - v4.3.6 - Jan. 17, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed scraper dialog failing under Background setting.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where file size limit was accounted for before a pack file size was re-calculated for actual
-    episode size inside the pack. This caused unnecessary removal of items.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where file size limit was accounted for before a pack file size was re-calculated for actual episode size inside the pack. This caused unnecessary removal of items.[/I]
 
 
 [B][COLOR red]Update - v4.3.5 - Jan. 17, 2021[/COLOR][/B]
@@ -372,29 +275,24 @@
 
 
 [B][COLOR red]Update - v4.3.4 - Jan. 04, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Removed setting option "Remove Captcha".  Since switching to debrid only support this option is no
-    longer needed.[/I]
-[COLOR yellow]--[/COLOR][I] Allot of cleanup has been done to the Sources module for removed options. Scraping and source
-    select is now faster.[/I]
+[COLOR yellow]--[/COLOR][I] Removed setting option "Remove Captcha".  Since switching to debrid only support this option is no longer needed.[/I]
+[COLOR yellow]--[/COLOR][I] Allot of cleanup has been done to the Sources module for removed options. Scraping and source select is now faster.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Library Update Service exit typo.[/I]
 
 
 [B][COLOR red]Update - v4.3.3 - Jan. 01, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue where torrents turned off produced no sources with premium hosters only enabled.[/I]
-[COLOR yellow]--[/COLOR][I] Reworked file size sorting. Provider sorting has been removed.  Now sorting is base on group sort
-    option and (quality/size) priority sorting.[/I]
+[COLOR yellow]--[/COLOR][I] Reworked file size sorting. Provider sorting has been removed.  Now sorting is base on group sort option and (quality/size) priority sorting.[/I]
 [COLOR yellow]--[/COLOR][I] See "Source Options"-"Source Select" for above changes.[/I]
 
 
 [B][COLOR red]Update - v4.3.2 - Dec. 30, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Library Update failure issue due to closed database.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Global Context Menu option "Clear Bookmark" call.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt Manager will no longer show "Scrobble Reset" if user settings are configured for
-    "Local Bookmarks".[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Manager will no longer show "Scrobble Reset" if user settings are configured for "Local Bookmarks".[/I]
 [COLOR yellow]--[/COLOR][I] Home screen widget refresh now more consistent than before.[/I]
 [COLOR yellow]--[/COLOR][I] Removed setting for Source Select to show "Extra Info".  This is now the hard coded default.[/I]
-[COLOR yellow]--[/COLOR][I] Source Select has been re-written to now show secondary line "file_name", similar to Torrent files.
-    It now follows secondary line type like torrents.[/I]
+[COLOR yellow]--[/COLOR][I] Source Select has been re-written to now show secondary line "file_name", similar to Torrent files.  It now follows secondary line type like torrents.[/I]
 [COLOR yellow]--[/COLOR][I] Source Select secondary line options now better grouped in Settings.[/I]
 [COLOR yellow]--[/COLOR][I] AD, PM, and RD cache check of torrent requests is now threaded for performance.[/I]
 
@@ -405,15 +303,11 @@
 [COLOR yellow]--[/COLOR][I] Fixed RD "My Downloads" not loading results.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed Trakt sync for "Scrobble Reset" items not sync'd to other devices.[/I]
 [COLOR yellow]--[/COLOR][I] Added ability to auto start playback upon completion of caching uncached torrent.[/I]
-[COLOR yellow]--[/COLOR][I] Added new "yes-no" dialog when cancelling caching of uncached torrent.  Now user has the option to
-    close progress dialog but allow premium service to continue it's download, or close and cancel both.[/I]
-[COLOR yellow]--[/COLOR][I] Request to add debrid account expiry notification.  This has now been added to the "My Accounts"
-    addon.[/I]
+[COLOR yellow]--[/COLOR][I] Added new "yes-no" dialog when cancelling caching of uncached torrent.  Now user has the option to close progress dialog but allow premium service to continue it's download, or close and cancel both.[/I]
+[COLOR yellow]--[/COLOR][I] Request to add debrid account expiry notification.  This has now been added to the "My Accounts" addon.[/I]
 [COLOR yellow]--[/COLOR][I] Removed "Multi-Line Source Select" setting.  This is now the hard coded default.[/I]
 [COLOR yellow]--[/COLOR][I] Uncached torrents now has it's own color setting choice under "Torrent Settings".[/I]
-[COLOR yellow]--[/COLOR][I] Due to settings changes the entire "Source Options" category has be rearranged.  A new heading has
-    been added to better group settings based on the flow of scraping process and source selection.  It is
-    advisable to review and save settings.[/I]
+[COLOR yellow]--[/COLOR][I] Due to settings changes the entire "Source Options" category has be rearranged.  A new heading has been added to better group settings based on the flow of scraping process and source selection.  It is advisable to review and save settings.[/I]
 
 
 [B][COLOR red]Update - v4.3.0 - Dec. 5, 2020[/COLOR][/B]
@@ -423,11 +317,9 @@
 
 [B][COLOR red]Update - v4.2.9 - Nov. 29, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed for some skins info dialog not closing when playback initiated from this info dialog.[/I]
-[COLOR yellow]--[/COLOR][I] Changed Venom scrape, resolve, and removed source link dialog heading to now display the item
-    being scraped vs. the addon name as heading.[/I]
+[COLOR yellow]--[/COLOR][I] Changed Venom scrape, resolve, and removed source link dialog heading to now display the item being scraped vs. the addon name as heading.[/I]
 [COLOR yellow]--[/COLOR][I] Added Trakt Watched status service sync.[/I]
-[COLOR yellow]--[/COLOR][I] Added setting to the "Source Options" to enable/disable the IMDb year check before scraping.  See Help
-    below setting for more info[/I]
+[COLOR yellow]--[/COLOR][I] Added setting to the "Source Options" to enable/disable the IMDb year check before scraping.  See Help below setting for more info[/I]
 
 
 [B][COLOR red]Update - v4.2.8 - Nov. 12, 2020[/COLOR][/B]
@@ -436,38 +328,21 @@
 
 
 [B][COLOR red]Update - v4.2.7 - Nov. 06, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed TVShows Season level watched indicators. Previously the Season level did not refresh the cached
-    watch status upon detection of a playcount change, this is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] Added new startup service to detect a mismatch in the current reuselanguageinvoker setting vs. an update
-    change.  Upon change detection user will be presented with the option to revert or accept the new setting.
-    Any change made and the users profile will be reloaded. There is no longer a need to restart Kodi as this
-    is now done via reloading users profile.[/I]
-[COLOR yellow]--[/COLOR][I] Added check for Google Drive account.  If present, and no debrid account exists, user will not longer be
-    presented with a notification that a debrid account is required since these are direct playable links.[/I]
-[COLOR yellow]--[/COLOR][I] New "traktSync.db" has been added. When user enables the "Trakt" category setting "Enable scrobbling",
-    and also sets "Resume Point source" to "Trakt scrobbles", an initial sync will retrieve your complete
-    Trakt Progress for all Movies and Shows.  At any time playback is stopped, before the normal 85%
-    for "mark as watched", the scrobble pause will be saved to local db as well as sent to Trakt to
-    maintain synchronization.  A service check is performed at 15 minute intervals to compare the latest
-    "paused_at" db entry with that from the Trakt api.  This assures that another device in your home
-    will get updated for changes.  This maintains sync across multiple devices.[/I]
-[COLOR yellow]--[/COLOR][I] For the item above a new option has been added to the "Trakt Manager" called "Scrobble Reset".  This
-    removes the given item from the local db and sends "progress=0" to Trakt "scrobble/start".  A 
-    "container.refresh()" is then issued so the changes are seen instantly.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed TVShows Season level watched indicators. Previously the Season level did not refresh the cached watch status upon detection of a playcount change, this is now fixed.[/I]
+[COLOR yellow]--[/COLOR][I] Added new startup service to detect a mismatch in the current reuselanguageinvoker setting vs. an update change.  Upon change detection user will be presented with the option to revert or accept the new setting.  Any change made and the users profile will be reloaded. There is no longer a need to restart Kodi as this is now done via reloading users profile.[/I]
+[COLOR yellow]--[/COLOR][I] Added check for Google Drive account.  If present, and no debrid account exists, user will not longer be presented with a notification that a debrid account is required since these are direct playable links.[/I]
+[COLOR yellow]--[/COLOR][I] New "traktSync.db" has been added. When user enables the "Trakt" category setting "Enable scrobbling", and also sets "Resume Point source" to "Trakt scrobbles", an initial sync will retrieve your complete Trakt Progress for all Movies and Shows.  At any time playback is stopped, before the normal 85% for "mark as watched", the scrobble pause will be saved to local db as well as sent to Trakt to maintain synchronization.  A service check is performed at 15 minute intervals to compare the latest "paused_at" db entry with that from the Trakt api.  This assures that another device in your home will get updated for changes.  This maintains sync across multiple devices.[/I]
+[COLOR yellow]--[/COLOR][I] For the item above a new option has been added to the "Trakt Manager" called "Scrobble Reset".  This removes the given item from the local db and sends "progress=0" to Trakt "scrobble/start".  A "container.refresh()" is then issued so the changes are seen instantly.[/I]
 
 
 [B][COLOR red]Update - v4.2.6 - Oct. 13, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed settings for remove uncached torrents. Under some conditions an item my be unavailable for AD, PM,
-    or RDd torrents.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed AD cache check when a single item from a list request contained an error the cache check process
-    halted.[/I]
-[COLOR yellow]--[/COLOR][I] Reduced the number of visible named scrapers for the progressDialog.  AuraMod skin had a slight overlap
-    with the progress bar.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed settings for remove uncached torrents. Under some conditions an item my be unavailable for AD, PM, or RDd torrents.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed AD cache check when a single item from a list request contained an error the cache check process halted.[/I]
+[COLOR yellow]--[/COLOR][I] Reduced the number of visible named scrapers for the progressDialog.  AuraMod skin had a slight overlap with the progress bar.[/I]
 
 
 [B][COLOR red]Update - v4.2.5 - Oct. 09, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Removed cache check setting for AD, PM, and RD, this is now hard coded on to always check cached status.
-    You can still enable/disable showing of uncached torrents.[/I]
+[COLOR yellow]--[/COLOR][I] Removed cache check setting for AD, PM, and RD, this is now hard coded on to always check cached status.  You can still enable/disable showing of uncached torrents.[/I]
 [COLOR yellow]--[/COLOR][I] Removed setting to enable/disable pack scraping.  This is now hard coded on.[/I]
 [COLOR yellow]--[/COLOR][I] Fix for random container refresh issues during playback.[/I]
 [COLOR yellow]--[/COLOR][I] Fix for Furk resolve issue.[/I]
@@ -486,10 +361,8 @@
 
 
 [B][COLOR red]Update - v4.2.2 - Sept. 29, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed seven instances of missing ID's in settings.xml.  This just caused a constant cleaning of these 7 items that were
-    never called or referenced.  This now avoids that notice.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed scraper progress dialog displaying to many scraper names for skins with small progress dialogs.  Names will not
-    display until the remaining count reaches 6.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed seven instances of missing ID's in settings.xml.  This just caused a constant cleaning of these 7 items that were never called or referenced.  This now avoids that notice.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed scraper progress dialog displaying to many scraper names for skins with small progress dialogs.  Names will not display until the remaining count reaches 6.[/I]
 
 
 [B][COLOR red]Update - v4.2.1 - Sept. 26, 2020[/COLOR][/B]
@@ -497,18 +370,13 @@
 
 
 [B][COLOR red]Update - v4.2.0 - Sept. 26, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Free hoster and foreign scraper support has been removed due to limited time to maintain.  Premium hosters supported
-    by AD, PM, and RD is still supported.[/I]
+[COLOR yellow]--[/COLOR][I] Free hoster and foreign scraper support has been removed due to limited time to maintain.  Premium hosters supported by AD, PM, and RD is still supported.[/I]
 [COLOR yellow]--[/COLOR][I] New scraper pack called "Fenom Scrapers" per above changes and OpenScrapers is no longer to be maintained.[/I]
-[COLOR yellow]--[/COLOR][I] Venom now integrates with a new addon to access your account information called "My Accounts".  My Accounts
-    allows any addon to access the authorized info so if adopted by other developers it would eliminate the
-    need to authorize in every addon you use.  This does however require a new initial setup.[/I]
+[COLOR yellow]--[/COLOR][I] Venom now integrates with a new addon to access your account information called "My Accounts".  My Accounts allows any addon to access the authorized info so if adopted by other developers it would eliminate the need to authorize in every addon you use.  This does however require a new initial setup.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed missing download option for premium hosters.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed library imports where disabled notifications would
-    prematurely terminate the import process.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed library imports where disabled notifications would prematurely terminate the import process.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed invalid characters displayed in source select.[/I]
-[COLOR yellow]--[/COLOR][I] Source select has been re-written for the removal of "Free" hoster streams.  A new layout is now in place and
-    includes an elapsed timer count.[/I]
+[COLOR yellow]--[/COLOR][I] Source select has been re-written for the removal of "Free" hoster streams.  A new layout is now in place and includes an elapsed timer count.[/I]
 [COLOR yellow]--[/COLOR][I] New bookmark options to use exist local bookmarks or Trakt scrobble.[/I]
 
 
@@ -536,86 +404,58 @@
 
 
 [B][COLOR red]Update - v4.1.0 - Sept. 03, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added "File Name Format" option to downloads.  You have the option of "Title (year) or Title S01E01", which is
-    the older file naming method.  Or you can chose "torrent file name".[/I]
-[COLOR yellow]--[/COLOR][I] Fixed random issue where meta fallback would replace "tvshowtitle" with episode "title".  This caused issues with
-    OpenInfo or TMDbHelper failing lookup of the show.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed playback issue with OpenInfo where video playing was in background.  This occurred when a search was
-    performed first and then accessing OpenInfo to play from.[/I]
+[COLOR yellow]--[/COLOR][I] Added "File Name Format" option to downloads.  You have the option of "Title (year) or Title S01E01", which is the older file naming method.  Or you can chose "torrent file name".[/I]
+[COLOR yellow]--[/COLOR][I] Fixed random issue where meta fallback would replace "tvshowtitle" with episode "title".  This caused issues with OpenInfo or TMDbHelper failing lookup of the show.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed playback issue with OpenInfo where video playing was in background.  This occurred when a search was performed first and then accessing OpenInfo to play from.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed PM expiry date when viewing Account Info.[/I]
 [COLOR yellow]--[/COLOR][I] Added All Debrid support for cache checking and removal of uncached torrents.[/I]
 [COLOR yellow]--[/COLOR][I] Added All Debrid support for resolving of pack files for playback.[/I]
 [COLOR yellow]--[/COLOR][I] Added All Debrid support for context menu option to cache uncached torrents.[/I]
 [COLOR yellow]--[/COLOR][I] Added All Debrid support for downloading from source select.[/I]
 [COLOR yellow]--[/COLOR][I] Added All Debrid support for "Browse Debrid Pack".[/I]
-[COLOR yellow]--[/COLOR][I] Fixed "My Movies" "Date Added" sorting.  Previously it was stuck at descending sort order due to Trakt api key
-    for "listed_at" was not assigned.  This is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] Renamed "Unfinished" in My Movies and My TV Shows to "Continue Watching".  Limit has been reduced to 40
-    items. Trakt On Deck is now removed as this was the same list with only 20 items so I feel this was a good
-    compromise. Sort order is now set to be based on date paused.[/I]
-[COLOR yellow]--[/COLOR][I] "reuselanguageinvoker" is now officially hard coded on. There is a new service settings management system
-    courtesy of Tikipeter,  so credit goes to him!!![/I]  There is still an option for user to turn this off if not
-    comfortable.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed "My Movies" "Date Added" sorting.  Previously it was stuck at descending sort order due to Trakt api key for "listed_at" was not assigned.  This is now fixed.[/I]
+[COLOR yellow]--[/COLOR][I] Renamed "Unfinished" in My Movies and My TV Shows to "Continue Watching".  Limit has been reduced to 40 items. Trakt On Deck is now removed as this was the same list with only 20 items so I feel this was a good compromise. Sort order is now set to be based on date paused.[/I]
+[COLOR yellow]--[/COLOR][I] "reuselanguageinvoker" is now officially hard coded on. There is a new service settings management system courtesy of Tikipeter,  so credit goes to him!!![/I]  There is still an option for user to turn this off if not comfortable.[/I]
 [COLOR yellow]--[/COLOR][I] TVShows Originals is now on by default.[/I]
 [COLOR yellow]--[/COLOR][I] Youtube is now on by default.[/I]
 [COLOR yellow]--[/COLOR][I] Please be sure to update "context.venom" to v1.0.6 for compliant changes.[/I]
 
 
 [B][COLOR red]Update - v4.0.8 - Aug. 23, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Changed episode unaired condition when meta provider does not return a premiered date.  The item is now
-    considered unaired.[/I]
-[COLOR yellow]--[/COLOR][I] Added Real-Debrid to the new "Premium Services" menu.  You can view, play, download, and manage
-    your RD account from here.[/I]
-[COLOR yellow]--[/COLOR][I] Added a new setting that allows user to flip and test kodi 18's new setting called "reuselanguageinvoker" that
-    greatly improves the performance of the addon.  Option is found under the "Debugging-Developer Mode".
-    You must enable Developer mode for option to be visible.  Note that this is an experimental feature you
-    can test.  It has been reported that this can cause kodi to crash and seems to effect widgets.  The issue
-    has been posted to Team Kodi's github so it's on them to fix it. I'm not discussing this experimental
-    inclusion beyond this.[/I]
+[COLOR yellow]--[/COLOR][I] Changed episode unaired condition when meta provider does not return a premiered date.  The item is now considered unaired.[/I]
+[COLOR yellow]--[/COLOR][I] Added Real-Debrid to the new "Premium Services" menu.  You can view, play, download, and manage your RD account from here.[/I]
+[COLOR yellow]--[/COLOR][I] Added a new setting that allows user to flip and test kodi 18's new setting called "reuselanguageinvoker" that greatly improves the performance of the addon.  Option is found under the "Debugging-Developer Mode".  You must enable Developer mode for option to be visible.  Note that this is an experimental feature you can test.  It has been reported that this can cause kodi to crash and seems to effect widgets.  The issue has been posted to Team Kodi's github so it's on them to fix it. I'm not discussing this experimental inclusion beyond this.[/I]
 [COLOR yellow]--[/COLOR][I] Many code changes for the above have taken place to comply with its requirements.[/I]
 
 
 [B][COLOR red]Update - v4.0.7 - Aug. 15, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue with free hosters not showing in source select.[/I]
-[COLOR yellow]--[/COLOR][I] Added new "Premium Services" menu.  At this time only Premiumize.me is fully functional.  I had no
-    intention of releasing this till PM, RD, and AD was complete but the item list above bit me in the ass.
-    You can view, play, and manage your cloud account from here.[/I]
-[COLOR yellow]--[/COLOR][I] Added Context Menu option "Cache to cloud" for selected uncached torrent provided seeder count
-    is not 0 for the selected item.  If you have uncached torrents removed this option is not available at this
-    time.  I'm considering adding a yes-no dialog to load uncached torrents if no sources found and user has
-    removed uncached torrents.  This would give you an opportunity to cache an item to your cloud.[/I]
+[COLOR yellow]--[/COLOR][I] Added new "Premium Services" menu.  At this time only Premiumize.me is fully functional.  I had no intention of releasing this till PM, RD, and AD was complete but the item list above bit me in the ass.  You can view, play, and manage your cloud account from here.[/I]
+[COLOR yellow]--[/COLOR][I] Added Context Menu option "Cache to cloud" for selected uncached torrent provided seeder count is not 0 for the selected item.  If you have uncached torrents removed this option is not available at this time.  I'm considering adding a yes-no dialog to load uncached torrents if no sources found and user has removed uncached torrents.  This would give you an opportunity to cache an item to your cloud.[/I]
 
 
 [B][COLOR red]Update - v4.0.6 - Aug. 05, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue with "Watched Count" setting dropping show-seasons that do not contain a valid imdb_id.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed db issue for shows mentioned above.  This also caused issues in rare cases that the very next
-     episode scraped also did not contain a valid imdb_id the returned sources would include previous
-     scrape.  This is now fixed and invalid imdb_id entries are wiped from the db.[/I]
-[COLOR yellow]--[/COLOR][I] Changed Pack scraping option to ON by default and changed OpenScrapers dependency to required
-    version to comply. Previous installs will not change.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed db issue for shows mentioned above.  This also caused issues in rare cases that the very next episode scraped also did not contain a valid imdb_id the returned sources would include previous scrape.  This is now fixed and invalid imdb_id entries are wiped from the db.[/I]
+[COLOR yellow]--[/COLOR][I] Changed Pack scraping option to ON by default and changed OpenScrapers dependency to required version to comply. Previous installs will not change.[/I]
 [COLOR yellow]--[/COLOR][I] Added "sample" to filter string for packs files to ignore in resolving.[/I]
 
 
 [B][COLOR red]Update - v4.0.5 - Aug. 05, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added 2 new string format checks for resolving pack files due to some rare and rather odd internal
-    episode naming conventions used.[/I]
+[COLOR yellow]--[/COLOR][I] Added 2 new string format checks for resolving pack files due to some rare and rather odd internal episode naming conventions used.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed a torrent caching expiry issue preventing a fresh scrape under some situations.[/I]
 
 
 [B][COLOR red]Update - v4.0.4 - Aug. 02, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Sorry folks completely forgot about .strm library file playback with the new pack file work, they were badly
-    broken.  This is now fixed including resolving of pack files from library as well.[/I]
+[COLOR yellow]--[/COLOR][I] Sorry folks completely forgot about .strm library file playback with the new pack file work, they were badly broken.  This is now fixed including resolving of pack files from library as well.[/I]
 
 
 [B][COLOR red]Update - v4.0.3 - Aug. 02, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added new Pack file size calc. function.  This will take the current pack file and calculate the approx. size
-    of each episode inside the pack.  This will also vary based on show Packs that are ranges
-    ex. 1-7 when there are 9 total season.  Only season 1-7 will be accounted for in that case.[/I]
+[COLOR yellow]--[/COLOR][I] Added new Pack file size calc. function.  This will take the current pack file and calculate the approx. size of each episode inside the pack.  This will also vary based on show Packs that are ranges ex. 1-7 when there are 9 total season.  Only season 1-7 will be accounted for in that case.[/I]
 
 
 [B][COLOR red]Update - v4.0.2 - July 30, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Switched IMDb year check for titles to api request for small 1/2-3/4 second savings to scrape startup.  Thanks
-    for the tip on that hidden api Mr.Anonymous!![/I]
+[COLOR yellow]--[/COLOR][I] Switched IMDb year check for titles to api request for small 1/2-3/4 second savings to scrape startup.  Thanks for the tip on that hidden api Mr.Anonymous!![/I]
 [COLOR yellow]--[/COLOR][I] Code cleanup of forgotten logging.[/I]
 
 
@@ -625,22 +465,13 @@
 
 
 [B][COLOR red]Update - v4.0 - July 26, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Pack scraping support added.  This is off by default so enable under "Source Options". Resolving support for
-    RD and PM only at this time.  Special thanks to Tikipeter for his collaboration in this project!!![/I]
-[COLOR yellow]--[/COLOR][I] Added "is_airing" for seasons containing unaired episodes. This flag will avoid seasonPack scraping for
-    seasons that are still airing, which returns nothing but incomplete season packs anyway.[/I]
-[COLOR yellow]--[/COLOR][I] Added the ability to view pack files via context menu option courtesy of TikiPeter. You can pick and play
-    any video content.[/I]
-[COLOR yellow]--[/COLOR][I] Added "Dev mode" to "Debugging" settings section.  Please DO NOT USE.  This is for my own testing of
-    scrapers to enable or disable and isolate issues.  I will not field questions or speak of this section.[/I]
-[COLOR yellow]--[/COLOR][I] Added IMDb check for titles and year, just prior to scraping.  A number of titles the meta from trakt and
-    tmdb differ from IMDb by a year, ex. "Dragged Across Concrete" and "Oculus".  Some titles also differ,
-    ex. "Star Wars: The Rise of Skywalker" vs. "Star Wars: Episode IX - The Rise of Skywalker".[/I]
-[COLOR yellow]--[/COLOR][I] Season count is now hard coded ON.  Previously a trakt api request was used to fetch total season and the
-    need to disable for speed was apparent.  Now the season count is parsed from and counted
-    from the tvdb v1 api xml files already received so there is no longer a need to disable.[/I]
-[COLOR yellow]--[/COLOR][I] Removed Season0 from season count when option is enabled.  Season count will no longer include
-    Season0 regardless of setting.[/I]
+[COLOR yellow]--[/COLOR][I] Pack scraping support added.  This is off by default so enable under "Source Options". Resolving support for RD and PM only at this time.  Special thanks to Tikipeter for his collaboration in this project!!![/I]
+[COLOR yellow]--[/COLOR][I] Added "is_airing" for seasons containing unaired episodes. This flag will avoid seasonPack scraping for seasons that are still airing, which returns nothing but incomplete season packs anyway.[/I]
+[COLOR yellow]--[/COLOR][I] Added the ability to view pack files via context menu option courtesy of TikiPeter. You can pick and play any video content.[/I]
+[COLOR yellow]--[/COLOR][I] Added "Dev mode" to "Debugging" settings section.  Please DO NOT USE.  This is for my own testing of scrapers to enable or disable and isolate issues.  I will not field questions or speak of this section.[/I]
+[COLOR yellow]--[/COLOR][I] Added IMDb check for titles and year, just prior to scraping.  A number of titles the meta from trakt and tmdb differ from IMDb by a year, ex. "Dragged Across Concrete" and "Oculus".  Some titles also differ, ex. "Star Wars: The Rise of Skywalker" vs. "Star Wars: Episode IX - The Rise of Skywalker".[/I]
+[COLOR yellow]--[/COLOR][I] Season count is now hard coded ON.  Previously a trakt api request was used to fetch total season and the need to disable for speed was apparent.  Now the season count is parsed from and counted from the tvdb v1 api xml files already received so there is no longer a need to disable.[/I]
+[COLOR yellow]--[/COLOR][I] Removed Season0 from season count when option is enabled.  Season count will no longer include Season0 regardless of setting.[/I]
 [COLOR yellow]--[/COLOR][I] Changed TV Specials (Season0) to default "false"(off).[/I]
 [COLOR yellow]--[/COLOR][I] Fixed  function cache scraping from library .strm files.[/I]
 [COLOR yellow]--[/COLOR][I] Added alias title check matching to scraped query results[/I]
@@ -658,10 +489,7 @@
 
 
 [B][COLOR red]Update - v3.7.2 - May 30, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added new TVDB api key selection between 3 possible keys.  It was discovered today that some keys seem to
-    drop random shows loading a season list, and that happens rarely in itself.  This server anomaly eventually
-    clears up in a day or so but flipping to a different key seems to also cure the problem more immediate for
-    those that can no wait.[/I]
+[COLOR yellow]--[/COLOR][I] Added new TVDB api key selection between 3 possible keys.  It was discovered today that some keys seem to drop random shows loading a season list, and that happens rarely in itself.  This server anomaly eventually clears up in a day or so but flipping to a different key seems to also cure the problem more immediate for those that can no wait.[/I]
 
 
 [B][COLOR red]Update - v3.7.1 - May 29, 2020[/COLOR][/B]
@@ -673,58 +501,40 @@
 [COLOR yellow]--[/COLOR][I] Removed tagline for shows.[/I]
 [COLOR yellow]--[/COLOR][I] Added missing clearlogo and clearart at season level.[/I]
 [COLOR yellow]--[/COLOR][I] Unwatched count now only added to multi episode lists like Progress and Calendar.[/I]
-[COLOR yellow]--[/COLOR][I] Added .setProperty(tmdb_id) for episodes and .setProperty(tvshow.tmdb_id) for shows for TMDBHelper
-    support of lookup.[/I]
+[COLOR yellow]--[/COLOR][I] Added .setProperty(tmdb_id) for episodes and .setProperty(tvshow.tmdb_id) for shows for TMDBHelper support of lookup.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed bookmark issue mismatch in databse.[/I]
 
 
 [B][COLOR red]Update - v3.6.9 - May 20, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added new source filtering option "File Size limit (GB)".
-    This is off by default.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed random case of fetching foreign landscape
-    from fanart.tv.[/I]
+[COLOR yellow]--[/COLOR][I] Added new source filtering option "File Size limit (GB)".  This is off by default.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed random case of fetching foreign landscape from fanart.tv.[/I]
 
 
 [B][COLOR red]Update - v3.6.8 - May 17, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed random issue with busy dialog not closing.[/I]
 [COLOR yellow]--[/COLOR][I] Added database table check to avoid bogus log errors.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed issue if user cleared Provider cache and then selected Rescrape the table was now empty and halted scraping.[/I]
-[COLOR yellow]--[/COLOR][I] Because of the changes to item #2 and 3 above the setting option "Allow Rescrape to first clear item providers"
-    has now been removed and hard coded as the default.[/I]
+[COLOR yellow]--[/COLOR][I] Because of the changes to item #2 and 3 above the setting option "Allow Rescrape to first clear item providers" has now been removed and hard coded as the default.[/I]
 
 
 [B][COLOR red]Update - v3.6.7 - May 14, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed Library .strm playback. Previous update added ability to compare meta received from tmdbhelper vs. Venom's
-    cached meta and use the largest.  I neglected that .strm files are also player files and meta sent is None type.
-    Now I compare this as well and if the item is cached that meta is now used vs. scraped meta saved locally,
-    which is more limited than Venom's cached meta.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Library .strm playback. Previous update added ability to compare meta received from tmdbhelper vs. Venom's cached meta and use the largest.  I neglected that .strm files are also player files and meta sent is None type.  Now I compare this as well and if the item is cached that meta is now used vs. scraped meta saved locally, which is more limited than Venom's cached meta.[/I]
 
 
 [B][COLOR red]Update - v3.6.6 - May 14, 2020[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed Remove HVAC and Remove 3D options.  Previousely there would be random failures if specific free hosters were
-    enabled.  Some free hosters were missing 'info' keys in the sources dict.  This has been fixed in both
-    Venom and missing keys added to OpenScrapers.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Remove HVAC and Remove 3D options.  Previousely there would be random failures if specific free hosters were enabled.  Some free hosters were missing 'info' keys in the sources dict.  This has been fixed in both Venom and missing keys added to OpenScrapers.[/I]
 
 
 [B][COLOR red]Update - v3.6.5 - May 12, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added new setting option to disable Cloudflare protected providers due to recent challenge failures.[/I]
-[COLOR yellow]--[/COLOR][I] Reorganized all settings under "Source Options" to better follow the flow
-    of scraping from start to results.[/I]
-[COLOR yellow]--[/COLOR][I] Changed all Source filtering options to be "Remove" options.  Previously options were "Enable" or "Remove"
-    and this just seems to be cleaner.[/I]
-[COLOR yellow]--[/COLOR][I] Added new setting option "Allow Rescrape to first clear item providers".  Previously Rescrape would only cache new
-    providers and read in previously cached providers. Now you have the option to make Rescrape fully
-    start from scratch for the selected item.  This option will only clear provider links for the item you are
-    selecting, this is not a full "Clear Providers" built in function.[/I]
+[COLOR yellow]--[/COLOR][I] Reorganized all settings under "Source Options" to better follow the flow of scraping from start to results.[/I]
+[COLOR yellow]--[/COLOR][I] Changed all Source filtering options to be "Remove" options.  Previously options were "Enable" or "Remove" and this just seems to be cleaner.[/I]
+[COLOR yellow]--[/COLOR][I] Added new setting option "Allow Rescrape to first clear item providers".  Previously Rescrape would only cache new providers and read in previously cached providers. Now you have the option to make Rescrape fully start from scratch for the selected item.  This option will only clear provider links for the item you are selecting, this is not a full "Clear Providers" built in function.[/I]
 [COLOR yellow]--[/COLOR][I] Improved scrape time.[/I]
 [COLOR yellow]--[/COLOR][I] Added IMDBNUMBER to episode InfoLabels for a4ksubtitles.[/I]
-[COLOR yellow]--[/COLOR][I] Improved meta data handling to deal with TMDBHELPER's limited meta exchange.  Now the Venomplayer will look in
-    the Venom cache and compare against the meta received from TMDBHELPER and use the larger
-    of the two.[/I]
-[COLOR yellow]--[/COLOR][I] Removed context menu "Clear All Cache" and replaced in movies and episodes with "Clear Providers".  Sorry folks but
-    really frowning upon clearing of metacache.[/I]
-[COLOR yellow]--[/COLOR][I] Submitted new player files to TMDBHELPER.  Now there are two.."Venom (Auto Play)" and 'Venom (Source Select)".
-    Please be sure to update TMDBHELPER's players.[/I]
+[COLOR yellow]--[/COLOR][I] Improved meta data handling to deal with TMDBHELPER's limited meta exchange.  Now the Venomplayer will look in the Venom cache and compare against the meta received from TMDBHELPER and use the larger of the two.[/I]
+[COLOR yellow]--[/COLOR][I] Removed context menu "Clear All Cache" and replaced in movies and episodes with "Clear Providers".  Sorry folks but really frowning upon clearing of metacache.[/I]
+[COLOR yellow]--[/COLOR][I] Submitted new player files to TMDBHELPER.  Now there are two.."Venom (Auto Play)" and 'Venom (Source Select)".  Please be sure to update TMDBHELPER's players.[/I]
 
 
 [B][COLOR red]Update - v3.6.4 - May 8, 2020[/COLOR][/B]
@@ -733,8 +543,7 @@
 
 [B][COLOR red]Update - v3.6.3 - May 6, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Integration with new "Play from Here" option in Global Context Menu. See "What's New" for more info in addon.[/I]
-[COLOR yellow]--[/COLOR][I] Code changes per cProfile function testing for speed inprovements.  Movie menus should now load faster 
-    and more to follow.[/I]
+[COLOR yellow]--[/COLOR][I] Code changes per cProfile function testing for speed inprovements.  Movie menus should now load faster and more to follow.[/I]
 
 
 [B][COLOR red]Update - v3.6.2 - April 29, 2020[/COLOR][/B]
@@ -750,15 +559,13 @@
 
 [B][COLOR red]Update - v3.6.0 - April 2, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Compressed artwork to lessen footprint.[/I]
-[COLOR yellow]--[/COLOR][I] Added new setting to enable or disable Calendar (TVMaze) extended meta.  When disabled(default) the Calendar
-    list items will now load faster without the extra meta and artwork.[/I]
+[COLOR yellow]--[/COLOR][I] Added new setting to enable or disable Calendar (TVMaze) extended meta.  When disabled(default) the Calendar list items will now load faster without the extra meta and artwork.[/I]
 [COLOR yellow]--[/COLOR][I] resolveURL is now maintained by gural so repo has been updated.[/I]
 
 
 [B][COLOR red]Update - v3.5.9 - March 30, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Removed resolveURL notification from previous update.[/I]
-[COLOR yellow]--[/COLOR][I] Updated bookmarks caching method to now also record show name and year for better tracking of progress
-    indicators.  This requires you to clear old bookmarks for the new update to be in use.[/I]
+[COLOR yellow]--[/COLOR][I] Updated bookmarks caching method to now also record show name and year for better tracking of progress indicators.  This requires you to clear old bookmarks for the new update to be in use.[/I]
 
 
 [B][COLOR red]Update - v3.5.8 - March 29, 2020[/COLOR][/B]
@@ -769,8 +576,7 @@
 
 [B][COLOR red]Update - v3.5.7 - March 24, 2020[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue with random duplicate list items after playback ends when Autoplay is enabled.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed trakt api issue randomly placing Season0 at end of users watch list. This would alter the
-    NextUp-Progress item.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed trakt api issue randomly placing Season0 at end of users watch list. This would alter the NextUp-Progress item.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed trakt api episode count not including Season0 when enabled. This would cause shows
     to vanish from Trakt Progress when the count was exceeded.[/I]
 [COLOR yellow]--[/COLOR][I] Added color setting for Movies who's theatrical release date is greater than current date.[/I]
