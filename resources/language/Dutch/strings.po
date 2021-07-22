@@ -2835,7 +2835,7 @@ msgstr ""
 
 msgctxt "#33665"
 msgid "Season Lists"
-msgstr "Seizoens lijsten"
+msgstr "Seizoen lijsten"
 
 msgctxt "#33666"
 msgid ""
@@ -2906,7 +2906,7 @@ msgstr "Geen Trakt resultaat"
 
 msgctxt "#33787"
 msgid "Trakt Rate Limit Reached"
-msgstr "Trakt snelheidslimiet bereikt"
+msgstr "Trakt Beoordeel Limiet bereikt"
 
 
 
@@ -2967,7 +2967,7 @@ msgstr "Uitzending label Vet"
 
 msgctxt "#35022"
 msgid "Native"
-msgstr "inheems"
+msgstr "Oorspronkelijk"
 
 msgctxt "#35023"
 msgid "UTC"
@@ -3762,7 +3762,7 @@ msgstr "%s seeders"
 
 msgctxt "#40013"
 msgid "Converting MAGNET..."
-msgstr "MAGNET omzetten..."
+msgstr "MAGNET Converteren..."
 
 msgctxt "#40014"
 msgid "Progress Dialog Canceled"
