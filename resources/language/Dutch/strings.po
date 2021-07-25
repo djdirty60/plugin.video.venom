@@ -100,7 +100,7 @@ msgstr "Populair"
 
 msgctxt "#32019"
 msgid "Upcoming Progress"
-msgstr "Aankomende vooruitgang"
+msgstr "Aankomende Voortgang"
 
 msgctxt "#32020"
 msgid "Box Office"
@@ -112,7 +112,7 @@ msgstr "Niet groeperen (kwaliteit, prioriteit grootte)"
 
 msgctxt "#32022"
 msgid "Group(Torrents, Acct Sources, Prem Hosters)"
-msgstr "Groep (Torrents, Acct-bronnen, Prem Hosters)"
+msgstr "Groep (Torrents, Acct bronnen, Prem Hosters)"
 
 msgctxt "#32023"
 msgid "Enable Calendar (TVMaze) fetching extended meta"
@@ -188,7 +188,7 @@ msgstr "Series Lijst"
 
 msgctxt "#32041"
 msgid "Episode Lists"
-msgstr "Afleverings-lijst"
+msgstr "Afleverings lijst"
 
 msgctxt "#32042"
 msgid "No Trakt or IMDb account found."
@@ -292,7 +292,7 @@ msgstr "Bekeken in Venom"
 
 msgctxt "#32067"
 msgid "Unwatched in Venom"
-msgstr "Ongebruikt in Venom"
+msgstr "Niet bekeken in Venom"
 
 msgctxt "#32068"
 msgid "Watched in Trakt"
@@ -356,7 +356,7 @@ msgstr "Trakt: Scrobble Reset"
 
 msgctxt "#32083"
 msgid "Clean Settings file: [B]VENOM[/B] and [B]FENOMSCRAPERS[/B]"
-msgstr "Clean Settings-bestand: [B]VENOM[/B] en [B]FENOMSCRAPERS[/B]"
+msgstr "Clean Settings bestand: [B]VENOM[/B] en [B]FENOMSCRAPERS[/B]"
 
 msgctxt "#32084"
 msgid "{} Obsolete Settings Entries Removed"
@@ -436,27 +436,27 @@ msgstr "Bladwijzer succesvol gewist!"
 
 msgctxt "#32103"
 msgid "strm files written but library cannot be updated"
-msgstr "strm-bestanden geschreven maar bibliotheek kan niet worden bijgewerkt"
+msgstr "strm bestanden geschreven maar bibliotheek kan niet worden bijgewerkt"
 
 msgctxt "#32104"
 msgid "strm file written but library cannot be updated"
-msgstr "strm-bestand geschreven maar bibliotheek kan niet worden bijgewerkt"
+msgstr "strm bestand geschreven maar bibliotheek kan niet worden bijgewerkt"
 
 msgctxt "#32105"
 msgid "Trakt Movies Sync Complete"
-msgstr "Trakt Movies-synchronisatie voltooid"
+msgstr "Trakt films synchronisatie voltooid"
 
 msgctxt "#32106"
 msgid "Update Service is disabled. Please enable and try again"
-msgstr "Update-service is uitgeschakeld. Schakel het in en probeer het opnieuw"
+msgstr "Update service is uitgeschakeld. Schakel het in en probeer het opnieuw"
 
 msgctxt "#32107"
 msgid "Your Library Folders do not exist in Kodi Sources. Please run setup"
-msgstr "Update-service is uitgeschakeld. Schakel het in en probeer het opnieuw"
+msgstr "Update service is uitgeschakeld. Schakel het in en probeer het opnieuw"
 
 msgctxt "#32108"
 msgid "No Shows in Addon Folder"
-msgstr "Geen shows in Add-on-map"
+msgstr "Geen shows in Addon map"
 
 msgctxt "#32109"
 msgid "No Episode Updates Found"
@@ -468,7 +468,7 @@ msgstr "Herstart Kodi voor wijzigingen is vereist"
 
 msgctxt "#32111"
 msgid "Folders Failed to add to Kodi Sources"
-msgstr "Mappen kunnen niet worden toegevoegd aan Kodi-bronnen"
+msgstr "Mappen kunnen niet worden toegevoegd aan Kodi bronnen"
 
 msgctxt "#32112"
 msgid "Library Auto Update Service is now turned off"
@@ -484,7 +484,7 @@ msgstr "Synchronisatie van Mijn accounts voltooid"
 
 msgctxt "#32115"
 msgid "Error Cleaning Settings.xml. Old settings.xml files Restored."
-msgstr "Fout bij het opschonen van Settings.xml. Oude settings.xml-bestanden Hersteld."
+msgstr "Fout bij het opschonen van Settings.xml. Oude settings.xml bestanden Hersteld."
 
 msgctxt "#32116"
 msgid "This feature is only supported in kodi 18 and beyond"
@@ -520,7 +520,7 @@ msgstr "Niet gevonden in afspeellijst"
 
 msgctxt "#32124"
 msgid "No TVShow lists imports found"
-msgstr "Geen TVShow-lijsten gevonden import"
+msgstr "Geen TVShow lijsten gevonden import"
 
 msgctxt "#32125"
 msgid "Scraper Preperation"
@@ -540,7 +540,7 @@ msgstr "Furk API sleutel"
 
 msgctxt "#32129"
 msgid "Enable Furk.net Menu"
-msgstr "Furk.net-menu inschakelen"
+msgstr "Furk.net menu inschakelen"
 
 msgctxt "#32130"
 msgid "Trakt: Scrobble Failed"
@@ -548,7 +548,7 @@ msgstr "Trakt: Scrobble mislukt"
 
 msgctxt "#32131"
 msgid "Trakt: Scrobble Reset Failed"
-msgstr "Trakt: Scrobble-reset mislukt"
+msgstr "Trakt: Scrobble reset mislukt"
 
 msgctxt "#32132"
 msgid "Highlight Color"
@@ -576,7 +576,7 @@ msgstr "[COLOR FFA0C12C] -- Help --[/COLOR]"
 
 msgctxt "#32138"
 msgid "[COLOR FFA0C12C] -- Dev Mode Help --[/COLOR]"
-msgstr "[COLOR FFA0C12C] -- Hulp bij dev-modus --[/COLOR]"
+msgstr "[COLOR FFA0C12C] -- Hulp bij dev modus --[/COLOR]"
 
 msgctxt "#32139"
 msgid "Toggle reuselanguageinvoker"
@@ -648,7 +648,7 @@ msgstr "Min. Filmgrootte (GB)"
 
 msgctxt "#32156"
 msgid "Max. Movie Size (GB)"
-msgstr "Maximaal. Filmgrootte (GB)"
+msgstr "Max. Filmgrootte (GB)"
 
 msgctxt "#32157"
 msgid "Min. Episode Size (GB)"
@@ -656,7 +656,7 @@ msgstr "Min. Afleveringsgrootte (GB)"
 
 msgctxt "#32158"
 msgid "Max. Episode Size (GB)"
-msgstr "Maximaal. Afleveringsgrootte (GB)"
+msgstr "Max. Afleveringsgrootte (GB)"
 
 msgctxt "#32159"
 msgid "Do not spam log with removed duplicates"
@@ -664,19 +664,19 @@ msgstr "Log geen spam met verwijderde duplicaten"
 
 msgctxt "#32160"
 msgid "Remove CAM sources"
-msgstr "CAM-bronnen verwijderen"
+msgstr "CAM bronnen verwijderen"
 
 msgctxt "#32161"
 msgid "Remove SD sources (only if better quality exists)"
-msgstr "SD-bronnen verwijderen (alleen als er betere kwaliteit is)"
+msgstr "SD bronnen verwijderen (alleen als er betere kwaliteit is)"
 
 msgctxt "#32162"
 msgid "Remove uncached torrents"
-msgstr "Verwijder niet-gecachete torrents"
+msgstr "Verwijder niet gecachete torrents"
 
 msgctxt "#32163"
 msgid "Allow Multi Episodes to Show Unwatched Count"
-msgstr "Sta toe dat meerdere afleveringen niet-bekeken worden weergegeven"
+msgstr "Sta toe dat meerdere afleveringen niet bekeken worden weergegeven"
 
 msgctxt "#32164"
 msgid "Scraper Dialog Highlight Color"
@@ -712,7 +712,7 @@ msgstr "Eindigt om:"
 
 msgctxt "#32172"
 msgid "Still there?"
-msgstr "Nog altijd daar?"
+msgstr "Nog altijd hier?"
 
 msgctxt "#32173"
 msgid "Continue watching"
@@ -811,7 +811,7 @@ msgstr "Icoonpakket"
 
 msgctxt "#32312"
 msgid "Scraper Timeout"
-msgstr "Time-out schraper"
+msgstr "Timeout schraper"
 
 msgctxt "#32313"
 msgid "Indicators"
@@ -1087,7 +1087,7 @@ msgstr "Uitgezonden op"
 
 msgctxt "#32381"
 msgid "Ended"
-msgstr "Beëindigd om"
+msgstr "stopt om"
 
 msgctxt "#32382"
 msgid "Documentary"
@@ -1099,7 +1099,7 @@ msgstr "Talkshow"
 
 msgctxt "#32384"
 msgid "Airing/Ended"
-msgstr "Uitgezonden op/Beëindigd om"
+msgstr "Uitgezonden op/stopt om"
 
 msgctxt "#32385"
 msgid "All"
@@ -1259,11 +1259,11 @@ msgstr "Nu aan het afspelen (TMDb)"
 
 msgctxt "#32424"
 msgid "Anticipated"
-msgstr "verwacht"
+msgstr "Verwacht"
 
 msgctxt "#32425"
 msgid "Anticipated (Trakt)"
-msgstr "verwacht (Trakt)"
+msgstr "Verwacht (Trakt)"
 
 msgctxt "#32426"
 msgid "Upcoming"
@@ -1827,7 +1827,7 @@ msgstr "Voeg afleveringen toe met onbekende uitzenddatums"
 
 msgctxt "#32570"
 msgid "Show unaired seasons/episodes"
-msgstr "TNiet uitgezonden seizoenen/afleveringen weergeven"
+msgstr "Niet uitgezonden seizoenen/afleveringen weergeven"
 
 msgctxt "#32571"
 msgid "Hide movies in cinema"
@@ -1839,7 +1839,7 @@ msgstr "Trakt Progress Show niet uitgezonden afleveringen"
 
 msgctxt "#32573"
 msgid "Trakt Upcoming Progress prepend date"
-msgstr "Trakteer aanstaande voortgangsdatum "
+msgstr "Trakt aanstaande voortgangsdatum "
 
 msgctxt "#32574"
 msgid ""
@@ -2494,7 +2494,7 @@ msgstr "Er is niets gevonden"
 
 msgctxt "#33050"
 msgid "Notifications"
-msgstr "meldingen"
+msgstr "Meldingen"
 
 msgctxt "#33051"
 msgid "Server Notifications"
