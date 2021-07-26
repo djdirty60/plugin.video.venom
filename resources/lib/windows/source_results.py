@@ -135,19 +135,7 @@ class SourceResultsXML(BaseDialog):
 					quality = item.get('quality', 'SD')
 					quality_icon = self.get_quality_iconPath(quality)
 					extra_info = item.get('info')
-					try:
-						size_label = extra_info.split('|', 1)[0]
-						if any(value in size_label for value in ['HEVC', '3D']): size_label = ''
-					except: size_label = ''
-
-					try: f = ' / '.join(['%s' % info.strip() for info in extra_info.split('|')])
-					except: f = ''
-					if 'name_info' in item: t = getFileType(name_info=item.get('name_info'))
-					else: t = getFileType(url=item.get('url'))
-					t = '%s /%s' % (f, t) if (f != '' and f != '0 ' and f != ' ') else t
-					if t == '': t = getFileType(url=item.get('url'))
-					extra_info = t
-
+					size_label = str(round(item.get('size', ''), 2)) + ' GB' if item.get('size') else 'NA'
 					listitem.setProperty('venom.source_dict', jsdumps([item]))
 					listitem.setProperty('venom.debrid', self.debrid_abv(item.get('debrid')))
 					listitem.setProperty('venom.provider', item.get('provider').upper())
@@ -161,8 +149,7 @@ class SourceResultsXML(BaseDialog):
 					listitem.setProperty('venom.quality_icon', quality_icon)
 					listitem.setProperty('venom.url', item.get('url'))
 					listitem.setProperty('venom.extra_info', extra_info)
-					if size_label: listitem.setProperty('venom.size_label', size_label)
-					else: listitem.setProperty('venom.size_label', 'NA')
+					listitem.setProperty('venom.size_label', size_label)
 					listitem.setProperty('venom.count', '%02d.)' % count)
 					yield listitem
 				except:

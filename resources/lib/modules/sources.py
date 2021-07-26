@@ -370,6 +370,12 @@ class Sources:
 			trakt_aliases = self.getAliasTitles(imdb, 'episode')
 			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 			except: pass
+			country_codes = meta.get('country_codes', '')
+			for i in country_codes:
+				if i in ['CA', 'US', 'UK', 'GB']:
+					if i == 'GB': i = 'UK'
+					alias = {'title': tvshowtitle + ' ' + i, 'country': i.lower()}
+					if not alias in aliases: aliases.append(alias)
 			aliases = jsdumps(aliases)
 			for i in sourceDict:
 				threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
@@ -442,6 +448,12 @@ class Sources:
 				trakt_aliases = self.getAliasTitles(imdb, content)
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
+				country_codes = meta.get('country_codes', '')
+				for i in country_codes:
+					if i in ['CA', 'US', 'UK', 'GB']:
+						if i == 'GB': i = 'UK'
+						alias = {'title': tvshowtitle + ' ' + i, 'country': i.lower()}
+						if not alias in aliases: aliases.append(alias)
 				aliases = jsdumps(aliases)
 				for i in sourceDict:
 					threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1]))
@@ -790,21 +802,25 @@ class Sources:
 					self.sources = [i for i in self.sources if (i.get('size', 0) >= episode_minSize and i.get('size', 0) <= episode_maxSize)]
 				except:
 					log_utils.error()
+
+		for i in self.sources:
+			if 'name_info' in i: info_string = source_utils.getFileType(name_info=i.get('name_info'))
+			else: info_string = source_utils.getFileType(url=i.get('url'))
+			i.update({'info': (i.get('info') + ' / ' + info_string).lstrip(' / ')})
+
 		if control.setting('remove.hevc') == 'true':
-			self.sources = [i for i in self.sources if 'HEVC' not in i.get('info', '')] # scrapers write HEVC to info
+			self.sources = [i for i in self.sources if 'HEVC' not in i.get('info', '')]
 		if control.setting('remove.hdr') == 'true':
-			filter = [i for i in self.sources if '.sdr' not in i.get('name_info')]
-			filter = [i for i in filter if any(value in i.get('name_info') for value in source_utils.HDR)]
-			self.sources = [i for i in self.sources if i not in filter]
+			self.sources = [i for i in self.sources if ' HDR ' not in i.get('info', '')] # needs space before and aft because of "HDRIP"
 		if control.setting('remove.dolby.vision') == 'true':
-			self.sources = [i for i in self.sources if not any(value in i.get('name_info', '') for value in source_utils.DOLBY_VISION)]
+			self.sources = [i for i in self.sources if  'DOLBY-VISION' not in i.get('info', '')]
 		if control.setting('remove.cam.sources') == 'true':
 			self.sources = [i for i in self.sources if i['quality'] != 'CAM']
 		if control.setting('remove.sd.sources') == 'true':
 			if any(i for i in self.sources if any(value in i['quality'] for value in ['4K', '1080p', '720p'])): #only remove SD if better quality does exist
 				self.sources = [i for i in self.sources if i['quality'] != 'SD']
 		if control.setting('remove.3D.sources') == 'true':
-			self.sources = [i for i in self.sources if '3D' not in i.get('info', '')] # scrapers write 3D to info
+			self.sources = [i for i in self.sources if '3D' not in i.get('info', '')]
 
 		local = [i for i in self.sources if 'local' in i and i['local'] is True] # for library and videoscraper (skips cache check)
 		self.sources = [i for i in self.sources if not i in local]
@@ -1064,24 +1080,15 @@ class Sources:
 			log_utils.error('Error debridPackDialog: ')
 			control.hide()
 
-	def sourceInfo(self, info):
+	def sourceInfo(self, item):
 		try:
 			supported_platform = any(value in sys_platform for value in ['win32', 'linux2'])
-			source = jsloads(info)[0]
-			try: f = ' / '.join(['%s' % info.strip() for info in source.get('info').split('|')])
-			except: f = ''
-			if 'name_info' in source: t = source_utils.getFileType(name_info=source.get('name_info'))
-			else: t = source_utils.getFileType(url=source.get('url'))
-			t = '%s /%s' % (f, t) if (f != '' and f != '0 ' and f != ' ') else t
-			if t == '': t = source_utils.getFileType(url=source.get('url'))
+			source = jsloads(item)[0]
 			list = [('[COLOR %s]url:[/COLOR]  %s' % (self.highlight_color, source.get('url')), source.get('url'))]
-			# "&" in magnets causes copy2clip to fail
-			# if 'magnet:' not in source.get('url') and not source.get('direct'):
-				# if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % self.highlight_color, ' ')]
-			if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % self.highlight_color, ' ')]
+			if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % self.highlight_color, ' ')] # "&" in magnets causes copy2clip to fail .replace('&', '^&').strip() used in copy2clip() method
 			list += [('[COLOR %s]name:[/COLOR]  %s' % (self.highlight_color, source.get('name')), source.get('name'))]
 			if supported_platform: list += [('[COLOR %s]  -- Copy name To Clipboard[/COLOR]' % self.highlight_color, ' ')]
-			list += [('[COLOR %s]info:[/COLOR]  %s' % (self.highlight_color, t), ' ')]
+			list += [('[COLOR %s]info:[/COLOR]  %s' % (self.highlight_color, source.get('info')), ' ')]
 			if 'magnet:' in source.get('url'):
 				list += [('[COLOR %s]hash:[/COLOR]  %s' % (self.highlight_color, source.get('hash')), source.get('hash'))]
 				if supported_platform: list += [('[COLOR %s]  -- Copy hash To Clipboard[/COLOR]' % self.highlight_color, ' ')]
@@ -1115,7 +1122,7 @@ class Sources:
 		try:
 			t = trakt.getMovieAliases(imdb) if content == 'movie' else trakt.getTVShowAliases(imdb)
 			if not t: return []
-			t = [i for i in t if i.get('country', '').lower() in ['en', '', 'us', 'uk', 'gb']]
+			t = [i for i in t if i.get('country', '').lower() in ['en', '', 'ca', 'us', 'uk', 'gb']]
 			return t
 		except:
 			log_utils.error()
@@ -1208,10 +1215,10 @@ class Sources:
 					if round(float_size, 2) == 0: continue
 					str_size = '%.2f GB' % float_size
 					info = i['info']
-					try: info = [i['info'].split(' | ', 1)[1]]
+					try: info = [i['info'].split(' / ', 1)[1]]
 					except: info = []
 					info.insert(0, str_size)
-					info = ' | '.join(info)
+					info = ' / '.join(info)
 					i.update({'size': float_size, 'info': info})
 				else:
 					continue

@@ -358,13 +358,13 @@ class Collections:
 
 	def collections_Navigator(self, lite=False):
 		self.addDirectoryItem('Movies', 'collections_Boxset', 'boxsets.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('Martial Arts', 'collections_MartialArts', 'boxsets.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Martial Arts', 'collections_MartialArts', 'martial-arts.png', 'DefaultVideoPlaylists.png')
 		if control.getMenuEnabled('navi.xmascollections'):
 			self.addDirectoryItem('Christmas Collections', 'collections&url=xmasmovies', 'boxsets.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('DC Comics', 'collections&url=dcmovies', 'boxsets.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('Marvel Comics', 'collections&url=marvelmovies', 'boxsets.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('Superheroes', 'collections_Superhero', 'boxsets.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('Kids Collections', 'collections_Kids', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('DC Comics', 'collections&url=dcmovies', 'dc-comics.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Marvel Comics', 'collections&url=marvelmovies', 'marvel-comics.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Superheroes', 'collections_Superhero', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Kids Collections', 'collections_Kids', 'collectionkids.png', 'DefaultVideoPlaylists.png')
 		self.endDirectory()
 
 	def collections_Boxset(self):
@@ -585,7 +585,7 @@ class Collections:
 		self.addDirectoryItem('Steven Seagal', 'collections&url=stevenseagal', 'https://i.postimg.cc/0Qhm6n6h/Steven-Seagal.jpg', 'DefaultActor.png')
 		self.addDirectoryItem('Tiger Chen', 'collections&url=tigerchen', 'https://i.postimg.cc/gkzcVRv7/Tiger-Chen.jpg', 'DefaultActor.png')
 		self.addDirectoryItem('Tony Jaa', 'collections&url=tonyjaa', 'https://i.postimg.cc/Bn80pCtm/Tony-Jaa.jpg', 'DefaultActor.png')
-		self.endDirectory(content_type='files')
+		self.endDirectory(content='actors')
 
 	def collections_Kids(self):
 		self.addDirectoryItem('Disney Collection', 'collections&url=disneymovies', 'collectiondisney.png', 'DefaultVideoPlaylists.png')
@@ -943,13 +943,19 @@ class Collections:
 			item = control.item(label=name, offscreen=True)
 			item.setProperty('IsPlayable', 'false')
 			item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
+			item.setInfo(type='video', infoLabels={'plot': name})
 			item.addContextMenuItems(cm)
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 
-	def endDirectory(self, content_type='addons'):
+	def endDirectory(self, content=''):
 		syshandle = int(argv[1])
-		control.content(syshandle, content_type)
+		skin = control.skin
+		if content != 'actors': content = 'addons' if skin == 'skin.auramod' else ''
+		else:
+			if skin == 'skin.arctic.horizon': pass
+			else: content = ''
+		control.content(syshandle, content)# some skins use their own thumb for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)

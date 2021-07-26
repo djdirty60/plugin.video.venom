@@ -326,6 +326,7 @@ class Episodes:
 				values['imdb'] = imdb
 				values['tvdb'] = tvdb
 				values['aliases'] = showSeasons.get('aliases', [])
+				values['country_codes'] = showSeasons.get('country_codes', [])
 				values['total_seasons'] = showSeasons.get('total_seasons')
 				values['counts'] = showSeasons.get('counts')
 				values['studio'] = showSeasons.get('studio')
@@ -965,7 +966,6 @@ class Episodes:
 		queueMenu = control.lang(32065)
 		for i in items:
 			try:
-				content = i.get('content', '') or 'addons'
 				name = i['name']
 				if i['image'].startswith('http'): poster = i['image']
 				elif artPath: poster = control.joinPath(artPath, i['image'])
@@ -981,10 +981,12 @@ class Episodes:
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
+				item.setInfo(type='video', infoLabels={'plot': name})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-		control.content(syshandle, content)  # some skins use the own poster for things like "genres" when content type is set here
+		content = 'addons' if control.skin == 'skin.auramod' else ''
+		control.content(syshandle, content) # some skins use their own thumb for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)

@@ -254,7 +254,10 @@ class Movies:
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			# try: meta['studio'] = result.get('production_companies', {})[0]['name'] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
 			# except: meta['studio'] = ''
-# production_countries
+			# try: meta['country'] = [i['name'] for i in result['production_countries']]
+			# except: meta['country'] = ''
+			try: meta['country_codes'] = [i['iso_3166_1'] for i in result['production_countries']]
+			except: meta['country_codes'] = ''
 			meta['premiered'] = str(result.get('release_date', '')) if result.get('release_date') else ''
 			try: meta['year'] = meta['premiered'][:4]
 			except: meta['year'] = ''
@@ -545,6 +548,10 @@ class TVshows:
 			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
+			# try: meta['country'] = [i['name'] for i in result['production_countries']]
+			# except: meta['country'] = ''
+			try: meta['country_codes'] = [i['iso_3166_1'] for i in result['production_countries']]
+			except: meta['country_codes'] = ''
 			meta['seasons'] = result.get('seasons')
 			meta['status'] = result.get('status')
 			# meta['counts'] = self.seasonCountParse(meta['seasons']) # check on performance hit
@@ -863,6 +870,7 @@ class TVshows:
 			# ('Playboy TV', '225', 'https://i.postimg.cc/sxVWPpL3/playboy-tv.png'),
 			('Paramount Network', '2076', 'https://i.postimg.cc/fL9YCz5R/paramount-network.png'),
 			('PBS', '14', 'https://i.imgur.com/r9qeDJY.png'),
+			('Peacock', '3353', 'https://i.postimg.cc/76m4v7VW/NBCUniversal-Peacock-Logo.png'),
 			('Reelz', '367', 'https://i.postimg.cc/7P7byqjF/reelz.png'),
 			('Showcase (AU)', '1630', 'https://i.postimg.cc/C5JVs11Q/showcase-ca.png'),
 			('Showcase (CA)', '105', 'https://i.postimg.cc/C5JVs11Q/showcase-ca.png'),

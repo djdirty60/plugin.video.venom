@@ -298,23 +298,17 @@ class TVshows:
 		k.doModal()
 		q = k.getText().strip() if k.isConfirmed() else None
 		if not q: return
-		# url = self.persons_link + quote_plus(q)
-		# control.execute('Container.Update(%s?action=tvPersons&url=%s)' % (argv[0], quote_plus(url)))
+		url = self.persons_link + quote_plus(q)
+		control.execute('Container.Update(%s?action=tvPersons&url=%s)' % (argv[0], quote_plus(url)))
 
 	def persons(self, url):
-		try:
-			if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
-			else: self.list = cache.get(self.imdb_person_list, 1, url)
-			if self.list is None:
-				control.hide() ; control.notification(title=32010, message=33049)
-				return
-			for i in range(0, len(self.list)):
-				self.list[i].update({'content': 'files', 'icon': 'DefaultActor.png', 'action': 'tvshows'})
-			self.addDirectory(self.list)
-			return self.list
-		except:
-			from resources.lib.modules import log_utils
-			log_utils.error()
+		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
+		else: self.list = cache.get(self.imdb_person_list, 1, url)
+		if self.list is None: self.list = []
+		if self.list:
+			for i in range(0, len(self.list)): self.list[i].update({'content': 'actors', 'icon': 'DefaultActor.png', 'action': 'tvshows'})
+		self.addDirectory(self.list)
+		return self.list
 
 	def genres(self):
 		genres = [
@@ -332,14 +326,14 @@ class TVshows:
 	def networks(self):
 		networks = tmdb_indexer.TVshows().get_networks()
 		for i in networks:
-			self.list.append({'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
+			self.list.append({'content': 'studios', 'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
 	def originals(self):
 		originals = tmdb_indexer.TVshows().get_originals()
 		for i in originals:
-			self.list.append({'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
+			self.list.append({'content': 'studios', 'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -350,7 +344,7 @@ class TVshows:
 			('Japanese', 'ja'), ('Korean', 'ko'), ('Norwegian', 'no'), ('Persian', 'fa'), ('Polish', 'pl'), ('Portuguese', 'pt'), ('Punjabi', 'pa'),
 			('Romanian', 'ro'), ('Russian', 'ru'), ('Serbian', 'sr'), ('Spanish', 'es'), ('Swedish', 'sv'), ('Turkish', 'tr'), ('Ukrainian', 'uk')]
 		for i in languages:
-			self.list.append({'name': str(i[0]), 'url': self.language_link % i[1], 'image': 'languages.png', 'icon': 'DefaultAddonLanguage.png', 'action': 'tvshows'})
+			self.list.append({'content': 'countries', 'name': str(i[0]), 'url': self.language_link % i[1], 'image': 'languages.png', 'icon': 'DefaultAddonLanguage.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -363,7 +357,7 @@ class TVshows:
 			('Youth Audience (TV-14)', 'TV-13', 'TV-14'),
 			('Mature Audience (TV-MA)', 'TV-MA')]
 		for i in certificates:
-			self.list.append({'name': str(i[0]), 'url': self.certification_link % self.certificatesFormat(i[1]), 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'tvshows'})
+			self.list.append({'content': 'tags', 'name': str(i[0]), 'url': self.certification_link % self.certificatesFormat(i[1]), 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -872,30 +866,25 @@ class TVshows:
 	def addDirectory(self, items, queue=False):
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
-			control.hide() ; control.notification(title=32002, message=33049)
+			content = '' ; control.hide() ; control.notification(title=32002, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
 		queueMenu, playRandom, addToLibrary = control.lang(32065), control.lang(32535), control.lang(32551)
 		for i in items:
 			try:
-				content = i.get('content', '') or 'addons'
+				content = i.get('content', '')
 				name = i['name']
 				if i['image'].startswith('http'): poster = i['image']
 				elif artPath: poster = control.joinPath(artPath, i['image'])
 				else: poster = addonThumb
-
 				if content == 'genres':
-					genreIconPath = control.genreIconPath()
-					genrePosterPath = control.genrePosterPath()
-					icon = control.joinPath(genreIconPath, i['icon']) or 'DefaultFolder.png'
-					poster = control.joinPath(genrePosterPath, i['image']) or addonThumb
-					content = ''
+					icon = control.joinPath(control.genreIconPath(), i['icon']) or 'DefaultFolder.png'
+					poster = control.joinPath(control.genrePosterPath(), i['image']) or addonThumb
 				else:
 					icon = i['icon']
 					if i['icon'].startswith('http'): pass
 					elif not i['icon'].startswith('Default'): icon = control.joinPath(artPath, i['icon'])
-
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
@@ -910,10 +899,17 @@ class TVshows:
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': icon, 'fanart': control.addonFanart(), 'banner': poster})
+				item.setInfo(type='video', infoLabels={'plot': name})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-		control.content(syshandle, content)  # some skins use the own poster for things like "genres" when content type is set here
+		skin = control.skin
+		if skin == 'skin.arctic.horizon': pass
+		elif skin in ['skin.estuary', 'skin.aeon.nox.silvo']: content = ''
+		elif skin == 'skin.auramod':
+			if content not in ['actors', 'genres']: content = 'addons'
+			else: content = ''
+		control.content(syshandle, content) # some skins use their own thumb for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)

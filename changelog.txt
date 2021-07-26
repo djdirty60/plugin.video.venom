@@ -1,4 +1,11 @@
 
+[B][COLOR red]Update - v6.0.9 - July 22, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Changed content type for menu folder items to better support skins.[/I]
+[COLOR yellow]--[/COLOR][I] Dutch language file update.[/I]
+[COLOR yellow]--[/COLOR][I] Added Peacock to TVShows-Networks.[/I]
+[COLOR yellow]--[/COLOR][I] Added [B]"country_code"[/B] check to episode scrape process.[/I]
+
+
 [B][COLOR red]Update - v6.0.8 - July 20, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added new genre icon and poster pack per request.[/I]
 [COLOR yellow]--[/COLOR][I] Added actor profile pics to the Martial Arts section.[/I]

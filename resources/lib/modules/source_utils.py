@@ -6,10 +6,10 @@
 import re
 from urllib.parse import unquote, unquote_plus
 
-
+VIDEO_3D = ['.3d.', '.sbs.', '.hsbs', 'sidebyside', 'side.by.side', 'stereoscopic', '.tab.', '.htab.', 'topandbottom', 'top.and.bottom']
 HDR = ['.hdr.', 'hdr10', 'hdr.10', '2160p.bluray.remux', 'uhd.bluray.2160p', '2160p.uhd.bluray', '2160p.bluray.hevc.truehd', '2160p.remux',
 			'2160p.bluray.hevc.dts.hd.ma']
-CODEC_H265 = ['hevc', 'h265', 'h.265', 'x265', 'x.265']
+CODEC_H265 = ['hevc', 'h265', 'h.265', 'x265', 'x.265', '.dv.', 'dolby.vision', 'dolbyvision', '.hdr.', 'hdr10', 'hdr.10', '2160p.remux']
 CODEC_H264 = ['avc', 'h264', 'h.264', 'x264', 'x.264']
 CODEC_XVID = ['xvid', '.x.vid']
 CODEC_DIVX = ['divx', 'divx ', 'div2', 'div3', 'div4']
@@ -18,7 +18,7 @@ CODEC_MKV = ['.mkv', 'matroska']
 
 DOLBY_VISION = ['.dv.', 'dolby.vision', 'dolbyvision']
 DOLBY_TRUEHD = ['true.hd', 'truehd']
-DOLBY_DIGITALPLUS = ['dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3']
+DOLBY_DIGITALPLUS = ['dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3', '.e.ac3']
 DOLBY_DIGITALEX = ['.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.']
 DOLBYDIGITAL = ['dd2.', 'dd5', 'dd7', 'dolby.digital', 'dolbydigital', '.ac3', '.ac.3.', '.dd.']
 
@@ -130,8 +130,10 @@ def getFileType(name_info=None, url=None):
 		elif url: fmt = url_strip(url)
 		if not fmt: return type
 
+		if any(value in fmt for value in VIDEO_3D):  type += ' 3D /'
+
 		if any(value in fmt for value in CODEC_H264): type += ' AVC /'
-		# if any(value in fmt for value in CODEC_H265): type += ' HEVC /' # returned from scrapers 'info'...why idk
+		elif any(value in fmt for value in CODEC_H265): type += ' HEVC /'
 		elif any(value in fmt for value in CODEC_XVID): type += ' XVID /'
 		elif any(value in fmt for value in CODEC_DIVX): type += ' DIVX /'
 
@@ -141,6 +143,7 @@ def getFileType(name_info=None, url=None):
 		elif any(value in fmt for value in CODEC_MKV): type += ' MKV /'
 
 		if '.sdr' in fmt: type += ' SDR /'
+		elif any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
 		elif any(value in fmt for value in HDR): type += ' HDR /'
 
 		if 'remux' in fmt: type += ' REMUX /'
@@ -154,10 +157,9 @@ def getFileType(name_info=None, url=None):
 		elif any(value in fmt for value in ['screener', '.scr']): type += ' SCR /'
 		elif any(value in fmt for value in ['.hdrip', '.hd.rip']): type += ' HDRIP /'
 
-		if any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
 		if 'atmos' in fmt: type += ' ATMOS /'
 		if any(value in fmt for value in DOLBY_TRUEHD): type += ' DOLBY-TRUEHD /'
-		elif any(value in fmt for value in DOLBY_DIGITALPLUS): type += ' DD+ /'
+		if any(value in fmt for value in DOLBY_DIGITALPLUS): type += ' DD+ /'
 		elif any(value in fmt for value in DOLBY_DIGITALEX): type += ' DD-EX /'
 		elif any(value in fmt for value in DOLBYDIGITAL): type += ' DOLBYDIGITAL /'
 
@@ -180,7 +182,7 @@ def getFileType(name_info=None, url=None):
 		if any(value in fmt for value in SUBS):
 			if type != '': type += ' WITH SUBS'
 			else: type = 'SUBS'
-		type = type.rstrip('/')
+		type = type.rstrip('/') # leave trailing space for cases like " HDR " vs. " HDRIP "
 		return type
 	except:
 		from resources.lib.modules import log_utils

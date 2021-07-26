@@ -445,9 +445,11 @@ class Navigator:
 		if isPlayable: item.setProperty('IsPlayable', 'true')
 		else: item.setProperty('IsPlayable', 'false')
 		item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
+		item.setInfo(type='video', infoLabels={'plot': name})
 		control.addItem(handle=syshandle, url=url, listitem=item, isFolder= isFolder)
 
 	def endDirectory(self):
 		syshandle = int(argv[1])
-		control.content(syshandle, 'addons')
+		content = 'addons' if control.skin == 'skin.auramod' else ''
+		control.content(syshandle, content) # some skins use their own thumb for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)
