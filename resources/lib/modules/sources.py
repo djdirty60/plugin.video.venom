@@ -154,7 +154,6 @@ class Sources:
 			control.playlist.clear()
 			if not items:
 				control.sleep(200) ; 	control.hide() ; sysexit()
-
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
 			self.imdb_user = control.setting('imdb.user').replace('ur', '')
 			self.tmdb_key = control.setting('tmdb.api.key')
@@ -189,20 +188,15 @@ class Sources:
 				return art
 			try:
 				if self.mediatype != 'movie': raise Exception()
-				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
+				# do not add IMDBNUMBER as tmdb scraper puts their id in the key value
+				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "uniqueid", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "cast", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
 				meta = jsloads(meta)['result']['movies']
-				t = cleantitle.get(self.title.replace('&', 'and'))
-				years = [str(self.year), str(int(self.year)+1), str(int(self.year)-1)]
-				# Maybe needed alias title check?
-				# aliases = self.getAliasTitles(self.imdb, 'movie')
-				# aliases = [cleantitle.get(x.get('title').replace('&', 'and')) for x in aliases]
-				# aliases.append(t)
-				meta = [i for i in meta if str(i['year']) in years and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
-				# meta = [i for i in meta if str(i['year']) in years and (cleantitle.get(i['title'].replace('&', 'and')) in aliases) or (cleantitle.get(i['originaltitle'].replace('&', 'and')) in aliases)]
+				meta = [i for i in meta if i['uniqueid']['imdb'] == self.imdb]
 				if meta: meta = meta[0]
 				else: raise Exception()
 				if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
 				if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
+				if 'castandrole' not in meta: meta.update({'castandrole': [(i['name'], i['role']) for i in meta.get('cast')]})
 				poster = cleanLibArt(meta.get('art').get('poster', '')) or self.poster
 				fanart = cleanLibArt(meta.get('art').get('fanart', '')) or self.fanart
 				clearart = cleanLibArt(meta.get('art').get('clearart', ''))
@@ -215,19 +209,22 @@ class Sources:
 				meta = ''
 			try:
 				if self.mediatype != 'episode': raise Exception()
-				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "mpaa", "year", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
+				# do not add IMDBNUMBER as tmdb scraper puts their id in the key value
+				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "uniqueid", "mpaa", "year", "genre", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
 				show_meta = jsloads(show_meta)['result']['tvshows']
-				t = cleantitle.get(self.title.replace('&', 'and'))
-				show_meta = [i for i in show_meta if self.year == str(i['year']) and (t == cleantitle.get(i['title'].replace('&', 'and')) or t == cleantitle.get(i['originaltitle'].replace('&', 'and')))]
+				show_meta = [i for i in show_meta if i['uniqueid']['imdb'] == self.imdb]
 				if show_meta: show_meta = show_meta[0]
 				else: raise Exception()
 				tvshowid = show_meta['tvshowid']
-				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{ "tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
+				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params":{"tvshowid": %d, "filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "cast", "plot", "thumbnail", "art", "file"]}, "id": 1}' % (tvshowid, self.season, self.episode))
 				meta = jsloads(meta)['result']['episodes']
 				if meta: meta = meta[0]
 				else: raise Exception()
 				if 'mediatype' not in meta: meta.update({'mediatype': 'episode'})
-				if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback
+				if 'tvshowtitle' not in meta: meta.update({'tvshowtitle': meta.get('showtitle')})
+				if 'castandrole' not in meta: meta.update({'castandrole': [(i['name'], i['role']) for i in meta.get('cast')]})
+				if 'genre' not in meta: meta.update({'genre': show_meta.get('genre')})
+				if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback but Kodi lib returns "0" for shows or episodes
 				if 'mpaa' not in meta: meta.update({'mpaa': show_meta.get('mpaa')})
 				if 'premiered' not in meta: meta.update({'premiered': meta.get('firstaired')})
 				if 'year' not in meta: meta.update({'year': meta.get('firstaired')[:4]})
@@ -247,7 +244,7 @@ class Sources:
 		try:
 			def sourcesDirMeta(metadata): # pass skin minimal meta needed
 				if not metadata: return metadata
-				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode']
+				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode', 'castandrole']
 				return {k: v for k, v in iter(metadata.items()) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
 
@@ -363,14 +360,14 @@ class Sources:
 				meta = self.meta
 				aliases = meta.get('aliases', [])
 			except: pass
-
 			threads = []
 			from fenomscrapers import pack_sources
 			self.packDict = providerscache.get(pack_sources, 192)
 			trakt_aliases = self.getAliasTitles(imdb, 'episode')
 			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 			except: pass
-			country_codes = meta.get('country_codes', '')
+			try: country_codes = meta.get('country_codes', [])
+			except: country_codes = []
 			for i in country_codes:
 				if i in ['CA', 'US', 'UK', 'GB']:
 					if i == 'GB': i = 'UK'
@@ -388,8 +385,7 @@ class Sources:
 			start_time = time()
 			end_time = start_time + timeout
 		except:
-			log_utils.error()
-			return
+			return log_utils.error()
 
 		while True:
 			try:
@@ -448,7 +444,8 @@ class Sources:
 				trakt_aliases = self.getAliasTitles(imdb, content)
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
-				country_codes = meta.get('country_codes', '')
+				try: country_codes = meta.get('country_codes', [])
+				except: country_codes = []
 				for i in country_codes:
 					if i in ['CA', 'US', 'UK', 'GB']:
 						if i == 'GB': i = 'UK'
@@ -787,8 +784,7 @@ class Sources:
 		if self.mediatype == 'movie':
 			if control.setting('source.enable.msizelimit') == 'true':
 				try:
-					movie_minSize = float(control.setting('source.min.moviesize'))
-					movie_maxSize = float(control.setting('source.max.moviesize'))
+					movie_minSize, movie_maxSize = float(control.setting('source.min.moviesize')), float(control.setting('source.max.moviesize'))
 					self.sources = [i for i in self.sources if (i.get('size', 0) >= movie_minSize and i.get('size', 0) <= movie_maxSize)]
 				except:
 					log_utils.error()
@@ -797,8 +793,7 @@ class Sources:
 			except: pass
 			if control.setting('source.enable.esizelimit') == 'true':
 				try:
-					episode_minSize = float(control.setting('source.min.epsize'))
-					episode_maxSize = float(control.setting('source.max.epsize'))
+					episode_minSize, episode_maxSize = float(control.setting('source.min.epsize')), float(control.setting('source.max.epsize'))
 					self.sources = [i for i in self.sources if (i.get('size', 0) >= episode_minSize and i.get('size', 0) <= episode_maxSize)]
 				except:
 					log_utils.error()
@@ -806,7 +801,7 @@ class Sources:
 		for i in self.sources:
 			if 'name_info' in i: info_string = source_utils.getFileType(name_info=i.get('name_info'))
 			else: info_string = source_utils.getFileType(url=i.get('url'))
-			i.update({'info': (i.get('info') + ' / ' + info_string).lstrip(' / ')})
+			i.update({'info': (i.get('info') + ' /' + info_string).lstrip(' ').lstrip('/').rstrip('/')})
 
 		if control.setting('remove.hevc') == 'true':
 			self.sources = [i for i in self.sources if 'HEVC' not in i.get('info', '')]

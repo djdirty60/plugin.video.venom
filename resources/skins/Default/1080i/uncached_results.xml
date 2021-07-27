@@ -466,6 +466,16 @@
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
+						<texture>audio/multi_lingual.png</texture>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MULTI-LANG)</visible>
+					</control>
+					<control type="image">
+						<left>0</left>
+						<top>0</top>
+						<width>100</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
 						<texture>channels/2.png</texture>
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),2CH)</visible>
 					</control>

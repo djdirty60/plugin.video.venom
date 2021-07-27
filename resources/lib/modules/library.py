@@ -755,6 +755,7 @@ class libepisodes:
 				for season in seasons:
 					episodes = episodesX.Episodes().tmdb_list(item['tvshowtitle'], item['imdb'], item['tmdb'], item['tvdb'], meta=season, season=season['season']) # fetch fresh meta (uncached)
 					it += [{'tvshowtitle': i['tvshowtitle'], 'status': status, 'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'premiered': i['premiered']} for i in episodes]
+					# it += [{'tvshowtitle': i['tvshowtitle'], 'status': status, 'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'premiered': i['premiered'], 'aliases': i['aliases'], 'country_codes': i['country_codes']} for i in episodes]
 				# if not status or any(value in status for value in ['continuing', 'returning series']): raise Exception() # only write db entry for completed(Ended) shows
 				if status == 'ended':
 					dbcur.execute('''INSERT INTO tvshows Values (?, ?)''', (item['tvdb'], repr(it)))
