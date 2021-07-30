@@ -403,8 +403,7 @@ class Sources:
 				log_utils.error()
 		del threads[:] # Make sure any remaining providers are stopped.
 		self.sources.extend(self.scraper_sources)
-		if len(self.sources) > 0:
-			self.sourcesFilter()
+		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
 
 	def getSources_dialog(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=60):
@@ -497,16 +496,12 @@ class Sources:
 				if terminate_onCloud == 'true':
 					if len([e for e in self.scraper_sources if e['source'] == 'cloud']) > 0: break
 				if pre_emp == 'true':
-					if pre_emp_res == '0':
-						if (source_4k) >= pre_emp_limit: break
-					elif pre_emp_res == '1':
-						if (source_1080) >= pre_emp_limit: break
-					elif pre_emp_res == '2':
-						if (source_720) >= pre_emp_limit: break
-					elif pre_emp_res == '3':
-						if (source_sd) >= pre_emp_limit: break
+					if pre_emp_res == '0' and source_4k >= pre_emp_limit: break
+					elif pre_emp_res == '1' and source_1080 >= pre_emp_limit: break
+					elif pre_emp_res == '2' and source_720 >= pre_emp_limit: break
+					elif pre_emp_res == '3' and source_sd >= pre_emp_limit: break
 					else:
-						if (source_sd) >= pre_emp_limit: break
+						if source_sd >= pre_emp_limit: break
 
 				if quality == '0':
 					source_4k = len([e for e in self.scraper_sources if e['quality'] == '4K'])
@@ -981,9 +976,7 @@ class Sources:
 					meta = control.homeWindow.getProperty(self.metaProperty) # need for CM "downlod" action
 					if meta:
 						meta = jsloads(unquote(meta.replace('%22', '\\"')))
-						season = meta.get('season')
-						episode = meta.get('episode')
-						title = meta.get('title')
+						season, episode, title = meta.get('season'), meta.get('episode'), meta.get('title')
 					else:
 						season = control.homeWindow.getProperty(self.seasonProperty)
 						episode = control.homeWindow.getProperty(self.episodeProperty)

@@ -3,18 +3,51 @@
 	<!-- <defaultcontrol>2040</defaultcontrol> -->
 	<controls>
 		<control type="image">
+			<description>background</description>
 			<left>0</left>
 			<top>0</top>
 			<width>1920</width>
 			<height>1080</height>
 			<texture>common/black.png</texture>
 		</control>
+
+		<control type="group">
+			<description>Trailer group</description>
+			<visible>Player.HasVideo</visible>
+			<left>25</left>
+			<top>150</top>
+			<control type="videowindow">
+				<description>Play Trailer in window</description>
+				<width>1350</width>
+				<height>800</height>
+			</control>
+			<control type="button" id="2045">
+				<description>Stop Trailer playback Button</description>
+				<onright>2045</onright>
+				<onleft>2045</onleft>
+				<onup>2045</onup>
+				<ondown>2045</ondown>
+				<width>120</width>
+				<height>70</height>
+				<textoffsetx>0</textoffsetx>
+				<texturefocus colordiffuse="$INFO[Window().Property(venom.highlight.color)]">common/button5.png</texturefocus>
+				<texturenofocus>common/button5.png</texturenofocus>
+				<label>$ADDON[plugin.video.venom 32170]</label>
+				<font>font12</font>
+				<align>center</align>
+				<textcolor>white</textcolor>
+				<focusedcolor>white</focusedcolor>
+			</control>
+		</control>
+
 		<control type="group" id="1">
+			<description>ListItems</description>
 			<left>25</left>
 			<top>0</top>
 			<height>80</height>
 			<width min="0" max="1920">auto</width>
 			<control type="textbox">
+				<visible>!Player.HasVideo</visible>
 				<left>0</left>
 				<top>110</top>
 				<width>100</width>
@@ -26,6 +59,7 @@
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]Hidden[/COLOR]</label>
 			</control>
 			<control type="textbox">
+				<visible>!Player.HasVideo</visible>
 				<left>120</left>
 				<top>110</top>
 				<width>300</width>
@@ -39,6 +73,7 @@
 
 			<control type="list" id="2040">
 				<description>Trakt Hidden-Watched Progress List</description>
+				<visible>!Player.HasVideo</visible>
 				<viewtype>list</viewtype>
 				<left>0</left>
 				<top>150</top>
@@ -50,6 +85,7 @@
 				<ondown>2040</ondown>
 				<scrolltime tween="sine">400</scrolltime>
 				<orientation>Vertical</orientation>
+
 				<itemlayout height="100" width="1325">
 					<control type="image">
 						<left>10</left>
@@ -71,7 +107,7 @@
 						<visible>!String.isEmpty(ListItem.Property(venom.isSelected))</visible>
 					</control>
 					<control type="label">
-						<description>Line1 tvshowtitle</description>
+						<description>Line1 tvshowtitle and watched count</description>
 						<left>110</left>
 						<top>15</top>
 						<width>1240</width>
@@ -80,10 +116,10 @@
 						<textcolor>white</textcolor>
 						<align>left</align>
 						<aligny>bottom</aligny>
-						<label>[COLOR $INFO[Window().Property(venom.highlight.color)]][B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.tvshowtitle)][/B][/COLOR]</label>
+						<label>[COLOR $INFO[Window().Property(venom.highlight.color)]][B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.tvshowtitle)]  -  $INFO[ListItem.Property(venom.watched_count)][/B][/COLOR]</label>
 					</control>
 					<control type="label">
-						<description>Line2 year-genre-mpaa</description>
+						<description>Line2 year-genre-mpaa-status</description>
 						<left>180</left>
 						<top>50</top>
 						<width>1170</width>
@@ -92,10 +128,9 @@
 						<textcolor>white</textcolor>
 						<align>left</align>
 						<aligny>top</aligny>
-						<label>$INFO[ListItem.Property(venom.year)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.genre)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.mpaa)]</label>
+						<label>$INFO[ListItem.Property(venom.year)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.genre)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.mpaa)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.status)]</label>
 					</control>
 				</itemlayout>
-
 				<focusedlayout height="100" width="1325">
 					<control type="image">
 						<left>0</left>
@@ -132,7 +167,7 @@
 						<visible>!String.isEmpty(ListItem.Property(venom.isSelected))</visible>
 					</control>
 					<control type="label">
-						<description>Line1 tvshowtitle</description>
+						<description>Line1 tvshowtitle and watched count</description>
 						<left>110</left>
 						<top>15</top>
 						<width>1240</width>
@@ -141,10 +176,10 @@
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>bottom</aligny>
-						<label>[B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.tvshowtitle)][/B]</label>
+						<label>[B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.tvshowtitle)]  -  $INFO[ListItem.Property(venom.watched_count)][/B]</label>
 					</control>
 					<control type="label">
-						<description>Line2 year-genre-mpaa</description>
+						<description>Line2 year-genre-mpaa-status</description>
 						<left>180</left>
 						<top>50</top>
 						<width>1170</width>
@@ -153,12 +188,14 @@
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<aligny>top</aligny>
-						<label>[B]$INFO[ListItem.Property(venom.year)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.genre)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.mpaa)][/B]</label>
+						<label>[B]$INFO[ListItem.Property(venom.year)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.genre)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.mpaa)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.status)][/B]</label>
 					</control>
 				</focusedlayout>
 			</control>
 
 			<control type="group">
+				<description>OK and Stop Buttons</description>
+				<visible>!Player.HasVideo</visible>
 				<left>1470</left>
 				<top>50</top>
 					<control type="button" id="2041">
@@ -197,28 +234,29 @@
 			</control>
 
 			<control type="group">
-					<control type="image">
-						<aspectratio align="center" aligny="center">keep</aspectratio>
-						<left>400</left>
-						<top>0</top>
-						<width>600</width>
-						<height>175%</height>
-						<texture background="true">$INFO[Container(2040).ListItem.Property(venom.clearlogo)]</texture>
-						<!-- <visible>!String.IsEmpty(Container(2040).ListItem.Property(venom.clearlogo))</visible> -->
-					</control>
-					<!-- <control type="textbox"> -->
-						<!-- <description>Title when no clearlogo</description> -->
-						<!-- <left>200</left> -->
-						<!-- <top>0</top> -->
-						<!-- <width>900</width> -->
-						<!-- <height>400</height> -->
-						<!-- <font>font100caps_title</font> -->
-						<!-- <textcolor>$INFO[Window().Property(venom.highlight.color)]</textcolor> -->
-						<!-- <align>center</align> -->
-						<!-- <aligny>bottom</aligny> -->
-						<!-- <label>$INFO[Window().Property(venom.title)]</label> -->
-						<!-- <visible>String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
-					<!-- </control> -->
+				<description>Clearlogo</description>
+				<control type="image">
+					<aspectratio align="center" aligny="center">keep</aspectratio>
+					<left>400</left>
+					<top>0</top>
+					<width>600</width>
+					<height>175%</height>
+					<texture background="true">$INFO[Container(2040).ListItem.Property(venom.clearlogo)]</texture>
+					<!-- <visible>!String.IsEmpty(Container(2040).ListItem.Property(venom.clearlogo))</visible> -->
+				</control>
+				<!-- <control type="textbox"> -->
+					<!-- <description>Title when no clearlogo</description> -->
+					<!-- <left>200</left> -->
+					<!-- <top>0</top> -->
+					<!-- <width>900</width> -->
+					<!-- <height>400</height> -->
+					<!-- <font>font100caps_title</font> -->
+					<!-- <textcolor>$INFO[Window().Property(venom.highlight.color)]</textcolor> -->
+					<!-- <align>center</align> -->
+					<!-- <aligny>bottom</aligny> -->
+					<!-- <label>$INFO[Window().Property(venom.title)]</label> -->
+					<!-- <visible>String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
+				<!-- </control> -->
 			</control>
 
 			<control type="grouplist" id="2043">

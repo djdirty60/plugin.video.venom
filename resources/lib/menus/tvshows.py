@@ -176,6 +176,10 @@ class TVshows:
 			self.list = cache.get(self.trakt_list, 24, self.progress_link, self.trakt_user)
 		except:
 			self.list = cache.get(self.trakt_list, 0, self.progress_link, self.trakt_user)
+		indicators = getTVShowIndicators(refresh=True)
+		for i in self.list:
+			count = getShowCount(indicators, imdb=i.get('imdb'), tvdb=i.get('tvdb'))
+			i.update({'watched_count': count})
 		try:
 			hidden = cache.get(trakt.getTrakt, 0, self.hiddenprogress_link) # if this gets cached and user hides an item it's not instantly removed.
 			hidden = jsloads(hidden)
@@ -898,7 +902,7 @@ class TVshows:
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
-				item.setArt({'icon': icon, 'poster': poster, 'thumb': icon, 'fanart': control.addonFanart(), 'banner': poster})
+				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 				item.setInfo(type='video', infoLabels={'plot': name})
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)

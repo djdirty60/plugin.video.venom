@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.0">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.1">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,11 +32,12 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.1.0 - July 26, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed library episode playback that was broken by new [B]country_code[/B] check.[/I]
-[COLOR yellow]--[/COLOR][I] Lowered max file size filters for returned sources to 2gb.[/I]
-[COLOR yellow]--[/COLOR][I] The uncached torrents xml was not updated for the previous [B]info[/B] changes to FenomScrapers.  This caused some random items to not report the size.  This is now fixed.[/I]
-[COLOR yellow]--[/COLOR][I] Added new Multilingual icon for Source Select xml.[/I]
+[B][COLOR red]Update - v6.1.1 - July 29, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added [B]"en"[/B] fallback check to fanart.tv for cases when api language is set to other that "English". Previousley some extended artwork was not being pulled under this condition.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Hidden Manager now lists the watched episode counts as, ex. [B]"(watched 50 of 60)"[/B] next to the tvshowtitle.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Hidden Manager now lists the shows status, ex. Canceled, Returning, Ended.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Hidden Manager now has context menu options [B]Play Trailer[/B] and [B]Browse Series[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Added a new setting to hide fully watched shows from the Trakt Hidden Manager.  See Trakt category in settings.[/I]
 		</news>
 	</extension>
 </addon>

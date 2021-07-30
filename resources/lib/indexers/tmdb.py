@@ -254,8 +254,6 @@ class Movies:
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			# try: meta['studio'] = result.get('production_companies', {})[0]['name'] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
 			# except: meta['studio'] = ''
-			# try: meta['country'] = [i['name'] for i in result['production_countries']]
-			# except: meta['country'] = ''
 			try: meta['country_codes'] = [i['iso_3166_1'] for i in result['production_countries']]
 			except: meta['country_codes'] = ''
 			meta['premiered'] = str(result.get('release_date', '')) if result.get('release_date') else ''
@@ -548,8 +546,6 @@ class TVshows:
 			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
-			# try: meta['country'] = [i['name'] for i in result['production_countries']]
-			# except: meta['country'] = ''
 			try: meta['country_codes'] = [i['iso_3166_1'] for i in result['production_countries']]
 			except: meta['country_codes'] = ''
 			meta['seasons'] = result.get('seasons')
@@ -912,8 +908,7 @@ class Auth:
 	def create_session_id(self):
 		try:
 			from resources.lib.modules.control import setSetting
-			if getSetting('tmdb.username') == '' or getSetting('tmdb.password') == '':
-				return notification(message='TMDb Account info missing', icon='ERROR')
+			if getSetting('tmdb.username') == '' or getSetting('tmdb.password') == '': return notification(message='TMDb Account info missing', icon='ERROR')
 			url = self.auth_base_link + '/token/new?api_key=%s' % API_key
 			result = requests.get(url).json()
 			token = result.get('request_token')
@@ -931,8 +926,7 @@ class Auth:
 				if yesnoDialog(msg, '', ''):
 					setSetting('tmdb.session_id', session_id)
 					notification(message='TMDb Successfully Authorized')
-				else:
-					notification(message='TMDb Authorization Cancelled')
+				else: notification(message='TMDb Authorization Cancelled')
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -947,8 +941,7 @@ class Auth:
 			if result.get('success') is True:
 				setSetting('tmdb.session_id', '')
 				notification(message='TMDb session_id successfully deleted')
-			else:
-				notification(message='TMDb session_id deletion FAILED', icon='ERROR')
+			else: notification(message='TMDb session_id deletion FAILED', icon='ERROR')
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

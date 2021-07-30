@@ -51,7 +51,7 @@ def parse_art(img):
 		if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 		elif len(ret_img) == 1: pass
 		else:
-			ret_img = [(x['url'], x['likes']) for x in img if any(value == x.get('lang') for value in ['00', ''])]
+			ret_img = [(x['url'], x['likes']) for x in img if any(value == x.get('lang') for value in ['en', '00', ''])]
 			if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 		if not ret_img: return None
 		ret_img = [x[0] for x in ret_img][0]

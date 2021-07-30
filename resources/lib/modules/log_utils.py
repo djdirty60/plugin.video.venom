@@ -87,7 +87,6 @@ def error(message=None, exception=True):
 
 def normalize(msg):
 	try:
-		# msg = ''.join(c for c in unicodedata.normalize('NFKD', py_tools.ensure_text(py_tools.ensure_str(msg))) if unicodedata.category(c) != 'Mn')
 		msg = ''.join(c for c in unicodedata.normalize('NFKD', msg) if unicodedata.category(c) != 'Mn')
 		return str(msg)
 	except:

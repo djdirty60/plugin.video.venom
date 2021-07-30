@@ -217,8 +217,10 @@
 		<setting id="trakt.progress.showunaired" type="bool" label="32572" default="false" visible="!eq(-13,)" />
 		<setting id="trakt.UpcomingProgress.prependDate" type="bool" label="32573" default="true" visible="!eq(-14,)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=UpcomingProgressPrependDate)" />
+		<setting type="lsep" label="35057" />
+		<setting id="trakt.HiddenManager.hideWatched" type="bool" label="32183" default="false" visible="!eq(-17,)" />
 		<setting type="lsep" label="32645" />
-		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-17,)" />
+		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-19,)" />
 		<setting id="schedTraktTime" type="slider" label="32647" default="0" range="0,24" option="int" enable="eq(-1,true)" />
 		<setting id="trakt.message2" type="text" label="32648" default="" enable="false" />
 	</category>

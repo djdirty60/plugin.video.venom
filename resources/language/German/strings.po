@@ -751,10 +751,18 @@ msgid "Watched Progress and Calendar"
 msgstr "Beobachteter Fortschritt und Kalender"
 
 msgctxt "#32182"
+msgid "Browsing Series must force close this xml and any changes will be lost.  Continue?"
+msgstr "Das Durchsuchen von Serien muss das Schließen dieser XML erzwingen und alle Änderungen gehen verloren. Weitermachen?"
+
+msgctxt "#32183"
+msgid "Hide fully watched shows"
+msgstr "Vollständig angesehene Sendungen ausblenden"
+
+msgctxt "#32184"
 msgid ""
 msgstr ""
 
-msgctxt "#32183"
+msgctxt "#32185"
 msgid ""
 msgstr ""
 

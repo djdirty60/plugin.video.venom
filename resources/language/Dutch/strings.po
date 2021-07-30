@@ -751,10 +751,18 @@ msgid "Watched Progress and Calendar"
 msgstr "Voortgang en kalender bekeken"
 
 msgctxt "#32182"
+msgid "Browsing Series must force close this xml and any changes will be lost.  Continue?"
+msgstr "Browsing Series moet deze XML geforceerd sluiten en alle wijzigingen gaan verloren. Doorgaan met?"
+
+msgctxt "#32183"
+msgid "Hide fully watched shows"
+msgstr "Volledig bekeken programma's verbergen"
+
+msgctxt "#32184"
 msgid ""
 msgstr ""
 
-msgctxt "#32183"
+msgctxt "#32185"
 msgid ""
 msgstr ""
 
