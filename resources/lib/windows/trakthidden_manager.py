@@ -117,11 +117,12 @@ class TraktHiddenManagerXML(BaseDialog):
 			log_utils.error()
 
 	def make_items(self):
+		def filerWatched():
+			if self.hide_watched:
+				self.results = [i for i in self.results if i.get('watched_count').get('watched') != i.get('watched_count').get('total')]
 		def builder():
 			for count, item in enumerate(self.results, 1):
 				try:
-					if self.hide_watched:
-						if item.get('watched_count').get('watched') == item.get('watched_count').get('total'): continue
 					listitem = self.make_listitem()
 					listitem.setProperty('venom.tvshowtitle', item.get('tvshowtitle'))
 					listitem.setProperty('venom.year', str(item.get('year')))
@@ -147,6 +148,7 @@ class TraktHiddenManagerXML(BaseDialog):
 					from resources.lib.modules import log_utils
 					log_utils.error()
 		try:
+			filerWatched()
 			self.item_list = list(builder())
 			self.total_results = str(len(self.item_list))
 		except:

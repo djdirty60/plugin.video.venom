@@ -4,12 +4,12 @@
 """
 
 import xml.etree.ElementTree as ET
-from resources.lib.modules import control, log_utils
+from resources.lib.modules.control import transPath, existsPath
 
 
 def add_source(source_name, source_path, source_content, source_thumbnail, type='video'):
-	xml_file = control.transPath('special://profile/sources.xml')
-	if not control.existsPath(xml_file):
+	xml_file = transPath('special://profile/sources.xml')
+	if not existsPath(xml_file):
 		with open(xml_file, 'w') as f:
 			f.write(
 '''
@@ -130,7 +130,7 @@ def _db_execute(db_name, command):
 def _get_database(db_name):
 	from glob import glob
 	path_db = 'special://profile/Database/%s' % db_name
-	filelist = glob(control.transPath(path_db))
+	filelist = glob(transPath(path_db))
 	if filelist: return filelist[-1]
 	return None
 

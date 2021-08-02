@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.1">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.2">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,12 +32,10 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.1.1 - July 29, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added [B]"en"[/B] fallback check to fanart.tv for cases when api language is set to other that "English". Previousley some extended artwork was not being pulled under this condition.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt Hidden Manager now lists the watched episode counts as, ex. [B]"(watched 50 of 60)"[/B] next to the tvshowtitle.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt Hidden Manager now lists the shows status, ex. Canceled, Returning, Ended.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt Hidden Manager now has context menu options [B]Play Trailer[/B] and [B]Browse Series[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Added a new setting to hide fully watched shows from the Trakt Hidden Manager.  See Trakt category in settings.[/I]
+[B][COLOR red]Update - v6.1.2 - Aug. 01, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed the Trakt Hidden Progress Manager count when the setting to hide fully watched shows is enabled.[/I]
+[COLOR yellow]--[/COLOR][I] Added a collection of Boxing Movie titles to [B]Collections[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Added a collection of movie titles based on True stories to [B]Collections[/B].[/I]
 		</news>
 	</extension>
 </addon>

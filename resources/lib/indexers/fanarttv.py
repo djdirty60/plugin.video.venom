@@ -14,7 +14,7 @@ if not client_key: client_key = 'cf0ebcc2f7b824bd04cf3a318f15c17d'
 headers.update({'client-key': client_key})
 base_url = "http://webservice.fanart.tv/v3/%s/%s"
 lang = apiLanguage()['trakt']
-error_codes = ['500 Internal Server Error', '502 Bad Gateway', '504 Gateway Timeout']
+error_codes = ['500 Internal Server Error', '502 Bad Gateway', '503 Service Unavailable', '504 Gateway Timeout']
 session = requests.Session()
 retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
 session.mount('http://', HTTPAdapter(max_retries=retries))

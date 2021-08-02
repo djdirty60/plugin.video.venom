@@ -75,7 +75,7 @@ def getTraktAsJson(url, post=None):
 		res_headers = {}
 		r = getTrakt(url=url, post=post, extended=True)
 		if isinstance(r, tuple) and len(r) == 2:
-			r , res_headers = r[0], r[1]
+			r, res_headers = r[0], r[1]
 		if not r: return
 		r = utils.json_loads_as_str(r)
 		res_headers = dict((k.lower(), v) for k, v in iter(res_headers.items()))
@@ -468,9 +468,9 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 					else: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
 				if items[select][1] == '/users/me/lists/%s/items':
 					slug = listAdd(successNotification=True)
-					if slug: getTrakt(items[select][1] % slug, post=post)[0]
+					if slug: getTrakt(items[select][1] % slug, post=post)
 				else:
-					getTrakt(items[select][1], post=post)[0]
+					getTrakt(items[select][1], post=post)
 				control.hide()
 				list = re.search('\[B](.+?)\[/B]', items[select][0]).group(1)
 				message = control.lang(33583) if 'remove' in items[select][1] else control.lang(33582)
@@ -780,7 +780,7 @@ def seasonCount(imdb, refresh=True, wait=False):
 		if refresh:
 			thread = threading.Thread(target=_seasonCountCache, args=(imdb,))
 			thread.start()
-			if wait: # NB: Do not wait to retrieve a fresh count, otherwise loading show/season menus are slow.
+			if wait: # Do not wait to retrieve a fresh count, otherwise loading show/season menus are slow.
 				thread.join()
 				indicators = cache.cache_existing(_seasonCountRetrieve, imdb)
 		return indicators
@@ -789,7 +789,7 @@ def seasonCount(imdb, refresh=True, wait=False):
 		return None
 
 def _seasonCountCache(imdb):
-	return cache.get(_seasonCountRetrieve, 0.3, imdb)
+	return cache.get(_seasonCountRetrieve, 0.3, imdb) # this may be causing manual marking as watched/unwatched to not update counts
 	# return cache.get(_seasonCountRetrieve, 0, imdb)
 
 def _seasonCountRetrieve(imdb):
@@ -809,21 +809,21 @@ def _seasonCountRetrieve(imdb):
 
 def markMovieAsWatched(imdb):
 	if not imdb.startswith('tt'): imdb = 'tt' + imdb
-	return getTrakt('/sync/history', {"movies": [{"ids": {"imdb": imdb}}]})[0]
+	return getTrakt('/sync/history', {"movies": [{"ids": {"imdb": imdb}}]})
 
 def markMovieAsNotWatched(imdb):
 	if not imdb.startswith('tt'): imdb = 'tt' + imdb
-	return getTrakt('/sync/history/remove', {"movies": [{"ids": {"imdb": imdb}}]})[0]
+	return getTrakt('/sync/history/remove', {"movies": [{"ids": {"imdb": imdb}}]})
 
 def markTVShowAsWatched(imdb, tvdb):
 	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
-	result = getTrakt('/sync/history', {"shows": [{"ids": {"tvdb": tvdb}}]})[0]
+	result = getTrakt('/sync/history', {"shows": [{"ids": {"tvdb": tvdb}}]})
 	seasonCount(imdb)
 	return result
 
 def markTVShowAsNotWatched(imdb, tvdb):
 	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
-	result = getTrakt('/sync/history/remove', {"shows": [{"ids": {"tvdb": tvdb}}]})[0]
+	result = getTrakt('/sync/history/remove', {"shows": [{"ids": {"tvdb": tvdb}}]})
 	seasonCount(imdb)
 	return result
 
@@ -831,7 +831,7 @@ def markSeasonAsWatched(imdb, tvdb, season):
 	try:
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season = int('%01d' % int(season))
-		result = getTrakt('/sync/history', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})[0]
+		result = getTrakt('/sync/history', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
 		seasonCount(imdb)
 		return result
 	except:
@@ -841,7 +841,7 @@ def markSeasonAsNotWatched(imdb, tvdb, season):
 	try:
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season = int('%01d' % int(season))
-		result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})[0]
+		result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
 		seasonCount(imdb)
 		return result
 	except:

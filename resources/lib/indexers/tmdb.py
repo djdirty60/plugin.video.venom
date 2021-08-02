@@ -48,7 +48,7 @@ def userlists(url):
 		items = result['results']
 		next = '' ; list = []
 	except: return
-	try: # This is actual wrong but may not be used so look into 
+	try: # This is actually wrong but may not be used so look into 
 		page = int(result['page'])
 		total = int(result['total_pages'])
 		if page >= total: raise Exception()
@@ -87,7 +87,7 @@ class Movies:
 		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
 		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
-###  other "append_to_response" options external_ids,images,content_ratings, translations
+		###  other "append_to_response" options external_ids,images,content_ratings, translations
 		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', API_key)
 		self.external_ids = base_link + 'movie/%s/external_ids?api_key=%s' % ('%s', API_key)
 		# self.user = str(self.imdb_user) + str(API_key)

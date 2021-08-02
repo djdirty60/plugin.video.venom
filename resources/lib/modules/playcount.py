@@ -319,4 +319,3 @@ def check_metahandler():
 		control.execute('InstallAddon(script.module.metahandler)')
 	try: from metahandler import metahandlers
 	except: pass
-

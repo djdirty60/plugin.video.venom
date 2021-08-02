@@ -225,9 +225,7 @@ class libmovies:
 	def auto_movie_setup(self):
 		try:
 			control.makeFile(self.library_folder)
-			# icon = control.joinPath(control.artPath(), 'libmovies.png')
 			source_content = "('%s','movies','metadata.themoviedb.org','',2147483647,1,'<settings version=\"2\"><setting id=\"certprefix\" default=\"true\">Rated </setting><setting id=\"fanart\">true</setting><setting id=\"imdbanyway\">true</setting><setting id=\"keeporiginaltitle\" default=\"true\">false</setting><setting id=\"language\" default=\"true\">en</setting><setting id=\"RatingS\" default=\"true\">TMDb</setting><setting id=\"tmdbcertcountry\" default=\"true\">us</setting><setting id=\"trailer\">true</setting></settings>',0,0,NULL,NULL)" % self.library_folder
-			# control.add_source('Venom Movies', self.library_folder, source_content, icon)
 			library_sources.add_source('Venom Movies', self.library_folder, source_content, 'DefaultMovies.png')
 		except:
 			log_utils.error()

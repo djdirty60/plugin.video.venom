@@ -55,17 +55,6 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 				log_utils.error()
 
 		if verifySsl and ((2, 7, 8) < version_info < (2, 7, 12)):
-			# try:
-				# import ssl
-				# ssl_context = ssl.create_default_context()
-				# ssl_context.check_hostname = False
-				# ssl_context.verify_mode = ssl.CERT_NONE
-				# handlers += [urllib2.HTTPSHandler(context=ssl_context)]
-				# opener = urllib2.build_opener(*handlers)
-				# urllib2.install_opener(opener)
-			# except:
-				# from resources.lib.modules import log_utils
-				# log_utils.error()
 			try:
 				import ssl
 				try:

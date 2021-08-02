@@ -399,8 +399,7 @@ class TVshows:
 			activity = trakt.getActivity()
 			self.list = [] ; lists = []
 			try:
-				if activity > cache.timeout(self.trakt_user_list, self.traktlists_link, self.trakt_user):
-					raise Exception()
+				if activity > cache.timeout(self.trakt_user_list, self.traktlists_link, self.trakt_user): raise Exception()
 				lists += cache.get(self.trakt_user_list, 720, self.traktlists_link, self.trakt_user)
 			except:
 				lists += cache.get(self.trakt_user_list, 0, self.traktlists_link, self.trakt_user)
@@ -412,8 +411,7 @@ class TVshows:
 			if not self.traktCredentials: raise Exception()
 			self.list = [] ; lists = []
 			try:
-				if activity > cache.timeout(self.trakt_user_list, self.traktlikedlists_link, self.trakt_user):
-					raise Exception()
+				if activity > cache.timeout(self.trakt_user_list, self.traktlikedlists_link, self.trakt_user): raise Exception()
 				lists += cache.get(self.trakt_user_list, 3, self.traktlikedlists_link, self.trakt_user)
 			except:
 				lists += cache.get(self.trakt_user_list, 0, self.traktlikedlists_link, self.trakt_user)

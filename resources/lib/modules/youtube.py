@@ -59,12 +59,9 @@ class youtube(object):
 		for item in items:
 			try:
 				title = item['snippet']['title']
-				# title = title.encode('utf-8')
 				url = item['id']
-				# url = url.encode('utf-8')
 				image = item['snippet']['thumbnails']['high']['url']
 				if '/default.jpg' in image: raise Exception()
-				# image = image.encode('utf-8')
 				image = image
 				self.list.append({'title': title, 'url': url, 'image': image})
 			except: pass
@@ -92,13 +89,10 @@ class youtube(object):
 		for item in items: 
 			try:
 				title = item['snippet']['title']
-				# title = title.encode('utf-8')
 				try: url = item['snippet']['resourceId']['videoId']
 				except: url = item['id']['videoId']
-				# url = url.encode('utf-8')
 				image = item['snippet']['thumbnails']['high']['url']
 				if '/default.jpg' in image: raise Exception()
-				# image = image.encode('utf-8')
 				image = image
 				append = {'title': title, 'url': url, 'image': image}
 				if next != '': append['next'] = next
@@ -138,7 +132,6 @@ class youtube(object):
 				self.list[item]['duration'] = duration
 			except: pass
 		return self.list
-
 
 	def thread(self, url, i):
 		try:
