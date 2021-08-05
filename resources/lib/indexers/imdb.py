@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from json import loads as jsloads
 import re
 from urllib.parse import urlparse
-from resources.lib.database import cache, metacache
+from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import fanarttv
 from resources.lib.modules import client
 from resources.lib.modules import control
@@ -22,14 +22,15 @@ class Movies:
 		self.meta = []
 		self.date_time = datetime.now()
 		self.lang = control.apiLanguage()['trakt']
-		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
+		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
+
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.tmdb_key = control.setting('tmdb.api.key')
 		if not self.tmdb_key:
 			self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
 		self.user = str(self.imdb_user) + str(self.tmdb_key)
 
-		self.tmdb_poster = 'https://image.tmdb.org/t/p/w500'
+		self.tmdb_poster = 'https://image.tmdb.org/t/p/w342'
 		self.tmdb_fanart = 'https://image.tmdb.org/t/p/w1280'
 		self.tmdb_info_link = 'https://api.themoviedb.org/3/movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,external_ids' % ('%s', self.tmdb_key, self.lang)
 																	# other	"append_to_response"options		alternative_titles,videos,images
@@ -169,8 +170,8 @@ class Movies:
 						'fanart': '', 'fanart2': '', 'fanart3': '', 'clearlogo': '', 'clearart': '', 'landscape': '',
 						'metacache': False, 'next': next}
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.tmdb_key, 'item': values}
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art:
 						values.update(extended_art)
 						meta.update(values)
@@ -352,8 +353,8 @@ class Movies:
 						'writer': writer, 'castandart': castandart, 'plot': plot, 'poster2': '', 'poster3': poster3,
 						'banner': '', 'banner2': '', 'fanart2': '', 'fanart3': fanart3, 'clearlogo': '', 'clearart': '', 'landscape': '',
 						'discart': '', 'mediatype': 'movie', 'trailer': trailer, 'metacache': False}
-			if not self.disable_fanarttv:
-				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+			if self.enable_fanarttv:
+				extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: item.update(extended_art)
 			if not item.get('landscape'): item.update({'landscape': fanart3})
 			item = dict((k, v) for k, v in iter(item.items()) if v is not None and and v != '')

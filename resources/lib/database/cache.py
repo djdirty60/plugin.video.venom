@@ -27,8 +27,7 @@ def get(function, duration, *args):
 				return result
 
 		fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
-
-		if cache_result and len(result) == 1 and fresh_result == '[]': # fix for syncSeason mark unwatched season when it's the last item reamining
+		if cache_result and len(result) == 1 and fresh_result == '[]': # fix for syncSeason mark unwatched season when it's the last item remaining
 			if result[0].isdigit():
 				remove(function, *args)
 				return []
@@ -42,7 +41,7 @@ def get(function, duration, *args):
 
 		if invalid: # If the cache is old, but we didn't get "fresh_result", return the old cache
 			if cache_result: return result
-			else: return None
+			else: return None # do not cache_insert() None type, sometimes servers just down momentarily
 		else:
 			cache_insert(key, fresh_result)
 			return literal_eval(fresh_result)
@@ -137,7 +136,7 @@ def _generate_md5(*args):
 def cache_clear():
 	dbcon = get_connection()
 	dbcur = get_connection_cursor(dbcon)
-	for t in ['cache', 'rel_list', 'rel_lib']:
+	for t in ['cache', 'rel_list', 'rel_lib']: # check, rel_list and rel_lib was moved
 		try:
 			dbcur.execute('''DROP TABLE IF EXISTS {}'''.format(t))
 			dbcur.execute('''VACUUM''')

@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.2">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.3">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,10 +32,13 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.1.2 - Aug. 01, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed the Trakt Hidden Progress Manager count when the setting to hide fully watched shows is enabled.[/I]
-[COLOR yellow]--[/COLOR][I] Added a collection of Boxing Movie titles to [B]Collections[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Added a collection of movie titles based on True stories to [B]Collections[/B].[/I]
+[B][COLOR red]Update - v6.1.3 - Aug. 05, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added new setting [B]"Prefer TMDb artwork (poster, fanart)"[/B] in the [B]"General"[/B] category.  Now you can set TMDb as preferred artwork even if retrieving fanart.tv for for it's clearlogo, clearart, etc.[/I]
+[COLOR yellow]--[/COLOR][I] Prem-Emptive Termination quit before hitting it's limit.  This is now fixed.[/I]
+[COLOR yellow]--[/COLOR][I] fanart.tv now has it's own database.  No longer will clearing cache needlessly wipe out the fanart.tv artwork.  I've also elected to not allow clearing of this database as most often it is completely unnecessary to do so.  The cached results will be held for one week, at which time item data will be updated.[/I]
+[COLOR yellow]--[/COLOR][I] Previously fanart.tv [B]season posters[/B] were not used.  This has now been added and also respects the new setting [B]"Prefer TMDb artwork (poster, fanart)"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Added [B]"View Changelog"[/B] to the [B]Shortcuts[/B] setting category.[/I]
+[COLOR yellow]--[/COLOR][I] There is a new context menu item called [B]"Save to ? Cloud"[/B] for the Source Select xml.  Your Debrid service will be listed.  You can now save a cached torrents to your user cloud.[/I]
 		</news>
 	</extension>
 </addon>

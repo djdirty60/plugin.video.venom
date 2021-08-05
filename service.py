@@ -119,10 +119,10 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				control.homeWindow.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.0.9' # set to desired version to force any db clearing needed
+				clearDB_version = '6.1.3' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', ''))  <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
-					cache.clrCache_version_update(clr_providers=True, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
+					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
 
 				# write_UDsettings_version = '6.0.6' # set to desired version to force writting new UD settings.xml for added setting
 				# do_UDsettings_write = (int(oldVersion.replace('.', '')) < int(write_UDsettings_version.replace('.', ''))  <= int(curVersion.replace('.', '')))

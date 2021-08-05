@@ -9,7 +9,7 @@ from re import sub as re_sub
 from time import time
 try: from sqlite3 import dbapi2 as db
 except ImportError: from pysqlite2 import dbapi2 as db
-from resources.lib.modules.control import existsPath, dataPath, makeFile, providercacheFile
+from resources.lib.modules.control import existsPath, dataPath, makeFile, fanarttvCacheFile
 
 
 def get(function, duration, *args):
@@ -19,8 +19,7 @@ def get(function, duration, *args):
 	:param args: Optional arguments for the provided function
 	"""
 	try:
-		rev_args = args[:9] # discard extra args after "premiered" in getSources() from hash/key so preScrape cache key is the same.
-		key = _hash_function(function, rev_args)
+		key = _hash_function(function, args)
 		cache_result = cache_get(key)
 		if cache_result:
 			result = literal_eval(cache_result['value'])
@@ -92,16 +91,27 @@ def remove(function, *args):
 	try: dbcur.close() ; dbcon.close()
 	except: pass
 
-def cache_clear_providers():
+def _hash_function(function_instance, *args):
+	return _get_function_name(function_instance) + _generate_md5(args)
+
+def _get_function_name(function_instance):
+	return re_sub(r'.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', repr(function_instance))
+
+def _generate_md5(*args):
+	md5_hash = md5()
+	try: [md5_hash.update(str(arg)) for arg in args]
+	except: [md5_hash.update(str(arg).encode('utf-8')) for arg in args]
+	return str(md5_hash.hexdigest())
+
+def cache_clear():
 	cleared = False
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
-		for t in ['cache', 'rel_src', 'rel_url']:
-			dbcur.execute('''DROP TABLE IF EXISTS {}'''.format(t))
-			dbcur.execute('''VACUUM''')
-			dbcur.connection.commit()
-			cleared = True
+		dbcur.execute('''DROP TABLE IF EXISTS cache''')
+		dbcur.execute('''VACUUM''')
+		dbcur.connection.commit()
+		cleared = True
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -112,7 +122,7 @@ def cache_clear_providers():
 
 def get_connection():
 	if not existsPath(dataPath): makeFile(dataPath)
-	dbcon = db.connect(providercacheFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
+	dbcon = db.connect(fanarttvCacheFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
 	dbcon.row_factory = _dict_factory
 	return dbcon
 
@@ -126,20 +136,6 @@ def _dict_factory(cursor, row):
 	d = {}
 	for idx, col in enumerate(cursor.description): d[col[0]] = row[idx]
 	return d
-
-def _hash_function(function_instance, *args):
-	return _get_function_name(function_instance) + _generate_md5(args)
-
-def _get_function_name(function_instance):
-	return re_sub(r'.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', repr(function_instance))
-# function=<function Sources.getConstants.<locals>.cache_prDict at 0x000001AE601D0AF0>
-# function=<bound method Sources.getSources of <resources.lib.modules.sources.Sources object at 0x000001AE66533670>>
-
-def _generate_md5(*args):
-	md5_hash = md5()
-	try: [md5_hash.update(str(arg)) for arg in args]
-	except: [md5_hash.update(str(arg).encode('utf-8')) for arg in args]
-	return str(md5_hash.hexdigest())
 
 def _is_cache_valid(cached_time, cache_timeout):
 	now = int(time())

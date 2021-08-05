@@ -244,7 +244,7 @@ class Sources:
 		try:
 			def sourcesDirMeta(metadata): # pass skin minimal meta needed
 				if not metadata: return metadata
-				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode', 'castandrole']
+				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'tvshow.poster', 'season_poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode', 'castandrole']
 				return {k: v for k, v in iter(metadata.items()) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
 
@@ -411,7 +411,6 @@ class Sources:
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
 			header = control.homeWindow.getProperty(self.labelProperty) + ': Scraping...'
 			progressDialog.create(header, '')
-
 			self.prepareSources()
 			sourceDict = self.sourceDict
 			progressDialog.update(0, control.lang(32600))
@@ -473,7 +472,7 @@ class Sources:
 			terminate_onCloud = str(control.setting('terminate.onCloud.sources'))
 			pre_emp = str(control.setting('preemptive.termination'))
 			pre_emp_limit = int(control.setting('preemptive.limit'))
-			pre_emp_res = str(control.setting('preemptive.res'))
+			pre_emp_res = str(control.setting('preemptive.res')) or '0'
 			source_4k = source_1080 = source_720 = source_sd = total = 0
 			total_format = '[COLOR %s][B]%s[/B][/COLOR]'
 			pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % \
@@ -500,9 +499,6 @@ class Sources:
 					elif pre_emp_res == '1' and source_1080 >= pre_emp_limit: break
 					elif pre_emp_res == '2' and source_720 >= pre_emp_limit: break
 					elif pre_emp_res == '3' and source_sd >= pre_emp_limit: break
-					else:
-						if source_sd >= pre_emp_limit: break
-
 				if quality == '0':
 					source_4k = len([e for e in self.scraper_sources if e['quality'] == '4K'])
 					source_1080 = len([e for e in self.scraper_sources if e['quality'] == '1080p'])

@@ -9,7 +9,7 @@ import re
 from sys import argv
 from urllib.parse import quote_plus
 from resources.lib.database import cache
-from resources.lib.indexers import tmdb as tmdb_indexer
+from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import control
 from resources.lib.modules.playcount import getSeasonIndicators, getSeasonOverlay, getSeasonCount
@@ -22,11 +22,12 @@ class Seasons:
 		self.list = []
 		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
+		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
+		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
 		self.season_special = False
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
-
-		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w300'
+		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w342'
 		self.trakt_user = control.setting('trakt.user').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/seasons'
@@ -87,14 +88,16 @@ class Seasons:
 				if not values['poster'] and art: values['poster'] = art['poster'] if 'poster' in art else ''
 				values['season_poster'] = values['poster']
 				values['season'] = str(int(item['season_number']))
+				if self.enable_fanarttv: values['season_poster2'] = fanarttv.get_season_poster(tvdb, values['season'])
 				if art:
 					values['fanart'] = art['fanart']
 					values['icon'] = art['icon']
-					values['thumb'] = art['thumb']
+					values['thumb'] = art['thumb'] # thumb here is show_poster from show level TMDb module
 					values['banner'] = art['banner']
 					values['clearlogo'] = art['clearlogo']
 					values['clearart'] = art['clearart']
 					values['landscape'] = art['landscape']
+					values['tvshow.poster'] = art['tvshow.poster'] # not used in seasonDirectory() atm
 				for k in ('seasons',): values.pop(k, None) # pop() keys from showSeasons that are not needed anymore
 				self.list.append(values)
 			except:
@@ -125,9 +128,8 @@ class Seasons:
 		multi = True if len([x for y,x in enumerate(multi) if x not in multi[:y]]) > 1 else False
 		for i in items:
 			try:
-				imdb, tmdb, tvdb, year, season = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('season')
-				title = i.get('tvshowtitle')
-				label = '%s %s' % (labelMenu, i.get('season'))
+				title, imdb, tmdb, tvdb, year, season = i.get('tvshowtitle'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('season')
+				label = '%s %s' % (labelMenu, season)
 				if not self.season_special and self.showspecials:
 					self.season_special = True if int(season) == 0 else False
 				try:
@@ -139,20 +141,19 @@ class Seasons:
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
-				# First check thumbs, since they typically contains the seasons poster. The normal poster contains the show poster.
-				poster = meta.get('thumb') or meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
-				season_poster = meta.get('season_poster') or poster
-				landscape = meta.get('landscape')
+
+				poster = meta.get('tvshow.poster') or addonPoster # tvshow.poster
+				if self.prefer_tmdbArt: season_poster = meta.get('season_poster') or meta.get('season_poster2') or poster
+				else: season_poster = meta.get('season_poster2') or meta.get('season_poster') or poster
 				fanart = ''
-				if settingFanart: fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or landscape or addonFanart
-				thumb = season_poster
+				if settingFanart: fanart = meta.get('fanart') or addonFanart
 				icon = meta.get('icon') or poster
-				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
+				banner = meta.get('banner') or addonBanner
 				art = {}
-				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb, 'banner': banner,
-						'clearlogo': meta.get('clearlogo', ''), 'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': landscape})
-				for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3'): meta.pop(k, None)
-				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': thumb, 'icon': icon})
+				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': season_poster, 'banner': banner,
+						'clearlogo': meta.get('clearlogo', ''), 'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': meta.get('landscape')})
+				# for k in ('poster2', 'poster3', 'fanart2', 'fanart3', 'banner2', 'banner3'): meta.pop(k, None)
+				meta.update({'poster': poster, 'fanart': fanart, 'banner': banner, 'thumb': season_poster, 'season_poster': season_poster, 'icon': icon})
 ####-Context Menu and Overlays-####
 				cm = []
 				try:

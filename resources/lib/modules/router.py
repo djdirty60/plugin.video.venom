@@ -810,6 +810,9 @@ def router(params):
 		elif action == 'cache_clearCache':
 			from resources.lib.menus import navigator
 			navigator.Navigator().clearCache()
+		elif action == 'cache_clearMetaAndCache':
+			from resources.lib.menus import navigator
+			navigator.Navigator().clearMetaAndCache()
 		elif action == 'cache_clearSearch':
 			from resources.lib.menus import navigator
 			navigator.Navigator().clearCacheSearch() 

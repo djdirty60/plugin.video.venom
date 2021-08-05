@@ -8,7 +8,7 @@ from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
-from resources.lib.database import cache
+from resources.lib.database import cache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
@@ -28,7 +28,8 @@ class Episodes:
 		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
-		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
+		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
+		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
@@ -430,7 +431,7 @@ class Episodes:
 				items.append(values)
 			except: pass
 		try:
-			result = cache.get(trakt.getTrakt, 0, self.hiddenprogress_link) # if this gets cached and user hides an item it's not instantly removed.
+			result = cache.get(trakt.getTrakt, 0, self.hiddenprogress_link) # if this gets cached and user hides an item it's not instantly removed. Keep at "0" duration
 			result = jsloads(result)
 			result = [str(i['show']['ids']['tvdb']) for i in result]
 			items = [i for i in items if i['tvdb'] not in result] # removes hidden progress items
@@ -461,6 +462,7 @@ class Episodes:
 				if not self.showspecials and next_season_num == 0: return
 				seasonEpisodes = cache.get(tmdb_indexer.TVshows().get_seasonEpisodes_meta, 96, tmdb, next_season_num)
 				if not seasonEpisodes: return
+				seasonEpisodes = dict((k,v) for k, v in iter(seasonEpisodes.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				try: episode_meta = [x for x in seasonEpisodes.get('episodes') if x.get('episode') == next_episode_num][0] # to pull just the episode meta we need
 				except: return
 				if not episode_meta['plot']: episode_meta['plot'] = showSeasons['plot'] # some plots missing for eps so use season level plot
@@ -503,8 +505,8 @@ class Episodes:
 				if not direct: values['action'] = 'episodes' # for direct progress scraping
 				values['traktProgress'] = True # for direct progress scraping and multi episode watch counts indicators
 				values['extended'] = True # used to bypass calling "super_info()", super_info() no longer used as of 4-12-21 so this could be removed.
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				self.list.append(values)
 			except:
@@ -614,12 +616,12 @@ class Episodes:
 				values.update(seasonEpisodes)
 				values.update(episode_meta)
 				for k in ('episodes',): values.pop(k, None) # pop() keys from seasonEpisodes that are not needed anymore
-				try:
+				try: # used for fanart fetch since not available in seasonEpisodes request
 					art = cache.get(tmdb_indexer.TVshows().get_art, 96, tmdb)
 					values.update(art)
 				except: pass
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				values['extended'] = True # used to bypass calling "super_info()", super_info() no longer used as of 4-12-21 so this could be removed.
 				if not direct: values['action'] = 'episodes'
@@ -705,8 +707,8 @@ class Episodes:
 					if not values['thumb']: values['thumb'] = values['poster']
 					values['fanart'] = values['thumb']
 					values['season_poster'] = values['poster']
-					if not self.disable_fanarttv:
-						extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+					if self.enable_fanarttv:
+						extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 						if extended_art: values.update(extended_art)
 				values['imdb'] = imdb
 				values['tmdb'] = tmdb
@@ -826,14 +828,18 @@ class Episodes:
 						elif airLocation == '1': labelProgress = '%s %s' % (labelProgress, air)
 						elif airLocation == '2': meta['plot'] = '%s%s\r\n%s' % (airLabel, air, meta['plot'])
 						elif airLocation == '3': meta['plot'] = '%s\r\n%s%s' % (meta['plot'], airLabel, air)
-				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
+
+				if self.prefer_tmdbArt: poster = meta.get('poster3') or meta.get('poster') or meta.get('poster2') or addonPoster
+				else: poster = meta.get('poster2') or meta.get('poster3') or meta.get('poster') or addonPoster
 				season_poster = meta.get('season_poster') or poster
 				landscape = meta.get('landscape')
 				fanart = ''
-				if settingFanart: fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or landscape or addonFanart
+				if settingFanart:
+					if self.prefer_tmdbArt: fanart = meta.get('fanart3') or meta.get('fanart') or meta.get('fanart2') or addonFanart
+					else: fanart = meta.get('fanart2') or meta.get('fanart3') or meta.get('fanart') or addonFanart
 				thumb = meta.get('thumb') or landscape or fanart or season_poster
 				icon = meta.get('icon') or season_poster or poster
-				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
+				banner = meta.get('banner') or addonBanner
 				art = {}
 				art.update({'poster': season_poster, 'tvshow.poster': poster, 'season.poster': season_poster, 'fanart': fanart, 'icon': icon, 'thumb': thumb, 'banner': banner,
 						'clearlogo': meta.get('clearlogo', ''), 'tvshow.clearlogo': meta.get('clearlogo', ''), 'clearart': meta.get('clearart', ''), 'tvshow.clearart': meta.get('clearart', ''), 'landscape': thumb})
@@ -876,7 +882,7 @@ class Episodes:
 				# cm.append(('PlayAll', 'RunPlugin(%s?action=play_All)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
-				if trailer: meta.update({'trailer': trailer})
+				if trailer: meta.update({'trailer': trailer}) # removed temp so it's not passed to CM items, only infoLabels for skin
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', syslabelProgress, year, imdb)})
 				item = control.item(label=labelProgress, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])

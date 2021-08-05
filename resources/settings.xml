@@ -13,9 +13,10 @@
 		<setting id="page.item.limit" type="slider" label="32011" default="20" range="10,60" option="int" />
 		<setting id="search.page.limit" type="slider" label="32167" default="20" range="10,100" option="int" />
 		<setting id="fanart" type="bool" label="32318" default="true" />
-		<setting id="disable.fanarttv" type="bool" label="32012" default="false" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disableFanartTV)" />
-		<setting type="action" label="32612" subsetting="true" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMeta)" />
+		<setting id="enable.fanarttv" type="bool" label="32012" default="true" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=enableFanartTV)" visible="eq(-1,true)" />
+		<setting type="action" label="32620" subsetting="true" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMetaAndCache)" visible="eq(-2,true)" />
+		<setting id="prefer.tmdbArt" type="bool" label="32079" subsetting="true" default="true" visible="eq(-3,true)" />
 		<setting id="hidecinema" type="bool" label="32571" default="false" />
 		<setting id="hidecinema.rollback" type="slider" label="40063" enable="eq(-1,true)" default="6" range="1,12" option="int" />
 		<setting id="movie.unaired.identify" type="select" label="35526" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" />
@@ -106,7 +107,6 @@
 		<setting id="playnext.default.action" type="select" label="40065" subsetting="true" visible="eq(-3,true)" lvalues="32176|32177|32178" default="0" />
 		<setting id="stillwatching.count" type="slider" subsetting="true" visible="eq(-4,true)" default="3" label="40026" option="int" range="2,10" />
 		<setting id="stillwatching.default.action" type="select" label="40025" subsetting="true" visible="eq(-5,true)" lvalues="32176|32177|32178" default="2" />
-		<!-- <setting id="auto.playlistcreate" type="bool" label="40030" default="true" /> -->
 
 		<setting label="35056" type="lsep" />
 		<setting id="sort.imdbshows.type" type="select" label="35054" lvalues="33564|33039|35187|35188|35391|35392|35393" default="0" />
@@ -161,7 +161,7 @@
 		<setting id="progress.dialog" type="enum" label="32335" lvalues="32336|32337" default="0" />
 		<setting id="scrapers.timeout" type="slider" label="32312" default="60" range="10,60" option="int" />
 		<setting id="scraper.dialog.color" type="select" label="32164" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" />
-		<setting id="terminate.onCloud.sources" type="bool" label="Terminate on Cloud Sources" default="true" />
+		<setting id="terminate.onCloud.sources" type="bool" label="32007" default="true" />
 		<setting id="preemptive.termination" type="bool" label="32654" default="false" />
 		<setting id="preemptive.limit" type="slider" label="32655" default="25" range="1,50" option="int" visible="eq(-1,true)" />
 		<setting id="preemptive.res" type="enum" label="32659" values="4K|1080p|720p|480p(SD)" default="2" visible="eq(-2,true)" />
@@ -373,5 +373,6 @@
 		<setting type="action" label="32613" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearCache)" />
 		<setting type="action" label="32614" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearSearch)" />
 		<setting type="action" label="32615" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearBookmarks)" />
+		<setting type="action" label="32101" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowChangelog)" />
 	</category>
 </settings>

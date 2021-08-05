@@ -5,7 +5,7 @@
 
 from json import dumps as jsdumps
 from urllib.parse import quote_plus
-from resources.lib.modules.control import joinPath, transPath, dialog, getSourceHighlightColor
+from resources.lib.modules.control import joinPath, transPath, dialog, getSourceHighlightColor, notification
 from resources.lib.modules.source_utils import getFileType
 from resources.lib.modules import tools
 from resources.lib.windows.base import BaseDialog
@@ -70,6 +70,7 @@ class SourceResultsXML(BaseDialog):
 					self.selected = ('play_Item', chosen_source)
 				return self.close()
 			elif action_id in self.context_actions:
+				from re import match as re_match
 				chosen_source = self.item_list[self.get_position(self.window_id)]
 				source_dict = chosen_source.getProperty('venom.source_dict')
 				cm_list = [('[B]Additional Link Info[/B]', 'sourceInfo')]
@@ -78,10 +79,11 @@ class SourceResultsXML(BaseDialog):
 				source = chosen_source.getProperty('venom.source')
 				if not 'UNCACHED' in source:
 					cm_list += [('[B]Download[/B]', 'download')]
-
+				if re_match(r'^CACHED.*TORRENT', source):
+					debrid = chosen_source.getProperty('venom.debrid')
+					cm_list += [('[B]Save to %s Cloud[/B]' % debrid, 'saveToCloud')]
 				chosen_cm_item = dialog.contextmenu([i[0] for i in cm_list])
 				if chosen_cm_item == -1: return
-
 				cm_action = cm_list[chosen_cm_item][1]
 				if cm_action == 'sourceInfo':
 					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=sourceInfo&source=%s)' % quote_plus(source_dict))
@@ -105,6 +107,21 @@ class SourceResultsXML(BaseDialog):
 					self.execute_code('RunPlugin(plugin://plugin.video.venom/?action=download&name=%s&image=%s&source=%s&caller=sources&title=%s)' %
 										(new_sysname, quote_plus(poster), quote_plus(source_dict), sysname))
 					self.selected = (None, '')
+				elif cm_action == 'saveToCloud':
+					magnet = chosen_source.getProperty('venom.url')
+					if debrid == 'AD':
+						from resources.lib.debrid import alldebrid
+						alldebrid.AllDebrid().create_transfer(magnet)
+						notification(message='Sending MAGNET to the AllDebrid cloud', icon=alldebrid.ad_icon)
+					elif debrid == 'PM':
+						from resources.lib.debrid import premiumize
+						premiumize.Premiumize().create_transfer(magnet)
+						notification(message='Sending MAGNET to the Premiumize.me cloud', icon=premiumize.pm_icon)
+					elif debrid == 'RD':
+						from resources.lib.debrid import realdebrid
+						torrent_id = realdebrid.RealDebrid().add_magnet(magnet)
+						realdebrid.RealDebrid().add_torrent_select(torrent_id, 'all')
+						notification(message='Sending MAGNET to the Real-Debrid cloud', icon=realdebrid.rd_icon)
 			elif action in self.closing_actions:
 				self.selected = (None, '')
 				self.close()
@@ -173,7 +190,7 @@ class SourceResultsXML(BaseDialog):
 			# self.setProperty('venom.clearart', self.meta.get('clearart', ''))
 			self.setProperty('venom.clearlogo', self.meta.get('clearlogo', ''))
 			# title = self.meta.get('tvshowtitle') if self.meta.get('tvshowtitle') else self.meta.get('title')
-			# self.setProperty('venom.title', title)
+			# self.setProperty('venom.title', title) # was going to use this for missing clearlogo
 			self.setProperty('venom.plot', self.meta.get('plot', ''))
 			self.setProperty('venom.year', str(self.meta.get('year', '')))
 			new_date = tools.Time.convert(stringTime=str(self.meta.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')

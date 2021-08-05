@@ -8,7 +8,7 @@ from json import dumps as jsdumps
 import re
 from sys import argv
 from urllib.parse import quote_plus, parse_qsl, urlparse
-from resources.lib.database import cache, metacache
+from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
@@ -23,7 +23,8 @@ class Collections:
 	def __init__(self):
 		self.list = []
 		self.count = control.setting('page.item.limit')
-		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
+		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
+		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
 		self.unairedcolor = control.getColor(control.setting('movie.unaired.identify'))
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
@@ -797,8 +798,8 @@ class Collections:
 				except:
 					from resources.lib.modules import log_utils
 					log_utils.error()
-			if not self.disable_fanarttv:
-				extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+			if self.enable_fanarttv:
+				extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 				if extended_art: values.update(extended_art)
 			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)
@@ -841,9 +842,13 @@ class Collections:
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'movie', 'tag': [imdb, tmdb]})
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
-				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
+
+				if self.prefer_tmdbArt: poster = meta.get('poster3') or meta.get('poster') or meta.get('poster2') or addonPoster
+				else: poster = meta.get('poster2') or meta.get('poster3') or meta.get('poster') or addonPoster
 				fanart = ''
-				if settingFanart: fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or addonFanart
+				if settingFanart:
+					if self.prefer_tmdbArt: fanart = meta.get('fanart3') or meta.get('fanart') or meta.get('fanart2') or addonFanart
+					else: fanart = meta.get('fanart2') or meta.get('fanart3') or meta.get('fanart') or addonFanart
 				landscape = meta.get('landscape')
 				thumb = meta.get('thumb') or poster or landscape
 				icon = meta.get('icon') or poster
@@ -880,7 +885,7 @@ class Collections:
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
-				if trailer: meta.update({'trailer': trailer})
+				if trailer: meta.update({'trailer': trailer}) # removed temp so it's not passed to CM items, only infoLabels for skin
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'movie', sysname, year, imdb)})
 				item = control.item(label=label, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])

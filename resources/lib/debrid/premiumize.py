@@ -321,6 +321,7 @@ class Premiumize:
 	def create_transfer(self, src,  folder_id=0):
 		try:
 			data = {'src': src, 'folder_id': folder_id}
+			log_utils.log('Premiumize.me: Sending MAGNET URL %s to the Premiumize.me cloud' % src, __name__, log_utils.LOGDEBUG)
 			return self._post(transfer_create_url, data)
 		except:
 			log_utils.error()

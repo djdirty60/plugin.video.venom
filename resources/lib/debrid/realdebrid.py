@@ -632,6 +632,7 @@ class RealDebrid:
 		try:
 			data = {'magnet': magnet}
 			response = self._post(add_magnet_url, data)
+			log_utils.log('Real-Debrid: Sending MAGNET URL %s to the Real-Debrid cloud' % magnet, __name__, log_utils.LOGDEBUG)
 			return response.get('id', "")
 		except:
 			log_utils.error('Real-Debrid Error: ADD MAGNET %s : ' % magnet)

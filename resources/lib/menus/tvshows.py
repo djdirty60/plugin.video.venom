@@ -8,7 +8,7 @@ from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
-from resources.lib.database import cache, metacache
+from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
@@ -29,7 +29,8 @@ class TVshows:
 		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
-		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
+		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
+		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
@@ -729,8 +730,8 @@ class TVshows:
 				except:
 					from resources.lib.modules import log_utils
 					log_utils.error()
-			if not self.disable_fanarttv:
-				extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+			if self.enable_fanarttv:
+				extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 				if extended_art: values.update(extended_art)
 			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)
@@ -772,11 +773,14 @@ class TVshows:
 				try:
 					if 'tvshowtitle' not in meta: meta.update({'tvshowtitle': title})
 				except: pass
-				poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') or addonPoster
+				if self.prefer_tmdbArt: poster = meta.get('poster3') or meta.get('poster') or meta.get('poster2') or addonPoster
+				else: poster = meta.get('poster2') or meta.get('poster3') or meta.get('poster') or addonPoster
 				landscape = meta.get('landscape')
 				fanart = ''
-				if settingFanart: fanart = meta.get('fanart3') or meta.get('fanart2') or meta.get('fanart') or landscape or addonFanart
-				thumb = meta.get('thumb') or poster or landscape
+				if settingFanart:
+					if self.prefer_tmdbArt: fanart = meta.get('fanart3') or meta.get('fanart') or meta.get('fanart2') or addonFanart
+					else: fanart = meta.get('fanart2') or meta.get('fanart3') or meta.get('fanart') or addonFanart
+				thumb = meta.get('thumb') or poster or landscape # set to show level poster
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
 				art = {}
@@ -809,7 +813,7 @@ class TVshows:
 ####################################
 				if flatten: url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta)
 				else: url = '%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)
-				if trailer: meta.update({'trailer': trailer})
+				if trailer: meta.update({'trailer': trailer}) # removed temp so it's not passed to CM items, only skin
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', systitle, year, imdb)})
 				item = control.item(label=title, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])

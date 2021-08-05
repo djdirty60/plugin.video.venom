@@ -344,8 +344,7 @@ class Navigator:
 				except:
 					from resources.lib.modules import log_utils
 					log_utils.error()
-			if cache_clear_all():
-				control.notification(message=32089)
+			if cache_clear_all(): control.notification(message=32089)
 			else: control.notification(message=33586)
 		except:
 			from resources.lib.modules import log_utils
@@ -379,6 +378,26 @@ class Navigator:
 		try:
 			from resources.lib.database import cache
 			if cache.cache_clear(): control.notification(message=32092)
+			else: control.notification(message=33586)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
+	def clearMetaAndCache(self):
+		control.hide()
+		if not control.yesnoDialog(control.lang(35531), '', ''): return
+		try:
+			def cache_clear_both():
+				try:
+					from resources.lib.database import cache, metacache
+					metacache.cache_clear_meta()
+					cache.cache_clear()
+					return True
+				except:
+					from resources.lib.modules import log_utils
+					log_utils.error()
+			if cache_clear_both():
+				control.notification(message=35532)
 			else: control.notification(message=33586)
 		except:
 			from resources.lib.modules import log_utils

@@ -8,7 +8,7 @@ import re
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from resources.lib.database import cache, metacache
+from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import fanarttv
 from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, trailer as control_trailer, yesnoDialog
 from resources.lib.modules import workers
@@ -16,8 +16,10 @@ API_key = getSetting('tmdb.api.key')
 if not API_key: API_key = '3320855e65a9758297fec4f7c9717698'
 base_link = 'https://api.themoviedb.org/3/'
 tmdb_networks = base_link + 'discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1' % (API_key, '%s')
-poster_path = 'https://image.tmdb.org/t/p/w300'
+poster_path = 'https://image.tmdb.org/t/p/w342'
 fanart_path = 'https://image.tmdb.org/t/p/w1280'
+still_path = 'https://image.tmdb.org/t/p/w500'
+profile_path = 'https://image.tmdb.org/t/p/w185'
 session = requests.Session()
 retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
 session.mount('https://', HTTPAdapter(max_retries=retries))
@@ -84,7 +86,7 @@ class Movies:
 	def __init__(self):
 		self.list = []
 		self.meta = []
-		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
+		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
 		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
 		###  other "append_to_response" options external_ids,images,content_ratings, translations
@@ -128,8 +130,8 @@ class Movies:
 				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				values.update(movie_meta)
 				imdb = values['imdb']
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -151,7 +153,7 @@ class Movies:
 		sorted_list = []
 		self.list = [i for i in self.list if i.get('tmdb')]
 		for i in sortList:
-			sorted_list += [item for item in self.list if item['tmdb'] == i] # resort to match TMDb list because threading will loose order.
+			sorted_list += [item for item in self.list if item['tmdb'] == i] # resort to match TMDb list because threading will lose order.
 		return sorted_list
 
 	def tmdb_collections_list(self, url):
@@ -191,8 +193,8 @@ class Movies:
 				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				values.update(movie_meta)
 				imdb = values['imdb']
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -274,7 +276,7 @@ class Movies:
 			except: meta['writer'] = ''
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (poster_path, person['profile_path']) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			try:
@@ -319,8 +321,7 @@ class Movies:
 			ret_img = [(x['file_path'], x['vote_average']) for x in img if any(value == x.get('iso_639_1') for value in [self.lang, 'null', '', None])]
 			if not ret_img: ret_img = [(x['file_path'], x['vote_average']) for x in img]
 			if not ret_img: return None
-			if len(ret_img) >1:
-				ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
+			if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 			ret_img = [x[0] for x in ret_img][0]
 		except:
 			from resources.lib.modules import log_utils
@@ -367,10 +368,10 @@ class TVshows:
 	def __init__(self):
 		self.list = []
 		self.meta = []
-		self.disable_fanarttv = getSetting('disable.fanarttv') == 'true'
+		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
 		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
-# 'append_to_response=translations, aggregate_credits' (DO NOT USE, response data way to massive and bogs the response time)
+		# 'append_to_response=translations, aggregate_credits' (DO NOT USE, response data way to massive and bogs the response time)
 		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
 		self.tvdb_key = getSetting('tvdb.api.key')
 		self.imdb_user = getSetting('imdb.user').replace('ur', '')
@@ -413,8 +414,8 @@ class TVshows:
 				values.update(showSeasons_meta)
 				imdb = values['imdb']
 				tvdb = values['tvdb']
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -476,8 +477,8 @@ class TVshows:
 				values.update(showSeasons_meta)
 				imdb = values['imdb']
 				tvdb = values['tvdb']
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -546,6 +547,7 @@ class TVshows:
 			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
+			meta['tvshow_poster'] = meta['poster'] # check that this new dict key is used throughout
 			try: meta['country_codes'] = [i['iso_3166_1'] for i in result['production_countries']]
 			except: meta['country_codes'] = ''
 			meta['seasons'] = result.get('seasons')
@@ -569,7 +571,7 @@ class TVshows:
 			except: meta['writer'] = ''
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (poster_path, person['profile_path']) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			try: meta['mpaa'] = [x['rating'] for x in result['content_ratings']['results'] if x['iso_3166_1'] == 'US'][0]
@@ -641,7 +643,7 @@ class TVshows:
 				episode_meta['plot'] = episode.get('overview', '') if episode.get('overview') else ''
 				episode_meta['code'] = episode['production_code']
 				episode_meta['season'] = episode['season_number']
-				episode_meta['thumb'] = '%s%s' % (fanart_path, episode['still_path']) if episode.get('still_path') else ''
+				episode_meta['thumb'] = '%s%s' % (still_path, episode['still_path']) if episode.get('still_path') else ''
 				episode_meta['rating'] = episode['vote_average']
 				episode_meta['votes'] = episode['vote_count']
 				episodes.append(episode_meta)
@@ -655,7 +657,7 @@ class TVshows:
 			meta['season'] = result.get('season_number')
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (poster_path, person['profile_path']) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			# meta['banner'] = '' # not available from TMDb
@@ -698,8 +700,7 @@ class TVshows:
 			ret_img = [(x['file_path'], x['vote_average']) for x in img if any(value == x.get('iso_639_1') for value in [self.lang, 'null', '', None])]
 			if not ret_img: ret_img = [(x['file_path'], x['vote_average']) for x in img]
 			if not ret_img: return None
-			if len(ret_img) >1:
-				ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
+			if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 			ret_img = [x[0] for x in ret_img][0]
 		except:
 			from resources.lib.modules import log_utils

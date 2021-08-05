@@ -124,10 +124,10 @@ def get_tvshow_art(tvdb):
 		poster2 = parse_art(art['tvposter'])
 	except: poster2 = ''
 
-	# try: # will need season number to fetch correct one
-		# if 'seasonposter' not in art: raise Exception()
-		# season_poster2 = parse_art(art['seasonposter'])
-	# except: season_poster2 = ''
+	try: # cache all season_posters and pull from seperate method call at season level
+		if 'seasonposter' not in art: raise Exception()
+		season_posters = art['seasonposter']
+	except: season_posters = ''
 
 	try:
 		if 'showbackground' not in art: raise Exception()
@@ -158,5 +158,21 @@ def get_tvshow_art(tvdb):
 			landscape = art['showbackground']
 		landscape = parse_art(landscape)
 	except: landscape = ''
-	extended_art = {'extended': True, 'poster2': poster2, 'banner2': banner2, 'fanart2': fanart2, 'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape}
+	# extended_art = {'extended': True, 'poster2': poster2, 'banner2': banner2, 'fanart2': fanart2, 'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape}
+	extended_art = {'extended': True, 'poster2': poster2, 'banner2': banner2, 'fanart2': fanart2, 'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape, 'season_posters': season_posters}
 	return extended_art
+
+def get_season_poster(tvdb, season):
+	if not tvdb or not season: return None
+	try:
+		from resources.lib.database import fanarttv_cache
+		extended_art = fanarttv_cache.get(get_tvshow_art, 168, tvdb)
+		if not extended_art: return None
+		season_posters = extended_art.get('season_posters', {})
+		if season_posters:
+			season_posters = [i for i in season_posters if i.get('season') == str(season)]
+			season_poster = parse_art(season_posters)
+			return season_poster
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()

@@ -78,6 +78,7 @@ searchFile = joinPath(dataPath, 'search.db')
 libcacheFile = joinPath(dataPath, 'library.db')
 cacheFile = joinPath(dataPath, 'cache.db')
 traktSyncFile = joinPath(dataPath, 'traktSync.db')
+fanarttvCacheFile = joinPath(dataPath, 'fanarttv.db')
 trailer = 'plugin://plugin.video.youtube/play/?video_id=%s'
 
 def getKodiVersion(full=False):

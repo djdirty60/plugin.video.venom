@@ -51,7 +51,7 @@ msgid "New Episodes"
 msgstr ""
 
 msgctxt "#32007"
-msgid ""
+msgid "Terminate on Cloud Sources"
 msgstr ""
 
 msgctxt "#32008"
@@ -71,7 +71,7 @@ msgid "Page Item Limit"
 msgstr ""
 
 msgctxt "#32012"
-msgid "Disable Extended artwork(fanart.tv)"
+msgid "Enable Extended artwork (fanart.tv)"
 msgstr ""
 
 msgctxt "#32013"
@@ -327,11 +327,11 @@ msgid "Auto update User Lists"
 msgstr ""
 
 msgctxt "#32076"
-msgid "Removing metacache results in excessive api requests and\nsystem slow down.\nAre you sure?"
+msgid "Removing metacache results in excessive api requests and system slow down.[CR]Are you sure?"
 msgstr ""
 
 msgctxt "#32077"
-msgid "This also wipes out your metacache and all meta must be\nfetched from scratch, resulting in excessive api requests\nand system slow down.\nBest to only use this unless ABSOLUTELY necessary.\nAre you sure?"
+msgid "This wipes your cache, metacache, search, and providers database.  All meta must be fetched from scratch, resulting in excessive api requests and system slow down.  Best to only use this unless ABSOLUTELY necessary.[CR]Are you sure?"
 msgstr ""
 
 msgctxt "#32078"
@@ -339,7 +339,7 @@ msgid "Show general notifications"
 msgstr ""
 
 msgctxt "#32079"
-msgid ""
+msgid "Prefer TMDb artwork (poster, fanart)"
 msgstr ""
 
 msgctxt "#32080"
@@ -427,7 +427,7 @@ msgid "Bookmarks Successfully Cleared!"
 msgstr ""
 
 msgctxt "#32101"
-msgid ""
+msgid "Show [COLOR yellow]Changelog[/COLOR]..."
 msgstr ""
 
 msgctxt "#32102"
@@ -2034,7 +2034,7 @@ msgid "venom.log"
 msgstr ""
 
 msgctxt "#32620"
-msgid ""
+msgid "Clear [COLOR yellow]Metadata[/COLOR] and [COLOR yellow]Cache[/COLOR]."
 msgstr ""
 
 msgctxt "#32621"
@@ -3402,7 +3402,7 @@ msgid "Notify Me About Available Updates"
 msgstr ""
 
 msgctxt "#35525"
-msgid "Disable clearart, clearlogo, and discart in player"
+msgid ""
 msgstr ""
 
 msgctxt "#35526"
@@ -3426,11 +3426,11 @@ msgid "Debug(Extra info)"
 msgstr ""
 
 msgctxt "#35531"
-msgid ""
+msgid "Clear both Cache and Metacache?"
 msgstr ""
 
 msgctxt "#35532"
-msgid ""
+msgid "Cache and Metacache successfully cleared!"
 msgstr ""
 
 msgctxt "#35533"

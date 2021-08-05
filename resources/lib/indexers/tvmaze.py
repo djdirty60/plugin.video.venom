@@ -6,7 +6,7 @@
 import re
 import requests
 from urllib.parse import quote_plus
-from resources.lib.database import cache, metacache
+from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
@@ -244,7 +244,7 @@ class tvshows:
 		self.tvdb_key = control.setting('tvdb.api.key')
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
-		self.disable_fanarttv = control.setting('disable.fanarttv') == 'true'
+		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
 
 	def tvmaze_list(self, url):
 		try:
@@ -349,8 +349,8 @@ class tvshows:
 				if not values.get('tmdb'): values['tmdb'] = tmdb
 				if not values.get('tvdb'): values['tvdb'] = tvdb
 				for k in ('seasons',): values.pop(k, None) # pop() keys from showSeasons that are not needed anymore
-				if not self.disable_fanarttv:
-					extended_art = cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+				if self.enable_fanarttv:
+					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
 					if extended_art: values.update(extended_art)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values} # DO NOT move this after "values = dict()" below or it becomes the same object and "del meta['item']['next']" removes it from both
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '')
