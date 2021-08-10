@@ -759,10 +759,30 @@ msgid "Hide fully watched shows"
 msgstr "Vollständig angesehene Sendungen ausblenden"
 
 msgctxt "#32184"
+msgid "Find similar"
+msgstr "Ähnliches finden"
+
+msgctxt "#32185"
+msgid "Rescrape Item"
+msgstr "Artikel neu kratzen"
+
+msgctxt "#32186"
+msgid "Like List"
+msgstr "Like-Liste"
+
+msgctxt "#32187"
+msgid "UnLike List"
+msgstr "Unlike-Liste"
+
+msgctxt "#32188"
 msgid ""
 msgstr ""
 
-msgctxt "#32185"
+msgctxt "#32189"
+msgid ""
+msgstr ""
+
+msgctxt "#32190"
 msgid ""
 msgstr ""
 
@@ -1242,12 +1262,12 @@ msgid ""
 msgstr ""
 
 msgctxt "#32418"
-msgid ""
-msgstr ""
+msgid "Trakt Popular Lists"
+msgstr "Trakt-Beliebtslisten"
 
 msgctxt "#32419"
-msgid ""
-msgstr ""
+msgid "Trakt Trending Lists"
+msgstr "Trakt-Trendlisten"
 
 msgctxt "#32420"
 msgid "In Theaters"
@@ -2774,8 +2794,8 @@ msgstr ""
 
 
 msgctxt "#33648"
-msgid "Date Sorting"
-msgstr "Datumssortierung"
+msgid ""
+msgstr ""
 
 msgctxt "#33649"
 msgid "Ascending"
@@ -2842,8 +2862,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#33665"
-msgid "Season Lists"
-msgstr "Saisonlisten"
+msgid ""
+msgstr ""
 
 msgctxt "#33666"
 msgid ""
@@ -3157,8 +3177,8 @@ msgid "Show Sorting"
 msgstr "Sortierung anzeigen"
 
 msgctxt "#35192"
-msgid "Documentary Sorting"
-msgstr "Dokumentarische Sortierung"
+msgid "Collections Sorting"
+msgstr ""
 
 msgctxt "#35193"
 msgid "Short Sorting"

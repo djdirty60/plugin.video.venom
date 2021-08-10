@@ -32,7 +32,14 @@ class AllDebrid:
 		try:
 			if self.token == '': return None
 			url = base_url + url + '?agent=%s&apikey=%s' % (user_agent, self.token) + url_append
-			response = requests.get(url, timeout=self.timeout).json()
+			response = requests.get(url, timeout=self.timeout)
+			if 'Response [500]' in str(response):
+				log_utils.log('AllDebrid: Status code 500 – Internal Server Error', __name__, log_utils.LOGWARNING)
+				return None
+			if not response:
+				log_utils.log('AllDebrid: No Response from server', __name__, log_utils.LOGWARNING)
+				return None
+			response = response.json()
 			if 'status' in response:
 				if response.get('status') == 'success':
 					if 'data' in response: response = response['data']
@@ -52,7 +59,14 @@ class AllDebrid:
 		try:
 			if self.token == '': return None
 			url = base_url + url + '?agent=%s&apikey=%s' % (user_agent, self.token)
-			response = requests.post(url, data=data, timeout=self.timeout).json()
+			response = requests.post(url, data=data, timeout=self.timeout)
+			if 'Response [500]' in str(response):
+				log_utils.log('AllDebrid: Status code 500 – Internal Server Error', __name__, log_utils.LOGWARNING)
+				return None
+			if not response:
+				log_utils.log('AllDebrid: No Response from server', __name__, log_utils.LOGWARNING)
+				return None
+			response = response.json()
 			if 'status' in response:
 				if response.get('status') == 'success':
 					if 'data' in response: response = response['data']

@@ -64,7 +64,8 @@ class source:
 			self.episode = str(data['episode']) if 'tvshowtitle' in data else None
 			query_list = self.episode_query_list() if 'tvshowtitle' in data else self.year_query_list()
 			# log_utils.log('query_list = %s' % query_list)
-			cloud_folders = alldebrid.AllDebrid().user_cloud()['magnets']
+			try: cloud_folders = alldebrid.AllDebrid().user_cloud()['magnets']
+			except: return sources
 			if not cloud_folders: return sources
 			cloud_folders = [i for i in cloud_folders if i['statusCode'] == 4]
 			if not cloud_folders: return sources

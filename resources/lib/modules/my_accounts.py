@@ -12,11 +12,13 @@ def syncMyAccounts(silent=False):
 		all_acct = myaccounts.getAll()
 		trakt_acct = all_acct.get('trakt')
 		if getSetting('trakt.token') != trakt_acct.get('token'):
-			setSetting('trakt.isauthed', 'true')
-			setSetting('trakt.token', trakt_acct.get('token'))
-			setSetting('trakt.username', trakt_acct.get('username'))
-			setSetting('trakt.refresh', trakt_acct.get('refresh'))
+			trakt_username = trakt_acct.get('username')
+			setSetting('trakt.username', trakt_username)
+			if trakt_username != '': setSetting('trakt.isauthed', 'true')
+			else: setSetting('trakt.isauthed', '')
 			setSetting('trakt.expires', trakt_acct.get('expires'))
+			setSetting('trakt.token', trakt_acct.get('token'))
+			setSetting('trakt.refresh', trakt_acct.get('refresh'))
 
 		ad_acct = all_acct.get('alldebrid')
 		if getSetting('alldebrid.username') != ad_acct.get('username'):

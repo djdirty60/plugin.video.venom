@@ -8,6 +8,8 @@ from urllib.parse import quote_plus
 from resources.lib.modules.control import dialog, getHighlightColor, yesnoDialog, sleep, condVisibility, setting as getSetting
 from resources.lib.windows.base import BaseDialog
 
+import xbmc
+monitor = xbmc.Monitor()
 
 class TraktHiddenManagerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
@@ -20,6 +22,7 @@ class TraktHiddenManagerXML(BaseDialog):
 		self.hide_watched = getSetting('trakt.HiddenManager.hideWatched') == 'true'
 		self.make_items()
 		self.set_properties()
+		self.hasVideo = False
 
 	def onInit(self):
 		super(TraktHiddenManagerXML, self).onInit()
@@ -86,12 +89,15 @@ class TraktHiddenManagerXML(BaseDialog):
 					while True:
 						sleep(500)
 						total_sleep += 500
-						HasVideo = condVisibility('Player.HasVideo')
-						if HasVideo or total_sleep >= 3000: break
-					if HasVideo:
+						self.hasVideo = condVisibility('Player.HasVideo')
+						if self.hasVideo or total_sleep >= 3000: break
+					if self.hasVideo:
 						self.setFocusId(2045)
-						while condVisibility('Player.HasVideo'):
+						while (condVisibility('Player.HasVideo') and not monitor.abortRequested()):
+							self.setProgressBar()
 							sleep(1000)
+						self.hasVideo = False
+						self.progressBarReset()
 						self.setFocusId(self.window_id)
 					else: self.setFocusId(self.window_id)
 
@@ -111,10 +117,26 @@ class TraktHiddenManagerXML(BaseDialog):
 
 			elif action in self.closing_actions:
 				self.chosen_hide, self.chosen_unhide = None, None
-				self.close()
+				if self.hasVideo: self.execute_code('PlayerControl(Stop)')
+				else: self.close()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
+
+	def setProgressBar(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(self.calculate_percent())
+
+	def calculate_percent(self):
+		return (xbmc.Player().getTime() / float(xbmc.Player().getTotalTime())) * 100
+
+	def progressBarReset(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(0)
 
 	def make_items(self):
 		def filerWatched():

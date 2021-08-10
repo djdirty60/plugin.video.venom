@@ -16,7 +16,7 @@ CODEC_DIVX = ['divx', 'divx ', 'div2', 'div3', 'div4']
 CODEC_MPEG = ['.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', 'msmpeg', 'mpegurl']
 CODEC_MKV = ['.mkv', 'matroska']
 
-DOLBY_VISION = ['.dv.', 'dolby.vision', 'dolbyvision']
+DOLBY_VISION = ['.dv.', 'dolby.vision', 'dolbyvision', '.dovi.']
 DOLBY_TRUEHD = ['true.hd', 'truehd']
 DOLBY_DIGITALPLUS = ['dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3', '.e.ac3']
 DOLBY_DIGITALEX = ['.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.']

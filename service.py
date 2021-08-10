@@ -136,11 +136,6 @@ class VersionIsUpdateCheck:
 		except:
 			log_utils.error()
 
-class LibraryService:
-	def run(self):
-		control.log('[ plugin.video.venom ]  Library Update Service Starting (Update check every 6hrs)...', LOGINFO)
-		control.execute('RunPlugin(%s?action=library_service)' % plugin) # library_service contains control.monitor().waitForAbort() while loop every 6hrs
-
 class SyncTraktCollection:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Trakt Collection Sync Starting...', LOGINFO)
@@ -148,15 +143,15 @@ class SyncTraktCollection:
 		control.execute('RunPlugin(%s?action=library_moviesToLibrarySilent&url=traktcollection)' % plugin)
 		control.log('[ plugin.video.venom ]  Trakt Collection Sync Complete', LOGINFO)
 
-class SyncTraktWatched:
+class LibraryService:
 	def run(self):
-		control.log('[ plugin.video.venom ]  Trakt Watched Sync Service Starting (sync check every 15min)...', LOGINFO)
-		control.execute('RunPlugin(%s?action=tools_syncTraktWatched)' % plugin) # trakt.sync_watched() contains control.monitor().waitForAbort() while loop every 15min
+		control.log('[ plugin.video.venom ]  Library Update Service Starting (Update check every 6hrs)...', LOGINFO)
+		control.execute('RunPlugin(%s?action=service_library)' % plugin) # service_library contains control.monitor().waitForAbort() while loop every 6hrs
 
-class SyncTraktProgress:
+class SyncTraktService: # replaces   SyncTraktWatched, SyncTraktProgress, SyncTraktLikedLists
 	def run(self):
-		control.log('[ plugin.video.venom ]  Trakt Progress Sync Service Starting (sync check every 15min)...', LOGINFO)
-		control.execute('RunPlugin(%s?action=tools_syncTraktProgress)' % plugin) # trakt.sync_progress() contains control.monitor().waitForAbort() while loop every 15min
+		control.log('[ plugin.video.venom ]  Trakt Sync Service Starting (sync check every 15min)...', LOGINFO)
+		control.execute('RunPlugin(%s?action=service_syncTrakt)' % plugin) # trakt.sync_watched() contains control.monitor().waitForAbort() while loop every 15min
 
 try:
 	kodiVersion = control.getKodiVersion(full=True)
@@ -186,8 +181,6 @@ def getTraktCredentialsInfo():
 def main():
 	while not control.monitor.abortRequested():
 		control.log('[ plugin.video.venom ]  Service Started', LOGINFO)
-		syncWatched = None
-		syncProgress = None
 		schedTrakt = None
 		libraryService = None
 		CheckSettingsFile().run()
@@ -199,13 +192,9 @@ def main():
 		if control.setting('general.checkAddonUpdates') == 'true':
 			AddonCheckUpdate().run()
 		VersionIsUpdateCheck().run()
+		SyncTraktService().run() # run service in case user auth's trakt later
+
 		if getTraktCredentialsInfo():
-			if control.setting('indicators.alt') == '1':
-				syncWatched = True
-				SyncTraktWatched().run()
-			if control.setting('bookmarks') == 'true' and control.setting('resume.source') == '1':
-				syncProgress = True
-				SyncTraktProgress().run()
 			if control.setting('autoTraktOnStart') == 'true':
 				SyncTraktCollection().run()
 			if int(control.setting('schedTraktTime')) > 0:
@@ -218,15 +207,12 @@ def main():
 		break
 	SettingsMonitor().waitForAbort()
 	control.log('[ plugin.video.venom ]  Settings Monitor Service Stopping...', LOGINFO)
-	if syncWatched:
-		control.log('[ plugin.video.venom ]  Trakt Watched Sync Service Stopping...', LOGINFO)
-	if syncProgress:
-		control.log('[ plugin.video.venom ]  Trakt Progress Sync Service Stopping...', LOGINFO)
+	control.log('[ plugin.video.venom ]  Trakt Sync Service Stopping...', LOGINFO)
+
 	if libraryService:
 		control.log('[ plugin.video.venom ]  Library Update Service Stopping...', LOGINFO)
 	if schedTrakt:
 		schedTrakt.cancel()
-		# control.log('[ plugin.video.venom ]  Library Update Service Stopping...', LOGINFO)
 	control.log('[ plugin.video.venom ]  Service Stopped', LOGINFO)
 
 main()

@@ -8,7 +8,7 @@ from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
-from resources.lib.database import cache, metacache, fanarttv_cache
+from resources.lib.database import cache, metacache, fanarttv_cache, traktsync
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
@@ -31,6 +31,7 @@ class TVshows:
 		self.notifications = notifications
 		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
+		self.highlight_color = control.getHighlightColor()
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
@@ -73,6 +74,9 @@ class TVshows:
 		self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/shows?limit=40'
 		self.progress_link = 'https://api.trakt.tv/sync/watched/shows?extended=noseasons'
 		self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
+		self.trakt_popularLists_link = 'https://api.trakt.tv/lists/popular?limit=40&page=1' # use limit=40 due to filtering out Movie only lists
+		self.trakt_trendingLists_link = 'https://api.trakt.tv/lists/trending?limit=40&page=1'
+		self.trakt_publicLists_link = 'https://api.trakt.tv/lists/%s/items/shows?limit=%s&page=1' % ('%s', self.page_limit)
 
 		self.tvmaze_link = 'https://www.tvmaze.com'
 		self.tmdb_key = control.setting('tmdb.api.key')
@@ -169,6 +173,24 @@ class TVshows:
 			if not self.list:
 				control.hide()
 				if self.notifications: control.notification(title=32002, message=33049)
+
+	def getTraktPublicLists(self, url, create_directory=True):
+		self.list = []
+		try:
+			try: url = getattr(self, url + '_link')
+			except: pass
+			if '/popular' in url:
+				self.list = cache.get(self.trakt_public_list, 168, url)
+			elif '/trending' in url:
+				self.list = cache.get(self.trakt_public_list, 48, url)
+			if create_directory: self.addDirectory(self.list)
+			return self.list
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			if not self.list:
+				control.hide()
+				if self.notifications: control.notification(title=32001, message=33049)
 
 	def traktHiddenManager(self, idx=True):
 		control.busy()
@@ -563,6 +585,37 @@ class TVshows:
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
 
+	def trakt_public_list(self, url):
+		try:
+			result = trakt.getTrakt(url)
+			items = jsloads(result)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+		try:
+			q = dict(parse_qsl(urlsplit(url).query))
+			if int(q['limit']) != len(items): raise Exception()
+			q.update({'page': str(int(q['page']) + 1)})
+			q = (urlencode(q)).replace('%2C', ',')
+			next = url.replace('?' + urlparse(url).query, '') + '?' + q
+		except: next = ''
+
+		for item in items:
+			try:
+				list_item = item.get('list', {})
+				list_name = list_item.get('name', '')
+				list_id = list_item.get('ids', {}).get('trakt', '')
+				list_owner = list_item.get('user', {}).get('username', '')
+				list_url = self.trakt_publicLists_link % list_id
+				results = trakt.getTrakt(list_url)
+				if not results or results == '[]': continue
+				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
+				self.list.append({'name': label , 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'tvshows'})
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		return self.list
+
 	def imdb_list(self, url, isRatinglink=False):
 		list = [] ; items = [] ; dupes = []
 		try:
@@ -759,7 +812,8 @@ class TVshows:
 		traktManagerMenu, queueMenu = control.lang(32070), control.lang(32065)
 		showPlaylistMenu, clearPlaylistMenu = control.lang(35517), control.lang(35516)
 		playRandom, addToLibrary = control.lang(32535), control.lang(32551)
-		nextMenu = control.lang(32053)
+		nextMenu, findSimilarMenu = control.lang(32053), control.lang(32184)
+
 		for i in items:
 			try:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
@@ -803,7 +857,7 @@ class TVshows:
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_TVShow&name=%s&imdb=%s&tvdb=%s&query=5)' % (sysaddon, systitle, imdb, tvdb)))
 				except: pass
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
-				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=tvshows&url=https://api.trakt.tv/shows/%s/related,return)' % (sysaddon, imdb)))
+				cm.append((findSimilarMenu, 'ActivateWindow(10025,%s?action=tvshows&url=https://api.trakt.tv/shows/%s/related,return)' % (sysaddon, imdb)))
 				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=season&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, systitle)))
 				cm.append((showPlaylistMenu, 'RunPlugin(%s?action=playlist_Show)' % sysaddon))
@@ -877,6 +931,7 @@ class TVshows:
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
 		queueMenu, playRandom, addToLibrary = control.lang(32065), control.lang(32535), control.lang(32551)
+		likeMenu, unlikeMenu = control.lang(32186), control.lang(32187)
 		for i in items:
 			try:
 				content = i.get('content', '')
@@ -894,7 +949,15 @@ class TVshows:
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
+
 				cm = []
+				if ('/lists/popular' or '/lists/trending' in url) and self.traktCredentials:
+					liked = traktsync.fetch_liked_list(i['list_id'])
+					if not liked:
+						cm.append((likeMenu, 'RunPlugin(%s?action=tools_likeList&list_owner=%s&list_name=%s&list_id=%s)' % (sysaddon, quote_plus(i['list_owner']), quote_plus(i['list_name']), i['list_id'])))
+					else:
+						name = '[COLOR %s][Liked][/COLOR] %s' % (self.highlight_color, name)
+						cm.append((unlikeMenu, 'RunPlugin(%s?action=tools_unlikeList&list_owner=%s&list_name=%s&list_id=%s)' % (sysaddon, quote_plus(i['list_owner']), quote_plus(i['list_name']), i['list_id'])))
 				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=show&url=%s)' % (sysaddon, quote_plus(i['url']))))
 				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 				try:
@@ -902,6 +965,7 @@ class TVshows:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowsToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
+
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
@@ -911,6 +975,25 @@ class TVshows:
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
+
+		try:
+			if not items: raise Exception()
+			url = items[0].get('next', '')
+			if url == '': raise Exception()
+			url_params = dict(parse_qsl(urlsplit(url).query))
+			nextMenu = control.lang(32053)
+			page = '  [I](%s)[/I]' % url_params.get('page')
+			nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
+			icon = control.addonNext()
+			url = '%s?action=tv_PublicLists&url=%s' % (sysaddon, quote_plus(url))
+			item = control.item(label=nextMenu, offscreen=True)
+			item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
+			item.setProperty ('SpecialSort', 'bottom')
+			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
 		skin = control.skin
 		if skin == 'skin.arctic.horizon': pass
 		elif skin in ['skin.estuary', 'skin.aeon.nox.silvo']: content = ''

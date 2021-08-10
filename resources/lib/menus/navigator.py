@@ -74,8 +74,6 @@ class Navigator:
 			self.addDirectoryItem(32445 if self.indexLabels else 32444, 'movies&url=traktrecommendations', 'trakt.png' if self.iconLogos else 'highly-rated.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.imdb.featured'):
 			self.addDirectoryItem(32447 if self.indexLabels else 32446, 'movies&url=featured', 'imdb.png' if self.iconLogos else 'movies.png', 'movies.png')
-		if control.getMenuEnabled('navi.movie.collections'):
-			self.addDirectoryItem(32000, 'collections_Navigator', 'boxsets.png', 'DefaultSets.png')
 		if control.getMenuEnabled('navi.movie.imdb.oscarwinners'):
 			self.addDirectoryItem(32452 if self.indexLabels else 32451, 'movies&url=oscars', 'imdb.png' if self.iconLogos else 'oscar-winners.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.imdb.oscarnominees'):
@@ -90,6 +88,12 @@ class Navigator:
 			self.addDirectoryItem(32462 if self.indexLabels else 32461, 'movieLanguages', 'imdb.png' if self.iconLogos else 'languages.png', 'DefaultAddonLanguage.png')
 		if control.getMenuEnabled('navi.movie.imdb.certificates'):
 			self.addDirectoryItem(32464 if self.indexLabels else 32463, 'movieCertificates', 'imdb.png' if self.iconLogos else 'certificates.png', 'DefaultMovies.png')
+		if control.getMenuEnabled('navi.movie.collections'):
+			self.addDirectoryItem(32000, 'collections_Navigator', 'boxsets.png', 'DefaultSets.png')
+		if control.getMenuEnabled('navi.movie.trakt.popularList'):
+			self.addDirectoryItem(32418, 'movies_PublicLists&url=trakt_popularLists', 'trakt.png' if self.iconLogos else 'movies.png', 'DefaultMovies.png')
+		if control.getMenuEnabled('navi.movie.trakt.trendingList'):
+			self.addDirectoryItem(32419, 'movies_PublicLists&url=trakt_trendingLists', 'trakt.png' if self.iconLogos else 'movies.png', 'DefaultMovies.png')
 		if not lite:
 			if control.getMenuEnabled('mylists.widget'): self.addDirectoryItem(32003, 'mymovieliteNavigator', 'mymovies.png', 'DefaultMovies.png')
 			self.addDirectoryItem(33044, 'moviePerson', 'imdb.png' if self.iconLogos else 'people-search.png', 'DefaultAddonsSearch.png', isFolder=False)
@@ -151,6 +155,10 @@ class Navigator:
 			self.addDirectoryItem(32476 if self.indexLabels else 32475, 'tvshows&url=premiere', 'imdb.png' if self.iconLogos else 'new-tvshows.png', 'DefaultRecentlyAddedEpisodes.png')
 		if control.getMenuEnabled('navi.tv.tvmaze.calendar'):
 			self.addDirectoryItem(32450 if self.indexLabels else 32027, 'calendars', 'tvmaze.png' if self.iconLogos else 'calendar.png', 'DefaultYear.png')
+		if control.getMenuEnabled('navi.tv.trakt.popularList'):
+			self.addDirectoryItem(32418, 'tv_PublicLists&url=trakt_popularLists', 'trakt.png' if self.iconLogos else 'movies.png', 'DefaultMovies.png')
+		if control.getMenuEnabled('navi.tv.trakt.trendingList'):
+			self.addDirectoryItem(32419, 'tv_PublicLists&url=trakt_trendingLists', 'trakt.png' if self.iconLogos else 'movies.png', 'DefaultMovies.png')
 		if not lite:
 			if control.getMenuEnabled('mylists.widget'):
 				self.addDirectoryItem(32004, 'mytvliteNavigator', 'mytvshows.png', 'DefaultTVShows.png')

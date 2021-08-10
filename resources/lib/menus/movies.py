@@ -8,7 +8,7 @@ from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
-from resources.lib.database import cache, metacache, fanarttv_cache
+from resources.lib.database import cache, metacache, fanarttv_cache, traktsync
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
@@ -101,6 +101,9 @@ class Movies:
 		self.traktboxoffice_link = 'https://api.trakt.tv/movies/boxoffice'
 		self.traktpopular_link = 'https://api.trakt.tv/movies/popular?limit=%s&page=1' % self.page_limit
 		self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/movies?limit=40'
+		self.trakt_popularLists_link = 'https://api.trakt.tv/lists/popular?limit=%s&page=1' % self.page_limit
+		self.trakt_trendingLists_link = 'https://api.trakt.tv/lists/trending?limit=%s&page=1' % self.page_limit
+		self.trakt_publicLists_link = 'https://api.trakt.tv/lists/%s/items/movies?limit=%s&page=1' % ('%s', self.page_limit)
 
 	def get(self, url, idx=True, create_directory=True):
 		self.list = []
@@ -163,6 +166,24 @@ class Movies:
 				self.list = cache.get(tmdb_indexer.Movies().tmdb_list, duration, url)
 			if self.list is None: self.list = []
 			if idx: self.movieDirectory(self.list)
+			return self.list
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			if not self.list:
+				control.hide()
+				if self.notifications: control.notification(title=32001, message=33049)
+
+	def getTraktPublicLists(self, url, create_directory=True):
+		self.list = []
+		try:
+			try: url = getattr(self, url + '_link')
+			except: pass
+			if '/popular' in url:
+				self.list = cache.get(self.trakt_public_list, 168, url)
+			elif '/trending' in url:
+				self.list = cache.get(self.trakt_public_list, 48, url)
+			if create_directory: self.addDirectory(self.list)
 			return self.list
 		except:
 			from resources.lib.modules import log_utils
@@ -254,7 +275,7 @@ class Movies:
 		if sort == 1: tmdb_sort = 'title'
 		if sort in [2, 3]: tmdb_sort = 'vote_average'
 		if sort in [4, 5, 6]: tmdb_sort = 'release_date'
-		tmdb_sort_order = '.asc' if int(control.setting('sort.movies.order')) == 0 else '.desc'
+		tmdb_sort_order = '.asc' if (int(control.setting('sort.movies.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
 		return sort_string
 
@@ -545,7 +566,7 @@ class Movies:
 			try:
 				try: name = item['list']['name']
 				except: name = item['name']
-				name = client.replaceHTMLCodes(name)
+				name = client.replaceHTMLCodes(name) # check...shouldn't be html codes in api response
 				try: url = (trakt.slug(item['list']['user']['username']), item['list']['ids']['slug'])
 				except: url = ('me', item['ids']['slug'])
 				url = self.traktlist_link % url
@@ -554,6 +575,37 @@ class Movies:
 				from resources.lib.modules import log_utils
 				log_utils.error()
 		self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
+		return self.list
+
+	def trakt_public_list(self, url):
+		try:
+			result = trakt.getTrakt(url)
+			items = jsloads(result)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+		try:
+			q = dict(parse_qsl(urlsplit(url).query))
+			if int(q['limit']) != len(items): raise Exception()
+			q.update({'page': str(int(q['page']) + 1)})
+			q = (urlencode(q)).replace('%2C', ',')
+			next = url.replace('?' + urlparse(url).query, '') + '?' + q
+		except: next = ''
+
+		for item in items:
+			try:
+				list_item = item.get('list', {})
+				list_name = list_item.get('name', '')
+				list_id = list_item.get('ids', {}).get('trakt', '')
+				list_owner = list_item.get('user', {}).get('username', '')
+				list_url = self.trakt_publicLists_link % list_id
+				# results = trakt.getTrakt(list_url)
+				# if not results or results == '[]': continue
+				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
+				self.list.append({'name': label , 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'movies'})
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
 		return self.list
 
 	def imdb_list(self, url, isRatinglink=False):
@@ -744,7 +796,7 @@ class Movies:
 		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
 		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
 		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
-
+		rescrapeMenu, findSimilarMenu = control.lang(32185), control.lang(32184)
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -804,9 +856,9 @@ class Movies:
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-				cm.append(('Rescrape Item', 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+				cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
-				cm.append(('Find similar', 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
+				cm.append((findSimilarMenu, 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
@@ -868,6 +920,7 @@ class Movies:
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
 		queueMenu, playRandom, addToLibrary = control.lang(32065), control.lang(32535), control.lang(32551)
+		likeMenu, unlikeMenu = control.lang(32186), control.lang(32187)
 		for i in items:
 			try:
 				content = i.get('content', '')
@@ -885,7 +938,15 @@ class Movies:
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
+
 				cm = []
+				if ('/lists/popular' or '/lists/trending' in url) and self.traktCredentials:
+					liked = traktsync.fetch_liked_list(i['list_id'])
+					if not liked:
+						cm.append((likeMenu, 'RunPlugin(%s?action=tools_likeList&list_owner=%s&list_name=%s&list_id=%s)' % (sysaddon, quote_plus(i['list_owner']), quote_plus(i['list_name']), i['list_id'])))
+					else:
+						name = '[COLOR %s][Liked][/COLOR] %s' % (self.highlight_color, name)
+						cm.append((unlikeMenu, 'RunPlugin(%s?action=tools_unlikeList&list_owner=%s&list_name=%s&list_id=%s)' % (sysaddon, quote_plus(i['list_owner']), quote_plus(i['list_name']), i['list_id'])))
 				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=movie&url=%s)' % (sysaddon, quote_plus(i['url']))))
 				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 				try:
@@ -893,6 +954,7 @@ class Movies:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_moviesToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
+
 				item = control.item(label=name, offscreen=True)
 				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
@@ -902,6 +964,25 @@ class Movies:
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
+
+		try:
+			if not items: raise Exception()
+			url = items[0].get('next', '')
+			if url == '': raise Exception()
+			url_params = dict(parse_qsl(urlsplit(url).query))
+			nextMenu = control.lang(32053)
+			page = '  [I](%s)[/I]' % url_params.get('page')
+			nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
+			icon = control.addonNext()
+			url = '%s?action=movies_PublicLists&url=%s' % (sysaddon, quote_plus(url))
+			item = control.item(label=nextMenu, offscreen=True)
+			item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
+			item.setProperty ('SpecialSort', 'bottom')
+			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
 		skin = control.skin
 		if skin == 'skin.arctic.horizon': pass
 		elif skin in ['skin.estuary', 'skin.aeon.nox.silvo']: content = ''

@@ -36,85 +36,70 @@ def router(params):
 	####################################################
 	#---MOVIES
 	####################################################
+	# elif action and action.startswith('movies_'):
 	elif action == 'movieNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().movies()
-
 	elif action == 'movieliteNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().movies(lite=True)
-
 	elif action == 'mymovieNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().mymovies()
-
 	elif action == 'mymovieliteNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().mymovies(lite=True)
-
 	elif action == 'movies':
 		from resources.lib.menus import movies
 		movies.Movies().get(url)
-
 	elif action == 'moviePage':
 		from resources.lib.menus import movies
 		movies.Movies().get(url)
-
 	elif action == 'tmdbmovies':
 		from resources.lib.menus import movies
 		movies.Movies().getTMDb(url)
-
 	elif action == 'tmdbmoviePage':
 		from resources.lib.menus import movies
 		movies.Movies().getTMDb(url)
-
 	elif action == 'movieSearch':
 		from resources.lib.menus import movies
 		movies.Movies().search()
-
 	elif action == 'movieSearchnew':
 		from resources.lib.menus import movies
 		movies.Movies().search_new()
-
 	elif action == 'movieSearchterm':
 		from resources.lib.menus import movies
 		movies.Movies().search_term(name)
-
 	elif action == 'moviePerson':
 		from resources.lib.menus import movies
 		movies.Movies().person()
-
 	elif action == 'movieGenres':
 		from resources.lib.menus import movies
 		movies.Movies().genres()
-
 	elif action == 'movieLanguages':
 		from resources.lib.menus import movies
 		movies.Movies().languages()
-
 	elif action == 'movieCertificates':
 		from resources.lib.menus import movies
 		movies.Movies().certifications()
-
 	elif action == 'movieYears':
 		from resources.lib.menus import movies
 		movies.Movies().years()
-
 	elif action == 'moviePersons':
 		from resources.lib.menus import movies
 		movies.Movies().persons(url)
-
 	elif action == 'moviesUnfinished':
 		from resources.lib.menus import movies
 		movies.Movies().unfinished(url)
-
 	elif action == 'movieUserlists':
 		from resources.lib.menus import movies
 		movies.Movies().userlists()
-
 	elif action == 'movies_traktUnfinishedManager':
 		from resources.lib.menus import movies
 		movies.Movies().unfinishedManager()
+	elif action == 'movies_PublicLists':
+		from resources.lib.menus import movies
+		movies.Movies().getTraktPublicLists(url)
 
 	####################################################
 	#---Collections
@@ -252,6 +237,10 @@ def router(params):
 	elif action == 'tvOriginals':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().originals()
+
+	elif action == 'tv_PublicLists':
+		from resources.lib.menus import tvshows
+		tvshows.TVshows().getTraktPublicLists(url)
 
 	elif action == 'shows_traktHiddenManager':
 		from resources.lib.menus import tvshows
@@ -536,18 +525,26 @@ def router(params):
 			watched = (params.get('watched') == 'True') if params.get('watched') else None
 			unfinished = (params.get('unfinished') == 'True') if params.get('unfinished') else False
 			trakt.manager(name, imdb, tvdb, season, episode, watched=watched, unfinished=unfinished)
-		elif action == 'tools_cachesyncMovies':
+
+		elif action == 'tools_likeList':
 			from resources.lib.modules import trakt
-			trakt.cachesyncMovies(int(params.get('timeout')))
-		elif action == 'tools_cachesyncTVShows':
+			trakt.like_list(params.get('list_owner'), params.get('list_name'), params.get('list_id'))
+
+		elif action == 'tools_unlikeList':
 			from resources.lib.modules import trakt
-			trakt.cachesyncTVShows(int(params.get('timeout')))
-		elif action == 'tools_syncTraktProgress':
+			trakt.unlike_list(params.get('list_owner'), params.get('list_name'), params.get('list_id'))
+
+	####################################################
+	#---Service
+	####################################################
+	elif action and action.startswith('service_'):
+		if action == 'service_syncTrakt':
 			from resources.lib.modules import trakt
-			trakt.sync_progress()
-		elif action == 'tools_syncTraktWatched':
-			from resources.lib.modules import trakt
-			trakt.sync_watched()
+			trakt.trakt_service_sync()
+
+		elif action == 'service_library':
+			from resources.lib.modules import library
+			library.lib_tools().service()
 
 	####################################################
 	#---Play
@@ -787,9 +784,9 @@ def router(params):
 		elif action == 'library_setup':
 			from resources.lib.modules import library
 			library.lib_tools().total_setup()
-		elif action == 'library_service':
-			from resources.lib.modules import library
-			library.lib_tools().service()
+		# elif action == 'library_service':
+			# from resources.lib.modules import library
+			# library.lib_tools().service()
 
 	####################################################
 	#---Cache

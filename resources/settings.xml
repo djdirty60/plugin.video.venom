@@ -28,6 +28,8 @@
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdb_sorting)" />
 		<setting id="sort.movies.type" type="select" label="35190" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" />
 		<setting id="sort.movies.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
+		<setting id="sort.collections.type" type="select" label="35192" lvalues="33564|33039|35187|35391" default="3" />
+		<setting id="sort.collections.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
 		<setting id="sort.movies.watchlist.type" type="select" label="35574" lvalues="33564|33039|35187|35188|35391|35392|35393" default="5" />
 		<setting id="sort.movies.watchlist.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
 	</category>
@@ -58,8 +60,6 @@
 		<setting id="navi.movie.trakt.trending" type="bool" label="32443" default="true" />
 		<setting id="navi.movie.trakt.recommended" type="bool" label="32445" default="true" />
 		<setting id="navi.movie.imdb.featured" type="bool" label="32447" default="true" />
-		<setting id="navi.movie.collections" type="bool" label="32000" default="true" />
-		<setting id="navi.xmascollections" subsetting="true" type="bool" label="40064" enable="eq(-1,true)" default="false" />
 		<setting id="navi.movie.imdb.oscarwinners" type="bool" label="32452" default="true" />
 		<setting id="navi.movie.imdb.oscarnominees" type="bool" label="32454" default="true" />
 		<setting id="navi.movie.imdb.genres" type="bool" label="32456" default="true" />
@@ -67,6 +67,10 @@
 		<setting id="navi.movie.imdb.people" type="bool" label="32460" default="true" />
 		<setting id="navi.movie.imdb.languages" type="bool" label="32462" default="true" />
 		<setting id="navi.movie.imdb.certificates" type="bool" label="32464" default="true" />
+		<setting id="navi.movie.collections" type="bool" label="32000" default="true" />
+		<setting id="navi.xmascollections" subsetting="true" type="bool" label="40064" enable="eq(-1,true)" default="false" />
+		<setting id="navi.movie.trakt.popularList" type="bool" label="32418" default="true" />
+		<setting id="navi.movie.trakt.trendingList" type="bool" label="32419" default="true" />
 		<setting type="lsep" label="32002" />
 		<setting id="navi.originals" type="bool" label="40069" default="false" />
 		<setting id="navi.tv.imdb.popular" type="bool" label="32429" default="true" />
@@ -87,6 +91,8 @@
 		<setting id="navi.tv.imdb.returningtvshows" type="bool" label="32474" default="true" />
 		<setting id="navi.tv.imdb.newtvshows" type="bool" label="32476" default="true" />
 		<setting id="navi.tv.tvmaze.calendar" type="bool" label="32450" default="true" />
+		<setting id="navi.tv.trakt.popularList" type="bool" label="32418" default="true" />
+		<setting id="navi.tv.trakt.trendingList" type="bool" label="32419" default="true" />
 	</category>
 
 	<!-- TV Shows - 2 -->
@@ -208,19 +214,20 @@
 		<setting id="trakt.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,)" />
 		<setting id="trakt.general.notifications" type="bool" label="33052" default="true" visible="!eq(-5,)" />
 		<setting id="tvshows.direct" type="bool" label="35492" default="false" visible="!eq(-6,)" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=directProgress)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=directProgress)" visible="!eq(-7,)" />
 		<setting id="trakt.rating" type="enum" label="35187" lvalues="33564|35547" default="0" visible="!eq(-8,)" />
 		<setting id="trakt.scrobble" type="bool" label="32097" default="false" visible="!eq(-9,)" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=Trakt_Scrobble)" visible="!eq(-1,)" />
-		<setting id="trakt.scrobble.notify" type="bool" label="32099" default="false" visible="!eq(-11,) + eq(-2,true)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=Trakt_Scrobble)" visible="eq(-1,true)" />
+		<setting id="trakt.scrobble.notify" type="bool" label="32099" subsetting="true" default="false" visible="!eq(-11,) + eq(-2,true)" />
 		<setting id="resume.source" type="enum" label="32095" lvalues="32314|32096" default="0" visible="!eq(-12,) + eq(-3,true)" />
-		<setting id="trakt.progress.showunaired" type="bool" label="32572" default="false" visible="!eq(-13,)" />
-		<setting id="trakt.UpcomingProgress.prependDate" type="bool" label="32573" default="true" visible="!eq(-14,)" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=UpcomingProgressPrependDate)" />
+		<setting id="resume.source.alt" type="enum" label="32095" lvalues="32314" default="0" visible="!eq(-13,) + !eq(-3,true)" />
+		<setting id="trakt.progress.showunaired" type="bool" label="32572" default="false" visible="!eq(-14,)" />
+		<setting id="trakt.UpcomingProgress.prependDate" type="bool" label="32573" default="true" visible="!eq(-15,)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=UpcomingProgressPrependDate)" visible="!eq(-16,)" />
 		<setting type="lsep" label="35057" />
-		<setting id="trakt.HiddenManager.hideWatched" type="bool" label="32183" default="false" visible="!eq(-17,)" />
+		<setting id="trakt.HiddenManager.hideWatched" type="bool" label="32183" default="false" visible="!eq(-18,)" />
 		<setting type="lsep" label="32645" />
-		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-19,)" />
+		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-20,)" />
 		<setting id="schedTraktTime" type="slider" label="32647" default="0" range="0,24" option="int" enable="eq(-1,true)" />
 		<setting id="trakt.message2" type="text" label="32648" default="" enable="false" />
 	</category>

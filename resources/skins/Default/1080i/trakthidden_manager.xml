@@ -21,6 +21,15 @@
 				<width>1350</width>
 				<height>800</height>
 			</control>
+			<control type="progress" id="2046">
+				<top>800</top>
+				<left>0</left>
+				<width>1350</width>
+				<height>7</height>
+				<reveal>true</reveal>
+				<texturebg colordiffuse="FF302F2F">common/white.png</texturebg>
+				<midtexture colordiffuse="FFFF4081">common/white.png</midtexture>
+			</control>
 			<control type="button" id="2045">
 				<description>Stop Trailer playback Button</description>
 				<onright>2045</onright>

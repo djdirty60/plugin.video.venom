@@ -759,10 +759,30 @@ msgid "Hide fully watched shows"
 msgstr ""
 
 msgctxt "#32184"
-msgid ""
+msgid "Find similar"
 msgstr ""
 
 msgctxt "#32185"
+msgid "Rescrape Item"
+msgstr ""
+
+msgctxt "#32186"
+msgid "Like List"
+msgstr ""
+
+msgctxt "#32187"
+msgid "UnLike List"
+msgstr ""
+
+msgctxt "#32188"
+msgid ""
+msgstr ""
+
+msgctxt "#32189"
+msgid ""
+msgstr ""
+
+msgctxt "#32190"
 msgid ""
 msgstr ""
 
@@ -1242,11 +1262,11 @@ msgid ""
 msgstr ""
 
 msgctxt "#32418"
-msgid ""
+msgid "Trakt Popular Lists"
 msgstr ""
 
 msgctxt "#32419"
-msgid ""
+msgid "Trakt Trending Lists"
 msgstr ""
 
 msgctxt "#32420"
@@ -2774,7 +2794,7 @@ msgstr ""
 
 
 msgctxt "#33648"
-msgid "Date Sorting"
+msgid ""
 msgstr ""
 
 msgctxt "#33649"
@@ -3157,7 +3177,7 @@ msgid "Show Sorting"
 msgstr ""
 
 msgctxt "#35192"
-msgid "Documentary Sorting"
+msgid "Collections Sorting"
 msgstr ""
 
 msgctxt "#35193"

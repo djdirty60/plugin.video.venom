@@ -233,7 +233,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			netloc = '%s://%s' % (urlparse(url).scheme, urlparse(url).netloc)
 			ua = headers['User-Agent']
 			headers['Cookie'] = cache.get(bfcookie().get, 168, netloc, ua, timeout)
-			result = _basic_request(url, headers=headers, post=post, timeout=timeout, limit=limit)
+			result = _basic_request(url, headers=headers, post=post, method='POST', timeout=timeout, limit=limit)
 		if output == 'extended':
 			try:
 				response_headers = dict([(item[0].title(), item[1]) for item in list(response.info().items())]) # behaves differently 18 to 19. 18 I had 3 "Set-Cookie:" it combined all 3 values into 1 key. In 19 only the last keys value was present.
@@ -257,14 +257,14 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 		log_utils.error('Request-Error url=(%s)' % url)
 		return None
 
-def _basic_request(url, headers=None, post=None, timeout='30', limit=None):
+def _basic_request(url, headers=None, post=None, method='GET', timeout='30', limit=None, ret_code=None):
 	try:
 		try: headers.update(headers)
 		except: headers = {}
-		req = urllib2.Request(url, data=post)
+		req = urllib2.Request(url, data=post, method=method)
 		_add_request_header(req, headers)
 		response = urllib2.urlopen(req, timeout=int(timeout))
-		return _get_result(response, limit)
+		return _get_result(response, limit, ret_code)
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -283,8 +283,9 @@ def _add_request_header(_request, headers):
 		from resources.lib.modules import log_utils
 		log_utils.error()
 
-def _get_result(response, limit=None):
+def _get_result(response, limit=None, ret_code=None):
 	try:
+		if ret_code: return response.code
 		if limit == '0': result = response.read(224 * 1024)
 		elif limit: result = response.read(int(limit) * 1024)
 		else: result = response.read(5242880)

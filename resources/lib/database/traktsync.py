@@ -124,6 +124,93 @@ def last_paused_at():
 		dbcur.close() ; dbcon.close()
 	return last_paused
 
+def fetch_liked_list(trakt_id):
+	liked_list = ''
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='liked_lists';''').fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+			dbcur.connection.commit()
+			dbcur.close() ; dbcon.close()
+			return liked_list
+		try:
+			match = dbcur.execute('''SELECT * FROM liked_lists WHERE trakt_id=?''', (trakt_id,)).fetchone()
+			liked_list = match[2]
+		except: pass
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return liked_list
+
+def insert_liked_lists(items):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		for item in items:
+			try:
+				list_item = item.get('list', {})
+				list_owner = list_item.get('user', {}).get('username', '')
+				list_name = list_item.get('name', '')
+				trakt_id = list_item.get('ids', {}).get('trakt', '')
+				item_count = list_item.get('item_count', '')
+				likes = list_item.get('likes', '')
+				dbcur.execute('''INSERT OR REPLACE INTO liked_lists Values (?, ?, ?, ?, ?)''', (list_owner, list_name, trakt_id, item_count, likes))
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_liked_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+
+def delete_liked_list(trakt_id):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='liked_lists';''').fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+			dbcur.connection.commit()
+			return
+		dbcur.execute('''DELETE FROM liked_lists WHERE trakt_id=?''', (trakt_id,))
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_liked_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+
+def last_liked_at():
+	last_liked = 0
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='service';''').fetchone()
+		if ck_table:
+			match = dbcur.execute('''SELECT * FROM service WHERE setting="last_liked_at";''').fetchone()
+			if match: last_liked = int(cleandate.iso_2_utc(match[1]))
+			else: dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_liked_at', '1970-01-01T20:00:00.000Z'))
+		else: dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return last_liked
+
 def get_connection():
 	if not existsPath(dataPath): makeFile(dataPath)
 	dbcon = db.connect(traktSyncFile, timeout=60) # added timeout 3/23/21 for concurrency with threads

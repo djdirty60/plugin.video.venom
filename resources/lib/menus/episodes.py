@@ -764,7 +764,7 @@ class Episodes:
 			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		traktManagerMenu, playlistManagerMenu, queueMenu = control.lang(32070), control.lang(35522), control.lang(32065)
 		tvshowBrowserMenu, addToLibrary = control.lang(32071), control.lang(32551)
-		clearSourcesMenu = control.lang(32611)
+		clearSourcesMenu, rescrapeMenu = control.lang(32611), control.lang(32185)
 		for i in items:
 			try:
 				tvshowtitle, title, imdb, tmdb, tvdb = i.get('tvshowtitle'), i.get('title'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', '')
@@ -875,7 +875,7 @@ class Episodes:
 				if not isFolder:
 					if traktProgress: cm.append((progressMenu, 'Container.Update(%s)' % Folderurl))
 					cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-					cm.append(('Rescrape Item', 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+					cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
 										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))

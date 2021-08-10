@@ -29,6 +29,7 @@ databaseName = control.cacheFile
 databaseTable = 'trakt'
 highlight_color = control.getHighlightColor()
 
+
 def getTrakt(url, post=None, extended=False):
 	try:
 		if not url.startswith(BASE_URL): url = urljoin(BASE_URL, url)
@@ -126,6 +127,7 @@ def re_auth(headers):
 
 			token, refresh = result['access_token'], result['refresh_token']
 			expires = str(time() + 7776000)
+			control.setSetting('trakt.isauthed', 'true')
 			control.setSetting('trakt.token', token)
 			control.setSetting('trakt.refresh', refresh)
 			control.setSetting('trakt.expires', expires)
@@ -272,6 +274,30 @@ def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 		if season and not episode: name = '%s-Season%s...' % (name, season)
 		if season and episode: name = '%s-S%sxE%02d...' % (name, season, int(episode))
 		control.notification(title=32315, message=control.lang(35503) % name)
+
+def like_list(list_owner, list_name, list_id):
+	try:
+		headers['Authorization'] = 'Bearer %s' % control.addon('script.module.myaccounts').getSetting('trakt.token')
+		resp_code = client._basic_request('https://api.trakt.tv/users/%s/lists/%s/like' % (list_owner, list_id), headers=headers, method='POST', ret_code=True)
+		if resp_code == 204:
+			control.notification(title=32315, message='Successfuly Liked list:  [COLOR %s]%s[/COLOR]' % (highlight_color, list_name))
+			sync_liked_lists()
+		else: control.notification(title=32315, message='Failed to Like list %s' % list_name)
+		control.refresh()
+	except:
+		log_utils.error()
+
+def unlike_list(list_owner, list_name, list_id):
+	try:
+		headers['Authorization'] = 'Bearer %s' % control.addon('script.module.myaccounts').getSetting('trakt.token')
+		resp_code = client._basic_request('https://api.trakt.tv/users/%s/lists/%s/like' % (list_owner, list_id), headers=headers, method='DELETE', ret_code=True)
+		if resp_code == 204:
+			control.notification(title=32315, message='Successfuly Unliked list:  [COLOR %s]%s[/COLOR]' % (highlight_color, list_name))
+			traktsync.delete_liked_list(list_id)
+		else: control.notification(title=32315, message='Failed to UnLike list %s' % list_name)
+		control.refresh()
+	except:
+		log_utils.error()
 
 def rate(imdb=None, tvdb=None, season=None, episode=None):
 	return _rating(action='rate', imdb=imdb, tvdb=tvdb, season=season, episode=episode)
@@ -629,28 +655,22 @@ def getPausedActivity():
 	except:
 		log_utils.error()
 
+def getListActivity():
+	try:
+		i = getTraktAsJson('/sync/last_activities')
+		if not i: return 0
+		activity = []
+		activity.append(i['lists']['liked_at'])
+		activity.append(i['lists']['updated_at'])
+		activity = [int(cleandate.iso_2_utc(i)) for i in activity]
+		activity = sorted(activity, key=int)[-1]
+		return activity
+	except:
+		log_utils.error()
+
 def cachesyncMovies(timeout=0):
 	indicators = cache.get(syncMovies, timeout)
 	return indicators
-
-def sync_watched():
-	try:
-		while not control.monitor.abortRequested():
-			moviesWatchedActivity = getMoviesWatchedActivity()
-			db_movies_last_watched = timeoutsyncMovies()
-			episodesWatchedActivity = getEpisodesWatchedActivity()
-			db_episoodes_last_watched = timeoutsyncTVShows()
-			if moviesWatchedActivity > db_movies_last_watched:
-				log_utils.log('Trakt Watched Movie Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
-								(str(db_movies_last_watched), str(moviesWatchedActivity)), __name__, log_utils.LOGDEBUG)
-				cachesyncMovies()
-			if episodesWatchedActivity > db_episoodes_last_watched:
-				log_utils.log('Trakt Watched Episodes Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
-								(str(db_episoodes_last_watched), str(episodesWatchedActivity)), __name__, log_utils.LOGDEBUG)
-				cachesyncTVShows()
-			if control.monitor.waitForAbort(60*15): break
-	except:
-		log_utils.error()
 
 def timeoutsyncMovies():
 	timeout = cache.timeout(syncMovies)
@@ -1042,6 +1062,7 @@ def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 		log_utils.error()
 
 def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True, widgetRefresh=False):
+	if not getTraktCredentialsInfo(): return
 	control.busy()
 	try:
 		type = 'movie' if not episode else 'episode'
@@ -1100,17 +1121,56 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 		log_utils.error()
 		return False
 
+#############    SERVICE SYNC    ######################
+def trakt_service_sync():
+	while not control.monitor.abortRequested():
+		if getTraktCredentialsInfo: # run service in case user auth's trakt later
+			if control.setting('bookmarks') == 'true' and control.setting('resume.source') == '1':
+				sync_progress()
+			if control.setting('indicators.alt') == '1':
+				sync_watched()
+			sync_liked_lists()
+		if control.monitor.waitForAbort(60*15): break
+
 def sync_progress():
 	try:
-		while not control.monitor.abortRequested():
-			db_last_paused = traktsync.last_paused_at()
-			activity = getPausedActivity()
-			if activity - db_last_paused >= 120: # do not sync unless 2 min difference or more
-				log_utils.log('Trakt Progress Sync Update...(local db latest "paused_at" = %s, trakt api latest "paused_at" = %s)' % \
-									(str(db_last_paused), str(activity)), __name__, log_utils.LOGDEBUG)
-				link = '/sync/playback/'
-				items = getTraktAsJson(link)
-				if items: traktsync.insert_bookmarks(items)
-			if control.monitor.waitForAbort(60*15): break
+		db_last_paused = traktsync.last_paused_at()
+		activity = getPausedActivity()
+		if activity - db_last_paused >= 120: # do not sync unless 2 min difference or more
+			log_utils.log('Trakt Progress Sync Update...(local db latest "paused_at" = %s, trakt api latest "paused_at" = %s)' % \
+								(str(db_last_paused), str(activity)), __name__, log_utils.LOGDEBUG)
+			link = '/sync/playback/'
+			items = getTraktAsJson(link)
+			if items: traktsync.insert_bookmarks(items)
+	except:
+		log_utils.error()
+
+def sync_watched():
+	try:
+		moviesWatchedActivity = getMoviesWatchedActivity()
+		db_movies_last_watched = timeoutsyncMovies()
+		episodesWatchedActivity = getEpisodesWatchedActivity()
+		db_episoodes_last_watched = timeoutsyncTVShows()
+		if moviesWatchedActivity > db_movies_last_watched:
+			log_utils.log('Trakt Watched Movie Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
+							(str(db_movies_last_watched), str(moviesWatchedActivity)), __name__, log_utils.LOGDEBUG)
+			cachesyncMovies()
+		if episodesWatchedActivity > db_episoodes_last_watched:
+			log_utils.log('Trakt Watched Episodes Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
+							(str(db_episoodes_last_watched), str(episodesWatchedActivity)), __name__, log_utils.LOGDEBUG)
+			cachesyncTVShows()
+	except:
+		log_utils.error()
+
+def sync_liked_lists():
+	try:
+		db_last_liked = traktsync.last_liked_at()
+		listActivity = getListActivity()
+		if listActivity > db_last_liked:
+			log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
+								(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
+			link = '/users/likes/lists?limit=1000000'
+			items = getTraktAsJson(link)
+			traktsync.insert_liked_lists(items)
 	except:
 		log_utils.error()

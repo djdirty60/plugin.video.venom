@@ -129,7 +129,7 @@ class Sources:
 				else: select = control.setting('play.mode')
 
 			title = tvshowtitle if tvshowtitle is not None else title
-			self.imdb=imdb ; self.tmdb = tmdb ; self.tvdb = tvdb ; self.title = title ; self.year = year
+			self.imdb = imdb ; self.tmdb = tmdb ; self.tvdb = tvdb ; self.title = title ; self.year = year
 			self.season = season ; self.episode = episode
 			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
 			if len(items) > 0:
@@ -191,7 +191,7 @@ class Sources:
 				# do not add IMDBNUMBER as tmdb scraper puts their id in the key value
 				meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "uniqueid", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "cast", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
 				meta = jsloads(meta)['result']['movies']
-				meta = [i for i in meta if i['uniqueid']['imdb'] == self.imdb]
+				meta = [i for i in meta if i.get('uniqueid', []).get('imdb', '') == self.imdb]
 				if meta: meta = meta[0]
 				else: raise Exception()
 				if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
@@ -212,7 +212,7 @@ class Sources:
 				# do not add IMDBNUMBER as tmdb scraper puts their id in the key value
 				show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "uniqueid", "mpaa", "year", "genre", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
 				show_meta = jsloads(show_meta)['result']['tvshows']
-				show_meta = [i for i in show_meta if i['uniqueid']['imdb'] == self.imdb]
+				show_meta = [i for i in show_meta if i.get('uniqueid', []).get('imdb', '') == self.imdb]
 				if show_meta: show_meta = show_meta[0]
 				else: raise Exception()
 				tvshowid = show_meta['tvshowid']
@@ -227,7 +227,7 @@ class Sources:
 				if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback but Kodi lib returns "0" for shows or episodes
 				if 'mpaa' not in meta: meta.update({'mpaa': show_meta.get('mpaa')})
 				if 'premiered' not in meta: meta.update({'premiered': meta.get('firstaired')})
-				if 'year' not in meta: meta.update({'year': meta.get('firstaired')[:4]})
+				if 'year' not in meta: meta.update({'year': show_meta.get('year')}) # shows year not year episode aired
 				poster = cleanLibArt(meta.get('art').get('season.poster', '')) or self.poster
 				fanart = cleanLibArt(meta.get('art').get('tvshow.fanart', '')) or self.poster
 				clearart = cleanLibArt(meta.get('art').get('tvshow.clearart', ''))
@@ -268,14 +268,7 @@ class Sources:
 			except: pass
 			try: meta = jsloads(meta)
 			except: pass
-
-			year = meta['year'] if 'year' in meta else None # year to be shows year, not season year.
-			season = meta['season'] if 'season' in meta else None
-			episode = meta['episode'] if 'episode' in meta else None
-			imdb = meta['imdb'] if 'imdb' in meta else None
-			tmdb = meta['tmdb'] if 'tmdb' in meta else None
-			tvdb = meta['tvdb'] if 'tvdb' in meta else None
-
+			# year, season, episode, imdb, tmdb, tvdb = self.year, self.season, self.episode, self.imdb, self.tmdb, self.tvdb
 			try:
 				chosen_source = jsloads(chosen_source)
 				source_index = items.index(chosen_source[0])
@@ -323,7 +316,8 @@ class Sources:
 					except: pass
 					del progressDialog
 					from resources.lib.modules import player
-					player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta)
+					# player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta)
+					player.Player().play_source(title, self.year, self.season, self.episode, self.imdb, self.tmdb, self.tvdb, self.url, meta)
 					return self.url
 				except:
 					log_utils.error()

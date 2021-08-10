@@ -33,6 +33,8 @@ class Player(xbmc.Player):
 		self.meta = {}
 		self.enable_playnext = control.setting('enable.playnext') == 'true'
 		self.playnext_time = int(control.setting('playnext.time')) or 60
+		self.traktCredentials = trakt.getTraktCredentialsInfo()
+
 
 	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta):
 		try:
@@ -43,10 +45,7 @@ class Player(xbmc.Player):
 				self.name, self.season, self.episode  = '%s (%s)' % (title, self.year), None, None
 			elif self.media_type == 'episode':
 				self.name, self.season, self.episode = '%s S%02dE%02d' % (title, int(season), int(episode)), '%01d' % int(season), '%01d' % int(episode)
-
-			self.imdb = imdb if imdb is not None else ''
-			self.tmdb = tmdb if tmdb is not None else ''
-			self.tvdb = tvdb if tvdb is not None else ''
+			self.imdb, self.tmdb, self.tvdb = imdb or '', tmdb or '', tvdb or ''
 			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
 			self.imdb_user = control.setting('imdb.user').replace('ur', '')
@@ -98,7 +97,7 @@ class Player(xbmc.Player):
 
 	def getMeta(self, meta):
 		try:
-			if not meta: raise Exception()
+			if not meta or ('videodb' in control.infoLabel('ListItem.FolderPath')): raise Exception()
 			poster = meta.get('poster3') or meta.get('poster2') or meta.get('poster') #poster2 and poster3 may not be passed anymore
 			thumb = meta.get('thumb')
 			thumb = thumb or poster or control.addonThumb()
@@ -130,7 +129,7 @@ class Player(xbmc.Player):
 			# do not add IMDBNUMBER as tmdb scraper puts their id in the key value
 			meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "uniqueid", "year", "premiered", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "cast", "plot", "plotoutline", "tagline", "thumbnail", "art", "file"]}, "id": 1}' % (self.year, str(int(self.year) + 1), str(int(self.year) - 1)))
 			meta = jsloads(meta)['result']['movies']
-			meta = [i for i in meta if i['uniqueid']['imdb'] == self.imdb]
+			meta = [i for i in meta if i.get('uniqueid', []).get('imdb', '') == self.imdb]
 			if meta: meta = meta[0]
 			else: raise Exception()
 			if 'mediatype' not in meta: meta.update({'mediatype': 'movie'})
@@ -155,6 +154,7 @@ class Player(xbmc.Player):
 			show_meta = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["title", "originaltitle", "uniqueid", "mpaa", "year", "genre", "runtime", "thumbnail", "file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
 			show_meta = jsloads(show_meta)['result']['tvshows']
 			show_meta = [i for i in show_meta if i['uniqueid']['imdb'] == self.imdb]
+			show_meta = [i for i in show_meta if i.get('uniqueid', []).get('imdb', '') == self.imdb]
 			if show_meta: show_meta = show_meta[0]
 			else: raise Exception()
 			tvshowid = show_meta['tvshowid']
@@ -169,7 +169,7 @@ class Player(xbmc.Player):
 			if 'duration' not in meta: meta.update({'duration': meta.get('runtime')}) # Trakt scrobble resume needs this for lib playback but Kodi lib returns "0" for shows or episodes
 			if 'mpaa' not in meta: meta.update({'mpaa': show_meta.get('mpaa')})
 			if 'premiered' not in meta: meta.update({'premiered': meta.get('firstaired')})
-			if 'year' not in meta: meta.update({'year': meta.get('firstaired')[:4]})
+			if 'year' not in meta: meta.update({'year': show_meta.get('year')}) # shows year not year episode aired
 			thumb = cleanLibArt(meta.get('art').get('thumb', ''))
 			season_poster = poster = cleanLibArt(meta.get('art').get('season.poster', '')) or self.poster
 			fanart = cleanLibArt(meta.get('art').get('tvshow.fanart', '')) or self.poster
@@ -316,7 +316,7 @@ class Player(xbmc.Player):
 			control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 			if self.media_length == 0: return xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGINFO)
 			Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
-			if control.setting('trakt.scrobble') == 'true':
+			if self.traktCredentials and (control.setting('trakt.scrobble') == 'true'):
 				Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode)
 			if (self.current_time / self.media_length) > .85:
 				self.libForPlayback()
@@ -331,7 +331,8 @@ class Player(xbmc.Player):
 
 	def onPlayBackEnded(self):
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
-		trakt.scrobbleReset(imdb=self.imdb, tvdb=self.tvdb, season=self.season, episode=self.episode, refresh=False)
+		if self.traktCredentials:
+			trakt.scrobbleReset(imdb=self.imdb, tvdb=self.tvdb, season=self.season, episode=self.episode, refresh=False)
 		self.libForPlayback()
 		# if control.setting('crefresh') == 'true':
 			# control.refresh()
