@@ -602,7 +602,7 @@ class Movies:
 				# results = trakt.getTrakt(list_url)
 				# if not results or results == '[]': continue
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
-				self.list.append({'name': label , 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'movies'})
+				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'movies'})
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
@@ -940,7 +940,7 @@ class Movies:
 				except: pass
 
 				cm = []
-				if ('/lists/popular' or '/lists/trending' in url) and self.traktCredentials:
+				if (i.get('list_type', '') == 'traktPulicList') and self.traktCredentials:
 					liked = traktsync.fetch_liked_list(i['list_id'])
 					if not liked:
 						cm.append((likeMenu, 'RunPlugin(%s?action=tools_likeList&list_owner=%s&list_name=%s&list_id=%s)' % (sysaddon, quote_plus(i['list_owner']), quote_plus(i['list_name']), i['list_id'])))

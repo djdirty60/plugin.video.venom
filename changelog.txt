@@ -1,4 +1,8 @@
 
+[B][COLOR red]Update - v6.1.5 - Aug. 09, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed [B]My Lists[/B] broken by previous update.[/I]
+[COLOR yellow]--[/COLOR][I] Removed left over logging.[/I]
+
 [B][COLOR red]Update - v6.1.4 - Aug. 09, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed playcount module log errors for non Trakt account users.[/I]
 [COLOR yellow]--[/COLOR][I] Note that a metahandlers update is in the works to fix issues with marking shows, season, episodes for non Trakt account users.[/I]
