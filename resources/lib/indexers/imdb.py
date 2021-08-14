@@ -240,128 +240,58 @@ class Movies:
 		list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return self.list
 
-
 	def super_info(self, i):
 		try:
 			if self.list[i]['metacache']: 	return
-			imdb = self.list[i].get('imdb') ; tmdb = self.list[i].get('tmdb')
-			try:
-				item = tmdb_indexer.Movies().get_movie_request(tmdb, imdb)  # api claims int rq'd.  But imdb_id works for movies but not looking like it does for shows
-				if not item and (not tmdb and imdb):
-					trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
-					if trakt_ids:
-						tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
-						if tmdb: item = tmdb_indexer.Movies().get_movie_request(tmdb, '')
-				if not item:
-					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
-					if results:
-						ids = results[0].get('movie').get('ids')
-						if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
-						if not imdb: imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
-						item = tmdb_indexer.Movies().get_movie_request(tmdb, imdb)
-						if not item: return
-					else: return
-			except:
-				log_utils.error()
-				return
-			title = item.get('title') or self.list[i]['title']
-			originaltitle = title
-
-#add these so sources module may not have to make a trakt api request
-			# aliases = item.get('alternative_titles').get('titles')
-			# log_utils.log('aliases = %s' % str(aliases), __name__, log_utils.LOGDEBUG)
-
-			if not imdb: imdb = str(item.get('imdb_id', '')) if item.get('imdb_id') else ''
-			if not tmdb: tmdb = str(item.get('id', '')) if item.get('id') else ''
-
-			if 'year' not in self.list[i] or not self.list[i]['year']:
-				year = str(item.get('release_date')[:4]) if item.get('release_date') else ''
-			else: year = self.list[i]['year']
-
-			if 'premiered' not in self.list[i] or not self.list[i]['premiered']:
-				premiered = item.get('release_date', '')
-			else: premiered = self.list[i]['premiered']
-
-			if premiered and year not in premiered: # hack fix for imdb vs. tmdb mismatch without a new request.
-				premiered = premiered.replace(premiered[:4], year)
-
-			if 'genre' not in self.list[i] or not self.list[i]['genre']:
-				genre = []
-				for x in item['genres']: genre.append(x.get('name'))
-			else: genre = self.list[i]['genre']
-
-			if 'duration' not in self.list[i] or not self.list[i]['duration']:
-				duration = str(item.get('runtime', '')) if item.get('runtime') else ''
-			else: duration = self.list[i]['duration']
-
-			if 'rating' not in self.list[i] or not self.list[i]['rating']:
-				rating = str(item.get('vote_average', '')) if item.get('vote_average') else ''
-			else: rating = self.list[i]['rating']
-
-			if 'votes' not in self.list[i] or not self.list[i]['votes']:
-				votes = str(item.get('vote_count', '')) if item.get('vote_count') else ''
-			else: votes = self.list[i]['votes']
-
-			if 'mpaa' not in self.list[i] or not self.list[i]['mpaa']:
-				rel_info = [x for x in item['release_dates']['results'] if x['iso_3166_1'] == 'US'][0]
+			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '')
+#### -- Missing id's lookup -- ####
+			if not tmdb and imdb:
 				try:
-					mpaa = ''
-					for cert in rel_info.get('release_dates', {}):
-						if cert['certification']: # loop thru all keys
-							mpaa = cert['certification']
-							break
-				except: mpaa = ''
-			else: mpaa = self.list[i]['mpaa']
-
-			if 'plot' not in self.list[i] or not self.list[i]['plot']:
-				plot = item.get('overview')
-			else: plot = self.list[i]['plot']
-
-			try:
-				trailer = [x for x in item['videos']['results'] if x['site'] == 'YouTube' and x['type'] == 'Trailer'][0]['key']
-				trailer = control.trailer % trailer
-			except: trailer = ''
-
-			director = writer = ''
-			poster3 = fanart3 = ''
-
-			castandart = []
-			for person in item['credits']['cast']:
-				try: castandart.append({'name': person['name'], 'role': person['character'], 'thumbnail': ((self.profile_path + person.get('profile_path')) if person.get('profile_path') else '')})
+					result = tmdb_indexer.Movies().IdLookup(imdb)
+					tmdb = str(result.get('id', '')) if result.get('id') else ''
+				except: tmdb = ''
+			if not tmdb and imdb:
+				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
+				if trakt_ids: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
+			if not tmdb and not imdb:
+				try:
+					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
+					if results[0]['movie']['title'] != self.list[i]['title'] or results[0]['movie']['year'] != self.list[i]['year']: return
+					ids = results[0].get('movie', {}).get('ids', {})
+					if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
+					if not imdb: imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
 				except: pass
-				if len(castandart) == 150: break
-
-			crew = item.get('credits', {}).get('crew')
-			try: director = ', '.join([d['name'] for d in [x for x in crew if x['job'] == 'Director']])
-			except: director = ''
-			try: writer = ', '.join([w['name'] for w in [y for y in crew if y['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']]])
-			except: writer = ''
-
-			poster3 = '%s%s' % (self.tmdb_poster, item['poster_path']) if item['poster_path'] else ''
-			fanart3 = '%s%s' % (self.tmdb_fanart, item['backdrop_path']) if item['backdrop_path'] else ''
-
-			try:
-				if self.lang == 'en' or self.lang not in item.get('available_translations', [self.lang]): raise Exception()
-				trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
-				title = trans_item.get('title') or title
-				plot = trans_item.get('overview') or plot
-			except:
-				log_utils.error()
-
-			item = {'title': title, 'originaltitle': originaltitle, 'year': year, 'imdb': imdb, 'tmdb': tmdb, 'premiered': premiered,
-						'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa, 'director': director,
-						'writer': writer, 'castandart': castandart, 'plot': plot, 'poster2': '', 'poster3': poster3,
-						'banner': '', 'banner2': '', 'fanart2': '', 'fanart3': fanart3, 'clearlogo': '', 'clearart': '', 'landscape': '',
-						'discart': '', 'mediatype': 'movie', 'trailer': trailer, 'metacache': False}
+#################################
+			if not tmdb: return
+			movie_meta = cache.get(tmdb_indexer.Movies().get_movie_meta, 96, tmdb)
+			if not movie_meta: return
+			values = {}
+			values.update(movie_meta)
+			if 'rating' in self.list[i] and self.list[i]['rating']: del values['rating'] #prefer trakt rating and votes if set
+			if 'votes' in self.list[i] and self.list[i]['votes']: del values['votes'] 
+			if 'year' in self.list[i] and self.list[i]['year'] != values.get('year'): del values['year'] 
+			if not imdb: imdb = values.get('imdb', '')
+			if not values.get('imdb'): values['imdb'] = imdb
+			if not values.get('tmdb'): values['tmdb'] = tmdb
+			if self.lang != 'en':
+				try:
+					# if self.lang == 'en' or self.lang not in values.get('available_translations', [self.lang]): raise Exception()
+					trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
+					if trans_item:
+						if trans_item.get('title'): values['title'] = trans_item.get('title')
+						if trans_item.get('overview'): values['plot'] =trans_item.get('overview')
+				except:
+					from resources.lib.modules import log_utils
+					log_utils.error()
 			if self.enable_fanarttv:
 				extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
-				if extended_art: item.update(extended_art)
-			if not item.get('landscape'): item.update({'landscape': fanart3})
-			item = dict((k, v) for k, v in iter(item.items()) if v is not None and and v != '')
-			self.list[i].update(item)
-			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': item}
+				if extended_art: values.update(extended_art)
+			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
+			self.list[i].update(values)
+			meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': '', 'lang': self.lang, 'user': self.user, 'item': values}
 			self.meta.append(meta)
 		except:
+			from resources.lib.modules import log_utils
 			log_utils.error()
 
 

@@ -100,6 +100,9 @@ def router(params):
 	elif action == 'movies_PublicLists':
 		from resources.lib.menus import movies
 		movies.Movies().getTraktPublicLists(url)
+	elif action == 'movies_LikedLists':
+		from resources.lib.menus import movies
+		movies.Movies().traktLlikedlists()
 
 	####################################################
 	#---Collections
@@ -245,6 +248,10 @@ def router(params):
 	elif action == 'shows_traktHiddenManager':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().traktHiddenManager()
+
+	elif action == 'shows_LikedLists':
+		from resources.lib.menus import tvshows
+		tvshows.TVshows().traktLlikedlists()
 
 	####################################################
 	#---SEASONS
@@ -619,8 +626,8 @@ def router(params):
 			if rtype == 'movie':
 				from resources.lib.menus import movies
 				rlist = movies.Movies().get(url, create_directory=False)
-				xbmc.log('movie rlist=%s' % rlist, 1)
-				xbmc.log('url=%s' % url, 1)
+				# xbmc.log('movie rlist=%s' % rlist, 1)
+				# xbmc.log('url=%s' % url, 1)
 				r = 'plugin://plugin.video.venom/?action=play_Item'
 			elif rtype == 'episode':
 				from resources.lib.menus import episodes
@@ -784,9 +791,6 @@ def router(params):
 		elif action == 'library_setup':
 			from resources.lib.modules import library
 			library.lib_tools().total_setup()
-		# elif action == 'library_service':
-			# from resources.lib.modules import library
-			# library.lib_tools().service()
 
 	####################################################
 	#---Cache

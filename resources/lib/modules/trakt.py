@@ -314,8 +314,7 @@ def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
 	try:
 		addon = 'script.trakt'
 		if control.condVisibility('System.HasAddon(%s)' % addon):
-			import imp
-			# from importlib import import_module ?
+			import importlib.util
 			data = {}
 			data['action'] = action
 			if tvdb:
@@ -336,8 +335,11 @@ def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
 				data['video_id'] = imdb
 				data['media_type'] = 'movie'
 				data['dbid'] = 4
-			script = control.joinPath(control.addonPath(addon), 'resources', 'lib', 'sqlitequeue.py')
-			sqlitequeue = imp.load_source('sqlitequeue', script) # this may be deprecated
+
+			script_path = control.joinPath(control.addonPath(addon), 'resources', 'lib', 'sqlitequeue.py')
+			spec = importlib.util.spec_from_file_location("sqlitequeue.py", script_path)
+			sqlitequeue = importlib.util.module_from_spec(spec)
+			spec.loader.exec_module(sqlitequeue)
 			data = {'action': 'manualRating', 'ratingData': data}
 			sqlitequeue.SqliteQueue().append(data)
 		else:
@@ -662,6 +664,20 @@ def getListActivity():
 		activity = []
 		activity.append(i['lists']['liked_at'])
 		activity.append(i['lists']['updated_at'])
+		activity = [int(cleandate.iso_2_utc(i)) for i in activity]
+		activity = sorted(activity, key=int)[-1]
+		return activity
+	except:
+		log_utils.error()
+
+def getProgressActivity():
+	try:
+		i = getTraktAsJson('/sync/last_activities')
+		if not i: return 0
+		activity = []
+		activity.append(i['episodes']['watched_at'])
+		activity.append(i['shows']['hidden_at'])
+		activity.append(i['seasons']['hidden_at'])
 		activity = [int(cleandate.iso_2_utc(i)) for i in activity]
 		activity = sorted(activity, key=int)[-1]
 		return activity
@@ -1128,13 +1144,16 @@ def trakt_service_sync():
 			if control.setting('bookmarks') == 'true' and control.setting('resume.source') == '1':
 				sync_progress()
 			if control.setting('indicators.alt') == '1':
-				sync_watched()
+				sync_watched() # still write to cache.db
 			sync_liked_lists()
+			sync_collection()
+			sync_hidden_progress()
+			sync_watch_list()
 		if control.monitor.waitForAbort(60*15): break
 
 def sync_progress():
 	try:
-		db_last_paused = traktsync.last_paused_at()
+		db_last_paused = traktsync.last_sync('last_paused_at')
 		activity = getPausedActivity()
 		if activity - db_last_paused >= 120: # do not sync unless 2 min difference or more
 			log_utils.log('Trakt Progress Sync Update...(local db latest "paused_at" = %s, trakt api latest "paused_at" = %s)' % \
@@ -1145,7 +1164,7 @@ def sync_progress():
 	except:
 		log_utils.error()
 
-def sync_watched():
+def sync_watched(): # still writes to cache.db, move to traktsync.db
 	try:
 		moviesWatchedActivity = getMoviesWatchedActivity()
 		db_movies_last_watched = timeoutsyncMovies()
@@ -1164,7 +1183,7 @@ def sync_watched():
 
 def sync_liked_lists():
 	try:
-		db_last_liked = traktsync.last_liked_at()
+		db_last_liked = traktsync.last_sync('last_liked_at')
 		listActivity = getListActivity()
 		if listActivity > db_last_liked:
 			log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
@@ -1172,5 +1191,50 @@ def sync_liked_lists():
 			link = '/users/likes/lists?limit=1000000'
 			items = getTraktAsJson(link)
 			traktsync.insert_liked_lists(items)
+	except:
+		log_utils.error()
+
+def sync_collection():
+	try:
+		db_last_collected = traktsync.last_sync('last_collected_at')
+		collectedActivity = getCollectedActivity()
+		if collectedActivity > db_last_collected:
+			log_utils.log('Trakt Collection Sync Update...(local db latest "collected_at" = %s, trakt api latest "collected_at" = %s)' % \
+								(str(db_last_collected), str(collectedActivity)), __name__, log_utils.LOGDEBUG)
+			link = '/users/me/collection/movies'
+			items = getTraktAsJson(link)
+			traktsync.insert_collection(items, 'movies_collection')
+			link = '/users/me/collection/shows'
+			items = getTraktAsJson(link)
+			traktsync.insert_collection(items, 'shows_collection')
+	except:
+		log_utils.error()
+
+def sync_hidden_progress():
+	try:
+		db_last_hidden = traktsync.last_sync('last_hiddenProgress_at')
+		hiddenActivity = getHiddenActivity()
+		if hiddenActivity > db_last_hidden:
+			log_utils.log('Trakt Hidden Progress Sync Update...(local db latest "hidden_at" = %s, trakt api latest "hidden_at" = %s)' % \
+								(str(db_last_hidden), str(hiddenActivity)), __name__, log_utils.LOGDEBUG)
+			link = '/users/hidden/progress_watched?limit=1000&type=show'
+			items = getTraktAsJson(link)
+			traktsync.insert_hidden_progress(items)
+	except:
+		log_utils.error()
+
+def sync_watch_list():
+	try:
+		db_last_watchList = traktsync.last_sync('last_watchlisted_at')
+		watchListActivity = getWatchedActivity()
+		if watchListActivity > db_last_watchList:
+			log_utils.log('Trakt Watch List Sync Update...(local db latest "watchlist_at" = %s, trakt api latest "watchlisted_at" = %s)' % \
+								(str(db_last_watchList), str(watchListActivity)), __name__, log_utils.LOGDEBUG)
+			link = '/users/me/watchlist/movies'
+			items = getTraktAsJson(link)
+			traktsync.insert_watch_list(items, 'movies_watchlist')
+			link = '/users/me/watchlist/shows'
+			items = getTraktAsJson(link)
+			traktsync.insert_watch_list(items, 'shows_watchlist')
 	except:
 		log_utils.error()

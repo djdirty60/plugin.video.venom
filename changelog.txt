@@ -1,7 +1,15 @@
 
+[B][COLOR red]Update - v6.1.6 - Aug. 14, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed [B]"Boxing"[/B] and [B]"Based on a True Story"[/B] lists stopped showing in [B]"Discover Movies"[/B] - [B]"Collections"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Trakt [B]"Watchlist"[/B] and [B]"Collections"[/B] for Movies and TVShows can now be paginated.  There is a new setting added in the Trakt category and is enabled by default.  To achieve this the data fetched from Trakt is now part of a new service sync and pagination occurs locally.[/I]
+[COLOR yellow]--[/COLOR][I] [B]"My Movies"[/B] and [B]"My TV Shows"[/B] now has it's own [B]"My Liked Lists"[/B] category to better group the list data.  These liked lists will no longer appear jumbled into [B]"Movie Lists"[/B] or [B]"TV Show Lists"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] The Trakt sync database has been expanded to cover users [B]hiddenProgress[/B], [B]liked_lists[/B], [B]movies_collections[/B], [B]movie_watchlist[/B], [B]shows_collections[/B], [B]shows_watchlist[/B].  This helps in speeding up the load time of lists utilizing this data and is currently still being developed.[/I]
+
+
 [B][COLOR red]Update - v6.1.5 - Aug. 09, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed [B]My Lists[/B] broken by previous update.[/I]
 [COLOR yellow]--[/COLOR][I] Removed left over logging.[/I]
+
 
 [B][COLOR red]Update - v6.1.4 - Aug. 09, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed playcount module log errors for non Trakt account users.[/I]
@@ -25,8 +33,8 @@
 
 [B][COLOR red]Update - v6.1.2 - Aug. 01, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed the Trakt Hidden Progress Manager count when the setting to hide fully watched shows is enabled.[/I]
-[COLOR yellow]--[/COLOR][I] Added a collection of Boxing Movie titles to [B]Collections[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Added a collection of movie titles based on True stories to [B]Collections[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Added a collection of [B]"Boxing"[/B] Movie titles to [B]Collections[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Added a collection of movies [B]"Based on a True Story"[/B] to [B]Collections[/B].[/I]
 
 
 [B][COLOR red]Update - v6.1.1 - July 29, 2021[/COLOR][/B]

@@ -156,8 +156,13 @@ class SourceResultsXML(BaseDialog):
 					listitem.setProperty('venom.source_dict', jsdumps([item]))
 					listitem.setProperty('venom.debrid', self.debrid_abv(item.get('debrid')))
 					listitem.setProperty('venom.provider', item.get('provider').upper())
-					if item.get('source') == 'Google Drive': item['source'] = 'direct'
+
+					if item.get('source') == 'Google Drive': # this can go once scraper updated
+						index = self.results.index(item)
+						item['source'] = 'direct'
+						self.results[index]['source'] = 'direct'
 					if item.get('provider') == 'furk': item['source'] = 'direct'
+
 					listitem.setProperty('venom.source', item.get('source').upper())
 					listitem.setProperty('venom.seeders', str(item.get('seeders')))
 					listitem.setProperty('venom.hash', item.get('hash', 'N/A'))

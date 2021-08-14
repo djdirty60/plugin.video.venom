@@ -9,7 +9,6 @@ window = control.homeWindow
 plugin = 'plugin://plugin.video.venom/'
 LOGINFO = 1
 
-
 class CheckSettingsFile:
 	def run(self):
 		try:
@@ -119,7 +118,7 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				control.homeWindow.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.1.5' # set to desired version to force any db clearing needed
+				clearDB_version = '6.1.6' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', ''))  <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)

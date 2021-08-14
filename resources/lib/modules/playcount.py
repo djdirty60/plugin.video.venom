@@ -20,7 +20,7 @@ def getMovieIndicators(refresh=False):
 	try:
 		if traktIndicators:
 			if not refresh: timeout = 720
-			elif trakt.getWatchedActivity() < trakt.timeoutsyncMovies(): timeout = 720
+			elif trakt.getMoviesWatchedActivity() < trakt.timeoutsyncMovies(): timeout = 720
 			else: timeout = 0
 			indicators = trakt.cachesyncMovies(timeout=timeout)
 			return indicators
@@ -36,7 +36,7 @@ def getTVShowIndicators(refresh=False):
 	try:
 		if traktIndicators:
 			if not refresh: timeout = 720
-			elif trakt.getWatchedActivity() < trakt.timeoutsyncTVShows(): timeout = 720
+			elif trakt.getEpisodesWatchedActivity() < trakt.timeoutsyncTVShows(): timeout = 720
 			else: timeout = 0
 			indicators = trakt.cachesyncTVShows(timeout=timeout)
 			return indicators
@@ -52,7 +52,7 @@ def getSeasonIndicators(imdb, refresh=False):
 	try:
 		if traktIndicators:
 			if not refresh: timeout = 720
-			if trakt.getWatchedActivity() < trakt.timeoutsyncSeason(imdb=imdb): timeout = 720
+			if trakt.getEpisodesWatchedActivity() < trakt.timeoutsyncSeason(imdb=imdb): timeout = 720
 			else: timeout = 0
 			indicators = trakt.cachesyncSeason(imdb=imdb, timeout=timeout)
 			return indicators
@@ -73,12 +73,6 @@ def getMovieOverlay(indicators, imdb):
 			return str(playcount)
 		else:
 			playcount = indicators._get_watched('movie', imdb, '', '')
-
-
-			# from resources.lib.modules import log_utils
-			# log_utils.log('playcount=%s' % playcount)
-
-
 			return str(playcount)
 	except:
 		from resources.lib.modules import log_utils

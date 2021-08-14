@@ -220,9 +220,9 @@ class Movies:
 		if not tmdb and not imdb: return
 		try:
 			result = None
-			if tmdb: result = cache.get(get_request, 96, self.movie_link % tmdb)
+			if tmdb: result = get_request(self.movie_link % tmdb)
 			if not result:
-				if imdb: result = cache.get(get_request, 96, self.movie_link % imdb)
+				if imdb: result = get_request(self.movie_link % imdb)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

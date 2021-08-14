@@ -775,8 +775,8 @@ msgid "UnLike List"
 msgstr "Niet-leuk-lijst"
 
 msgctxt "#32188"
-msgid ""
-msgstr ""
+msgid "Paginate Lists when possible"
+msgstr "Lijsten pagineren indien mogelijk"
 
 msgctxt "#32189"
 msgid ""

@@ -39,6 +39,10 @@ class Collections:
 		self.tmdb_link = 'https://api.themoviedb.org/4/list/%s?api_key=%s&sort_by=%s&page=1' % ('%s', self.tmdb_key, self.tmdb_sort())
 		self.imdb_link = 'https://www.imdb.com/search/title?title=%s&title_type=%s&num_votes=1000,&countries=us&languages=en&sort=%s' % ('%s', '%s', self.imdb_sort())
 
+# Boxing Movies
+		self.boxingmovies_link = self.tmdb_link % '7102952'
+# Based on true story Movies
+		self.basedontruemovies_link = self.tmdb_link % '7102955'
 # Martial Arts Movies
 		self.martialartsmovies_link = self.tmdb_link % '117973'
 # Martial Arts Actors
@@ -346,6 +350,8 @@ class Collections:
 
 	def collections_Navigator(self, lite=False):
 		self.addDirectoryItem('Movies', 'collections_Boxset', 'boxsets.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Based on a True Story', 'collections&url=basedontruemovies', 'movies.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Boxing', 'collections&url=boxingmovies', 'boxing.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Martial Arts', 'collections_MartialArts', 'martial-arts.png', 'DefaultVideoPlaylists.png')
 		if control.getMenuEnabled('navi.xmascollections'):
 			self.addDirectoryItem('Christmas Collections', 'collections&url=xmasmovies', 'boxsets.png', 'DefaultVideoPlaylists.png')

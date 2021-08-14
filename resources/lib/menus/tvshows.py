@@ -65,18 +65,15 @@ class TVshows:
 		self.trakt_link = 'https://api.trakt.tv'
 		self.search_link = 'https://api.trakt.tv/search/show?limit=%s&page=1&query=' % self.search_page_limit
 		self.traktlist_link = 'https://api.trakt.tv/users/%s/lists/%s/items/shows'
-		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000'
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
-		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/shows'
-		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/shows'
+		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/shows?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
+		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/shows?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
+		self.progress_link = 'https://api.trakt.tv/sync/watched/shows?extended=noseasons'
 		self.trakttrending_link = 'https://api.trakt.tv/shows/trending?page=1&limit=%s' % self.page_limit
 		self.traktpopular_link = 'https://api.trakt.tv/shows/popular?page=1&limit=%s' % self.page_limit
 		self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/shows?limit=40'
-		self.progress_link = 'https://api.trakt.tv/sync/watched/shows?extended=noseasons'
-		self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
 		self.trakt_popularLists_link = 'https://api.trakt.tv/lists/popular?limit=40&page=1' # use limit=40 due to filtering out Movie only lists
 		self.trakt_trendingLists_link = 'https://api.trakt.tv/lists/trending?limit=40&page=1'
-		self.trakt_publicLists_link = 'https://api.trakt.tv/lists/%s/items/shows?limit=%s&page=1' % ('%s', self.page_limit)
 
 		self.tvmaze_link = 'https://www.tvmaze.com'
 		self.tmdb_key = control.setting('tmdb.api.key')
@@ -84,9 +81,6 @@ class TVshows:
 			self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
 		self.tmdb_session_id = control.setting('tmdb.session_id')
 		self.tmdb_link = 'https://api.themoviedb.org'
-		self.tmdb_userlists_link = 'https://api.themoviedb.org/3/account/{account_id}/lists?api_key=%s&language=en-US&session_id=%s&page=1' % ('%s', self.tmdb_session_id)
-		self.tmdb_watchlist_link = 'https://api.themoviedb.org/3/account/{account_id}/watchlist/tv?api_key=%s&session_id=%s&sort_by=created_at.asc&page=1' % ('%s', self.tmdb_session_id)
-		self.tmdb_favorites_link = 'https://api.themoviedb.org/3/account/{account_id}/favorite/tv?api_key=%s&session_id=%s&sort_by=created_at.asc&page=1' % ('%s', self.tmdb_session_id) 
 		self.tmdb_popular_link = 'https://api.themoviedb.org/3/tv/popular?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_toprated_link = 'https://api.themoviedb.org/3/tv/top_rated?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_ontheair_link = 'https://api.themoviedb.org/3/tv/on_the_air?api_key=%s&language=en-US&region=US&page=1'
@@ -103,6 +97,8 @@ class TVshows:
 			if u in self.trakt_link and '/users/' in url:
 				try:
 					if '/users/me/' not in url: raise Exception()
+					if '/collection/' in url: return self.traktCollection(url)
+					if '/watchlist/' in url: return self.traktWatchlist(url)
 					if trakt.getActivity() > cache.timeout(self.trakt_list, url, self.trakt_user): raise Exception()
 					self.list = cache.get(self.trakt_list, 720, url, self.trakt_user)
 				except:
@@ -192,10 +188,66 @@ class TVshows:
 				control.hide()
 				if self.notifications: control.notification(title=32001, message=33049)
 
+	def traktCollection(self, url, create_directory=True):
+		self.list = []
+		try:
+			q = dict(parse_qsl(urlsplit(url).query))
+			page = int(q['page']) - 1
+			self.list = traktsync.fetch_collection('shows_collection')
+			if control.setting('trakt.paginate.lists') == 'true':
+				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
+				self.list = paginated_ids[page]
+			try:
+				if int(q['limit']) != len(self.list): raise Exception()
+				q.update({'page': str(int(q['page']) + 1)})
+				q = (urlencode(q)).replace('%2C', ',')
+				next = url.replace('?' + urlparse(url).query, '') + '?' + q
+			except: next = ''
+			for i in range(len(self.list)): self.list[i]['next'] = next
+			self.worker()
+			self.sort()
+			if self.list is None: self.list = []
+			if create_directory: self.tvshowDirectory(self.list)
+			return self.list
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			if not self.list:
+				control.hide()
+				if self.notifications: control.notification(title=32001, message=33049)
+
+	def traktWatchlist(self, url, create_directory=True):
+		self.list = []
+		try:
+			q = dict(parse_qsl(urlsplit(url).query))
+			index = int(q['page']) - 1
+			self.list = traktsync.fetch_watch_list('shows_watchlist')
+			self.sort()
+			if control.setting('trakt.paginate.lists') == 'true':
+				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
+				self.list = paginated_ids[index]
+			try:
+				if int(q['limit']) != len(self.list): raise Exception()
+				q.update({'page': str(int(q['page']) + 1)})
+				q = (urlencode(q)).replace('%2C', ',')
+				next = url.replace('?' + urlparse(url).query, '') + '?' + q
+			except: next = ''
+			for i in range(len(self.list)): self.list[i]['next'] = next
+			self.worker()
+			if self.list is None: self.list = []
+			if create_directory: self.tvshowDirectory(self.list)
+			return self.list
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			if not self.list:
+				control.hide()
+				if self.notifications: control.notification(title=32001, message=33049)
+
 	def traktHiddenManager(self, idx=True):
 		control.busy()
 		try:
-			if trakt.getActivity() > cache.timeout(self.trakt_list, self.progress_link, self.trakt_user): raise Exception()
+			if trakt.getProgressActivity() > cache.timeout(self.trakt_list, self.progress_link, self.trakt_user): raise Exception()
 			self.list = cache.get(self.trakt_list, 24, self.progress_link, self.trakt_user)
 		except:
 			self.list = cache.get(self.trakt_list, 0, self.progress_link, self.trakt_user)
@@ -204,9 +256,8 @@ class TVshows:
 			count = getShowCount(indicators, imdb=i.get('imdb'), tvdb=i.get('tvdb'))
 			i.update({'watched_count': count})
 		try:
-			hidden = cache.get(trakt.getTrakt, 0, self.hiddenprogress_link) # if this gets cached and user hides an item it's not instantly removed.
-			hidden = jsloads(hidden)
-			hidden = [str(i['show']['ids']['tvdb']) for i in hidden]
+			hidden = traktsync.fetch_hidden_progress()
+			hidden = [str(i['tvdb']) for i in hidden]
 			for i in self.list: i.update({'isHidden': 'true'}) if i['tvdb'] in hidden else i.update({'isHidden': ''})
 			if idx: self.worker()
 			self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
@@ -415,6 +466,24 @@ class TVshows:
 			log_utils.error()
 			return
 
+	def traktLlikedlists(self):
+		items = traktsync.fetch_liked_list('', True)
+		for item in items:
+			try:
+				list_name = item['list_name']
+				list_owner = item['list_owner']
+				list_id = item['trakt_id']
+				list_url = self.traktlist_link % (list_owner, list_id)
+				next = ''
+				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
+				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'tvshows'})
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
+		self.addDirectory(self.list, queue=True)
+		return self.list
+
 	def userlists(self):
 		userlists = []
 		try:
@@ -431,18 +500,6 @@ class TVshows:
 			userlists += lists
 		except: pass
 		try:
-			if not self.traktCredentials: raise Exception()
-			self.list = [] ; lists = []
-			try:
-				if activity > cache.timeout(self.trakt_user_list, self.traktlikedlists_link, self.trakt_user): raise Exception()
-				lists += cache.get(self.trakt_user_list, 3, self.traktlikedlists_link, self.trakt_user)
-			except:
-				lists += cache.get(self.trakt_user_list, 0, self.traktlikedlists_link, self.trakt_user)
-			for i in range(len(lists)):
-				lists[i].update({'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
-			userlists += lists
-		except: pass
-		try:
 			if not self.imdb_user: raise Exception()
 			self.list = []
 			lists = cache.get(self.imdb_user_list, 0, self.imdblists_link)
@@ -453,7 +510,8 @@ class TVshows:
 		try:
 			if self.tmdb_session_id == '': raise Exception()
 			self.list = []
-			lists = cache.get(tmdb_indexer.userlists, 0, self.tmdb_userlists_link)
+			url = self.tmdb_link + '/3/account/{account_id}/lists?api_key=%s&language=en-US&session_id=%s&page=1' % ('%s', self.tmdb_session_id)
+			lists = cache.get(tmdb_indexer.userlists, 0, url)
 			for i in range(len(lists)):
 				lists[i].update({'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
 			userlists += lists
@@ -469,15 +527,15 @@ class TVshows:
 			if not contains:
 				self.list.append(userlists[i])
 		if self.tmdb_session_id != '': # TMDb Favorites
-			self.list.insert(0, {'name': control.lang(32026), 'url': self.tmdb_favorites_link, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
+			url = self.tmdb_link + '/3/account/{account_id}/favorite/tv?api_key=%s&session_id=%s&sort_by=created_at.asc&page=1' % ('%s', self.tmdb_session_id)
+			self.list.insert(0, {'name': control.lang(32026), 'url': url, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
 		if self.tmdb_session_id != '': # TMDb Watchlist
-			self.list.insert(0, {'name': control.lang(32033), 'url': self.tmdb_watchlist_link, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
+			url = self.tmdb_link + '/3/account/{account_id}/watchlist/tv?api_key=%s&session_id=%s&sort_by=created_at.asc&page=1' % ('%s', self.tmdb_session_id)
+			self.list.insert(0, {'name': control.lang(32033), 'url': url, 'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
 		if self.imdb_user != '': # imdb Watchlist
 			self.list.insert(0, {'name': control.lang(32033), 'url': self.imdbwatchlist_link, 'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
 		if self.imdb_user != '': # imdb My Ratings
 			self.list.insert(0, {'name': control.lang(32025), 'url': self.imdbratings_link, 'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
-		if self.traktCredentials: # Trakt Watchlist
-			self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -574,7 +632,7 @@ class TVshows:
 			try:
 				try: name = item['list']['name']
 				except: name = item['name']
-				name = client.replaceHTMLCodes(name)
+				# name = client.replaceHTMLCodes(name)
 				try: url = (trakt.slug(item['list']['user']['username']), item['list']['ids']['slug'])
 				except: url = ('me', item['ids']['slug'])
 				url = self.traktlist_link % url
@@ -606,9 +664,11 @@ class TVshows:
 				list_name = list_item.get('name', '')
 				list_id = list_item.get('ids', {}).get('trakt', '')
 				list_owner = list_item.get('user', {}).get('username', '')
-				list_url = self.trakt_publicLists_link % list_id
+				list_url = self.traktlist_link % (list_owner, list_id)
+
 				results = trakt.getTrakt(list_url)
 				if not results or results == '[]': continue
+
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
 				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'tvshows'})
 			except:

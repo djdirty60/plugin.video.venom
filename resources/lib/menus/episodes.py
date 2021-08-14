@@ -8,7 +8,7 @@ from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
-from resources.lib.database import cache, fanarttv_cache
+from resources.lib.database import cache, fanarttv_cache, traktsync
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
@@ -30,6 +30,10 @@ class Episodes:
 		self.notifications = notifications
 		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
+		self.showunaired = control.setting('showunaired') == 'true'
+		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
+		self.showspecials = control.setting('tv.specials') == 'true'
+		self.highlight_color = control.getHighlightColor()
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
@@ -42,18 +46,13 @@ class Episodes:
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/episodes'
 		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=%s&page=1' % self.count
 		self.progress_link = 'https://api.trakt.tv/users/me/watched/shows'
-		self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
+		# self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
 		self.mycalendar_link = 'https://api.trakt.tv/calendars/my/shows/date[30]/32/'
 		self.traktunfinished_link = 'https://api.trakt.tv/sync/playback/episodes?limit=40'
-
 		self.tvmaze_link = 'https://api.tvmaze.com'
 		self.added_link = 'https://api.tvmaze.com/schedule'
 		self.calendar_link = 'https://api.tvmaze.com/schedule?date=%s'
 
-		self.showunaired = control.setting('showunaired') == 'true'
-		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
-		self.showspecials = control.setting('tv.specials') == 'true'
-		self.highlight_color = control.getHighlightColor()
 
 	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, create_directory=True):
 		self.list = []
@@ -132,10 +131,9 @@ class Episodes:
 		try:
 			try: url = getattr(self, url + '_link')
 			except: pass
-			activity = trakt.getActivity()
 			if self.trakt_link in url and url == self.progress_link:
 				try:
-					if activity > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, True, True): raise Exception()
+					if trakt.getProgressActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, True, True): raise Exception()
 					self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct)
 				except:
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, True, True)
@@ -165,7 +163,7 @@ class Episodes:
 			if self.trakt_link in url and url == self.progress_link:
 				direct = control.setting('tvshows.direct') == 'true'
 				try:
-					if trakt.getActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct): raise Exception()
+					if trakt.getProgressActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct): raise Exception()
 					self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct)
 				except:
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct)
@@ -379,7 +377,7 @@ class Episodes:
 			try:
 				try: name = item['list']['name']
 				except: name = item['name']
-				name = client.replaceHTMLCodes(name)
+				# name = client.replaceHTMLCodes(name)
 				try: url = (trakt.slug(item['list']['user']['username']), item['list']['ids']['slug'])
 				except: url = ('me', item['ids']['slug'])
 				url = self.traktlist_link % url
@@ -431,10 +429,9 @@ class Episodes:
 				items.append(values)
 			except: pass
 		try:
-			result = cache.get(trakt.getTrakt, 0, self.hiddenprogress_link) # if this gets cached and user hides an item it's not instantly removed. Keep at "0" duration
-			result = jsloads(result)
-			result = [str(i['show']['ids']['tvdb']) for i in result]
-			items = [i for i in items if i['tvdb'] not in result] # removes hidden progress items
+			hidden = traktsync.fetch_hidden_progress()
+			hidden = [str(i['tvdb']) for i in hidden]
+			items = [i for i in items if i['tvdb'] not in hidden] # removes hidden progress items
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

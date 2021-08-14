@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.5">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.6">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,15 +32,12 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.1.4 - Aug. 09, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed playcount module log errors for non Trakt account users.[/I]
-[COLOR yellow]--[/COLOR][I] Note that a metahandlers update is in the works to fix issues with marking shows, season, episodes for non Trakt account users.[/I]
-[COLOR yellow]--[/COLOR][I] Added progress bar to trailer playback inside the Trakt Progress Manager xml when playing trailers.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed library integration issue where meta retrieval from Kodi library failed due to missing "imdb" key in "uniqueid".[/I]
-[COLOR yellow]--[/COLOR][I] Added new logging for server errors from AllDebrid when down for maintenance.[/I]
-[COLOR yellow]--[/COLOR][I] Added new [B]"Trakt Popular Lists"[/B] and [B]"Trakt Trending Lists"[/B] to both [B]"Discover Movies"[/B] and [B]"Discover TV Shows"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] The new lists above now have new context menu options to allow you to [B]Like[/B], or [B]UnLike[/B] a list.  If the list is currently [B]Liked[/B] then that will be prepended to the listItem label.  There is a new table added to the database to store these liked lists and will update as a service so multi devices will take 15mins to be in sync.[/I]
-[COLOR yellow]--[/COLOR][I] Added a new sort method for [B]"Collections Sorting"[/B] and can be found in the [B]"General"[/B] category.[/I]
+[B][COLOR red]Update - v6.1.6 - Aug. 14, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed [B]"Boxing"[/B] and [B]"Based on a True Story"[/B] lists stopped showing in [B]"Discover Movies"[/B] - [B]"Collections"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Trakt [B]"Watchlist"[/B] and [B]"Collections"[/B] for Movies and TVShows can now be paginated.  There is a new setting added in the Trakt category and is enabled by default.  To achieve this the data fetched from Trakt is now part of a new service sync and pagination occurs locally.[/I]
+[COLOR yellow]--[/COLOR][I] [B]"My Movies"[/B] and [B]"My TV Shows"[/B] now has it's own [B]"My Liked Lists"[/B] category to better group the list data.  These liked lists will no longer appear jumbled into [B]"Movie Lists"[/B] or [B]"TV Show Lists"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] The Trakt sync database has been expanded to cover users [B]hiddenProgress[/B], [B]liked_lists[/B], [B]movies_collections[/B], [B]movie_watchlist[/B], [B]shows_collections[/B], [B]shows_watchlist[/B].  This helps in speeding up the load time of lists utilizing this data and is currently still being developed.[/I]
+
 		</news>
 	</extension>
 </addon>

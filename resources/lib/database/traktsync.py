@@ -106,25 +106,7 @@ def delete_bookmark(items):
 	finally:
 		dbcur.close() ; dbcon.close()
 
-def last_paused_at():
-	last_paused = 0
-	try:
-		dbcon = get_connection()
-		dbcur = get_connection_cursor(dbcon)
-		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='service';''').fetchone()
-		if ck_table:
-			match = dbcur.execute('''SELECT * FROM service WHERE setting="last_paused_at";''').fetchone()
-			if match: last_paused = int(cleandate.iso_2_utc(match[1]))
-			else: dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_paused_at', '1970-01-01T20:00:00.000Z'))
-		else: dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
-	except:
-		from resources.lib.modules import log_utils
-		log_utils.error()
-	finally:
-		dbcur.close() ; dbcon.close()
-	return last_paused
-
-def fetch_liked_list(trakt_id):
+def fetch_liked_list(trakt_id, ret_all=False):
 	liked_list = ''
 	try:
 		dbcon = get_connection()
@@ -135,10 +117,17 @@ def fetch_liked_list(trakt_id):
 			dbcur.connection.commit()
 			dbcur.close() ; dbcon.close()
 			return liked_list
-		try:
-			match = dbcur.execute('''SELECT * FROM liked_lists WHERE trakt_id=?''', (trakt_id,)).fetchone()
-			liked_list = match[2]
-		except: pass
+		if ret_all:
+			try:
+				match = dbcur.execute('''SELECT * FROM liked_lists WHERE NOT trakt_id=""''').fetchall()
+				liked_list = [{'list_owner': i[0], 'list_name': i[1], 'trakt_id': i[2], 'item_count': i[3], 'likes': i[4]} for i in match]
+			except: pass
+		else:
+			try:
+				match = dbcur.execute('''SELECT * FROM liked_lists WHERE trakt_id=?;''', (trakt_id,)).fetchone()
+				liked_list = match[2]
+			except: pass
+
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -146,12 +135,16 @@ def fetch_liked_list(trakt_id):
 		dbcur.close() ; dbcon.close()
 	return liked_list
 
-def insert_liked_lists(items):
+def insert_liked_lists(items, new_sync=True):
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		if new_sync:
+			dbcur.execute('''DELETE FROM liked_lists''')
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
 		for item in items:
 			try:
 				list_item = item.get('list', {})
@@ -183,7 +176,7 @@ def delete_liked_list(trakt_id):
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 			dbcur.connection.commit()
 			return
-		dbcur.execute('''DELETE FROM liked_lists WHERE trakt_id=?''', (trakt_id,))
+		dbcur.execute('''DELETE FROM liked_lists WHERE trakt_id=?;''', (trakt_id,))
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_liked_at', timestamp))
 		dbcur.connection.commit()
@@ -193,23 +186,193 @@ def delete_liked_list(trakt_id):
 	finally:
 		dbcur.close() ; dbcon.close()
 
-def last_liked_at():
-	last_liked = 0
+def last_sync(type):
+	last_sync_at = 0
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
 		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='service';''').fetchone()
 		if ck_table:
-			match = dbcur.execute('''SELECT * FROM service WHERE setting="last_liked_at";''').fetchone()
-			if match: last_liked = int(cleandate.iso_2_utc(match[1]))
-			else: dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_liked_at', '1970-01-01T20:00:00.000Z'))
+			match = dbcur.execute('''SELECT * FROM service WHERE setting=?;''', (type,)).fetchone()
+			if match: last_sync_at = int(cleandate.iso_2_utc(match[1]))
+			else: dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', (type, '1970-01-01T20:00:00.000Z'))
 		else: dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
 	finally:
 		dbcur.close() ; dbcon.close()
-	return last_liked
+	return last_sync_at
+
+def fetch_collection(table):
+	list = ''
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name=?;''', (table,)).fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS %s (title TEXT, year TEXT, imdb TEXT, tmdb INTEGER, tvdb INTEGER, trakt INTEGER, collected_at TEXT, UNIQUE(imdb, tmdb, tvdb, trakt));''' % table)
+			dbcur.connection.commit()
+			dbcur.close() ; dbcon.close()
+			return list
+		try:
+			match = dbcur.execute('''SELECT * FROM %s WHERE NOT title=""''' % table).fetchall()
+			list = [{'title': i[0], 'year': i[1], 'premiered': i[1], 'imdb': i[2], 'tmdb': i[3], 'tvdb': i[4], 'trakt': i[5], 'added': i[6]} for i in match]
+		except: pass
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return list
+
+def insert_collection(items, table, new_sync=True):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS %s (title TEXT, year TEXT, imdb TEXT, tmdb INTEGER, tvdb INTEGER, trakt INTEGER, collected_at TEXT, UNIQUE(imdb, tmdb, tvdb, trakt));''' % table)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		if new_sync:
+			dbcur.execute('''DELETE FROM %s''' % table)
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
+		for i in items:
+			try:
+				if 'show' in i: item = i.get('show')
+				else: item = i.get('movie')
+				title = item.get('title')
+				year = item.get('year', '') or ''
+				ids = item.get('ids')
+				imdb = ids.get('imdb', '')
+				tmdb = ids.get('tmdb', '')
+				tvdb = ids.get('tvdb', '')
+				trakt = ids.get('trakt', '')
+				collected_at = i.get('last_collected_at', '') if 'show' in i else i.get('collected_at', '')
+				dbcur.execute('''INSERT OR REPLACE INTO %s Values (?, ?, ?, ?, ?, ?, ?)''' % table, (title, year, imdb, tmdb, tvdb, trakt, collected_at))
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_collected_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+
+def fetch_hidden_progress():
+	list = ''
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='hiddenProgress';''').fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS hiddenProgress (title TEXT, year TEXT, imdb TEXT, tmdb INTEGER, tvdb INTEGER, trakt INTEGER, hidden_at TEXT, UNIQUE(imdb, tmdb, tvdb, trakt));''')
+			dbcur.connection.commit()
+			dbcur.close() ; dbcon.close()
+			return list
+		try:
+			match = dbcur.execute('''SELECT * FROM hiddenProgress WHERE NOT title=""''').fetchall()
+			list = [{'title': i[0], 'year': i[1], 'imdb': i[2], 'tmdb': i[3], 'tvdb': i[4], 'trakt': i[5], 'added': i[6]} for i in match]
+		except: pass
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return list
+
+def insert_hidden_progress(items, new_sync=True):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS hiddenProgress (title TEXT, year TEXT, imdb TEXT, tmdb INTEGER, tvdb INTEGER, trakt INTEGER, hidden_at TEXT, UNIQUE(imdb, tmdb, tvdb, trakt));''')
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		if new_sync:
+			dbcur.execute('''DELETE FROM hiddenProgress''')
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
+		for i in items:
+			try:
+				item = i.get('show')
+				title = item.get('title')
+				year = item.get('year', '') or ''
+				ids = item.get('ids')
+				imdb = ids.get('imdb', '')
+				tmdb = ids.get('tmdb', '')
+				tvdb = ids.get('tvdb', '')
+				trakt = ids.get('trakt', '')
+				hidden_at = i.get('hidden_at', '')
+				dbcur.execute('''INSERT OR REPLACE INTO hiddenProgress Values (?, ?, ?, ?, ?, ?, ?)''', (title, year, imdb, tmdb, tvdb, trakt, hidden_at))
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_hiddenProgress_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+
+def fetch_watch_list(table):
+	list = ''
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name=?;''', (table,)).fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS %s (title TEXT, year TEXT, imdb TEXT, tmdb INTEGER, tvdb INTEGER, trakt INTEGER, listed_at TEXT, UNIQUE(imdb, tmdb, tvdb, trakt));''' % table)
+			dbcur.connection.commit()
+			dbcur.close() ; dbcon.close()
+			return list
+		try:
+			match = dbcur.execute('''SELECT * FROM %s WHERE NOT title=""''' % table).fetchall()
+			list = [{'title': i[0], 'year': i[1], 'premiered': i[1], 'imdb': i[2], 'tmdb': i[3], 'tvdb': i[4], 'trakt': i[5], 'listed_at': i[6]} for i in match]
+		except: pass
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return list
+
+def insert_watch_list(items, table, new_sync=True):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS %s (title TEXT, year TEXT, imdb TEXT, tmdb INTEGER, tvdb INTEGER, trakt INTEGER, listed_at TEXT, UNIQUE(imdb, tmdb, tvdb, trakt));''' % table)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		if new_sync:
+			dbcur.execute('''DELETE FROM %s''' % table)
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
+		for i in items:
+			try:
+				if 'show' in i: item = i.get('show')
+				else: item = i.get('movie')
+				title = item.get('title')
+				year = item.get('year', '') or ''
+				ids = item.get('ids')
+				imdb = ids.get('imdb', '')
+				tmdb = ids.get('tmdb', '')
+				tvdb = ids.get('tvdb', '')
+				trakt = ids.get('trakt', '')
+				listed_at = i.get('listed_at', '')
+				dbcur.execute('''INSERT OR REPLACE INTO %s Values (?, ?, ?, ?, ?, ?, ?)''' % table, (title, year, imdb, tmdb, tvdb, trakt, listed_at))
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_watchlisted_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
 
 def get_connection():
 	if not existsPath(dataPath): makeFile(dataPath)
