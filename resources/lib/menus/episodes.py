@@ -46,13 +46,11 @@ class Episodes:
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/episodes'
 		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=%s&page=1' % self.count
 		self.progress_link = 'https://api.trakt.tv/users/me/watched/shows'
-		# self.hiddenprogress_link = 'https://api.trakt.tv/users/hidden/progress_watched?limit=1000&type=show'
 		self.mycalendar_link = 'https://api.trakt.tv/calendars/my/shows/date[30]/32/'
 		self.traktunfinished_link = 'https://api.trakt.tv/sync/playback/episodes?limit=40'
 		self.tvmaze_link = 'https://api.tvmaze.com'
 		self.added_link = 'https://api.tvmaze.com/schedule'
 		self.calendar_link = 'https://api.tvmaze.com/schedule?date=%s'
-
 
 	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, create_directory=True):
 		self.list = []

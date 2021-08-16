@@ -118,10 +118,16 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				control.homeWindow.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.1.6' # set to desired version to force any db clearing needed
-				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', ''))  <= int(curVersion.replace('.', '')))
+				clearDB_version = '6.1.7' # set to desired version to force any db clearing needed
+				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
+					from resources.lib.database import traktsync
+					clr_traktSync = {'bookmarks': False, 'liked_lists': True, 'hiddenProgress': True, 'movies_collection': True, 'shows_collection': True, 'movies_watchlist': True, 'shows_watchlist': True}
+					cleared = traktsync.delete_tables(clr_traktSync)
+					if cleared:
+						control.notification(message='Forced traktsync clear for version update complete.')
+						control.log('[ plugin.video.venom ]  Forced traktsync clear for version update complete.', LOGINFO)
 
 				# write_UDsettings_version = '6.0.6' # set to desired version to force writting new UD settings.xml for added setting
 				# do_UDsettings_write = (int(oldVersion.replace('.', '')) < int(write_UDsettings_version.replace('.', ''))  <= int(curVersion.replace('.', '')))
@@ -147,10 +153,10 @@ class LibraryService:
 		control.log('[ plugin.video.venom ]  Library Update Service Starting (Update check every 6hrs)...', LOGINFO)
 		control.execute('RunPlugin(%s?action=service_library)' % plugin) # service_library contains control.monitor().waitForAbort() while loop every 6hrs
 
-class SyncTraktService: # replaces   SyncTraktWatched, SyncTraktProgress, SyncTraktLikedLists
+class SyncTraktService:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Trakt Sync Service Starting (sync check every 15min)...', LOGINFO)
-		control.execute('RunPlugin(%s?action=service_syncTrakt)' % plugin) # trakt.sync_watched() contains control.monitor().waitForAbort() while loop every 15min
+		control.execute('RunPlugin(%s?action=service_syncTrakt)' % plugin) # trakt.trakt_service_sync() contains control.monitor().waitForAbort() while loop every 15min
 
 try:
 	kodiVersion = control.getKodiVersion(full=True)
@@ -192,7 +198,6 @@ def main():
 			AddonCheckUpdate().run()
 		VersionIsUpdateCheck().run()
 		SyncTraktService().run() # run service in case user auth's trakt later
-
 		if getTraktCredentialsInfo():
 			if control.setting('autoTraktOnStart') == 'true':
 				SyncTraktCollection().run()

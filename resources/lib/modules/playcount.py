@@ -120,12 +120,8 @@ def getEpisodeOverlay(indicators, imdb, tvdb, season, episode):
 			return str(playcount)
 		else:
 			playcount = indicators._get_watched_episode({'imdb_id': imdb, 'season': season, 'episode': episode, 'premiered': ''})
-
-
 			# from resources.lib.modules import log_utils
 			# log_utils.log('playcount=%s' % playcount)
-
-
 			return str(playcount)
 	except:
 		from resources.lib.modules import log_utils

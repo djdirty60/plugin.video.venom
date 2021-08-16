@@ -102,7 +102,6 @@ class Sources:
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
 			if rescrape: self.clr_item_providers(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
 			items = providerscache.get(self.getSources, 48, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
-
 			if not items:
 				self.url = url
 				return self.errorForSources()
@@ -784,9 +783,12 @@ class Sources:
 					log_utils.error()
 
 		for i in self.sources:
-			if 'name_info' in i: info_string = source_utils.getFileType(name_info=i.get('name_info'))
-			else: info_string = source_utils.getFileType(url=i.get('url'))
-			i.update({'info': (i.get('info') + ' /' + info_string).lstrip(' ').lstrip('/').rstrip('/')})
+			try:
+				if 'name_info' in i: info_string = source_utils.getFileType(name_info=i.get('name_info'))
+				else: info_string = source_utils.getFileType(url=i.get('url'))
+				i.update({'info': (i.get('info') + ' /' + info_string).lstrip(' ').lstrip('/').rstrip('/')})
+			except:
+				log_utils.error()
 
 		if control.setting('remove.hevc') == 'true':
 			self.sources = [i for i in self.sources if 'HEVC' not in i.get('info', '')]

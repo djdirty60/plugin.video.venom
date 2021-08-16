@@ -104,7 +104,7 @@ class TVshows:
 				except:
 					self.list = cache.get(self.trakt_list, 0, url, self.trakt_user)
 				if idx: self.worker()
-				if url == self.traktwatchlist_link: self.sort(type='shows.watchlist')
+				if url == self.traktwatchlist_link: self.sort(type='shows.watchlist') # not used
 				else: self.sort()
 			elif u in self.trakt_link and self.search_link in url:
 				self.list = cache.get(self.trakt_list, 1, url, self.trakt_user)
@@ -192,11 +192,12 @@ class TVshows:
 		self.list = []
 		try:
 			q = dict(parse_qsl(urlsplit(url).query))
-			page = int(q['page']) - 1
+			index = int(q['page']) - 1
 			self.list = traktsync.fetch_collection('shows_collection')
+			self.sort()
 			if control.setting('trakt.paginate.lists') == 'true':
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
-				self.list = paginated_ids[page]
+				self.list = paginated_ids[index]
 			try:
 				if int(q['limit']) != len(self.list): raise Exception()
 				q.update({'page': str(int(q['page']) + 1)})
@@ -205,7 +206,7 @@ class TVshows:
 			except: next = ''
 			for i in range(len(self.list)): self.list[i]['next'] = next
 			self.worker()
-			self.sort()
+			# self.sort()
 			if self.list is None: self.list = []
 			if create_directory: self.tvshowDirectory(self.list)
 			return self.list
@@ -222,7 +223,7 @@ class TVshows:
 			q = dict(parse_qsl(urlsplit(url).query))
 			index = int(q['page']) - 1
 			self.list = traktsync.fetch_watch_list('shows_watchlist')
-			self.sort()
+			self.sort(type='shows.watchlist')
 			if control.setting('trakt.paginate.lists') == 'true':
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
 				self.list = paginated_ids[index]
@@ -288,7 +289,7 @@ class TVshows:
 					try: self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=reverse)
 					except: self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['title'].lower()), reverse=reverse)
 				elif attribute == 2: self.list = sorted(self.list, key=lambda k: float(k['rating']), reverse=reverse)
-				elif attribute == 3: self.list = sorted(self.list, key=lambda k: int(k['votes'].replace(',', '')), reverse=reverse)
+				elif attribute == 3: self.list = sorted(self.list, key=lambda k: int(str(k['votes']).replace(',', '')), reverse=reverse)
 				elif attribute == 4:
 					for i in range(len(self.list)):
 						if 'premiered' not in self.list[i]: self.list[i]['premiered'] = ''

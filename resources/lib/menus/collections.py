@@ -775,7 +775,7 @@ class Collections:
 #### -- Missing id's lookup -- ####
 			if not tmdb and imdb:
 				try:
-					result = tmdb_indexer.Movies().IdLookup(imdb)
+					result = cache.get(tmdb_indexer.Movies().IdLookup, 96, imdb)
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not tmdb and imdb:

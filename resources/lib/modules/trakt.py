@@ -1146,8 +1146,8 @@ def trakt_service_sync():
 			if control.setting('indicators.alt') == '1':
 				sync_watched() # still write to cache.db
 			sync_liked_lists()
-			sync_collection()
 			sync_hidden_progress()
+			sync_collection()
 			sync_watch_list()
 		if control.monitor.waitForAbort(60*15): break
 
@@ -1194,22 +1194,6 @@ def sync_liked_lists():
 	except:
 		log_utils.error()
 
-def sync_collection():
-	try:
-		db_last_collected = traktsync.last_sync('last_collected_at')
-		collectedActivity = getCollectedActivity()
-		if collectedActivity > db_last_collected:
-			log_utils.log('Trakt Collection Sync Update...(local db latest "collected_at" = %s, trakt api latest "collected_at" = %s)' % \
-								(str(db_last_collected), str(collectedActivity)), __name__, log_utils.LOGDEBUG)
-			link = '/users/me/collection/movies'
-			items = getTraktAsJson(link)
-			traktsync.insert_collection(items, 'movies_collection')
-			link = '/users/me/collection/shows'
-			items = getTraktAsJson(link)
-			traktsync.insert_collection(items, 'shows_collection')
-	except:
-		log_utils.error()
-
 def sync_hidden_progress():
 	try:
 		db_last_hidden = traktsync.last_sync('last_hiddenProgress_at')
@@ -1223,6 +1207,24 @@ def sync_hidden_progress():
 	except:
 		log_utils.error()
 
+def sync_collection():
+	try:
+		db_last_collected = traktsync.last_sync('last_collected_at')
+		collectedActivity = getCollectedActivity()
+		if collectedActivity > db_last_collected:
+			log_utils.log('Trakt Collection Sync Update...(local db latest "collected_at" = %s, trakt api latest "collected_at" = %s)' % \
+								(str(db_last_collected), str(collectedActivity)), __name__, log_utils.LOGDEBUG)
+			link = '/users/me/collection/movies?extended=full'
+			# indicators = cachesyncMovies() # could maybe check watched status here to satisfy sort method
+			items = getTraktAsJson(link)
+			traktsync.insert_collection(items, 'movies_collection')
+			link = '/users/me/collection/shows?extended=full'
+			# indicators = cachesyncTVShows() # could maybe check watched status here to satisfy sort method
+			items = getTraktAsJson(link)
+			traktsync.insert_collection(items, 'shows_collection')
+	except:
+		log_utils.error()
+
 def sync_watch_list():
 	try:
 		db_last_watchList = traktsync.last_sync('last_watchlisted_at')
@@ -1230,10 +1232,10 @@ def sync_watch_list():
 		if watchListActivity > db_last_watchList:
 			log_utils.log('Trakt Watch List Sync Update...(local db latest "watchlist_at" = %s, trakt api latest "watchlisted_at" = %s)' % \
 								(str(db_last_watchList), str(watchListActivity)), __name__, log_utils.LOGDEBUG)
-			link = '/users/me/watchlist/movies'
+			link = '/users/me/watchlist/movies?extended=full'
 			items = getTraktAsJson(link)
 			traktsync.insert_watch_list(items, 'movies_watchlist')
-			link = '/users/me/watchlist/shows'
+			link = '/users/me/watchlist/shows?extended=full'
 			items = getTraktAsJson(link)
 			traktsync.insert_watch_list(items, 'shows_watchlist')
 	except:

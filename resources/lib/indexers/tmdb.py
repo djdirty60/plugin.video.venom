@@ -330,19 +330,23 @@ class Movies:
 		return ret_img
 
 	def get_credits(self, tmdb):
-		if API_key == '' or not tmdb: return None
-		url = base_link + 'movie/%s/credits?api_key=%s' % ('%s', API_key)
-		people = get_request(url % tmdb)
-		if not people: return None
-		return people
+		if not tmdb: return None
+		result = None
+		try:
+			url = base_link + 'movie/%s/credits?api_key=%s' % (tmdb, API_key)
+			result = get_request(url)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+		return result
 
 	def get_external_ids(self, tmdb, imdb): # api claims int rq'd.  But imdb_id works for movies but not looking like it does for shows
 		if not tmdb and not imdb: return
 		try:
 			result = None
-			if tmdb: result = cache.get(get_request, 96, self.external_ids % tmdb)
+			if tmdb: result = get_request(self.external_ids % tmdb)
 			if not result:
-				if imdb: result = cache.get(get_request, 96, self.external_ids % imdb)
+				if imdb: result = get_request(self.external_ids % imdb)
 			return result
 		except:
 			from resources.lib.modules import log_utils
@@ -356,7 +360,7 @@ class Movies:
 			find_url = base_link + 'find/%s?api_key=%s&external_source=%s'
 			if imdb:
 				url = find_url % (imdb, API_key, 'imdb_id')
-				try: result = cache.get(get_request, 96, url)['movie_results'][0]
+				try: result = get_request(url)['movie_results'][0]
 				except: return None
 		except:
 			from resources.lib.modules import log_utils
@@ -710,10 +714,10 @@ class TVshows:
 
 	def get_credits(self, tmdb):
 		if not tmdb: return None
+		result = None
 		try:
-			result = None
 			url = base_link + 'tv/%s/credits?api_key=%s' % (tmdb, API_key)
-			result = cache.get(get_request, 96, url)
+			result = get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -724,7 +728,7 @@ class TVshows:
 		try:
 			result = None
 			url = base_link + 'tv/%s/external_ids?api_key=%s' % (tmdb, API_key)
-			result = cache.get(get_request, 96, url)
+			result = get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -737,11 +741,11 @@ class TVshows:
 			find_url = base_link + 'find/%s?api_key=%s&external_source=%s'
 			if imdb:
 				url = find_url % (imdb, API_key, 'imdb_id')
-				try: result = cache.get(get_request, 96, url)['tv_results'][0]
+				try: result = get_request(url)['tv_results'][0]
 				except: pass
 			if tvdb and not result:
 				url = find_url % (tvdb, API_key, 'tvdb_id')
-				try: result = cache.get(get_request, 96, url)['tv_results'][0]
+				try: result = get_request(url)['tv_results'][0]
 				except: return None
 		except:
 			from resources.lib.modules import log_utils

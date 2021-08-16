@@ -1,4 +1,9 @@
 
+[B][COLOR red]Update - v6.1.7 - Aug. 15, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed sorting issues with Trakt Watchlist and Collections.[/I]
+[COLOR yellow]--[/COLOR][I] traktsync databse improvements to supports local sort options.[/I]
+
+
 [B][COLOR red]Update - v6.1.6 - Aug. 14, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed [B]"Boxing"[/B] and [B]"Based on a True Story"[/B] lists stopped showing in [B]"Discover Movies"[/B] - [B]"Collections"[/B].[/I]
 [COLOR yellow]--[/COLOR][I] Trakt [B]"Watchlist"[/B] and [B]"Collections"[/B] for Movies and TVShows can now be paginated.  There is a new setting added in the Trakt category and is enabled by default.  To achieve this the data fetched from Trakt is now part of a new service sync and pagination occurs locally.[/I]

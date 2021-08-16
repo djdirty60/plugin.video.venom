@@ -133,20 +133,26 @@ def _generate_md5(*args):
 	except: [md5_hash.update(str(arg).encode('utf-8')) for arg in args]
 	return str(md5_hash.hexdigest())
 
-def cache_clear():
-	dbcon = get_connection()
-	dbcur = get_connection_cursor(dbcon)
-	for t in ['cache', 'rel_list', 'rel_lib']: # check, rel_list and rel_lib was moved
-		try:
-			dbcur.execute('''DROP TABLE IF EXISTS {}'''.format(t))
+def cache_clear(flush_only=False):
+	cleared = False
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		if flush_only:
+			dbcur.execute('''DELETE FROM cache''')
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
+		else:
+			dbcur.execute('''DROP TABLE IF EXISTS cache''')
 			dbcur.execute('''VACUUM''')
 			dbcur.connection.commit()
-		except:
-			from resources.lib.modules import log_utils
-			log_utils.error()
-	try: dbcur.close() ; dbcon.close()
-	except: pass
-	return True
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+		cleared = False
+	finally:
+		dbcur.close() ; dbcon.close()
+	return cleared
 
 def get_connection():
 	if not control.existsPath(control.dataPath): control.makeFile(control.dataPath)
@@ -304,7 +310,7 @@ def clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=
 		if clr_metacache:
 			from resources.lib.database import metacache
 			metacache.cache_clear_meta()
-		if clr_cache: cache_clear()
+		if clr_cache: cache_clear(flush_only=True)
 		if clr_search: cache_clear_search()
 		if clr_bookmarks: cache_clear_bookmarks()
 		control.notification(message='Forced cache clear for version update complete.')
