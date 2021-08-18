@@ -246,7 +246,7 @@ class Sources:
 				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'tvshow.poster', 'season_poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode', 'castandrole']
 				return {k: v for k, v in iter(metadata.items()) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
-
+			# uncached_items = sorted(uncached_items, key=lambda k: (k['size'], k['seeders']), reverse=True)
 			if items == uncached_items:
 				from resources.lib.windows.uncached_results import UncachedResultsXML
 				window = UncachedResultsXML('uncached_results.xml', control.addonPath(control.addonId()), uncached=uncached_items, meta=self.meta)

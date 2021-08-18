@@ -224,6 +224,26 @@ class Movies:
 			refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
 			trakt.scrobbleResetItems(imdb_ids=selected_items, refresh=refresh, widgetRefresh=True)
 
+	def watchlistManager(self):
+		self.list = []
+		try:
+			control.busy()
+			self.list = traktsync.fetch_watch_list('movies_watchlist')
+			self.worker()
+			self.sort(type='movies.watchlist')
+			# self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
+			control.hide()
+			from resources.lib.windows.traktwatchlist_manager import TraktWatchlistManagerXML
+			window = TraktWatchlistManagerXML('traktwatchlist_manager.xml', control.addonPath(control.addonId()), results=self.list)
+			selected_items = window.run()
+			del window
+			if selected_items:
+				# refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+				trakt.removeWatchlistItems('movies', selected_items)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
 	def traktCollection(self, url, create_directory=True):
 		self.list = []
 		try:

@@ -94,15 +94,18 @@ def router(params):
 	elif action == 'movieUserlists':
 		from resources.lib.menus import movies
 		movies.Movies().userlists()
-	elif action == 'movies_traktUnfinishedManager':
-		from resources.lib.menus import movies
-		movies.Movies().unfinishedManager()
 	elif action == 'movies_PublicLists':
 		from resources.lib.menus import movies
 		movies.Movies().getTraktPublicLists(url)
 	elif action == 'movies_LikedLists':
 		from resources.lib.menus import movies
 		movies.Movies().traktLlikedlists()
+	elif action == 'movies_traktUnfinishedManager':
+		from resources.lib.menus import movies
+		movies.Movies().unfinishedManager()
+	elif action == 'movies_traktWatchListManager':
+		from resources.lib.menus import movies
+		movies.Movies().watchlistManager()
 
 	####################################################
 	#---Collections
@@ -252,6 +255,10 @@ def router(params):
 	elif action == 'shows_LikedLists':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().traktLlikedlists()
+
+	elif action == 'shows_traktWatchListManager':
+		from resources.lib.menus import tvshows
+		tvshows.TVshows().watchlistManager()
 
 	####################################################
 	#---SEASONS
@@ -532,14 +539,15 @@ def router(params):
 			watched = (params.get('watched') == 'True') if params.get('watched') else None
 			unfinished = (params.get('unfinished') == 'True') if params.get('unfinished') else False
 			trakt.manager(name, imdb, tvdb, season, episode, watched=watched, unfinished=unfinished)
-
 		elif action == 'tools_likeList':
 			from resources.lib.modules import trakt
 			trakt.like_list(params.get('list_owner'), params.get('list_name'), params.get('list_id'))
-
 		elif action == 'tools_unlikeList':
 			from resources.lib.modules import trakt
 			trakt.unlike_list(params.get('list_owner'), params.get('list_name'), params.get('list_id'))
+		elif action == 'tools_forceTraktSync':
+			from resources.lib.modules import trakt
+			trakt.force_traktSync()
 
 	####################################################
 	#---Service
@@ -548,7 +556,6 @@ def router(params):
 		if action == 'service_syncTrakt':
 			from resources.lib.modules import trakt
 			trakt.trakt_service_sync()
-
 		elif action == 'service_library':
 			from resources.lib.modules import library
 			library.lib_tools().service()

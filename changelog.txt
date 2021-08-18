@@ -1,4 +1,10 @@
 
+[B][COLOR red]Update - v6.1.8 - Aug. 18, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added new function [B]"Force Trakt Sync to local database"[/B]. If you modify your Trakt account items externally you can now use this to force a Trakt sync vs. waiting the 15min for service to detect and sync the changes.[/I]
+[COLOR yellow]--[/COLOR][I] Added new [B]"Watchlist Manager"[/B] for both movies and shows.  This can be found in the  [B]"Tools"[/B] - [B]"Trakt Management Tools"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Few additions added to the traktsync database insert and delete methods.[/I]
+
+
 [B][COLOR red]Update - v6.1.7 - Aug. 15, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed sorting issues with Trakt Watchlist and Collections.[/I]
 [COLOR yellow]--[/COLOR][I] traktsync databse improvements to supports local sort options.[/I]

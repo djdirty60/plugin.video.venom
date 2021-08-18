@@ -111,17 +111,18 @@ class SourceResultsXML(BaseDialog):
 					magnet = chosen_source.getProperty('venom.url')
 					if debrid == 'AD':
 						from resources.lib.debrid import alldebrid
-						alldebrid.AllDebrid().create_transfer(magnet)
-						notification(message='Sending MAGNET to the AllDebrid cloud', icon=alldebrid.ad_icon)
+						transfer_function = alldebrid.AllDebrid
+						debrid_icon = alldebrid.ad_icon
 					elif debrid == 'PM':
 						from resources.lib.debrid import premiumize
-						premiumize.Premiumize().create_transfer(magnet)
-						notification(message='Sending MAGNET to the Premiumize.me cloud', icon=premiumize.pm_icon)
+						transfer_function = premiumize.Premiumize
+						debrid_icon = premiumize.pm_icon
 					elif debrid == 'RD':
 						from resources.lib.debrid import realdebrid
-						torrent_id = realdebrid.RealDebrid().add_magnet(magnet)
-						realdebrid.RealDebrid().add_torrent_select(torrent_id, 'all')
-						notification(message='Sending MAGNET to the Real-Debrid cloud', icon=realdebrid.rd_icon)
+						transfer_function = realdebrid.RealDebrid
+						debrid_icon = realdebrid.rd_icon
+					result = transfer_function().create_transfer(magnet)
+					if result: notification(message='Sending MAGNET to the %s cloud' % debrid, icon=debrid_icon)
 			elif action in self.closing_actions:
 				self.selected = (None, '')
 				self.close()

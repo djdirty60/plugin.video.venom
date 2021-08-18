@@ -359,7 +359,9 @@ def unHideItems(tvdb_ids):
 		for section in sections:
 			success = getTrakt('users/hidden/%s/remove' % section, post=post)
 			control.sleep(1000)
+		if success:
 			if 'plugin.video.venom' in control.infoLabel('Container.PluginName'): control.refresh()
+			traktsync.delete_hidden_progress(tvdb_ids)
 			control.trigger_widget_refresh()
 			return True
 	except:
@@ -379,6 +381,7 @@ def hideItems(tvdb_ids):
 			control.sleep(1000)
 		if success:
 			if 'plugin.video.venom' in control.infoLabel('Container.PluginName'): control.refresh()
+			sync_hidden_progress(forced=True)
 			control.trigger_widget_refresh()
 			return True
 	except:
@@ -386,6 +389,7 @@ def hideItems(tvdb_ids):
 		return False
 
 def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
+	success = None
 	try:
 		sections = ['progress_watched', 'calendar']
 		sections_display = [control.lang(40072), control.lang(40073), control.lang(32181)]
@@ -396,16 +400,37 @@ def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True
 		else: post = {"movies": [{"ids": {"imdb": imdb}}]}
 		if selection in [0, 1]:
 			section = sections[selection]
-			getTrakt('users/hidden/%s' % section, post=post)
+			success = getTrakt('users/hidden/%s' % section, post=post)
 		else:
 			for section in sections:
-				getTrakt('users/hidden/%s' % section, post=post)
+				success = getTrakt('users/hidden/%s' % section, post=post)
 				control.sleep(1000)
-		control.hide()
-		if refresh: control.refresh()
-		control.trigger_widget_refresh()
-		if control.setting('trakt.general.notifications') == 'true':
-			control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
+		if success:
+			control.hide()
+			sync_hidden_progress(forced=True)
+			if refresh: control.refresh()
+			control.trigger_widget_refresh()
+			if control.setting('trakt.general.notifications') == 'true':
+				control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
+	except:
+		log_utils.error()
+
+def removeWatchlistItems(type, id_list):
+	if not id_list: return
+	success = None
+	try:
+		ids = []
+		total_items = len(id_list)
+		for id in id_list: ids.append({"ids": {"trakt": id}})
+		post = {type: ids}
+		success =getTrakt('/sync/watchlist/remove', post=post)
+		if success:
+			# if 'plugin.video.venom' in control.infoLabel('Container.PluginName'): control.refresh()
+			control.trigger_widget_refresh()
+			if type == 'movies': traktsync.delete_watchList_items(id_list, 'movies_watchlist')
+			else: traktsync.delete_watchList_items(id_list, 'shows_watchlist')
+			if control.setting('trakt.general.notifications') == 'true':
+				control.notification(title='Trakt Watch List Manager', message='Successfuly Removed %s Item%s' % (total_items, 's' if total_items >1 else ''))
 	except:
 		log_utils.error()
 
@@ -428,10 +453,10 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 			items += [(control.lang(33654) % highlight_color, 'unrate')]
 		if tvdb:
 			items += [(control.lang(40075) % (highlight_color, media_type), 'hideItem')]
-			items += [(control.lang(35057) % highlight_color, 'hiddenManager')]
+			items += [(control.lang(35058) % highlight_color, 'hiddenManager')]
 		if unfinished is True:
-			if episode: items += [(control.lang(35058) % highlight_color, 'unfinishedEpisodeManager')]
-			elif media_type == 'Movie': items += [(control.lang(35059) % highlight_color, 'unfinishedMovieManager')]
+			if media_type == 'Movie': items += [(control.lang(35059) % highlight_color, 'unfinishedMovieManager')]
+			elif episode: items += [(control.lang(35060) % highlight_color, 'unfinishedEpisodeManager')]
 		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
 			if media_type == 'Movie' or episode:
 				items += [(control.lang(40076) % highlight_color, 'scrobbleReset')]
@@ -499,6 +524,22 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 					if slug: getTrakt(items[select][1] % slug, post=post)
 				else:
 					getTrakt(items[select][1], post=post)
+
+				if items[select][1] == '/sync/watchlist':
+					sync_watch_list(forced=True)
+				if items[select][1] == '/sync/watchlist/remove':
+					if media_type == 'Movie':
+						traktsync.delete_watchList_items([imdb], 'movies_watchlist', 'imdb')
+					else:
+						traktsync.delete_watchList_items([tvdb], 'shows_watchlist', 'tvdb')
+				if items[select][1] == '/sync/collection':
+					sync_collection(forced=True)
+				if items[select][1] == '/sync/collection/remove':
+					if media_type == 'Movie':
+						traktsync.delete_collection_items([imdb], 'movies_watchlist', 'imdb')
+					else:
+						traktsync.delete_collection_items([tvdb], 'shows_watchlist', 'tvdb')
+
 				control.hide()
 				list = re.search('\[B](.+?)\[/B]', items[select][0]).group(1)
 				message = control.lang(33583) if 'remove' in items[select][1] else control.lang(33582)
@@ -565,9 +606,10 @@ def getActivity():
 	except:
 		log_utils.error()
 
-def getHiddenActivity():
+def getHiddenActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['movies']['hidden_at'])
@@ -579,9 +621,10 @@ def getHiddenActivity():
 	except:
 		log_utils.error()
 
-def getWatchedActivity():
+def getWatchedActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['movies']['watched_at'])
@@ -592,9 +635,10 @@ def getWatchedActivity():
 	except:
 		log_utils.error()
 
-def getMoviesWatchedActivity():
+def getMoviesWatchedActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['movies']['watched_at'])
@@ -604,9 +648,10 @@ def getMoviesWatchedActivity():
 	except:
 		log_utils.error()
 
-def getEpisodesWatchedActivity():
+def getEpisodesWatchedActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['episodes']['watched_at'])
@@ -616,9 +661,10 @@ def getEpisodesWatchedActivity():
 	except:
 		log_utils.error()
 
-def getCollectedActivity():
+def getCollectedActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['movies']['collected_at'])
@@ -629,9 +675,10 @@ def getCollectedActivity():
 	except:
 		log_utils.error()
 
-def getWatchListedActivity():
+def getWatchListedActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['movies']['watchlisted_at'])
@@ -644,9 +691,10 @@ def getWatchListedActivity():
 	except:
 		log_utils.error()
 
-def getPausedActivity():
+def getPausedActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['movies']['paused_at'])
@@ -657,9 +705,10 @@ def getPausedActivity():
 	except:
 		log_utils.error()
 
-def getListActivity():
+def getListActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['lists']['liked_at'])
@@ -670,9 +719,10 @@ def getListActivity():
 	except:
 		log_utils.error()
 
-def getProgressActivity():
+def getProgressActivity(activities=None):
 	try:
-		i = getTraktAsJson('/sync/last_activities')
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
 		if not i: return 0
 		activity = []
 		activity.append(i['episodes']['watched_at'])
@@ -886,7 +936,6 @@ def markSeasonAsNotWatched(imdb, tvdb, season):
 def markEpisodeAsWatched(imdb, tvdb, season, episode):
 	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
-	# result = getTrakt('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
 	result = getTrakt('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
 	seasonCount(imdb)
 	return result
@@ -894,7 +943,6 @@ def markEpisodeAsWatched(imdb, tvdb, season, episode):
 def markEpisodeAsNotWatched(imdb, tvdb, season, episode):
 	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
-	# result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})[0]
 	result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
 	seasonCount(imdb)
 	return result
@@ -1141,102 +1189,140 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 def trakt_service_sync():
 	while not control.monitor.abortRequested():
 		if getTraktCredentialsInfo: # run service in case user auth's trakt later
+			activities = getTraktAsJson('/sync/last_activities')
 			if control.setting('bookmarks') == 'true' and control.setting('resume.source') == '1':
-				sync_progress()
+				sync_progress(activities)
 			if control.setting('indicators.alt') == '1':
-				sync_watched() # still write to cache.db
-			sync_liked_lists()
-			sync_hidden_progress()
-			sync_collection()
-			sync_watch_list()
+				sync_watched(activities) # still writes to cache.db
+			sync_liked_lists(activities)
+			sync_hidden_progress(activities)
+			sync_collection(activities)
+			sync_watch_list(activities)
 		if control.monitor.waitForAbort(60*15): break
 
-def sync_progress():
+def force_traktSync():
+	control.busy()
+	sync_progress(forced=True)
+	sync_watched(forced=True) # still writes to cache.db
+	sync_liked_lists(forced=True)
+	sync_hidden_progress(forced=True)
+	sync_collection(forced=True)
+	sync_watch_list(forced=True)
+	control.hide()
+	control.notification(message='Forced Trakt Sync Complete')
+
+def sync_progress(activities=None, forced=False):
 	try:
-		db_last_paused = traktsync.last_sync('last_paused_at')
-		activity = getPausedActivity()
-		if activity - db_last_paused >= 120: # do not sync unless 2 min difference or more
-			log_utils.log('Trakt Progress Sync Update...(local db latest "paused_at" = %s, trakt api latest "paused_at" = %s)' % \
-								(str(db_last_paused), str(activity)), __name__, log_utils.LOGDEBUG)
-			link = '/sync/playback/'
-			items = getTraktAsJson(link)
-			if items: traktsync.insert_bookmarks(items)
+		link = '/sync/playback/'
+		if forced:
+				items = getTraktAsJson(link)
+				if items: traktsync.insert_bookmarks(items)
+		else:
+			db_last_paused = traktsync.last_sync('last_paused_at')
+			activity = getPausedActivity(activities)
+			if activity - db_last_paused >= 120: # do not sync unless 2 min difference or more
+				log_utils.log('Trakt Progress Sync Update...(local db latest "paused_at" = %s, trakt api latest "paused_at" = %s)' % \
+									(str(db_last_paused), str(activity)), __name__, log_utils.LOGDEBUG)
+				items = getTraktAsJson(link)
+				if items: traktsync.insert_bookmarks(items)
 	except:
 		log_utils.error()
 
-def sync_watched(): # still writes to cache.db, move to traktsync.db
+def sync_watched(activities=None, forced=False): # still writes to cache.db, move to traktsync.db
 	try:
-		moviesWatchedActivity = getMoviesWatchedActivity()
-		db_movies_last_watched = timeoutsyncMovies()
-		episodesWatchedActivity = getEpisodesWatchedActivity()
-		db_episoodes_last_watched = timeoutsyncTVShows()
-		if moviesWatchedActivity > db_movies_last_watched:
-			log_utils.log('Trakt Watched Movie Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
-							(str(db_movies_last_watched), str(moviesWatchedActivity)), __name__, log_utils.LOGDEBUG)
+		if forced:
 			cachesyncMovies()
-		if episodesWatchedActivity > db_episoodes_last_watched:
-			log_utils.log('Trakt Watched Episodes Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
-							(str(db_episoodes_last_watched), str(episodesWatchedActivity)), __name__, log_utils.LOGDEBUG)
 			cachesyncTVShows()
+		else:
+			moviesWatchedActivity = getMoviesWatchedActivity(activities)
+			db_movies_last_watched = timeoutsyncMovies()
+			episodesWatchedActivity = getEpisodesWatchedActivity(activities)
+			db_episoodes_last_watched = timeoutsyncTVShows()
+			if moviesWatchedActivity > db_movies_last_watched:
+				log_utils.log('Trakt Watched Movie Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
+								(str(db_movies_last_watched), str(moviesWatchedActivity)), __name__, log_utils.LOGDEBUG)
+				cachesyncMovies()
+			if episodesWatchedActivity > db_episoodes_last_watched:
+				log_utils.log('Trakt Watched Episodes Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
+								(str(db_episoodes_last_watched), str(episodesWatchedActivity)), __name__, log_utils.LOGDEBUG)
+				cachesyncTVShows()
 	except:
 		log_utils.error()
 
-def sync_liked_lists():
+def sync_liked_lists(activities=None, forced=False):
 	try:
-		db_last_liked = traktsync.last_sync('last_liked_at')
-		listActivity = getListActivity()
-		if listActivity > db_last_liked:
-			log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
-								(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
-			link = '/users/likes/lists?limit=1000000'
+		link = '/users/likes/lists?limit=1000000'
+		if forced:
 			items = getTraktAsJson(link)
 			traktsync.insert_liked_lists(items)
+		else:
+			db_last_liked = traktsync.last_sync('last_liked_at')
+			listActivity = getListActivity(activities)
+			if listActivity > db_last_liked:
+				log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
+									(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
+				items = getTraktAsJson(link)
+				traktsync.insert_liked_lists(items)
 	except:
 		log_utils.error()
 
-def sync_hidden_progress():
+def sync_hidden_progress(activities=None, forced=False):
 	try:
-		db_last_hidden = traktsync.last_sync('last_hiddenProgress_at')
-		hiddenActivity = getHiddenActivity()
-		if hiddenActivity > db_last_hidden:
-			log_utils.log('Trakt Hidden Progress Sync Update...(local db latest "hidden_at" = %s, trakt api latest "hidden_at" = %s)' % \
-								(str(db_last_hidden), str(hiddenActivity)), __name__, log_utils.LOGDEBUG)
-			link = '/users/hidden/progress_watched?limit=1000&type=show'
+		link = '/users/hidden/progress_watched?limit=1000&type=show'
+		if forced:
 			items = getTraktAsJson(link)
 			traktsync.insert_hidden_progress(items)
+		else:
+			db_last_hidden = traktsync.last_sync('last_hiddenProgress_at')
+			hiddenActivity = getHiddenActivity(activities)
+			if hiddenActivity > db_last_hidden:
+				log_utils.log('Trakt Hidden Progress Sync Update...(local db latest "hidden_at" = %s, trakt api latest "hidden_at" = %s)' % \
+									(str(db_last_hidden), str(hiddenActivity)), __name__, log_utils.LOGDEBUG)
+				items = getTraktAsJson(link)
+				traktsync.insert_hidden_progress(items)
 	except:
 		log_utils.error()
 
-def sync_collection():
+def sync_collection(activities=None, forced=False):
 	try:
-		db_last_collected = traktsync.last_sync('last_collected_at')
-		collectedActivity = getCollectedActivity()
-		if collectedActivity > db_last_collected:
-			log_utils.log('Trakt Collection Sync Update...(local db latest "collected_at" = %s, trakt api latest "collected_at" = %s)' % \
-								(str(db_last_collected), str(collectedActivity)), __name__, log_utils.LOGDEBUG)
-			link = '/users/me/collection/movies?extended=full'
-			# indicators = cachesyncMovies() # could maybe check watched status here to satisfy sort method
-			items = getTraktAsJson(link)
+		link = '/users/me/collection/%s?extended=full'
+		if forced:
+			items = getTraktAsJson(link % 'movies')
 			traktsync.insert_collection(items, 'movies_collection')
-			link = '/users/me/collection/shows?extended=full'
-			# indicators = cachesyncTVShows() # could maybe check watched status here to satisfy sort method
-			items = getTraktAsJson(link)
+			items = getTraktAsJson(link % 'shows')
 			traktsync.insert_collection(items, 'shows_collection')
+		else:
+			db_last_collected = traktsync.last_sync('last_collected_at')
+			collectedActivity = getCollectedActivity(activities)
+			if collectedActivity > db_last_collected:
+				log_utils.log('Trakt Collection Sync Update...(local db latest "collected_at" = %s, trakt api latest "collected_at" = %s)' % \
+									(str(db_last_collected), str(collectedActivity)), __name__, log_utils.LOGDEBUG)
+				# indicators = cachesyncMovies() # could maybe check watched status here to satisfy sort method
+				items = getTraktAsJson(link % 'movies')
+				traktsync.insert_collection(items, 'movies_collection')
+				# indicators = cachesyncTVShows() # could maybe check watched status here to satisfy sort method
+				items = getTraktAsJson(link % 'shows')
+				traktsync.insert_collection(items, 'shows_collection')
 	except:
 		log_utils.error()
 
-def sync_watch_list():
+def sync_watch_list(activities=None, forced=False):
 	try:
-		db_last_watchList = traktsync.last_sync('last_watchlisted_at')
-		watchListActivity = getWatchedActivity()
-		if watchListActivity > db_last_watchList:
-			log_utils.log('Trakt Watch List Sync Update...(local db latest "watchlist_at" = %s, trakt api latest "watchlisted_at" = %s)' % \
-								(str(db_last_watchList), str(watchListActivity)), __name__, log_utils.LOGDEBUG)
-			link = '/users/me/watchlist/movies?extended=full'
-			items = getTraktAsJson(link)
+		link = '/users/me/watchlist/%s?extended=full'
+		if forced:
+			items = getTraktAsJson(link % 'movies')
 			traktsync.insert_watch_list(items, 'movies_watchlist')
-			link = '/users/me/watchlist/shows?extended=full'
-			items = getTraktAsJson(link)
+			items = getTraktAsJson(link % 'shows')
 			traktsync.insert_watch_list(items, 'shows_watchlist')
+		else:
+			db_last_watchList = traktsync.last_sync('last_watchlisted_at')
+			watchListActivity = getWatchListedActivity(activities)
+			if watchListActivity > db_last_watchList:
+				log_utils.log('Trakt Watch List Sync Update...(local db latest "watchlist_at" = %s, trakt api latest "watchlisted_at" = %s)' % \
+									(str(db_last_watchList), str(watchListActivity)), __name__, log_utils.LOGDEBUG)
+				items = getTraktAsJson(link % 'movies')
+				traktsync.insert_watch_list(items, 'movies_watchlist')
+				items = getTraktAsJson(link % 'shows')
+				traktsync.insert_watch_list(items, 'shows_watchlist')
 	except:
 		log_utils.error()

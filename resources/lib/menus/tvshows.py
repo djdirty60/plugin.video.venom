@@ -193,6 +193,8 @@ class TVshows:
 		try:
 			q = dict(parse_qsl(urlsplit(url).query))
 			index = int(q['page']) - 1
+
+# add activities check to cover if user added items from external source so service won't check for 15mins
 			self.list = traktsync.fetch_collection('shows_collection')
 			self.sort()
 			if control.setting('trakt.paginate.lists') == 'true':
@@ -222,6 +224,8 @@ class TVshows:
 		try:
 			q = dict(parse_qsl(urlsplit(url).query))
 			index = int(q['page']) - 1
+
+# add activities check to cover if user added items from external source so service won't check for 15mins
 			self.list = traktsync.fetch_watch_list('shows_watchlist')
 			self.sort(type='shows.watchlist')
 			if control.setting('trakt.paginate.lists') == 'true':
@@ -274,6 +278,26 @@ class TVshows:
 			if chosen_hide:
 				success = trakt.hideItems(chosen_hide)
 				if success: control.notification(title='Trakt Hidden Progress Manager', message='Successfully Hid %s Item%s' % (len(chosen_hide), 's' if len(chosen_hide) >1 else ''))
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
+	def watchlistManager(self):
+		self.list = []
+		try:
+			control.busy()
+			self.list = traktsync.fetch_watch_list('shows_watchlist')
+			self.worker()
+			self.sort(type='shows.watchlist')
+			# self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
+			control.hide()
+			from resources.lib.windows.traktwatchlist_manager import TraktWatchlistManagerXML
+			window = TraktWatchlistManagerXML('traktwatchlist_manager.xml', control.addonPath(control.addonId()), results=self.list)
+			selected_items = window.run()
+			del window
+			if selected_items:
+				# refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+				trakt.removeWatchlistItems('shows', selected_items)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

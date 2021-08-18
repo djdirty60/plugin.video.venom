@@ -3134,20 +3134,60 @@ msgid "My TVShows and list sort options"
 msgstr "Moje programy telewizyjne i opcje sortowania list"
 
 msgctxt "#35057"
-msgid "[COLOR %s][B]Hidden Progress Manager[/B][/COLOR]"
-msgstr "[COLOR %s][B]Menedżer ukrytego postępu[/B][/COLOR]"
-
-msgctxt "#35058"
-msgid "[COLOR %s][B]Unfinsihed Episodes Progress Manager[/B][/COLOR]"
-msgstr "Menedżer postępu niedokończonych odcinków"
-
-msgctxt "#35059"
-msgid "[COLOR %s][B]Unfinished Movies Progress Manager[/B][/COLOR]"
-msgstr "Menedżer postępu niedokończonych filmów"
-
-msgctxt "#35060"
 msgid "[B]Trakt Management Tools[/B]"
 msgstr "[B]Narzędzia do zarządzania trasami[/B]"
+
+msgctxt "#35058"
+msgid "[COLOR %s][B]Hidden Progress Manager[/B][/COLOR]"
+msgstr "[COLOR %s][B]Ukryty menedżer postępu[/B][/COLOR]"
+
+msgctxt "#35059"
+msgid "[COLOR %s][B]Unininished Progress Manager - Movies[/B][/COLOR]"
+msgstr "[COLOR %s][B]Niedokończony menedżer postępów — filmy[/B][/COLOR]"
+
+msgctxt "#35060"
+msgid "[COLOR %s][B]Unininished Progress Manager - Episodes[/B][/COLOR]"
+msgstr "[COLOR %s][B]Niedokończony menedżer postępów – odcinki[/B][/COLOR]"
+
+msgctxt "#35061"
+msgid "[COLOR %s][B]Watchlist Manager - Movies[/B][/COLOR]"
+msgstr "[COLOR %s][B]Menedżer listy obserwowanych — filmy[/B][/COLOR]"
+
+msgctxt "#35062"
+msgid "[COLOR %s][B]Watchlist Manager - Shows[/B][/COLOR]"
+msgstr "[COLOR %s][B]Menedżer listy obserwowanych — programy[/B][/COLOR]"
+
+msgctxt "#35063"
+msgid "[COLOR %s][B]Collection Manager - Movies[/B][/COLOR]"
+msgstr "[COLOR %s][B]Menedżer kolekcji - filmy[/B][/COLOR]"
+
+msgctxt "#35064"
+msgid "[COLOR %s][B]Collection Manager - Shows[/B][/COLOR]"
+msgstr "[COLOR %s][B]Menedżer Kolekcji - Pokazy[/B][/COLOR]"
+
+msgctxt "#35065"
+msgid "[COLOR %s][B]Liked List Manager[/B][/COLOR]"
+msgstr "[COLOR %s][B]Menedżer połączonych list[/B][/COLOR]"
+
+msgctxt "#35066"
+msgid "[COLOR %s][B]Force Trakt Sync to local database[/B][/COLOR]"
+msgstr "[COLOR %s][B]Wymuś synchronizację Trakt z lokalną bazą danych[/B][/COLOR]"
+
+msgctxt "#35067"
+msgid ""
+msgstr ""
+
+msgctxt "#35068"
+msgid ""
+msgstr ""
+
+msgctxt "#35069"
+msgid ""
+msgstr ""
+
+msgctxt "#35070"
+msgid ""
+msgstr ""
 
 
 

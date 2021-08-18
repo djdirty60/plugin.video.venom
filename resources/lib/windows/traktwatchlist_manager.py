@@ -8,9 +8,9 @@ from resources.lib.modules.control import dialog, getHighlightColor
 from resources.lib.windows.base import BaseDialog
 
 
-class TraktMovieProgressManagerXML(BaseDialog):
+class TraktWatchlistManagerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(TraktMovieProgressManagerXML, self).__init__(self, args)
+		super(TraktWatchlistManagerXML, self).__init__(self, args)
 		self.window_id = 2050
 		self.results = kwargs.get('results')
 		self.total_results = str(len(self.results))
@@ -19,7 +19,7 @@ class TraktMovieProgressManagerXML(BaseDialog):
 		self.set_properties()
 
 	def onInit(self):
-		super(TraktMovieProgressManagerXML, self).onInit()
+		super(TraktWatchlistManagerXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
@@ -39,13 +39,13 @@ class TraktMovieProgressManagerXML(BaseDialog):
 				if focus_id == 2050: # listItems
 					position = self.get_position(self.window_id)
 					chosen_listitem = self.item_list[position]
-					imdb = chosen_listitem.getProperty('venom.imdb')
+					trakt = chosen_listitem.getProperty('venom.trakt')
 					if chosen_listitem.getProperty('venom.isSelected') == 'true':
 						chosen_listitem.setProperty('venom.isSelected', '')
-						if imdb in self.selected_items: self.selected_items.remove(imdb)
+						if trakt in self.selected_items: self.selected_items.remove(trakt)
 					else:
 						chosen_listitem.setProperty('venom.isSelected', 'true')
-						self.selected_items.append(imdb)
+						self.selected_items.append(trakt)
 				elif focus_id == 2051: # OK Button
 					self.close()
 				elif focus_id == 2052: # Cancel Button
@@ -78,11 +78,10 @@ class TraktMovieProgressManagerXML(BaseDialog):
 					listitem = self.make_listitem()
 					listitem.setProperty('venom.title', item.get('title'))
 					listitem.setProperty('venom.year', str(item.get('year')))
-					labelProgress = str(round(float(item['progress'] * 100), 1)) + '%'
-					listitem.setProperty('venom.progress', '[' + labelProgress + ']')
 					listitem.setProperty('venom.isSelected', '')
 					listitem.setProperty('venom.imdb', item.get('imdb'))
-					# listitem.setProperty('venom.tmdb', item.get('tmdb'))
+					listitem.setProperty('venom.tmdb', item.get('tmdb'))
+					listitem.setProperty('venom.trakt', item.get('trakt'))
 					listitem.setProperty('venom.rating', str(round(float(item.get('rating')), 1)))
 					listitem.setProperty('venom.trailer', item.get('trailer'))
 					listitem.setProperty('venom.studio', item.get('studio'))

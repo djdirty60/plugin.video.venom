@@ -647,6 +647,41 @@ class RealDebrid:
 			log_utils.error('Real-Debrid Error: ADD SELECT FILES %s : ' % torrent_id)
 			return None
 
+	# def add_torrent_select(self, torrent_id, file_ids=None):
+		# try:
+			# url = '%s/%s' % (select_files_url, torrent_id)
+			# if file_ids == None:
+				# extensions = supported_video_extensions()
+				# info = self.torrent_info(torrent_id)
+				# files = info['files']
+				# file_ids = [str(item['id']) for item in files if item['path'].lower().endswith(tuple(extensions))]
+				# file_ids = ','.join(file_ids)
+			# data = {'files': file_ids}
+			# return self._post(url, data)
+		# except:
+			# log_utils.error('Real-Debrid Error: ADD SELECT FILES %s : ' % torrent_id)
+			# return None
+
+	def create_transfer(self, magnet_url):
+		try:
+			extensions = supported_video_extensions()
+			# torrent = self.add_magnet(magnet_url)
+			# torrent_id = torrent['id']
+
+			torrent_id = self.add_magnet(magnet_url)
+
+
+			info = self.torrent_info(torrent_id)
+			files = info['files']
+			torrent_keys = [str(item['id']) for item in files if item['path'].lower().endswith(tuple(extensions))]
+			torrent_keys = ','.join(torrent_keys)
+			self.add_torrent_select(torrent_id, torrent_keys)
+			return 'success'
+		except:
+			log_utils.error()
+			self.delete_torrent(torrent_id)
+			return 'failed'
+
 	def unrestrict_link(self, link):
 		post_data = {'link': link}
 		response = self._post(unrestrict_link_url, post_data)
