@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.8">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.1.9">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,10 +32,15 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.1.8 - Aug. 18, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added new function [B]"Force Trakt Sync to local database"[/B]. If you modify your Trakt account items externally you can now use this to force a Trakt sync vs. waiting the 15min for service to detect and sync the changes.[/I]
-[COLOR yellow]--[/COLOR][I] Added new [B]"Watchlist Manager"[/B] for both movies and shows.  This can be found in the  [B]"Tools"[/B] - [B]"Trakt Management Tools"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Few additions added to the traktsync database insert and delete methods.[/I]
+[B][COLOR red]Update - v6.1.9 - Aug. 25, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] fanart.tv database now caches [B]"404"[/B] responses to avoid requesting again for a 7 day period.[/I]
+[COLOR yellow]--[/COLOR][I] Added new [B]"Collection Manager"[/B] for both movies and shows to [B]"Tools"[/B] - [B]"Trakt Management Tools"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Added new [B]"Liked List Manager"[/B] to [B]"Tools"[/B] - [B]"Trakt Management Tools"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Each [B]"Trakt Management Tools"[/B] category now has a [B]"Select All"[/B] button.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed bogus notification when clearing cache would falsely report "Error".[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Opensubtitles.org Login Error.[/I]
+[COLOR yellow]--[/COLOR][I] Dutch language strings update.[/I]
+[COLOR yellow]--[/COLOR][I] Added new context menu option [B]"Rescape with all providers"[/B].  Please use this sparingly as needed to not abuse sites!![/I]
 		</news>
 	</extension>
 </addon>
