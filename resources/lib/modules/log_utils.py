@@ -85,6 +85,23 @@ def error(message=None, exception=True):
 		import xbmc
 		xbmc.log('[ plugin.video.venom ] log_utils.error() Logging Failure: %s' % (e), LOGERROR)
 
+def clear_logFile():
+	cleared = False
+	try:
+		log_file = joinPath(LOGPATH, 'venom.log')
+		if not existsPath(log_file):
+			f = open(log_file, 'w')
+			return f.close()
+		f = open(log_file, 'r+')
+		f.truncate(0) # need '0' when using r
+		f.close()
+		cleared = True
+	except Exception as e:
+		import xbmc
+		xbmc.log('[ plugin.video.venom ] log_utils.clear_logFile() Failure: %s' % (e), LOGERROR)
+		cleared = False
+	return cleared
+
 def normalize(msg):
 	try:
 		msg = ''.join(c for c in unicodedata.normalize('NFKD', msg) if unicodedata.category(c) != 'Mn')

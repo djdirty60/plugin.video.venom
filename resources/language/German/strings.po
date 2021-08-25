@@ -779,10 +779,54 @@ msgid "Paginate Lists when possible"
 msgstr "Listen nach Möglichkeit paginieren"
 
 msgctxt "#32189"
+msgid "Clear Venom Log File"
+msgstr "Gift-Protokolldatei löschen"
+
+msgctxt "#32190"
+msgid "Select All"
+msgstr "Wählen Sie Alle"
+
+msgctxt "#32191"
+msgid "%s - Lang Downloaded from OPENSUBTILES.ORG"
+msgstr "%s - Lang Heruntergeladen von OPENSUBTILES.ORG"
+
+msgctxt "#32192"
+msgid "Enable notification of subtitle downloads"
+msgstr "Benachrichtigung über Untertitel-Downloads aktivieren"
+
+msgctxt "#32193"
+msgid "Rescrape with All Providers"
+msgstr "Mit allen Anbietern neu kratzen"
+
+msgctxt "#32194"
 msgid ""
 msgstr ""
 
-msgctxt "#32190"
+msgctxt "#32195"
+msgid ""
+msgstr ""
+
+msgctxt "#32196"
+msgid ""
+msgstr ""
+
+msgctxt "#32196"
+msgid ""
+msgstr ""
+
+msgctxt "#32197"
+msgid ""
+msgstr ""
+
+msgctxt "#32198"
+msgid ""
+msgstr ""
+
+msgctxt "#32199"
+msgid ""
+msgstr ""
+
+msgctxt "#32200"
 msgid ""
 msgstr ""
 
@@ -3142,12 +3186,12 @@ msgid "[COLOR %s][B]Hidden Progress Manager[/B][/COLOR]"
 msgstr "[COLOR %s][B]Versteckter Fortschrittsmanager[/B][/COLOR]"
 
 msgctxt "#35059"
-msgid "[COLOR %s][B]Unininished Progress Manager - Movies[/B][/COLOR]"
-msgstr "[COLOR %s][B]Unvollendeter Fortschrittsmanager - Filme[/B][/COLOR]"
+msgid "[COLOR %s][B]Unfinished Progress Manager - Movies[/B][/COLOR]"
+msgstr "[COLOR %s][B]Hidden Progress Manager - Filme[/B][/COLOR]"
 
 msgctxt "#35060"
-msgid "[COLOR %s][B]Unininished Progress Manager - Episodes[/B][/COLOR]"
-msgstr "[COLOR %s][B]Unvollendeter Fortschrittsmanager – Episoden[/B][/COLOR]"
+msgid "[COLOR %s][B]Unfinished Progress Manager - Episodes[/B][/COLOR]"
+msgstr "[COLOR %s][B]Hidden Progress Manager - Episoden[/B][/COLOR]"
 
 msgctxt "#35061"
 msgid "[COLOR %s][B]Watchlist Manager - Movies[/B][/COLOR]"

@@ -665,12 +665,7 @@ class RealDebrid:
 	def create_transfer(self, magnet_url):
 		try:
 			extensions = supported_video_extensions()
-			# torrent = self.add_magnet(magnet_url)
-			# torrent_id = torrent['id']
-
 			torrent_id = self.add_magnet(magnet_url)
-
-
 			info = self.torrent_info(torrent_id)
 			files = info['files']
 			torrent_keys = [str(item['id']) for item in files if item['path'].lower().endswith(tuple(extensions))]

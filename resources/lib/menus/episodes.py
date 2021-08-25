@@ -113,16 +113,21 @@ class Episodes:
 				if self.notifications: control.notification(title=32326, message=33049)
 
 	def unfinishedManager(self):
-		control.busy()
-		list = self.unfinished(url='traktunfinished', create_directory=False)
-		control.hide()
-		from resources.lib.windows.traktepisodeprogress_manager import TraktEpisodeProgressManagerXML
-		window = TraktEpisodeProgressManagerXML('traktepisodeprogress_manager.xml', control.addonPath(control.addonId()), results=list)
-		selected_items = window.run()
-		del window
-		if selected_items:
-			refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
-			trakt.scrobbleResetItems(imdb_ids=None, tvdb_dicts=selected_items, refresh=refresh, widgetRefresh=True)
+		try:
+			control.busy()
+			list = self.unfinished(url='traktunfinished', create_directory=False)
+			control.hide()
+			from resources.lib.windows.traktepisodeprogress_manager import TraktEpisodeProgressManagerXML
+			window = TraktEpisodeProgressManagerXML('traktepisodeprogress_manager.xml', control.addonPath(control.addonId()), results=list)
+			selected_items = window.run()
+			del window
+			if selected_items:
+				refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+				trakt.scrobbleResetItems(imdb_ids=None, tvdb_dicts=selected_items, refresh=refresh, widgetRefresh=True)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			control.hide()
 
 	def upcoming_progress(self, url):
 		self.list = []
@@ -759,7 +764,7 @@ class Episodes:
 			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		traktManagerMenu, playlistManagerMenu, queueMenu = control.lang(32070), control.lang(35522), control.lang(32065)
 		tvshowBrowserMenu, addToLibrary = control.lang(32071), control.lang(32551)
-		clearSourcesMenu, rescrapeMenu = control.lang(32611), control.lang(32185)
+		clearSourcesMenu, rescrapeMenu, rescrapeAllMenu  = control.lang(32611), control.lang(32185), control.lang(32193)
 		for i in items:
 			try:
 				tvshowtitle, title, imdb, tmdb, tvdb = i.get('tvshowtitle'), i.get('title'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', '')
@@ -871,6 +876,8 @@ class Episodes:
 					if traktProgress: cm.append((progressMenu, 'Container.Update(%s)' % Folderurl))
 					cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
 					cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
+					cm.append((rescrapeAllMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true&all_providers=true)' % (
 										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))

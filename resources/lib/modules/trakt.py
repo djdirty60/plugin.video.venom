@@ -299,6 +299,25 @@ def unlike_list(list_owner, list_name, list_id):
 	except:
 		log_utils.error()
 
+def remove_liked_lists(trakt_ids):
+	if not trakt_ids: return
+	success = None
+	try:
+		headers['Authorization'] = 'Bearer %s' % control.addon('script.module.myaccounts').getSetting('trakt.token')
+		for id in trakt_ids:
+			list_owner = id.get('list_owner')
+			list_id = id.get('trakt_id')
+			list_name = id.get('list_name')
+			resp_code = client._basic_request('https://api.trakt.tv/users/%s/lists/%s/like' % (list_owner, list_id), headers=headers, method='DELETE', ret_code=True)
+			if resp_code == 204:
+				control.notification(title=32315, message='Successfuly Unliked list:  [COLOR %s]%s[/COLOR]' % (highlight_color, list_name))
+				traktsync.delete_liked_list(list_id)
+			else: control.notification(title=32315, message='Failed to UnLike list %s' % list_name)
+			control.sleep(1000)
+		control.refresh()
+	except:
+		log_utils.error()
+
 def rate(imdb=None, tvdb=None, season=None, episode=None):
 	return _rating(action='rate', imdb=imdb, tvdb=tvdb, season=season, episode=episode)
 
@@ -412,6 +431,25 @@ def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True
 			control.trigger_widget_refresh()
 			if control.setting('trakt.general.notifications') == 'true':
 				control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
+	except:
+		log_utils.error()
+
+def removeCollectionItems(type, id_list):
+	if not id_list: return
+	success = None
+	try:
+		ids = []
+		total_items = len(id_list)
+		for id in id_list: ids.append({"ids": {"trakt": id}})
+		post = {type: ids}
+		success =getTrakt('/sync/collection/remove', post=post)
+		if success:
+			# if 'plugin.video.venom' in control.infoLabel('Container.PluginName'): control.refresh()
+			control.trigger_widget_refresh()
+			if type == 'movies': traktsync.delete_collection_items(id_list, 'movies_collection')
+			else: traktsync.delete_collection_items(id_list, 'shows_collection')
+			if control.setting('trakt.general.notifications') == 'true':
+				control.notification(title='Trakt Collection Manager', message='Successfuly Removed %s Item%s' % (total_items, 's' if total_items >1 else ''))
 	except:
 		log_utils.error()
 
@@ -719,6 +757,19 @@ def getListActivity(activities=None):
 	except:
 		log_utils.error()
 
+def getUserListActivity(activities=None):
+	try:
+		if activities: i = activities
+		else: i = getTraktAsJson('/sync/last_activities')
+		if not i: return 0
+		activity = []
+		activity.append(i['lists']['updated_at'])
+		activity = [int(cleandate.iso_2_utc(i)) for i in activity]
+		activity = sorted(activity, key=int)[-1]
+		return activity
+	except:
+		log_utils.error()
+
 def getProgressActivity(activities=None):
 	try:
 		if activities: i = activities
@@ -875,8 +926,8 @@ def seasonCount(imdb, refresh=True, wait=False):
 		return None
 
 def _seasonCountCache(imdb):
-	return cache.get(_seasonCountRetrieve, 0.3, imdb) # this may be causing manual marking as watched/unwatched to not update counts
-	# return cache.get(_seasonCountRetrieve, 0, imdb)
+	# return cache.get(_seasonCountRetrieve, 0.3, imdb) # this may be causing manual marking as watched/unwatched to not update season counts
+	return cache.get(_seasonCountRetrieve, 0, imdb)
 
 def _seasonCountRetrieve(imdb):
 	try:
@@ -1185,6 +1236,7 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 		log_utils.error()
 		return False
 
+
 #############    SERVICE SYNC    ######################
 def trakt_service_sync():
 	while not control.monitor.abortRequested():
@@ -1194,6 +1246,7 @@ def trakt_service_sync():
 				sync_progress(activities)
 			if control.setting('indicators.alt') == '1':
 				sync_watched(activities) # still writes to cache.db
+			# sync_user_lists(activities)
 			sync_liked_lists(activities)
 			sync_hidden_progress(activities)
 			sync_collection(activities)
@@ -1204,6 +1257,7 @@ def force_traktSync():
 	control.busy()
 	sync_progress(forced=True)
 	sync_watched(forced=True) # still writes to cache.db
+	# sync_user_lists(forced=True)
 	sync_liked_lists(forced=True)
 	sync_hidden_progress(forced=True)
 	sync_collection(forced=True)
@@ -1215,8 +1269,8 @@ def sync_progress(activities=None, forced=False):
 	try:
 		link = '/sync/playback/'
 		if forced:
-				items = getTraktAsJson(link)
-				if items: traktsync.insert_bookmarks(items)
+			items = getTraktAsJson(link)
+			if items: traktsync.insert_bookmarks(items)
 		else:
 			db_last_paused = traktsync.last_sync('last_paused_at')
 			activity = getPausedActivity(activities)
@@ -1249,6 +1303,24 @@ def sync_watched(activities=None, forced=False): # still writes to cache.db, mov
 	except:
 		log_utils.error()
 
+# def sync_user_lists(activities=None, forced=False):
+	# try:
+		# link = '/users/me/lists'
+		# if forced:
+			# items = getTraktAsJson(link)
+			# if items: traktsync.insert_user_lists(items)
+		# else:
+			# db_last_lists_updatedat = traktsync.last_sync('last_lists_updatedat')
+			# user_listActivity = getUserListActivity(activities)
+			# if user_listActivity > db_last_lists_updatedat:
+				# log_utils.log('Trakt User Lists Sync Update...(local db latest "lists_updatedat" = %s, trakt api latest "lists_updatedat" = %s)' % \
+									# (str(db_last_lists_updatedat), str(user_listActivity)), __name__, log_utils.LOGDEBUG)
+				# items = getTraktAsJson(link)
+	## add means to fetch the user list to determine list content as either movie, shows, or mixed.
+				# traktsync.insert_user_lists(items)
+	# except:
+		# log_utils.error()
+
 def sync_liked_lists(activities=None, forced=False):
 	try:
 		link = '/users/likes/lists?limit=1000000'
@@ -1262,6 +1334,7 @@ def sync_liked_lists(activities=None, forced=False):
 				log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
 									(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
 				items = getTraktAsJson(link)
+	# add means to fetch the user list to determine list content as either movie, shows, or mixed.
 				traktsync.insert_liked_lists(items)
 	except:
 		log_utils.error()

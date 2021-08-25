@@ -39,13 +39,14 @@
 
 			<control type="list" id="2060">
 				<description>Trakt Watched Progress Episode List</description>
+				<visible>!Player.HasVideo</visible>
 				<viewtype>list</viewtype>
 				<left>0</left>
 				<top>150</top>
 				<width>1350</width>
 				<height>800</height>
 				<onright>2061</onright>
-				<onleft>2062</onleft>
+				<onleft>2063</onleft>
 				<onup>2060</onup>
 				<ondown>2060</ondown>
 				<scrolltime tween="sine">400</scrolltime>
@@ -95,7 +96,6 @@
 						<label>$INFO[ListItem.Property(venom.premiered)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.genre)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.mpaa)]</label>
 					</control>
 				</itemlayout>
-
 				<focusedlayout height="100" width="1325">
 					<control type="image">
 						<left>0</left>
@@ -194,6 +194,23 @@
 						<focusedcolor>white</focusedcolor>
 						<visible>true</visible>
 					</control>
+					<control type="button" id="2063">
+						<description>Select All Button</description>
+						<left>280</left>
+						<onright>2050</onright>
+						<onleft>2052</onleft>
+						<width>120</width>
+						<height>70</height>
+						<textoffsetx>0</textoffsetx>
+						<texturefocus colordiffuse="$INFO[Window().Property(venom.highlight.color)]">common/button5.png</texturefocus>
+						<texturenofocus>common/button5.png</texturenofocus>
+						<label>$ADDON[plugin.video.venom 32190]</label>
+						<font>font12</font>
+						<align>center</align>
+						<textcolor>white</textcolor>
+						<focusedcolor>white</focusedcolor>
+						<visible>true</visible>
+					</control>
 			</control>
 
 			<control type="group">
@@ -221,7 +238,7 @@
 					<!-- </control> -->
 			</control>
 
-			<control type="grouplist" id="2063">
+			<control type="grouplist" id="2064">
 				<description>ListItem poster and plot</description>
 				<left>1350</left>
 				<top>150</top>
@@ -249,7 +266,7 @@
 					</control>
 			</control>
 
-			<control type="grouplist" id="2064">
+			<control type="grouplist" id="2065">
 				<description>Studio icons and ratings</description>
 				<left>180</left>
 				<top>965</top>

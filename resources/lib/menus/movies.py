@@ -20,7 +20,7 @@ from resources.lib.modules import views
 from resources.lib.modules import workers
 
 
-class Movies:
+class Movies(object):
 	def __init__(self, type='movie', notifications=True):
 		self.list = []
 		self.page_limit = control.setting('page.item.limit')
@@ -213,19 +213,42 @@ class Movies:
 				if self.notifications: control.notification(title=32001, message=33049)
 
 	def unfinishedManager(self):
-		control.busy()
-		list = self.unfinished(url='traktunfinished', create_directory=False)
-		control.hide()
-		from resources.lib.windows.traktmovieprogress_manager import TraktMovieProgressManagerXML
-		window = TraktMovieProgressManagerXML('traktmovieprogress_manager.xml', control.addonPath(control.addonId()), results=list)
-		selected_items = window.run()
-		del window
-		if selected_items:
-			refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
-			trakt.scrobbleResetItems(imdb_ids=selected_items, refresh=refresh, widgetRefresh=True)
+		try:
+			control.busy()
+			list = self.unfinished(url='traktunfinished', create_directory=False)
+			control.hide()
+			from resources.lib.windows.traktmovieprogress_manager import TraktMovieProgressManagerXML
+			window = TraktMovieProgressManagerXML('traktmovieprogress_manager.xml', control.addonPath(control.addonId()), results=list)
+			selected_items = window.run()
+			del window
+			if selected_items:
+				refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+				trakt.scrobbleResetItems(imdb_ids=selected_items, refresh=refresh, widgetRefresh=True)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
+	def collectionManager(self):
+		try:
+			control.busy()
+			self.list = traktsync.fetch_collection('movies_collection')
+			self.worker()
+			self.sort()
+			# self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
+			control.hide()
+			from resources.lib.windows.traktbasic_manager import TraktBasicManagerXML
+			window = TraktBasicManagerXML('traktbasic_manager.xml', control.addonPath(control.addonId()), results=self.list)
+			selected_items = window.run()
+			del window
+			if selected_items:
+				# refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+				trakt.removeCollectionItems('movies', selected_items)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			control.hide()
 
 	def watchlistManager(self):
-		self.list = []
 		try:
 			control.busy()
 			self.list = traktsync.fetch_watch_list('movies_watchlist')
@@ -233,13 +256,28 @@ class Movies:
 			self.sort(type='movies.watchlist')
 			# self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
 			control.hide()
-			from resources.lib.windows.traktwatchlist_manager import TraktWatchlistManagerXML
-			window = TraktWatchlistManagerXML('traktwatchlist_manager.xml', control.addonPath(control.addonId()), results=self.list)
+			from resources.lib.windows.traktbasic_manager import TraktBasicManagerXML
+			window = TraktBasicManagerXML('traktbasic_manager.xml', control.addonPath(control.addonId()), results=self.list)
 			selected_items = window.run()
 			del window
 			if selected_items:
 				# refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
 				trakt.removeWatchlistItems('movies', selected_items)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			control.hide()
+
+	def likedListsManager(self):
+		try:
+			items = traktsync.fetch_liked_list('', True)
+			from resources.lib.windows.traktlikedlist_manager import TraktLikedListManagerXML
+			window = TraktLikedListManagerXML('traktlikedlist_manager.xml', control.addonPath(control.addonId()), results=items)
+			selected_items = window.run()
+			del window
+			if selected_items:
+				# refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+				trakt.remove_liked_lists(selected_items)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -878,7 +916,7 @@ class Movies:
 		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
 		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
 		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
-		rescrapeMenu, findSimilarMenu = control.lang(32185), control.lang(32184)
+		rescrapeMenu, rescrapeAllMenu, findSimilarMenu = control.lang(32185), control.lang(32193), control.lang(32184)
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -939,6 +977,7 @@ class Movies:
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
 				cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+				cm.append((rescrapeAllMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&all_providers=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append((findSimilarMenu, 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
@@ -1057,6 +1096,7 @@ class Movies:
 			icon = control.addonNext()
 			url = '%s?action=movies_PublicLists&url=%s' % (sysaddon, quote_plus(url))
 			item = control.item(label=nextMenu, offscreen=True)
+			item.setProperty('IsPlayable', 'false')
 			item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 			item.setProperty ('SpecialSort', 'bottom')
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)

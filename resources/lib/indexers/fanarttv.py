@@ -26,22 +26,29 @@ def get_request(url):
 		except requests.exceptions.SSLError:
 			result = session.get(url, headers=headers, verify=False)
 	except requests.exceptions.ConnectionError:
-		notification(message='FANART.TV server Problems')
+		notification(message='FANART.TV Temporary Server Problems')
 		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
-	if '200' in str(result):
-		return result.json() 
-	elif 'Not found' in str(result.text):
-		if getSetting('debug.level') != '1': return None
+	try:
+		if result.status_code in [200, 201]:
+			return result.json()
+		elif result.status_code == 404:
+			if getSetting('debug.level') == '1':
+				from resources.lib.modules import log_utils
+				log_utils.log('requests.get() failed - FANART.TV URL: %s (404:NOT FOUND)' % url, level=log_utils.LOGDEBUG)
+			return '404:NOT FOUND'
+		else:
+			if getSetting('debug.level') == '1':
+				from resources.lib.modules import log_utils
+				from resources.lib.modules.client import parseDOM
+				title = parseDOM(result.text, 'title')[0]
+				log_utils.log('requests.get() failed - FANART.TV URL: %s (%s)' % (url, title), level=log_utils.LOGDEBUG)
+			return None
+	except:
 		from resources.lib.modules import log_utils
-		log_utils.log('requests.get() failed - FANART.TV URL: %s (NOT FOUND)' % url, level=log_utils.LOGDEBUG)
-	else:
-		if getSetting('debug.level') != '1': return None
-		from resources.lib.modules import log_utils
-		from resources.lib.modules.client import parseDOM
-		title = parseDOM(result.text, 'title')[0]
-		log_utils.log('requests.get() failed - FANART.TV URL: %s (%s)' % (url, title), level=log_utils.LOGDEBUG)
+		log_utils.error()
+		return None
 
 def parse_art(img):
 	if not img: return None
@@ -64,8 +71,9 @@ def parse_art(img):
 def get_movie_art(imdb, tmdb):
 	if not imdb and not tmdb: return None
 	art = get_request(base_url % ('movies', tmdb))
-	if art is None: art = get_request(base_url % ('movies', imdb))
+	if art is None or '404:NOT FOUND' in art: art = get_request(base_url % ('movies', imdb))
 	if art is None: return None
+	elif '404:NOT FOUND' in art: return art
 	try:
 		if 'movieposter' not in art: raise Exception()
 		poster2 = parse_art(art['movieposter'])
@@ -119,16 +127,16 @@ def get_tvshow_art(tvdb):
 	if not tvdb: return None
 	art = get_request(base_url % ('tv', tvdb))
 	if not art: return None
+	elif '404:NOT FOUND' in art: return art
+
 	try:
 		if 'tvposter' not in art: raise Exception()
 		poster2 = parse_art(art['tvposter'])
 	except: poster2 = ''
-
 	try: # cache all season_posters and pull from seperate method call at season level
 		if 'seasonposter' not in art: raise Exception()
 		season_posters = art['seasonposter']
 	except: season_posters = ''
-
 	try:
 		if 'showbackground' not in art: raise Exception()
 		fanart2 = parse_art(art['showbackground'])
@@ -158,7 +166,6 @@ def get_tvshow_art(tvdb):
 			landscape = art['showbackground']
 		landscape = parse_art(landscape)
 	except: landscape = ''
-	# extended_art = {'extended': True, 'poster2': poster2, 'banner2': banner2, 'fanart2': fanart2, 'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape}
 	extended_art = {'extended': True, 'poster2': poster2, 'banner2': banner2, 'fanart2': fanart2, 'clearlogo': clearlogo, 'clearart': clearart, 'landscape': landscape, 'season_posters': season_posters}
 	return extended_art
 

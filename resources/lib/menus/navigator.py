@@ -107,9 +107,9 @@ class Navigator:
 			if self.traktIndicators:
 				self.addDirectoryItem(35308, 'moviesUnfinished&url=traktunfinished', 'trakt.png', 'trakt.png', queue=True)
 				self.addDirectoryItem(32036, 'movies&url=trakthistory', 'trakt.png', 'trakt.png', queue=True)
-				self.addDirectoryItem('My Liked Lists', 'movies_LikedLists', 'trakt.png', 'trakt.png', queue=True)
 			self.addDirectoryItem(32683, 'movies&url=traktwatchlist', 'trakt.png', 'trakt.png', queue=True, context=(32551, 'library_moviesToLibrary&url=traktwatchlist&name=traktwatchlist'))
 			self.addDirectoryItem(32032, 'movies&url=traktcollection', 'trakt.png', 'trakt.png', queue=True, context=(32551, 'library_moviesToLibrary&url=traktcollection&name=traktcollection'))
+			self.addDirectoryItem('My Liked Lists', 'movies_LikedLists', 'trakt.png', 'trakt.png', queue=True)
 		if self.imdbCredentials: self.addDirectoryItem(32682, 'movies&url=imdbwatchlist', 'imdb.png', 'imdb.png', queue=True)
 		if not lite:
 			self.addDirectoryItem(32031, 'movieliteNavigator', 'movies.png', 'DefaultMovies.png')
@@ -233,9 +233,9 @@ class Navigator:
 		self.addDirectoryItem(35060, 'episodes_traktUnfinishedManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.addDirectoryItem(35061, 'movies_traktWatchListManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.addDirectoryItem(35062, 'shows_traktWatchListManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
-		# self.addDirectoryItem(35063, 'movies_traktCollectionManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
-		# self.addDirectoryItem(35064, 'shows_traktCollectionManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
-		# self.addDirectoryItem(35065, 'tools_traktLikedListManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		self.addDirectoryItem(35063, 'movies_traktCollectionManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		self.addDirectoryItem(35064, 'shows_traktCollectionManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		self.addDirectoryItem(35065, 'tools_traktLikedListManager', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.addDirectoryItem(35066, 'tools_forceTraktSync', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.endDirectory()
 
@@ -464,26 +464,32 @@ class Navigator:
 			log_utils.error()
 
 	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True, isPlayable=False, isSearch=False, table=''):
-		sysaddon = argv[0] ; syshandle = int(argv[1])
-		if isinstance(name, int): name = control.lang(name)
-		url = '%s?action=%s' % (sysaddon, query) if isAction else query
-		poster = control.joinPath(self.artPath, poster) if self.artPath else icon
-		if not icon.startswith('Default'): icon = control.joinPath(self.artPath, icon)
-		cm = []
-		queueMenu = control.lang(32065)
-		if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
-		if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
-		if isSearch: cm.append(('Clear Search Phrase', 'RunPlugin(%s?action=cache_clearSearchPhrase&source=%s&name=%s)' % (sysaddon, table, quote_plus(name))))
-		cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-		item = control.item(label=name, offscreen=True)
-		item.addContextMenuItems(cm)
-		if isPlayable: item.setProperty('IsPlayable', 'true')
-		else: item.setProperty('IsPlayable', 'false')
-		item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
-		item.setInfo(type='video', infoLabels={'plot': name})
-		control.addItem(handle=syshandle, url=url, listitem=item, isFolder= isFolder)
+		try:
+			from sys import argv
+			sysaddon = argv[0] ; syshandle = int(argv[1])
+			if isinstance(name, int): name = control.lang(name)
+			url = '%s?action=%s' % (sysaddon, query) if isAction else query
+			poster = control.joinPath(self.artPath, poster) if self.artPath else icon
+			if not icon.startswith('Default'): icon = control.joinPath(self.artPath, icon)
+			cm = []
+			queueMenu = control.lang(32065)
+			if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
+			if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
+			if isSearch: cm.append(('Clear Search Phrase', 'RunPlugin(%s?action=cache_clearSearchPhrase&source=%s&name=%s)' % (sysaddon, table, quote_plus(name))))
+			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
+			item = control.item(label=name, offscreen=True)
+			item.addContextMenuItems(cm)
+			if isPlayable: item.setProperty('IsPlayable', 'true')
+			else: item.setProperty('IsPlayable', 'false')
+			item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
+			item.setInfo(type='video', infoLabels={'plot': name})
+			control.addItem(handle=syshandle, url=url, listitem=item, isFolder= isFolder)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
 
 	def endDirectory(self):
+		from sys import argv
 		syshandle = int(argv[1])
 		content = 'addons' if control.skin == 'skin.auramod' else ''
 		control.content(syshandle, content) # some skins use their own thumb for things like "genres" when content type is set here

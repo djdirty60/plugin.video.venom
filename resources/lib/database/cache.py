@@ -142,10 +142,12 @@ def cache_clear(flush_only=False):
 			dbcur.execute('''DELETE FROM cache''')
 			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
 			dbcur.execute('''VACUUM''')
+			cleared = True
 		else:
 			dbcur.execute('''DROP TABLE IF EXISTS cache''')
 			dbcur.execute('''VACUUM''')
 			dbcur.connection.commit()
+			cleared = True
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()

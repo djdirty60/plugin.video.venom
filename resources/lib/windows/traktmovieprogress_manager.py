@@ -3,8 +3,8 @@
 	Venom Add-on
 """
 
-from json import dumps as jsdumps
-from resources.lib.modules.control import dialog, getHighlightColor
+# from json import dumps as jsdumps
+from resources.lib.modules.control import dialog, getHighlightColor, sleep, condVisibility
 from resources.lib.windows.base import BaseDialog
 
 
@@ -51,17 +51,49 @@ class TraktMovieProgressManagerXML(BaseDialog):
 				elif focus_id == 2052: # Cancel Button
 					self.selected_items = None
 					self.close()
+				elif focus_id == 2053: # Select All Button
+					for item in self.item_list:
+						item.setProperty('venom.isSelected', 'true')
+				elif focus_id == 2045: # Stop Trailer Playback Button
+					self.execute_code('PlayerControl(Stop)')
+					sleep(500)
+					self.setFocusId(self.window_id)
 
-			# elif action in self.context_actions:
-				# from resources.lib.modules import log_utils
-				# chosen_source = self.item_list[self.get_position(self.window_id)]
-				# source_trailer = chosen_source.getProperty('venom.trailer')
-				# if not source_trailer: return
-				# log_utils.log('source_trailer=%s' % source_trailer)
-				# cm = [('[B]Play Trailer[/B]', 'playTrailer'),]
-				# chosen_cm_item = dialog.contextmenu([i[0] for i in cm])
-				# if chosen_cm_item == -1: return
-				# return self.execute_code('PlayMedia(%s, 1)' % source_trailer)
+			elif action in self.context_actions:
+				cm = []
+				chosen_listitem = self.item_list[self.get_position(self.window_id)]
+				# media_type = chosen_listitem.getProperty('venom.media_type')
+
+				source_trailer = chosen_listitem.getProperty('venom.trailer')
+				if not source_trailer:
+					from resources.lib.modules import trailer
+					source_trailer = trailer.Trailer().worker('movie', chosen_listitem.getProperty('venom.title'), chosen_listitem.getProperty('venom.year'), None, chosen_listitem.getProperty('venom.imdb'))
+
+				if source_trailer: cm += [('[B]Play Trailer[/B]', 'playTrailer')]
+
+				# cm += [('[B]Browse Series[/B]', 'browseSeries')]
+
+				chosen_cm_item = dialog.contextmenu([i[0] for i in cm])
+				if chosen_cm_item == -1: return
+				cm_action = cm[chosen_cm_item][1]
+
+				if cm_action == 'playTrailer':
+					self.execute_code('PlayMedia(%s, 1)' % source_trailer)
+					total_sleep = 0
+					while True:
+						sleep(500)
+						total_sleep += 500
+						self.hasVideo = condVisibility('Player.HasVideo')
+						if self.hasVideo or total_sleep >= 3000: break
+					if self.hasVideo:
+						self.setFocusId(2045)
+						while (condVisibility('Player.HasVideo') and not monitor.abortRequested()):
+							self.setProgressBar()
+							sleep(1000)
+						self.hasVideo = False
+						self.progressBarReset()
+						self.setFocusId(self.window_id)
+					else: self.setFocusId(self.window_id)
 
 			elif action in self.closing_actions:
 				self.selected_items = None

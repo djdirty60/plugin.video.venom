@@ -103,6 +103,9 @@ def router(params):
 	elif action == 'movies_traktUnfinishedManager':
 		from resources.lib.menus import movies
 		movies.Movies().unfinishedManager()
+	elif action == 'movies_traktCollectionManager':
+		from resources.lib.menus import movies
+		movies.Movies().collectionManager()
 	elif action == 'movies_traktWatchListManager':
 		from resources.lib.menus import movies
 		movies.Movies().watchlistManager()
@@ -255,6 +258,10 @@ def router(params):
 	elif action == 'shows_LikedLists':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().traktLlikedlists()
+
+	elif action == 'shows_traktCollectionManager':
+		from resources.lib.menus import tvshows
+		tvshows.TVshows().collectionManager()
 
 	elif action == 'shows_traktWatchListManager':
 		from resources.lib.menus import tvshows
@@ -548,6 +555,14 @@ def router(params):
 		elif action == 'tools_forceTraktSync':
 			from resources.lib.modules import trakt
 			trakt.force_traktSync()
+		elif action == 'tools_clearLogFile':
+			from resources.lib.modules import log_utils
+			cleared = log_utils.clear_logFile()
+			if cleared: control.notification(message='Venom Log File Successfully Cleared')
+			else: control.notification(message='Error clearing Venom Log File, see kodi.log for more info')
+		elif action == 'tools_traktLikedListManager':
+			from resources.lib.menus import movies
+			movies.Movies().likedListsManager()
 
 	####################################################
 	#---Service
@@ -570,7 +585,8 @@ def router(params):
 			meta = params.get('meta')
 			select = params.get('select')
 			rescrape = params.get('rescrape')
-			sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
+			all_providers = params.get('all_providers')
+			sources.Sources(all_providers).play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
 
 		elif action == "play_preScrapeNext":
 			from resources.lib.modules.player import PlayNext
@@ -679,7 +695,8 @@ def router(params):
 		meta = params.get('meta')
 		select = params.get('select')
 		rescrape = params.get('rescrape')
-		sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
+		all_providers = params.get('all_providers')
+		sources.Sources(all_providers).play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
 
 	####################################################
 	#---Playlist

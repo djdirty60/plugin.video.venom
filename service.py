@@ -118,23 +118,22 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				control.homeWindow.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.1.7' # set to desired version to force any db clearing needed
+				clearDB_version = '6.1.9' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
-					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
+					cache.clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=False, clr_search=False, clr_bookmarks=False)
 					from resources.lib.database import traktsync
-					clr_traktSync = {'bookmarks': False, 'liked_lists': True, 'hiddenProgress': True, 'movies_collection': True, 'shows_collection': True, 'movies_watchlist': True, 'shows_watchlist': True}
+					clr_traktSync = {'bookmarks': False, 'liked_lists': False, 'hiddenProgress': False, 'movies_collection': False, 'shows_collection': False, 'movies_watchlist': False, 'shows_watchlist': False}
 					cleared = traktsync.delete_tables(clr_traktSync)
 					if cleared:
 						control.notification(message='Forced traktsync clear for version update complete.')
 						control.log('[ plugin.video.venom ]  Forced traktsync clear for version update complete.', LOGINFO)
-
-				# write_UDsettings_version = '6.0.6' # set to desired version to force writting new UD settings.xml for added setting
-				# do_UDsettings_write = (int(oldVersion.replace('.', '')) < int(write_UDsettings_version.replace('.', ''))  <= int(curVersion.replace('.', '')))
-				# if do_UDsettings_write:
-					# control.setSetting('trakt.message2', '') # force a settings write for any added settings may have been added in new version
-					# control.log('[ plugin.video.venom ]  Forced new User Data settings.xml saved', LOGINFO)
-
+					clr_fanarttv = True
+					if clr_fanarttv:
+						from resources.lib.database import fanarttv_cache
+						cleared = fanarttv_cache.cache_clear()
+						control.notification(message='Forced fanarttv.db clear for version update complete.')
+						control.log('[ plugin.video.venom ]  Forced fanarttv.db clear for version update complete.', LOGINFO)
 				control.setSetting('trakt.message2', '') # force a settings write for any added settings may have been added in new version
 				control.log('[ plugin.video.venom ]  Forced new User Data settings.xml saved', LOGINFO)
 				control.log('[ plugin.video.venom ]  Plugin updated to v%s' % curVersion, LOGINFO)

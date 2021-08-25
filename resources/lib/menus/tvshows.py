@@ -188,67 +188,6 @@ class TVshows:
 				control.hide()
 				if self.notifications: control.notification(title=32001, message=33049)
 
-	def traktCollection(self, url, create_directory=True):
-		self.list = []
-		try:
-			q = dict(parse_qsl(urlsplit(url).query))
-			index = int(q['page']) - 1
-
-# add activities check to cover if user added items from external source so service won't check for 15mins
-			self.list = traktsync.fetch_collection('shows_collection')
-			self.sort()
-			if control.setting('trakt.paginate.lists') == 'true':
-				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
-				self.list = paginated_ids[index]
-			try:
-				if int(q['limit']) != len(self.list): raise Exception()
-				q.update({'page': str(int(q['page']) + 1)})
-				q = (urlencode(q)).replace('%2C', ',')
-				next = url.replace('?' + urlparse(url).query, '') + '?' + q
-			except: next = ''
-			for i in range(len(self.list)): self.list[i]['next'] = next
-			self.worker()
-			# self.sort()
-			if self.list is None: self.list = []
-			if create_directory: self.tvshowDirectory(self.list)
-			return self.list
-		except:
-			from resources.lib.modules import log_utils
-			log_utils.error()
-			if not self.list:
-				control.hide()
-				if self.notifications: control.notification(title=32001, message=33049)
-
-	def traktWatchlist(self, url, create_directory=True):
-		self.list = []
-		try:
-			q = dict(parse_qsl(urlsplit(url).query))
-			index = int(q['page']) - 1
-
-# add activities check to cover if user added items from external source so service won't check for 15mins
-			self.list = traktsync.fetch_watch_list('shows_watchlist')
-			self.sort(type='shows.watchlist')
-			if control.setting('trakt.paginate.lists') == 'true':
-				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
-				self.list = paginated_ids[index]
-			try:
-				if int(q['limit']) != len(self.list): raise Exception()
-				q.update({'page': str(int(q['page']) + 1)})
-				q = (urlencode(q)).replace('%2C', ',')
-				next = url.replace('?' + urlparse(url).query, '') + '?' + q
-			except: next = ''
-			for i in range(len(self.list)): self.list[i]['next'] = next
-			self.worker()
-			if self.list is None: self.list = []
-			if create_directory: self.tvshowDirectory(self.list)
-			return self.list
-		except:
-			from resources.lib.modules import log_utils
-			log_utils.error()
-			if not self.list:
-				control.hide()
-				if self.notifications: control.notification(title=32001, message=33049)
-
 	def traktHiddenManager(self, idx=True):
 		control.busy()
 		try:
@@ -281,9 +220,29 @@ class TVshows:
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
+			control.hide()
+
+	def collectionManager(self):
+		try:
+			control.busy()
+			self.list = traktsync.fetch_collection('shows_collection')
+			self.worker()
+			self.sort(type='shows.watchlist')
+			# self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
+			control.hide()
+			from resources.lib.windows.traktbasic_manager import TraktBasicManagerXML
+			window = TraktBasicManagerXML('traktbasic_manager.xml', control.addonPath(control.addonId()), results=self.list)
+			selected_items = window.run()
+			del window
+			if selected_items:
+				# refresh = 'plugin.video.venom' in control.infoLabel('Container.PluginName')
+				trakt.removeCollectionItems('shows', selected_items)
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			control.hide()
 
 	def watchlistManager(self):
-		self.list = []
 		try:
 			control.busy()
 			self.list = traktsync.fetch_watch_list('shows_watchlist')
@@ -291,8 +250,8 @@ class TVshows:
 			self.sort(type='shows.watchlist')
 			# self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['tvshowtitle'].lower()), reverse=False)
 			control.hide()
-			from resources.lib.windows.traktwatchlist_manager import TraktWatchlistManagerXML
-			window = TraktWatchlistManagerXML('traktwatchlist_manager.xml', control.addonPath(control.addonId()), results=self.list)
+			from resources.lib.windows.traktbasic_manager import TraktBasicManagerXML
+			window = TraktBasicManagerXML('traktbasic_manager.xml', control.addonPath(control.addonId()), results=self.list)
 			selected_items = window.run()
 			del window
 			if selected_items:
@@ -301,6 +260,64 @@ class TVshows:
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
+			control.hide()
+
+	def traktCollection(self, url, create_directory=True):
+		self.list = []
+		try:
+			q = dict(parse_qsl(urlsplit(url).query))
+			index = int(q['page']) - 1
+			self.list = traktsync.fetch_collection('shows_collection')
+			self.sort()
+			if control.setting('trakt.paginate.lists') == 'true':
+				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
+				self.list = paginated_ids[index]
+			try:
+				if int(q['limit']) != len(self.list): raise Exception()
+				q.update({'page': str(int(q['page']) + 1)})
+				q = (urlencode(q)).replace('%2C', ',')
+				next = url.replace('?' + urlparse(url).query, '') + '?' + q
+			except: next = ''
+			for i in range(len(self.list)): self.list[i]['next'] = next
+			self.worker()
+			# self.sort()
+			if self.list is None: self.list = []
+			if create_directory: self.tvshowDirectory(self.list)
+			return self.list
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			if not self.list:
+				control.hide()
+				if self.notifications: control.notification(title=32001, message=33049)
+
+	def traktWatchlist(self, url, create_directory=True):
+		self.list = []
+		try:
+			q = dict(parse_qsl(urlsplit(url).query))
+			index = int(q['page']) - 1
+			self.list = traktsync.fetch_watch_list('shows_watchlist')
+			self.sort(type='shows.watchlist')
+			if control.setting('trakt.paginate.lists') == 'true':
+				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
+				self.list = paginated_ids[index]
+			try:
+				if int(q['limit']) != len(self.list): raise Exception()
+				q.update({'page': str(int(q['page']) + 1)})
+				q = (urlencode(q)).replace('%2C', ',')
+				next = url.replace('?' + urlparse(url).query, '') + '?' + q
+			except: next = ''
+			for i in range(len(self.list)): self.list[i]['next'] = next
+			self.worker()
+			if self.list is None: self.list = []
+			if create_directory: self.tvshowDirectory(self.list)
+			return self.list
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			if not self.list:
+				control.hide()
+				if self.notifications: control.notification(title=32001, message=33049)
 
 	def sort(self, type='shows'):
 		try:
@@ -1060,7 +1077,6 @@ class TVshows:
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-
 		try:
 			if not items: raise Exception()
 			url = items[0].get('next', '')
@@ -1072,6 +1088,7 @@ class TVshows:
 			icon = control.addonNext()
 			url = '%s?action=tv_PublicLists&url=%s' % (sysaddon, quote_plus(url))
 			item = control.item(label=nextMenu, offscreen=True)
+			item.setProperty('IsPlayable', 'false')
 			item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 			item.setProperty ('SpecialSort', 'bottom')
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)

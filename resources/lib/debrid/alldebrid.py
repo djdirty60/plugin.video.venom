@@ -33,6 +33,7 @@ class AllDebrid:
 			if self.token == '': return None
 			url = base_url + url + '?agent=%s&apikey=%s' % (user_agent, self.token) + url_append
 			response = requests.get(url, timeout=self.timeout)
+			# log_utils.log('response.status_code =%s' % response.status_code)
 			if 'Response [500]' in str(response):
 				log_utils.log('AllDebrid: Status code 500 – Internal Server Error', __name__, log_utils.LOGWARNING)
 				return None
@@ -44,7 +45,7 @@ class AllDebrid:
 				if response.get('status') == 'success':
 					if 'data' in response: response = response['data']
 				elif response.get('status') == 'error':
-					if self.server_notifications: control.notification(message=response.get('error').get('message'))
+					if self.server_notifications: control.notification(message=response.get('error').get('message'), icon=ad_icon)
 					log_utils.log('AllDebrid: %s' % response.get('error').get('message'), __name__, log_utils.LOGWARNING)
 					return None
 		except requests.exceptions.ConnectionError:
@@ -71,7 +72,7 @@ class AllDebrid:
 				if response.get('status') == 'success':
 					if 'data' in response: response = response['data']
 				elif response.get('status') == 'error':
-					if self.server_notifications:control.notification(message=response.get('error').get('message'))
+					if self.server_notifications:control.notification(message=response.get('error').get('message'), icon=ad_icon)
 					log_utils.log('AllDebrid: %s' % response.get('error').get('message'), __name__, log_utils.LOGWARNING)
 					return None
 		except requests.exceptions.ConnectionError:
@@ -87,7 +88,7 @@ class AllDebrid:
 		response = response['data']
 		if 'error' in response:
 			self.token = 'failed'
-			control.notification(message=40021)
+			control.notification(message=40021, icon=ad_icon)
 			log_utils.log(40021, __name__, log_utils.LOGWARNING)
 			return
 		if response['activated']:
@@ -97,7 +98,7 @@ class AllDebrid:
 				control.setSetting('alldebrid.token', self.token)
 			except:
 				self.token = 'failed'
-				control.notification(message=40021)
+				control.notification(message=40021, icon=ad_icon)
 				log_utils.log(40021, __name__, log_utils.LOGWARNING)
 				return
 		return

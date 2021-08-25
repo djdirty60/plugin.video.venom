@@ -3,7 +3,7 @@
 	Venom Add-on
 """
 
-from json import dumps as jsdumps
+# from json import dumps as jsdumps
 from urllib.parse import quote_plus
 from resources.lib.modules.control import dialog, getHighlightColor, yesnoDialog, sleep, condVisibility, setting as getSetting
 from resources.lib.windows.base import BaseDialog
@@ -160,7 +160,7 @@ class TraktHiddenManagerXML(BaseDialog):
 					listitem.setProperty('venom.studio', item.get('studio'))
 					listitem.setProperty('venom.genre', item.get('genre', ''))
 					listitem.setProperty('venom.duration', str(item.get('duration')))
-					listitem.setProperty('venom.mpaa', item.get('mpaa'))
+					listitem.setProperty('venom.mpaa', item.get('mpaa') or 'NA')
 					listitem.setProperty('venom.plot', item.get('plot'))
 					listitem.setProperty('venom.poster', item.get('poster', ''))
 					listitem.setProperty('venom.clearlogo', item.get('clearlogo', ''))

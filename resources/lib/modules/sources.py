@@ -26,7 +26,8 @@ from fenomscrapers import sources as fs_sources
 
 
 class Sources:
-	def __init__(self):
+	def __init__(self, all_providers=None):
+		self.all_providers = all_providers
 		self.time = datetime.now()
 		self.single_expiry = timedelta(hours=6)
 		self.season_expiry = timedelta(hours=48)
@@ -102,6 +103,7 @@ class Sources:
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
 			if rescrape: self.clr_item_providers(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
 			items = providerscache.get(self.getSources, 48, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
+
 			if not items:
 				self.url = url
 				return self.errorForSources()
@@ -407,7 +409,6 @@ class Sources:
 			self.prepareSources()
 			sourceDict = self.sourceDict
 			progressDialog.update(0, control.lang(32600))
-
 			content = 'movie' if tvshowtitle is None else 'episode'
 			if content == 'movie': sourceDict = [(i[0], i[1], getattr(i[1], 'movie', None)) for i in sourceDict]
 			else: sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
@@ -989,11 +990,18 @@ class Sources:
 		else:
 			try:
 				direct = item['direct']
-				call = [i[1] for i in self.sourceDict if i[0] == item['provider']][0]
 				if direct:
-					url = call.resolve(url)
-					self.url = url
-					return url
+					direct_sources = ['furk', 'ad_cloud', 'pm_cloud', 'rd_cloud']
+					if item['provider'] in direct_sources:
+						try:
+							call = [i[1] for i in self.sourceDict if i[0] == item['provider']][0]
+							url = call.resolve(url)
+							self.url = url
+							return url
+						except: pass
+					else:
+						self.url = url
+						return url
 				else:
 					if debrid_provider == 'Real-Debrid':
 						from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
@@ -1001,7 +1009,6 @@ class Sources:
 						from resources.lib.debrid.premiumize import Premiumize as debrid_function
 					elif debrid_provider == 'AllDebrid':
 						from resources.lib.debrid.alldebrid import AllDebrid as debrid_function
-					u = url = call.resolve(url)
 					url = debrid_function().unrestrict_link(url)
 					self.url = url
 					return url
@@ -1123,8 +1130,11 @@ class Sources:
 		self.tvdbProperty = 'plugin.video.venom.container.tvdb'
 		self.labelProperty = 'plugin.video.venom.container.label'
 
-		self.sourceDict = fs_sources()
-		self.sourceDict.extend(cloudSources())
+		if self.all_providers == 'true':
+			self.sourceDict = fs_sources(ret_all=True)
+		else:
+			self.sourceDict = fs_sources()
+			self.sourceDict.extend(cloudSources())
 
 		from resources.lib.debrid import premium_hosters
 		self.debrid_resolvers = debrid.debrid_resolvers()
@@ -1133,8 +1143,7 @@ class Sources:
 				hosts = []
 				for d in self.debrid_resolvers: hosts += d.get_hosts()[d.name]
 				return list(set(hosts))
-			except:
-				return premium_hosters.hostprDict
+			except: return premium_hosters.hostprDict
 		self.hostprDict = providerscache.get(cache_prDict, 192)
 		self.sourcecfDict = premium_hosters.sourcecfDict
 

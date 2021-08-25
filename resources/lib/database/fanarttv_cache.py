@@ -22,13 +22,15 @@ def get(function, duration, *args):
 		key = _hash_function(function, args)
 		cache_result = cache_get(key)
 		if cache_result:
-			result = literal_eval(cache_result['value'])
+			try: result = literal_eval(cache_result['value'])
+			except: result = None
 			if _is_cache_valid(cache_result['date'], duration):
 				return result
 
 		fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
+
 		invalid = False
-		try:  # Sometimes None is returned as a string instead of None type for "fresh_result"
+		try:  # repr() returns None as a string instead of None type for "fresh_result" as well as below converted strings
 			if not fresh_result: invalid = True
 			elif fresh_result == 'None' or fresh_result == '' or fresh_result == '[]' or fresh_result == '{}': invalid = True
 			elif len(fresh_result) == 0: invalid = True
@@ -36,9 +38,13 @@ def get(function, duration, *args):
 
 		if invalid: # If the cache is old, but we didn't get "fresh_result", return the old cache
 			if cache_result: return result
-			else: return None # do not cache_insert() None type, sometimes servers just down momentarily
+			else: return None # do not cache_insert() None type, sometimes servers down momentarily
 		else:
-			cache_insert(key, fresh_result)
+			args = str(args)
+			if '404:NOT FOUND' in fresh_result:
+				cache_insert(key, args, None) # cache_insert() "404:NOT FOUND" cases only as None type
+				return None
+			else: cache_insert(key, args, fresh_result)
 			return literal_eval(fresh_result)
 	except:
 		from resources.lib.modules import log_utils
@@ -60,15 +66,15 @@ def cache_get(key):
 	finally:
 		dbcur.close() ; dbcon.close()
 
-def cache_insert(key, value):
+def cache_insert(key, args, value):
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
 		now = int(time())
-		dbcur.execute('''CREATE TABLE IF NOT EXISTS cache (key TEXT, value TEXT, date INTEGER, UNIQUE(key));''')
-		update_result = dbcur.execute('''UPDATE cache SET value=?,date=? WHERE key=?''', (value, now, key))
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS cache (key TEXT, args TEXT, value TEXT, date INTEGER, UNIQUE(key));''')
+		update_result = dbcur.execute('''UPDATE cache SET value=?,args=?,date=? WHERE key=?''', (value, args, now, key))
 		if update_result.rowcount == 0:
-			dbcur.execute('''INSERT INTO cache Values (?, ?, ?)''', (key, value, now))
+			dbcur.execute('''INSERT INTO cache Values (?, ?, ?, ?)''', (key, args, value, now))
 		dbcur.connection.commit()
 	except:
 		from resources.lib.modules import log_utils

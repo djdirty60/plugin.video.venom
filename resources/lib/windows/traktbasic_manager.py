@@ -4,23 +4,27 @@
 """
 
 # from json import dumps as jsdumps
-from resources.lib.modules.control import dialog, getHighlightColor
-from resources.lib.modules import tools
+from urllib.parse import quote_plus
+from resources.lib.modules.control import dialog, getHighlightColor, yesnoDialog, sleep, condVisibility
 from resources.lib.windows.base import BaseDialog
 
+import xbmc
+monitor = xbmc.Monitor()
 
-class TraktEpisodeProgressManagerXML(BaseDialog):
+
+class TraktBasicManagerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(TraktEpisodeProgressManagerXML, self).__init__(self, args)
-		self.window_id = 2060
+		super(TraktBasicManagerXML, self).__init__(self, args)
+		self.window_id = 2050
 		self.results = kwargs.get('results')
 		self.total_results = str(len(self.results))
 		self.selected_items = []
 		self.make_items()
 		self.set_properties()
+		self.hasVideo = False
 
 	def onInit(self):
-		super(TraktEpisodeProgressManagerXML, self).onInit()
+		super(TraktBasicManagerXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
@@ -37,28 +41,22 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 		try:
 			if action in self.selection_actions:
 				focus_id = self.getFocusId()
-				if focus_id == 2060: # listItems
+				if focus_id == 2050: # listItems
 					position = self.get_position(self.window_id)
 					chosen_listitem = self.item_list[position]
-					imdb = chosen_listitem.getProperty('venom.imdb')
+					trakt = chosen_listitem.getProperty('venom.trakt')
 					if chosen_listitem.getProperty('venom.isSelected') == 'true':
 						chosen_listitem.setProperty('venom.isSelected', '')
-						if imdb in str(self.selected_items):
-							pos = next((index for (index, d) in enumerate(self.selected_items) if d["imdb"] == imdb), None)
-							self.selected_items.pop(pos)
+						if trakt in self.selected_items: self.selected_items.remove(trakt)
 					else:
 						chosen_listitem.setProperty('venom.isSelected', 'true')
-						imdb = chosen_listitem.getProperty('venom.imdb')
-						tvdb = chosen_listitem.getProperty('venom.tvdb')
-						season = chosen_listitem.getProperty('venom.season')
-						episode = chosen_listitem.getProperty('venom.episode')
-						self.selected_items.append({'imdb': imdb, 'tvdb': tvdb, 'season': season, 'episode': episode})
-				elif focus_id == 2061: # OK Button
+						self.selected_items.append(trakt)
+				elif focus_id == 2051: # OK Button
 					self.close()
-				elif focus_id == 2062: # Cancel Button
+				elif focus_id == 2052: # Cancel Button
 					self.selected_items = None
 					self.close()
-				elif focus_id == 2063: # Select All Button
+				elif focus_id == 2053: # Select All Button
 					for item in self.item_list:
 						item.setProperty('venom.isSelected', 'true')
 				elif focus_id == 2045: # Stop Trailer Playback Button
@@ -69,16 +67,16 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 			elif action in self.context_actions:
 				cm = []
 				chosen_listitem = self.item_list[self.get_position(self.window_id)]
-				# media_type = chosen_listitem.getProperty('venom.media_type')
-
+				media_type = chosen_listitem.getProperty('venom.media_type')
 				source_trailer = chosen_listitem.getProperty('venom.trailer')
 				if not source_trailer:
 					from resources.lib.modules import trailer
-					source_trailer = trailer.Trailer().worker('show', chosen_listitem.getProperty('venom.tvshowtitle'), chosen_listitem.getProperty('venom.year'), None, chosen_listitem.getProperty('venom.imdb'))
-
+					if media_type == 'show':
+						source_trailer = trailer.Trailer().worker('show', chosen_listitem.getProperty('venom.tvshowtitle'), chosen_listitem.getProperty('venom.year'), None, chosen_listitem.getProperty('venom.imdb'))
+					else:
+						source_trailer = trailer.Trailer().worker('movie', chosen_listitem.getProperty('venom.title'), chosen_listitem.getProperty('venom.year'), None, chosen_listitem.getProperty('venom.imdb'))
 				if source_trailer: cm += [('[B]Play Trailer[/B]', 'playTrailer')]
-
-				# cm += [('[B]Browse Series[/B]', 'browseSeries')]
+				if media_type == 'show': cm += [('[B]Browse Series[/B]', 'browseSeries')]
 
 				chosen_cm_item = dialog.contextmenu([i[0] for i in cm])
 				if chosen_cm_item == -1: return
@@ -102,39 +100,64 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 						self.setFocusId(self.window_id)
 					else: self.setFocusId(self.window_id)
 
+				if cm_action == 'browseSeries':
+					systvshowtitle = quote_plus(chosen_listitem.getProperty('venom.tvshowtitle'))
+					year = chosen_listitem.getProperty('venom.year')
+					imdb = chosen_listitem.getProperty('venom.imdb')
+					tmdb = chosen_listitem.getProperty('venom.tmdb')
+					tvdb = chosen_listitem.getProperty('venom.tvdb')
+					from resources.lib.modules.control import lang
+					if not yesnoDialog(lang(32182), '', ''): return
+					self.chosen_hide, self.chosen_unhide = None, None
+					self.close()
+					sysart = ''
+					self.execute_code('ActivateWindow(Videos,plugin://plugin.video.venom/?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s,return)' % (
+							systvshowtitle, year, imdb, tmdb, tvdb, sysart))
+
 			elif action in self.closing_actions:
 				self.selected_items = None
-				self.close()
+				if self.hasVideo: self.execute_code('PlayerControl(Stop)')
+				else: self.close()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 			self.close()
+
+	def setProgressBar(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(self.calculate_percent())
+
+	def calculate_percent(self):
+		return (xbmc.Player().getTime() / float(xbmc.Player().getTotalTime())) * 100
+
+	def progressBarReset(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(0)
+
 
 	def make_items(self):
 		def builder():
 			for count, item in enumerate(self.results, 1):
 				try:
 					listitem = self.make_listitem()
-					tvshowtitle = item.get('tvshowtitle')
-					listitem.setProperty('venom.tvshowtitle', tvshowtitle)
+					listitem.setProperty('venom.title', item.get('title'))
+					if item.get('tvshowtitle'): listitem.setProperty('venom.media_type', 'show')
+					else: listitem.setProperty('venom.media_type', 'movie')
 					listitem.setProperty('venom.year', str(item.get('year')))
-					new_date = tools.Time.convert(stringTime=str(item.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')
-					listitem.setProperty('venom.premiered', new_date)
-					season = str(item.get('season'))
-					listitem.setProperty('venom.season', season)
-					episode = str(item.get('episode'))
-					listitem.setProperty('venom.episode', episode)
-					label = '%s  -  %sx%s' % (tvshowtitle, season, episode.zfill(2))
-					listitem.setProperty('venom.label', label)
-					labelProgress = str(round(float(item['progress'] * 100), 1)) + '%'
-					listitem.setProperty('venom.progress', '[' + labelProgress + ']')
 					listitem.setProperty('venom.isSelected', '')
 					listitem.setProperty('venom.imdb', item.get('imdb'))
+					listitem.setProperty('venom.tmdb', item.get('tmdb'))
 					listitem.setProperty('venom.tvdb', item.get('tvdb'))
+					listitem.setProperty('venom.trakt', item.get('trakt'))
+					listitem.setProperty('venom.status', item.get('status'))
 					listitem.setProperty('venom.rating', str(round(float(item.get('rating')), 1)))
 					listitem.setProperty('venom.trailer', item.get('trailer'))
 					listitem.setProperty('venom.studio', item.get('studio'))
-					listitem.setProperty('venom.genre', str(item.get('genre', '')))
+					listitem.setProperty('venom.genre', item.get('genre', ''))
 					listitem.setProperty('venom.duration', str(item.get('duration')))
 					listitem.setProperty('venom.mpaa', item.get('mpaa') or 'NA')
 					listitem.setProperty('venom.plot', item.get('plot'))
