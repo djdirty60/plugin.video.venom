@@ -165,7 +165,7 @@
 		<!-- Scraper Progress Dialog -->
 		<setting type="lsep" label="32386" />
 		<setting id="progress.dialog" type="enum" label="32335" lvalues="32336|32337" default="0" />
-		<setting id="scrapers.timeout" type="slider" label="32312" default="60" range="10,60" option="int" />
+		<setting id="scrapers.timeout" type="slider" label="32312" default="60" range="10,90" option="int" />
 		<setting id="scraper.dialog.color" type="select" label="32164" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" />
 		<setting id="terminate.onCloud.sources" type="bool" label="32007" default="true" />
 		<setting id="preemptive.termination" type="bool" label="32654" default="false" />
@@ -177,10 +177,10 @@
 		<setting id="hosts.quality" type="enum" label="32339" values="4K|1080p|720p|480p(SD)" default="0" />
 		<setting id="source.enable.msizelimit" type="bool" label="32165" default="false" />
 		<setting id="source.min.moviesize" type="slider" subsetting="true" label="32155" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
-		<setting id="source.max.moviesize" type="slider" subsetting="true" label="32156" option="float" range="2.0,0.3,200" default="10" visible="eq(-2,true)" />
+		<setting id="source.max.moviesize" type="slider" subsetting="true" label="32156" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />
 		<setting id="source.enable.esizelimit" type="bool" label="32166" default="false" />
 		<setting id="source.min.epsize" type="slider" subsetting="true" label="32157" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
-		<setting id="source.max.epsize" type="slider" subsetting="true" label="32158" option="float" range="2.0,0.3,200" default="10" visible="eq(-2,true)" />
+		<setting id="source.max.epsize" type="slider" subsetting="true" label="32158" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />
 		<setting id="remove.duplicates" type="bool" label="32035" default="true" />
 		<setting id="remove.duplicates.logging" type="bool" subsetting="true" label="32159" default="true" enable="eq(-1,true)" />
 		<setting id="remove.dolby.vision" type="bool" label="32388" default="false" />

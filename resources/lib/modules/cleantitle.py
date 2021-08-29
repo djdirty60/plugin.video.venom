@@ -13,7 +13,8 @@ def get(title):
 		title = re.sub(r'&#(\d+);', '', title).lower()
 		title = re.sub(r'(&#[0-9]+)([^;^0-9]+)', '\\1;\\2', title)
 		title = title.replace('&quot;', '\"').replace('&amp;', '&')
-		title = re.sub(r'\n|([\[({].+?[})\]])|\s(vs[.]?|v[.])\s|([:;–\-"\',!_\.\?~])|\s', '', title) # removes bracketed content
+		# title = re.sub(r'\n|([\[({].+?[})\]])|\s(vs[.]?|v[.])\s|([:;–\-"\',!_\.\?~])|\s', '', title) # removes bracketed content
+		title = re.sub(r'\n|([\[({].+?[})\]])|([:;–\-"\',!_.?~$@])|\s', '', title) # stop trying to remove alpha characters "vs" or "v", they're part of a title
 		return title
 	except:
 		from resources.lib.modules import log_utils

@@ -4,7 +4,6 @@
 """
 
 from json import loads as jsloads
-import re
 
 
 def json_load_as_str(file_handle):
@@ -21,16 +20,3 @@ def byteify(data, ignore_dicts=False):
 	if isinstance(data, dict) and not ignore_dicts:
 		return dict([(byteify(key, ignore_dicts=True), byteify(value, ignore_dicts=True)) for key, value in iter(data.items())])
 	return data
-
-def title_key(title):
-	try:
-		if not title: title = ''
-		articles_en = ['the', 'a', 'an']
-		articles_de = ['der', 'die', 'das']
-		articles = articles_en + articles_de
-		match = re.match(r'^((\w+)\s+)', title.lower())
-		if match and match.group(2) in articles: offset = len(match.group(1))
-		else: offset = 0
-		return title[offset:]
-	except:
-		return title

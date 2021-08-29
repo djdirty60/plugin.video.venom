@@ -94,10 +94,9 @@ class Episodes:
 		try:
 			try: url = getattr(self, url + '_link')
 			except: pass
-			activity = trakt.getPausedActivity()
 			if url == self.traktunfinished_link :
 				try:
-					if activity > cache.timeout(self.trakt_episodes_list, url, self.trakt_user, self.lang): raise Exception()
+					if trakt.getPausedActivity() > cache.timeout(self.trakt_episodes_list, url, self.trakt_user, self.lang): raise Exception()
 					self.list = cache.get(self.trakt_episodes_list, 720, url, self.trakt_user, self.lang)
 				except:
 					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
@@ -108,9 +107,6 @@ class Episodes:
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
-			if not self.list:
-				control.hide()
-				if self.notifications: control.notification(title=32326, message=33049)
 
 	def unfinishedManager(self):
 		try:
@@ -296,9 +292,7 @@ class Episodes:
 					break
 			if not contains:
 				self.list.append(userlists[i])
-		for i in range(0, len(self.list)): self.list[i].update({'image': 'trakt.png', 'action': 'calendar'})
-		if self.traktCredentials: # Trakt Watchlist
-			self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
+		for i in range(0, len(self.list)): self.list[i].update({'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'calendar'})
 		self.addDirectory(self.list, queue=True)
 		return self.list
 
@@ -380,7 +374,6 @@ class Episodes:
 			try:
 				try: name = item['list']['name']
 				except: name = item['name']
-				# name = client.replaceHTMLCodes(name)
 				try: url = (trakt.slug(item['list']['user']['username']), item['list']['ids']['slug'])
 				except: url = ('me', item['ids']['slug'])
 				url = self.traktlist_link % url

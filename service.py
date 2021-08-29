@@ -121,14 +121,14 @@ class VersionIsUpdateCheck:
 				clearDB_version = '6.1.9' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
+					clr_fanarttv = False
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=False, clr_search=False, clr_bookmarks=False)
 					from resources.lib.database import traktsync
-					clr_traktSync = {'bookmarks': False, 'liked_lists': False, 'hiddenProgress': False, 'movies_collection': False, 'shows_collection': False, 'movies_watchlist': False, 'shows_watchlist': False}
+					clr_traktSync = {'bookmarks': False, 'liked_lists': True, 'hiddenProgress': False, 'movies_collection': False, 'shows_collection': False, 'movies_watchlist': False, 'shows_watchlist': False, 'user_lists': False}
 					cleared = traktsync.delete_tables(clr_traktSync)
 					if cleared:
 						control.notification(message='Forced traktsync clear for version update complete.')
 						control.log('[ plugin.video.venom ]  Forced traktsync clear for version update complete.', LOGINFO)
-					clr_fanarttv = True
 					if clr_fanarttv:
 						from resources.lib.database import fanarttv_cache
 						cleared = fanarttv_cache.cache_clear()

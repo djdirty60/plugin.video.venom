@@ -45,6 +45,7 @@ def getTrakt(url, post=None, extended=False):
 		except: code = ''
 
 		if code.startswith('5') or (result and isinstance(result, str) and '<html' in result) or not result: # covers Maintenance html responses ["Bad Gateway", "We're sorry, but something went wrong (500)"])
+			if not result: return None
 			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGINFO)
 			control.notification(title=32315, message=33676)
 			return None
@@ -1052,21 +1053,40 @@ def getSeasons(id, full=True):
 		log_utils.error()
 
 def sort_list(sort_key, sort_direction, list_data):
-	reverse = False if sort_direction == 'asc' else True
-	if sort_key == 'rank': return sorted(list_data, key=lambda x: x['rank'], reverse=reverse)
-	elif sort_key == 'added': return sorted(list_data, key=lambda x: x['listed_at'], reverse=reverse)
-	elif sort_key == 'title': return sorted(list_data, key=lambda x: utils.title_key(x[x['type']].get('title')), reverse=reverse)
-	elif sort_key == 'released': return sorted(list_data, key=lambda x: _released_key(x[x['type']]), reverse=reverse)
-	elif sort_key == 'runtime': return sorted(list_data, key=lambda x: x[x['type']].get('runtime', 0), reverse=reverse)
-	elif sort_key == 'popularity': return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
-	elif sort_key == 'percentage': return sorted(list_data, key=lambda x: x[x['type']].get('rating', 0), reverse=reverse)
-	elif sort_key == 'votes': return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
-	else: return list_data
+	try:
+		reverse = False if sort_direction == 'asc' else True
+		if sort_key == 'rank': return sorted(list_data, key=lambda x: x['rank'], reverse=reverse)
+		elif sort_key == 'added': return sorted(list_data, key=lambda x: x['listed_at'], reverse=reverse)
+		elif sort_key == 'title': return sorted(list_data, key=lambda x: _title_key(x[x['type']].get('title')), reverse=reverse)
+		elif sort_key == 'released': return sorted(list_data, key=lambda x: _released_key(x[x['type']]), reverse=reverse)
+		elif sort_key == 'runtime': return sorted(list_data, key=lambda x: x[x['type']].get('runtime', 0), reverse=reverse)
+		elif sort_key == 'popularity': return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
+		elif sort_key == 'percentage': return sorted(list_data, key=lambda x: x[x['type']].get('rating', 0), reverse=reverse)
+		elif sort_key == 'votes': return sorted(list_data, key=lambda x: x[x['type']].get('votes', 0), reverse=reverse)
+		else: return list_data
+	except:
+		log_utils.error()
+
+def _title_key(title):
+	try:
+		if not title: title = ''
+		articles_en = ['the', 'a', 'an']
+		articles_de = ['der', 'die', 'das']
+		articles = articles_en + articles_de
+		match = re.match(r'^((\w+)\s+)', title.lower())
+		if match and match.group(2) in articles: offset = len(match.group(1))
+		else: offset = 0
+		return title[offset:]
+	except:
+		return title
 
 def _released_key(item):
-	if 'released' in item: return item['released']
-	elif 'first_aired' in item: return item['first_aired']
-	else: return 0
+	try:
+		if 'released' in item: return item['released'] or '0'
+		elif 'first_aired' in item: return item['first_aired'] or '0'
+		else: return '0'
+	except:
+		log_utils.error()
 
 def getMovieAliases(id):
 	try:
@@ -1246,7 +1266,7 @@ def trakt_service_sync():
 				sync_progress(activities)
 			if control.setting('indicators.alt') == '1':
 				sync_watched(activities) # still writes to cache.db
-			# sync_user_lists(activities)
+			sync_user_lists(activities)
 			sync_liked_lists(activities)
 			sync_hidden_progress(activities)
 			sync_collection(activities)
@@ -1254,10 +1274,11 @@ def trakt_service_sync():
 		if control.monitor.waitForAbort(60*15): break
 
 def force_traktSync():
+	if not control.yesnoDialog(control.lang(32056), '', ''): return
 	control.busy()
 	sync_progress(forced=True)
 	sync_watched(forced=True) # still writes to cache.db
-	# sync_user_lists(forced=True)
+	sync_user_lists(forced=True)
 	sync_liked_lists(forced=True)
 	sync_hidden_progress(forced=True)
 	sync_collection(forced=True)
@@ -1303,29 +1324,59 @@ def sync_watched(activities=None, forced=False): # still writes to cache.db, mov
 	except:
 		log_utils.error()
 
-# def sync_user_lists(activities=None, forced=False):
-	# try:
-		# link = '/users/me/lists'
-		# if forced:
-			# items = getTraktAsJson(link)
-			# if items: traktsync.insert_user_lists(items)
-		# else:
-			# db_last_lists_updatedat = traktsync.last_sync('last_lists_updatedat')
-			# user_listActivity = getUserListActivity(activities)
-			# if user_listActivity > db_last_lists_updatedat:
-				# log_utils.log('Trakt User Lists Sync Update...(local db latest "lists_updatedat" = %s, trakt api latest "lists_updatedat" = %s)' % \
-									# (str(db_last_lists_updatedat), str(user_listActivity)), __name__, log_utils.LOGDEBUG)
-				# items = getTraktAsJson(link)
-	## add means to fetch the user list to determine list content as either movie, shows, or mixed.
-				# traktsync.insert_user_lists(items)
-	# except:
-		# log_utils.error()
+def sync_user_lists(activities=None, forced=False):
+	try:
+		link = '/users/me/lists'
+		list_link = '/users/me/lists/%s/items/%s'
+		if forced:
+			items = getTraktAsJson(link)
+			for i in items:
+				i['content_type'] = ''
+				trakt_id = i['ids']['trakt']
+				list_items = getTraktAsJson(list_link % (trakt_id, 'movies'))
+				if not list_items or list_items == '[]': pass
+				else: i['content_type'] = 'movies'
+				list_items = getTraktAsJson(list_link % (trakt_id, 'shows'))
+				if not list_items or list_items == '[]': pass
+				else: i['content_type'] = 'mixed' if i['content_type'] == 'movies' else 'shows'
+			traktsync.insert_user_lists(items)
+		else:
+			db_last_lists_updatedat = traktsync.last_sync('last_lists_updatedat')
+			user_listActivity = getUserListActivity(activities)
+			if user_listActivity > db_last_lists_updatedat:
+				log_utils.log('Trakt User Lists Sync Update...(local db latest "lists_updatedat" = %s, trakt api latest "lists_updatedat" = %s)' % \
+									(str(db_last_lists_updatedat), str(user_listActivity)), __name__, log_utils.LOGDEBUG)
+				items = getTraktAsJson(link)
+				for i in items:
+					i['content_type'] = ''
+					trakt_id = i['ids']['trakt']
+					list_items = getTraktAsJson(list_link % (trakt_id, 'movies'))
+					if not list_items or list_items == '[]': pass
+					else: i['content_type'] = 'movies'
+					list_items = getTraktAsJson(list_link % (trakt_id, 'shows'))
+					if not list_items or list_items == '[]': pass
+					else: i['content_type'] = 'mixed' if i['content_type'] == 'movies' else 'shows'
+				traktsync.insert_user_lists(items)
+	except:
+		log_utils.error()
 
 def sync_liked_lists(activities=None, forced=False):
 	try:
 		link = '/users/likes/lists?limit=1000000'
+		list_link = '/users/%s/lists/%s/items/%s'
 		if forced:
 			items = getTraktAsJson(link)
+			for i in items:
+				list_item = i.get('list', {})
+				list_item['content_type'] = ''
+				list_owner = list_item.get('user', {}).get('username', '')
+				trakt_id = list_item.get('ids', {}).get('trakt', '')
+				list_items = getTraktAsJson(list_link % (list_owner, trakt_id, 'movies'))
+				if not list_items or list_items == '[]': pass
+				else: list_item['content_type'] = 'movies'
+				list_items = getTraktAsJson(list_link % (list_owner, trakt_id, 'shows'))
+				if not list_items or list_items == '[]': pass
+				else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
 			traktsync.insert_liked_lists(items)
 		else:
 			db_last_liked = traktsync.last_sync('last_liked_at')
@@ -1334,7 +1385,17 @@ def sync_liked_lists(activities=None, forced=False):
 				log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
 									(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
 				items = getTraktAsJson(link)
-	# add means to fetch the user list to determine list content as either movie, shows, or mixed.
+				for i in items:
+					list_item = i.get('list', {})
+					list_item['content_type'] = ''
+					list_owner = list_item.get('user', {}).get('username', '')
+					trakt_id = list_item.get('ids', {}).get('trakt', '')
+					list_items = getTraktAsJson(list_link % (list_owner, trakt_id, 'movies'))
+					if not list_items or list_items == '[]': pass
+					else: list_item['content_type'] = 'movies'
+					list_items = getTraktAsJson(list_link % (list_owner, trakt_id, 'shows'))
+					if not list_items or list_items == '[]': pass
+					else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
 				traktsync.insert_liked_lists(items)
 	except:
 		log_utils.error()

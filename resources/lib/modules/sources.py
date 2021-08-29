@@ -340,7 +340,7 @@ class Sources:
 		else:
 			return self.getSources_dialog(title, year, imdb, tvdb, season, episode, tvshowtitle, premiered)
 
-	def getSources_silent(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=60):
+	def getSources_silent(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=90):
 		try:
 			self.prepareSources()
 			sourceDict = self.sourceDict
@@ -401,7 +401,7 @@ class Sources:
 		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
 
-	def getSources_dialog(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=60):
+	def getSources_dialog(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=90):
 		try:
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
 			header = control.homeWindow.getProperty(self.labelProperty) + ': Scraping...'
@@ -459,6 +459,7 @@ class Sources:
 
 			try: timeout = int(control.setting('scrapers.timeout'))
 			except: pass
+			if self.all_providers == 'true': timeout = 90
 			start_time = time()
 			end_time = start_time + timeout
 			quality = control.setting('hosts.quality') or '0'

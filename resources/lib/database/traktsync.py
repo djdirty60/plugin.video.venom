@@ -113,14 +113,14 @@ def fetch_liked_list(trakt_id, ret_all=False):
 		dbcur = get_connection_cursor(dbcon)
 		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='liked_lists';''').fetchone()
 		if not ck_table:
-			dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
 			dbcur.connection.commit()
 			dbcur.close() ; dbcon.close()
 			return liked_list
 		if ret_all:
 			try:
 				match = dbcur.execute('''SELECT * FROM liked_lists WHERE NOT trakt_id=""''').fetchall()
-				liked_list = [{'list_owner': i[0], 'list_name': i[1], 'trakt_id': i[2], 'item_count': i[3], 'likes': i[4]} for i in match]
+				liked_list = [{'list_owner': i[0], 'list_name': i[1], 'trakt_id': i[2], 'content_type': i[3], 'item_count': i[4], 'likes': i[5]} for i in match]
 			except: pass
 		else:
 			try:
@@ -138,7 +138,7 @@ def insert_liked_lists(items, new_sync=True):
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
-		dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS liked_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 		if new_sync:
 			dbcur.execute('''DELETE FROM liked_lists''')
@@ -150,9 +150,10 @@ def insert_liked_lists(items, new_sync=True):
 				list_owner = list_item.get('user', {}).get('username', '')
 				list_name = list_item.get('name', '')
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
+				content_type = list_item.get('content_type', '')
 				item_count = list_item.get('item_count', '')
 				likes = list_item.get('likes', '')
-				dbcur.execute('''INSERT OR REPLACE INTO liked_lists Values (?, ?, ?, ?, ?)''', (list_owner, list_name, trakt_id, item_count, likes))
+				dbcur.execute('''INSERT OR REPLACE INTO liked_lists Values (?, ?, ?, ?, ?, ?)''', (list_owner, list_name, trakt_id, content_type, item_count, likes))
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
@@ -445,6 +446,78 @@ def delete_watchList_items(items, table, col_name='trakt'):
 	finally:
 		dbcur.close() ; dbcon.close()
 
+def fetch_user_lists(trakt_id, ret_all=False):
+	user_lists = ''
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='user_lists';''').fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS user_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+			dbcur.connection.commit()
+			dbcur.close() ; dbcon.close()
+			return user_lists
+		if ret_all:
+			try:
+				match = dbcur.execute('''SELECT * FROM user_lists WHERE NOT trakt_id=""''').fetchall()
+				user_lists = [{'list_owner': i[0], 'list_name': i[1], 'trakt_id': i[2], 'content_type': i[3], 'item_count': i[4], 'likes': i[5]} for i in match]
+			except: pass
+		else:
+			try:
+				match = dbcur.execute('''SELECT * FROM user_lists WHERE trakt_id=?;''', (trakt_id,)).fetchone()
+				user_lists = match[2]
+			except: pass
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return user_lists
+
+def insert_user_lists(items, new_sync=True):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS user_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		if new_sync:
+			dbcur.execute('''DELETE FROM user_lists''')
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
+		for item in items:
+			try:
+				list_owner = item.get('user', {}).get('username', '')
+				list_name = item.get('name', '')
+				trakt_id = item.get('ids', {}).get('trakt', '')
+				content_type = item.get('content_type', '')
+				item_count = item.get('item_count', '')
+				likes = item.get('likes', '')
+				dbcur.execute('''INSERT OR REPLACE INTO user_lists Values (?, ?, ?, ?, ?, ?)''', (list_owner, list_name, trakt_id, content_type, item_count, likes))
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_lists_updatedat', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+
+# def delete_user_list(trakt_id):
+
+
+
+
+# def fetch_user_list_items(trakt_id, ret_all=False):
+
+# def insert_user_list_items(items, new_sync=True):
+
+# def delete_user_list_items(trakt_id):
+
+
+
 def last_sync(type):
 	last_sync_at = 0
 	try:
@@ -475,7 +548,8 @@ def delete_tables(tables):
 			'movies_collection': 'last_collected_at',
 			'shows_collection': 'last_collected_at',
 			'movies_watchlist': 'last_watchlisted_at',
-			'shows_watchlist': 'last_watchlisted_at'}
+			'shows_watchlist': 'last_watchlisted_at',
+			'user_lists': 'last_lists_updatedat'}
 		for table,v in iter(tables.items()):
 			if v is True:
 				dbcur.execute('''DROP TABLE IF EXISTS {}'''.format(table))
