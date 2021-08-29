@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.2.0">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.2.1">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,15 +32,8 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.2.0 - Aug. 25, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Hardcoded timeout to 90 seconds when using [B]"Rescape with all providers"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Scraper Timeout has been increased to 90 seconds, default remains at 60.[/I]
-[COLOR yellow]--[/COLOR][I] Added new context menu option [B]"Rescape with all providers"[/B] to [B]"Discover Movies - Collections"[/B].  This was missed in previous update.[/I]
-[COLOR yellow]--[/COLOR][I] Added confirmation dialog to the [B]"Force Trakt Sync to local database"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] The Trakt sync database has been expanded to cover [B]user_lists[/B].[/I]
-[COLOR yellow]--[/COLOR][I] The Trakt sync database for [B]"liked_lists"[/B] and [B]"user_lists"[/B] now has an added data column, [B]"content_type"[/B].  This allows lists to be filtered out when viewing Movie or Show lists.[/I]
-[COLOR yellow]--[/COLOR][I] Lowered Max file size for Movies and Episodes to [B]"0.5gb"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Trakt user lists are now locally paginated and respect the setting [B]"Paginate Lists when possible"[[/B].[/I]
+[B][COLOR red]Update - v6.2.1 - Aug. 29, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Forced traktsync.db flush to fix issue with [B]"liked list"[/B] missing in ui.[/I]
 		</news>
 	</extension>
 </addon>
