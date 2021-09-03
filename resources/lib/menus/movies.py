@@ -23,6 +23,7 @@ from resources.lib.modules import workers
 class Movies:
 	def __init__(self, type='movie', notifications=True):
 		self.list = []
+		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.page_limit = control.setting('page.item.limit')
 		self.search_page_limit = control.setting('search.page.limit')
 		self.type = type
@@ -30,7 +31,7 @@ class Movies:
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 		self.hidecinema = control.setting('hidecinema') == 'true'
-		self.trakt_user = control.setting('trakt.user').strip()
+		self.trakt_user = control.setting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.lang = control.apiLanguage()['trakt']
 		self.imdb_user = control.setting('imdb.user').replace('ur', '')
@@ -86,7 +87,6 @@ class Movies:
 		self.trakt_link = 'https://api.trakt.tv'
 		self.search_link = 'https://api.trakt.tv/search/movie?limit=%s&page=1&query=' % self.search_page_limit
 		# self.traktlistsearch_link = 'https://api.trakt.tv/search/list?limit=%s&page=1&query=' % self.page_limit
-
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/movies?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
 		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/movies?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
@@ -185,9 +185,6 @@ class Movies:
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
-			if not self.list:
-				control.hide()
-				if self.notifications: control.notification(title=32001, message=33049)
 
 	def unfinished(self, url, idx=True, create_directory=True):
 		self.list = []
@@ -376,8 +373,8 @@ class Movies:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-		url = quote_plus(self.search_link + q)
-		control.execute('Container.Update(%s?action=movies&url=%s)' % (argv[0], url))
+		url = self.search_link + quote_plus(q)
+		control.execute('Container.Update(%s?action=movies&url=%s)' % (argv[0], quote_plus(url)))
 
 	def search_term(self, name):
 		url = self.search_link + quote_plus(name)
@@ -606,10 +603,10 @@ class Movies:
 				values = {}
 				values['next'] = next 
 				values['added'] = item.get('listed_at', '')
-				values['paused_at'] = item.get('paused_at', '') # for history
+				values['paused_at'] = item.get('paused_at', '') # for unfinished
 				try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
 				except: values['progress'] = ''
-				try: values['lastplayed'] = item.get('watched_at', '')
+				try: values['lastplayed'] = item.get('watched_at', '') # for history
 				except: values['lastplayed'] = ''
 				movie = item.get('movie') or item
 				values['title'] = movie.get('title')
@@ -716,9 +713,14 @@ class Movies:
 				list_id = list_item.get('ids', {}).get('trakt', '')
 				list_owner = list_item.get('user', {}).get('username', '')
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
+				privacy = list_item.get('privacy', '')
+				if privacy == 'private': continue
 				list_url = self.traktlist_link % (list_owner_slug, list_id)
-				# results = trakt.getTrakt(list_url)
-				# if not results or results == '[]': continue
+				if '/popular' in url:
+					list_content = traktsync.fetch_popular_list(list_id)
+				elif '/trending' in url:
+					list_content = traktsync.fetch_trending_list(list_id)
+				if list_content and list_content.get('content_type', '') == 'shows': continue
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
 				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'movies'})
 			except:
@@ -961,7 +963,7 @@ class Movies:
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 1, 'overlay': 5})
-						# meta.update({'lastplayed': trakt.watchedMoviesTime(imdb)})
+						# meta.update({'lastplayed': trakt.watchedMoviesTime(imdb)}) # no skin support
 					else:
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=5)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 0, 'overlay': 4})

@@ -60,11 +60,10 @@ class TVshows:
 		self.imdbratings_link = 'https://www.imdb.com/user/ur%s/ratings?sort=your_rating,desc&mode=detail&start=1' % self.imdb_user # IMDb ratings does not take title_type so filter in imdb_list() function
 		self.anime_link = 'https://www.imdb.com/search/keyword?keywords=anime&title_type=tvSeries,miniSeries&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
 
-		self.trakt_user = control.setting('trakt.user').strip()
+		self.trakt_user = control.setting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.trakt_link = 'https://api.trakt.tv'
 		self.search_link = 'https://api.trakt.tv/search/show?limit=%s&page=1&query=' % self.search_page_limit
-
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/shows?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
 		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/shows?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
@@ -186,9 +185,6 @@ class TVshows:
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
-			if not self.list:
-				control.hide()
-				if self.notifications: control.notification(title=32001, message=33049)
 
 	def traktHiddenManager(self, idx=True):
 		control.busy()
@@ -351,8 +347,8 @@ class TVshows:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-		url = quote_plus(self.search_link + q)
-		control.execute('Container.Update(%s?action=tvshows&url=%s)' % (argv[0], url))
+		url = self.search_link + quote_plus(q)
+		control.execute('Container.Update(%s?action=tvshows&url=%s)' % (argv[0], quote_plus(url)))
 
 	def search_term(self, name):
 		url = self.search_link + quote_plus(name)
@@ -587,10 +583,10 @@ class TVshows:
 				values = {}
 				values['next'] = next 
 				values['added'] = item.get('listed_at', '')
-				values['paused_at'] = item.get('paused_at', '') # for history
+				values['paused_at'] = item.get('paused_at', '') # for unfinished
 				try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
 				except: values['progress'] = ''
-				values['lastplayed'] = item.get('watched_at', '')
+				values['lastplayed'] = item.get('watched_at', '') # for history
 				show = item.get('show') or item
 				values['title'] = show.get('title')
 				values['originaltitle'] = values['title']
@@ -703,9 +699,14 @@ class TVshows:
 				list_id = list_item.get('ids', {}).get('trakt', '')
 				list_owner = list_item.get('user', {}).get('username', '')
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
+				privacy = list_item.get('privacy', '')
+				if privacy == 'private': continue
 				list_url = self.traktlist_link % (list_owner_slug, list_id)
-				results = cache.get(trakt.getTrakt, 6, list_url)
-				if not results or results == '[]': continue
+				if '/popular' in url:
+					list_content = traktsync.fetch_popular_list(list_id)
+				elif '/trending' in url:
+					list_content = traktsync.fetch_trending_list(list_id)
+				if list_content and list_content.get('content_type', '') == 'movies': continue
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
 				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'tvshows'})
 			except:

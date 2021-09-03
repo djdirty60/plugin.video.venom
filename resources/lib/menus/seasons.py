@@ -28,7 +28,7 @@ class Seasons:
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w342'
-		self.trakt_user = control.setting('trakt.user').strip()
+		self.trakt_user = control.setting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/seasons'
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'

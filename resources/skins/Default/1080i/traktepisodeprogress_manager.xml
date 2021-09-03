@@ -180,7 +180,7 @@
 					<control type="button" id="2062">
 						<description>Cancel Button</description>
 						<left>140</left>
-						<onright>2060</onright>
+						<onright>2063</onright>
 						<onleft>2061</onleft>
 						<width>120</width>
 						<height>70</height>
@@ -197,8 +197,8 @@
 					<control type="button" id="2063">
 						<description>Select All Button</description>
 						<left>280</left>
-						<onright>2050</onright>
-						<onleft>2052</onleft>
+						<onright>2060</onright>
+						<onleft>2062</onleft>
 						<width>120</width>
 						<height>70</height>
 						<textoffsetx>0</textoffsetx>

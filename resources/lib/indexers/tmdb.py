@@ -33,7 +33,7 @@ def get_request(url):
 	except requests.exceptions.ConnectionError:
 		return notification(message=32024)
 	if '200' in str(response): return response.json()
-	elif 'Retry-After' in response.headers: 	# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
+	elif 'Retry-After' in response.headers: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
 		throttleTime = response.headers['Retry-After']
 		notification(message='TMDb Throttling Applied, Sleeping for %s seconds' % throttleTime)
 		sleep((int(throttleTime) + 1) * 1000)

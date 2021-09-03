@@ -291,6 +291,10 @@ def router(params):
 		from resources.lib.menus import episodes
 		episodes.Episodes().upcoming_progress(url)
 
+	elif action == 'episodes_clrProgressCache':
+		from resources.lib.menus import episodes
+		episodes.Episodes().clr_progress_cache(url)
+
 	elif action == 'calendars':
 		from resources.lib.menus import episodes
 		episodes.Episodes().calendars()

@@ -22,6 +22,7 @@ from resources.lib.modules import workers
 
 class Episodes:
 	def __init__(self, type='show', notifications=True):
+		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.count = control.setting('page.item.limit')
 		self.list = []
 		self.threads = []
@@ -37,13 +38,15 @@ class Episodes:
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
-		self.trakt_user = control.setting('trakt.user').strip()
+		self.trakt_user = control.setting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.trakt_link = 'https://api.trakt.tv'
 		self.traktlist_link = 'https://api.trakt.tv/users/%s/lists/%s/items/episodes'
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000'
-		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/episodes'
+		# self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/episodes'
+		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/episodes?limit=%s&page=1'
+
 		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=%s&page=1' % self.count
 		self.progress_link = 'https://api.trakt.tv/users/me/watched/shows'
 		self.mycalendar_link = 'https://api.trakt.tv/calendars/my/shows/date[30]/32/'
@@ -153,6 +156,14 @@ class Episodes:
 				control.hide()
 				if self.notifications: control.notification(title=32326, message=33049)
 
+	def clr_progress_cache(self, url):
+		try: url = getattr(self, url + '_link')
+		except: pass
+		direct = control.setting('tvshows.direct') == 'true'
+		cache.remove(self.trakt_progress_list, url, self.trakt_user, self.lang, direct)
+		control.sleep(200)
+		control.refresh()
+
 	def calendar(self, url):
 		self.list = []
 		try:
@@ -184,7 +195,7 @@ class Episodes:
 				except:
 					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
 				for i in range(len(self.list)): self.list[i]['traktHistory'] = True
-				self.sort(type='progress')
+				self.sort(type='progress') # why sort history by progress?
 			elif self.trakt_link in url and '/users/' in url:
 				self.list = cache.get(self.trakt_episodes_list, 0.3, url, self.trakt_user, self.lang)
 				self.sort(type='calendar')
@@ -293,6 +304,8 @@ class Episodes:
 			if not contains:
 				self.list.append(userlists[i])
 		for i in range(0, len(self.list)): self.list[i].update({'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'calendar'})
+		# if self.traktCredentials: # Trakt Watchlist
+			# self.list.insert(0, {'name': control.lang(32033), 'url': self.traktwatchlist_link, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
 		self.addDirectory(self.list, queue=True)
 		return self.list
 
@@ -431,7 +444,6 @@ class Episodes:
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
-			pass
 
 		def items_list(i):
 			values = i
@@ -513,6 +525,7 @@ class Episodes:
 		return self.list
 
 	def trakt_list(self, url, user, count=False):
+		itemlist = []
 		try:
 			for i in re.findall(r'date\[(\d+)\]', url):
 				url = url.replace('date[%s]' % i, (self.date_time - timedelta(days=int(i))).strftime('%Y-%m-%d'))
@@ -520,11 +533,10 @@ class Episodes:
 			q.update({'extended': 'full'})
 			q = (urlencode(q)).replace('%2C', ',')
 			u = url.replace('?' + urlparse(url).query, '') + '?' + q
-			itemlist = []
 			items = trakt.getTraktAsJson(u)
 		except: return
 		try:
-			q = dict(parse_qsl(urlsplit(url).query))
+			q = dict(parse_qsl(urlsplit(url).query)) # should  not need this a 2nd time
 			if int(q['limit']) != len(items): raise Exception()
 			q.update({'page': str(int(q['page']) + 1)})
 			q = (urlencode(q)).replace('%2C', ',')
@@ -569,7 +581,7 @@ class Episodes:
 				plot = item['episode']['overview'] or item['show']['overview']
 				if self.lang != 'en':
 					try:
-						trans_item = trakt.getTVShowTranslation(imdb, lang=self.lang, season=season, episode=episode,  full=True)
+						trans_item = trakt.getTVShowTranslation(imdb, lang=self.lang, season=season, episode=episode, full=True)
 						title = trans_item.get('title') or title
 						plot = trans_item.get('overview') or plot
 						tvshowtitle = trakt.getTVShowTranslation(imdb, lang=self.lang) or tvshowtitle
@@ -857,6 +869,14 @@ class Episodes:
 										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)
 				sysurl = quote_plus(url)
 				Folderurl = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s&art=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode, sysart)
+
+
+
+				if traktProgress:
+					cm.append(('Refresh Progress List', 'RunPlugin(%s?action=episodes_clrProgressCache&url=progress)' % sysaddon))
+
+
+
 				if isFolder:
 					if traktProgress:
 						cm.append((progressMenu, 'PlayMedia(%s)' % url))

@@ -22,6 +22,7 @@ from resources.lib.modules import workers
 class Collections:
 	def __init__(self):
 		self.list = []
+		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.count = control.setting('page.item.limit')
 		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'

@@ -3,7 +3,6 @@
 	Venom Add-on
 """
 
-# from json import dumps as jsdumps
 from resources.lib.modules.control import dialog, getHighlightColor, sleep, condVisibility
 from resources.lib.windows.base import BaseDialog
 

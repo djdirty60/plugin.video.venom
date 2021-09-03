@@ -219,7 +219,7 @@
 					<control type="button" id="2052">
 						<description>Cancel Button</description>
 						<left>140</left>
-						<onright>2050</onright>
+						<onright>2053</onright>
 						<onleft>2051</onleft>
 						<width>120</width>
 						<height>70</height>

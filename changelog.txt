@@ -1,4 +1,12 @@
 
+[B][COLOR red]Update - v6.2.2 - Sept. 03, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed Movie and TV Show search.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Trending and Popular lists will now sync the first 300 items.  This allows the filtering of movie and show only lists.[/I]
+[COLOR yellow]--[/COLOR][I] Fix for continual playback when Kodi fails to issue [B]"onPlaybackCallback()"[/B].  Previously the preResolved url was still held in the windows property and could play on a new title.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed navigation issue in some Trakt Management tools that would get stuck on "OK" button.[/I]
+[COLOR yellow]--[/COLOR][I] Removed obsolete xml files.[/I]
+
+
 [B][COLOR red]Update - v6.2.1 - Aug. 29, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Forced traktsync.db flush to fix issue with [B]"liked list"[/B] missing in ui.[/I]
 

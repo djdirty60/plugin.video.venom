@@ -11,7 +11,7 @@ from resources.lib.modules import trakt
 from resources.lib.modules import workers
 
 self.trakt_link = 'https://api.trakt.tv'
-# self.trakt_user = control.setting('trakt.user').strip()
+# self.trakt_user = control.setting('trakt.username').strip()
 self.lang = control.apiLanguage()['trakt']
 
 self.traktlist_link = 'https://api.trakt.tv/users/%s/lists/%s/items'
@@ -27,9 +27,6 @@ self.traktrecommendations_link = 'https://api.trakt.tv/recommendations/movies?li
 self.trakttrending_link = 'https://api.trakt.tv/movies/trending?limit=40&page=1'
 self.traktboxoffice_link = 'https://api.trakt.tv/movies/boxoffice?limit=40&page=1'
 self.traktpopular_link = 'https://api.trakt.tv/movies/popular?limit=40&page=1'
-
-# https://api.trakt.tv/users/id/collection/type
-
 
 def trakt_list(self, url, user):
 	try:

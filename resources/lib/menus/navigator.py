@@ -465,7 +465,6 @@ class Navigator:
 
 	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True, isPlayable=False, isSearch=False, table=''):
 		try:
-			from sys import argv
 			sysaddon = argv[0] ; syshandle = int(argv[1])
 			if isinstance(name, int): name = control.lang(name)
 			url = '%s?action=%s' % (sysaddon, query) if isAction else query
@@ -489,7 +488,6 @@ class Navigator:
 			log_utils.error()
 
 	def endDirectory(self):
-		from sys import argv
 		syshandle = int(argv[1])
 		content = 'addons' if control.skin == 'skin.auramod' else ''
 		control.content(syshandle, content) # some skins use their own thumb for things like "genres" when content type is set here

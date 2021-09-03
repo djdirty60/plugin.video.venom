@@ -517,6 +517,125 @@ def insert_user_lists(items, new_sync=True):
 # def delete_user_list_items(trakt_id):
 
 
+def fetch_popular_list(trakt_id, ret_all=False):
+	popular_list = ''
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='popular_lists';''').fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS popular_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+			dbcur.connection.commit()
+			dbcur.close() ; dbcon.close()
+			return popular_list
+		if ret_all:
+			try:
+				match = dbcur.execute('''SELECT * FROM popular_lists WHERE NOT trakt_id=""''').fetchall()
+				popular_list = [{'list_owner': i[0], 'list_name': i[1], 'trakt_id': i[2], 'content_type': i[3], 'item_count': i[4], 'likes': i[5]} for i in match]
+			except: pass
+		else:
+			try:
+				match = dbcur.execute('''SELECT * FROM popular_lists WHERE trakt_id=?;''', (trakt_id,)).fetchone()
+				popular_list = {'list_owner': match[0], 'list_name': match[1], 'trakt_id': match[2], 'content_type': match[3], 'item_count': match[4], 'likes': match[5]}
+			except: pass
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return popular_list
+
+def insert_popular_lists(items, new_sync=True):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS popular_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		if new_sync:
+			dbcur.execute('''DELETE FROM popular_lists''')
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
+		for item in items:
+			try:
+				list_item = item.get('list', {})
+				list_owner = list_item.get('user', {}).get('username', '')
+				list_name = list_item.get('name', '')
+				trakt_id = list_item.get('ids', {}).get('trakt', '')
+				content_type = list_item.get('content_type', '')
+				item_count = list_item.get('item_count', '')
+				likes = list_item.get('likes', '')
+				dbcur.execute('''INSERT OR REPLACE INTO popular_lists Values (?, ?, ?, ?, ?, ?)''', (list_owner, list_name, trakt_id, content_type, item_count, likes))
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_popularlist_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+
+def fetch_trending_list(trakt_id, ret_all=False):
+	trending_list = ''
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='trending_lists';''').fetchone()
+		if not ck_table:
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS trending_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+			dbcur.connection.commit()
+			dbcur.close() ; dbcon.close()
+			return trending_list
+		if ret_all:
+			try:
+				match = dbcur.execute('''SELECT * FROM trending_lists WHERE NOT trakt_id=""''').fetchall()
+				trending_list = [{'list_owner': i[0], 'list_name': i[1], 'trakt_id': i[2], 'content_type': i[3], 'item_count': i[4], 'likes': i[5]} for i in match]
+			except: pass
+		else:
+			try:
+				match = dbcur.execute('''SELECT * FROM trending_lists WHERE trakt_id=?;''', (trakt_id,)).fetchone()
+				trending_list = {'list_owner': match[0], 'list_name': match[1], 'trakt_id': match[2], 'content_type': match[3], 'item_count': match[4], 'likes': match[5]}
+			except: pass
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+	return trending_list
+
+def insert_trending_lists(items, new_sync=True):
+	try:
+		dbcon = get_connection()
+		dbcur = get_connection_cursor(dbcon)
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS trending_lists (list_owner TEXT, list_name TEXT, trakt_id TEXT, content_type TEXT, item_count INTEGER, likes INTEGER, UNIQUE(trakt_id));''')
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		if new_sync:
+			dbcur.execute('''DELETE FROM trending_lists''')
+			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
+			dbcur.execute('''VACUUM''')
+		for item in items:
+			try:
+				list_item = item.get('list', {})
+				list_owner = list_item.get('user', {}).get('username', '')
+				list_name = list_item.get('name', '')
+				trakt_id = list_item.get('ids', {}).get('trakt', '')
+				content_type = list_item.get('content_type', '')
+				item_count = list_item.get('item_count', '')
+				likes = list_item.get('likes', '')
+				dbcur.execute('''INSERT OR REPLACE INTO trending_lists Values (?, ?, ?, ?, ?, ?)''', (list_owner, list_name, trakt_id, content_type, item_count, likes))
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_trendinglist_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
 
 def last_sync(type):
 	last_sync_at = 0
@@ -529,6 +648,7 @@ def last_sync(type):
 			if match: last_sync_at = int(cleandate.iso_2_utc(match[1]))
 			else: dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', (type, '1970-01-01T20:00:00.000Z'))
 		else: dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
+		dbcur.connection.commit()
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -543,12 +663,14 @@ def delete_tables(tables):
 		dbcur = get_connection_cursor(dbcon)
 		service_dict = {
 			'bookmarks': 'last_paused_at',
-			'liked_lists': 'last_liked_at',
 			'hiddenProgress': 'last_hiddenProgress_at',
+			'liked_lists': 'last_liked_at',
 			'movies_collection': 'last_collected_at',
-			'shows_collection': 'last_collected_at',
 			'movies_watchlist': 'last_watchlisted_at',
+			'popular_lists': 'last_popularlist_at',
+			'shows_collection': 'last_collected_at',
 			'shows_watchlist': 'last_watchlisted_at',
+			'trending_lists': 'last_trendinglist_at',
 			'user_lists': 'last_lists_updatedat'}
 		for table,v in iter(tables.items()):
 			if v is True:
