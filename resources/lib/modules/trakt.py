@@ -15,6 +15,7 @@ from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import utils
+from resources.lib.modules import workers
 
 BASE_URL = 'https://api.trakt.tv'
 # Venom trakt app
@@ -25,12 +26,10 @@ V2_API_KEY = '1ff09b52d009f286be2d9bdfc0314c688319cbf931040d5f8847e7694a01de42'
 CLIENT_SECRET = '0c5134e5d15b57653fefed29d813bfbd58d73d51fb9bcd6442b5065f30c4d4dc'
 headers = {'Content-Type': 'application/json', 'trakt-api-key': V2_API_KEY, 'trakt-api-version': '2'}
 REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
-# databaseName = control.cacheFile
-# databaseTable = 'trakt'
 highlight_color = control.getHighlightColor()
+server_notification = control.setting('trakt.server.notifications') == 'true'
 
-
-def getTrakt(url, post=None, extended=False):
+def getTrakt(url, post=None, extended=False, silent=False):
 	try:
 		if not url.startswith(BASE_URL): url = urljoin(BASE_URL, url)
 		if post: post = jsdumps(post)
@@ -47,11 +46,11 @@ def getTrakt(url, post=None, extended=False):
 		if code.startswith('5') or (result and isinstance(result, str) and '<html' in result) or not result: # covers Maintenance html responses ["Bad Gateway", "We're sorry, but something went wrong (500)"])
 			if not result: return None
 			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGINFO)
-			control.notification(title=32315, message=33676)
+			if (not silent) and server_notification: control.notification(title=32315, message=33676)
 			return None
 		elif result and code in ['423']:
 			log_utils.log('Locked User Account - Contact Trakt Support: %s' % str(result[0]), level=log_utils.LOGWARNING)
-			control.notification(title=32315, message=33675)
+			if (not silent) and server_notification: control.notification(title=32315, message=33675)
 			return None
 		elif result and code in ['404']:
 			log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
@@ -59,12 +58,12 @@ def getTrakt(url, post=None, extended=False):
 		elif result and code in ['429']:
 			if 'Retry-After' in result[2]: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (1000 calls every 5 minutes, doubt we'll ever hit that)
 				throttleTime = result[2]['Retry-After']
-				control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message lang code 33674
+				if (not silent) and server_notification: control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message lang code 33674
 				control.sleep((int(throttleTime) + 1) * 1000)
-				return getTrakt(url, post=post, extended=extended)
+				return getTrakt(url, post=post, extended=extended, silent=silent)
 		elif result and code in ['401']: # Re-Auth token
 			success = re_auth(headers)
-			if success: return getTrakt(url, post=post, extended=extended)
+			if success: return getTrakt(url, post=post, extended=extended, silent=silent)
 		if result and code not in ['401', '405']:
 			if extended: return result[0], result[2]
 			else: return result[0]
@@ -72,10 +71,10 @@ def getTrakt(url, post=None, extended=False):
 		log_utils.error('getTrakt Error: ')
 	return None
 
-def getTraktAsJson(url, post=None):
+def getTraktAsJson(url, post=None, silent=False):
 	try:
 		res_headers = {}
-		r = getTrakt(url=url, post=post, extended=True)
+		r = getTrakt(url=url, post=post, extended=True, silent=silent)
 		if isinstance(r, tuple) and len(r) == 2:
 			r, res_headers = r[0], r[1]
 		if not r: return
@@ -1261,7 +1260,7 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 def trakt_service_sync():
 	while not control.monitor.abortRequested():
 		if getTraktCredentialsInfo: # run service in case user auth's trakt later
-			activities = getTraktAsJson('/sync/last_activities')
+			activities = getTraktAsJson('/sync/last_activities', silent=True)
 			if control.setting('bookmarks') == 'true' and control.setting('resume.source') == '1':
 				sync_playbackProgress(activities)
 			sync_watchedProgress(activities)
@@ -1272,8 +1271,8 @@ def trakt_service_sync():
 			sync_hidden_progress(activities)
 			sync_collection(activities)
 			sync_watch_list(activities)
-			sync_popular_lists(activities)
-			sync_trending_lists(activities)
+			sync_popular_lists()
+			sync_trending_lists()
 		if control.monitor.waitForAbort(60*15): break
 
 def force_traktSync():
@@ -1287,6 +1286,8 @@ def force_traktSync():
 	sync_hidden_progress(forced=True)
 	sync_collection(forced=True)
 	sync_watch_list(forced=True)
+	sync_popular_lists(forced=True)
+	sync_trending_lists(forced=True)
 	control.hide()
 	control.notification(message='Forced Trakt Sync Complete')
 
@@ -1294,15 +1295,15 @@ def sync_playbackProgress(activities=None, forced=False):
 	try:
 		link = '/sync/playback/'
 		if forced:
-			items = getTraktAsJson(link)
+			items = getTraktAsJson(link, silent=True)
 			if items: traktsync.insert_bookmarks(items)
 		else:
 			db_last_paused = traktsync.last_sync('last_paused_at')
 			activity = getPausedActivity(activities)
 			if activity - db_last_paused >= 120: # do not sync unless 2 min difference or more
-				log_utils.log('Trakt Progress Sync Update...(local db latest "paused_at" = %s, trakt api latest "paused_at" = %s)' % \
+				log_utils.log('Trakt Playback Progress Sync Update...(local db latest "paused_at" = %s, trakt api latest "paused_at" = %s)' % \
 									(str(db_last_paused), str(activity)), __name__, log_utils.LOGDEBUG)
-				items = getTraktAsJson(link)
+				items = getTraktAsJson(link, silent=True)
 				if items: traktsync.insert_bookmarks(items)
 	except:
 		log_utils.error()
@@ -1347,14 +1348,14 @@ def sync_user_lists(activities=None, forced=False):
 		link = '/users/me/lists'
 		list_link = '/users/me/lists/%s/items/%s'
 		if forced:
-			items = getTraktAsJson(link)
+			items = getTraktAsJson(link, silent=True)
 			for i in items:
 				i['content_type'] = ''
 				trakt_id = i['ids']['trakt']
-				list_items = getTraktAsJson(list_link % (trakt_id, 'movies'))
+				list_items = getTraktAsJson(list_link % (trakt_id, 'movies'), silent=True)
 				if not list_items or list_items == '[]': pass
 				else: i['content_type'] = 'movies'
-				list_items = getTraktAsJson(list_link % (trakt_id, 'shows'))
+				list_items = getTraktAsJson(list_link % (trakt_id, 'shows'), silent=True)
 				if not list_items or list_items == '[]': pass
 				else: i['content_type'] = 'mixed' if i['content_type'] == 'movies' else 'shows'
 				control.sleep(200)
@@ -1365,14 +1366,14 @@ def sync_user_lists(activities=None, forced=False):
 			if user_listActivity > db_last_lists_updatedat:
 				log_utils.log('Trakt User Lists Sync Update...(local db latest "lists_updatedat" = %s, trakt api latest "lists_updatedat" = %s)' % \
 									(str(db_last_lists_updatedat), str(user_listActivity)), __name__, log_utils.LOGDEBUG)
-				items = getTraktAsJson(link)
+				items = getTraktAsJson(link, silent=True)
 				for i in items:
 					i['content_type'] = ''
 					trakt_id = i['ids']['trakt']
-					list_items = getTraktAsJson(list_link % (trakt_id, 'movies'))
+					list_items = getTraktAsJson(list_link % (trakt_id, 'movies'), silent=True)
 					if not list_items or list_items == '[]': pass
 					else: i['content_type'] = 'movies'
-					list_items = getTraktAsJson(list_link % (trakt_id, 'shows'))
+					list_items = getTraktAsJson(list_link % (trakt_id, 'shows'), silent=True)
 					if not list_items or list_items == '[]': pass
 					else: i['content_type'] = 'mixed' if i['content_type'] == 'movies' else 'shows'
 					control.sleep(200)
@@ -1384,47 +1385,33 @@ def sync_liked_lists(activities=None, forced=False):
 	try:
 		link = '/users/likes/lists?limit=1000000'
 		list_link = '/users/%s/lists/%s/items/%s'
-		if forced:
-			items = getTraktAsJson(link)
-			for i in items:
+
+		db_last_liked = traktsync.last_sync('last_liked_at')
+		listActivity = getListActivity(activities)
+		if (listActivity > db_last_liked) or forced:
+			log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
+								(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
+			items = getTraktAsJson(link, silent=True)
+			thrd_items = []
+			def items_list(i):
 				list_item = i.get('list', {})
-				privacy = list_item.get('privacy', '')
-				if privacy == 'private': continue
-				list_item['content_type'] = ''
-				list_owner = list_item.get('user', {}).get('username', '')
+				if list_item.get('privacy', '') == 'private': return
+				i['list']['content_type'] = ''
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
-				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'movies'))
+				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'movies'), silent=True)
 				if not list_items or list_items == '[]': pass
-				else: list_item['content_type'] = 'movies'
-				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'shows'))
+				else: i['list']['content_type'] = 'movies'
+				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'shows'), silent=True)
 				if not list_items or list_items == '[]': pass
-				else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
-				control.sleep(200)
-			traktsync.insert_liked_lists(items)
-		else:
-			db_last_liked = traktsync.last_sync('last_liked_at')
-			listActivity = getListActivity(activities)
-			if listActivity > db_last_liked:
-				log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
-									(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
-				items = getTraktAsJson(link)
-				for i in items:
-					list_item = i.get('list', {})
-					privacy = list_item.get('privacy', '')
-					if privacy == 'private': continue
-					list_item['content_type'] = ''
-					list_owner = list_item.get('user', {}).get('username', '')
-					list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
-					trakt_id = list_item.get('ids', {}).get('trakt', '')
-					list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'movies'))
-					if not list_items or list_items == '[]': pass
-					else: list_item['content_type'] = 'movies'
-					list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'shows'))
-					if not list_items or list_items == '[]': pass
-					else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
-					control.sleep(200)
-				traktsync.insert_liked_lists(items)
+				else: i['list']['content_type'] = 'mixed' if i['list']['content_type'] == 'movies' else 'shows'
+				thrd_items.append(i)
+			threads = []
+			for i in items:
+				threads.append(workers.Thread(items_list, i))
+			[i.start() for i in threads]
+			[i.join() for i in threads]
+			traktsync.insert_liked_lists(thrd_items)
 	except:
 		log_utils.error()
 
@@ -1432,7 +1419,7 @@ def sync_hidden_progress(activities=None, forced=False):
 	try:
 		link = '/users/hidden/progress_watched?limit=1000&type=show'
 		if forced:
-			items = getTraktAsJson(link)
+			items = getTraktAsJson(link, silent=True)
 			traktsync.insert_hidden_progress(items)
 		else:
 			db_last_hidden = traktsync.last_sync('last_hiddenProgress_at')
@@ -1440,7 +1427,7 @@ def sync_hidden_progress(activities=None, forced=False):
 			if hiddenActivity > db_last_hidden:
 				log_utils.log('Trakt Hidden Progress Sync Update...(local db latest "hidden_at" = %s, trakt api latest "hidden_at" = %s)' % \
 									(str(db_last_hidden), str(hiddenActivity)), __name__, log_utils.LOGDEBUG)
-				items = getTraktAsJson(link)
+				items = getTraktAsJson(link, silent=True)
 				traktsync.insert_hidden_progress(items)
 	except:
 		log_utils.error()
@@ -1449,9 +1436,9 @@ def sync_collection(activities=None, forced=False):
 	try:
 		link = '/users/me/collection/%s?extended=full'
 		if forced:
-			items = getTraktAsJson(link % 'movies')
+			items = getTraktAsJson(link % 'movies', silent=True)
 			traktsync.insert_collection(items, 'movies_collection')
-			items = getTraktAsJson(link % 'shows')
+			items = getTraktAsJson(link % 'shows', silent=True)
 			traktsync.insert_collection(items, 'shows_collection')
 		else:
 			db_last_collected = traktsync.last_sync('last_collected_at')
@@ -1460,10 +1447,10 @@ def sync_collection(activities=None, forced=False):
 				log_utils.log('Trakt Collection Sync Update...(local db latest "collected_at" = %s, trakt api latest "collected_at" = %s)' % \
 									(str(db_last_collected), str(collectedActivity)), __name__, log_utils.LOGDEBUG)
 				# indicators = cachesyncMovies() # could maybe check watched status here to satisfy sort method
-				items = getTraktAsJson(link % 'movies')
+				items = getTraktAsJson(link % 'movies', silent=True)
 				traktsync.insert_collection(items, 'movies_collection')
 				# indicators = cachesyncTVShows() # could maybe check watched status here to satisfy sort method
-				items = getTraktAsJson(link % 'shows')
+				items = getTraktAsJson(link % 'shows', silent=True)
 				traktsync.insert_collection(items, 'shows_collection')
 	except:
 		log_utils.error()
@@ -1472,9 +1459,9 @@ def sync_watch_list(activities=None, forced=False):
 	try:
 		link = '/users/me/watchlist/%s?extended=full'
 		if forced:
-			items = getTraktAsJson(link % 'movies')
+			items = getTraktAsJson(link % 'movies', silent=True)
 			traktsync.insert_watch_list(items, 'movies_watchlist')
-			items = getTraktAsJson(link % 'shows')
+			items = getTraktAsJson(link % 'shows', silent=True)
 			traktsync.insert_watch_list(items, 'shows_watchlist')
 		else:
 			db_last_watchList = traktsync.last_sync('last_watchlisted_at')
@@ -1482,109 +1469,93 @@ def sync_watch_list(activities=None, forced=False):
 			if watchListActivity > db_last_watchList:
 				log_utils.log('Trakt Watch List Sync Update...(local db latest "watchlist_at" = %s, trakt api latest "watchlisted_at" = %s)' % \
 									(str(db_last_watchList), str(watchListActivity)), __name__, log_utils.LOGDEBUG)
-				items = getTraktAsJson(link % 'movies')
+				items = getTraktAsJson(link % 'movies', silent=True)
 				traktsync.insert_watch_list(items, 'movies_watchlist')
-				items = getTraktAsJson(link % 'shows')
+				items = getTraktAsJson(link % 'shows', silent=True)
 				traktsync.insert_watch_list(items, 'shows_watchlist')
 	except:
 		log_utils.error()
 
-def sync_popular_lists(activities=None, forced=False):
+def sync_popular_lists(forced=False):
 	try:
+		from datetime import timedelta
 		link = '/lists/popular?limit=300'
-		list_link = '/users/%s/lists/%s/items/%s'
-		if forced:
-			items = getTraktAsJson(link)
-			for i in items:
+		list_link = '/users/%s/lists/%s/items/movie,show'
+		db_last_popularList = traktsync.last_sync('last_popularlist_at')
+		cache_expiry = (datetime.utcnow() - timedelta(hours=168)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		cache_expiry = int(cleandate.iso_2_utc(cache_expiry))
+		if (cache_expiry > db_last_popularList) or forced:
+			log_utils.log('Trakt Popular Lists Sync Update...(local db latest "popularlist_at" = %s, cache expiry = %s)' % \
+								(str(db_last_popularList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
+			items = getTraktAsJson(link, silent=True)
+			thrd_items = []
+			def items_list(i):
 				list_item = i.get('list', {})
-				privacy = list_item.get('privacy', '')
-				if privacy == 'private': continue
-				list_item['content_type'] = ''
-				list_owner = list_item.get('user', {}).get('username', '')
-				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
+				if list_item.get('privacy', '') == 'private': return
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
-				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'movies'))
-				if not list_items or list_items == '[]': pass
-				else: list_item['content_type'] = 'movies'
-				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'shows'))
-				if not list_items or list_items == '[]': pass
-				else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
-				control.sleep(200)
-			traktsync.insert_popular_lists(items)
-		else:
-			from datetime import timedelta
-			db_last_popularList = traktsync.last_sync('last_popularlist_at')
-			cache_expiry = (datetime.utcnow() - timedelta(hours=168)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-			cache_expiry = int(cleandate.iso_2_utc(cache_expiry))
-			if cache_expiry > db_last_popularList:
-				log_utils.log('Trakt Popular Lists Sync Update...(local db latest "popularlist_at" = %s, cache expiry = %s)' % \
-									(str(db_last_popularList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
-				items = getTraktAsJson(link)
-				for i in items:
-					list_item = i.get('list', {})
-					privacy = list_item.get('privacy', '')
-					if privacy == 'private': continue
-					list_item['content_type'] = ''
-					list_owner = list_item.get('user', {}).get('username', '')
-					list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
-					trakt_id = list_item.get('ids', {}).get('trakt', '')
-					list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'movies'))
-					if not list_items or list_items == '[]': pass
-					else: list_item['content_type'] = 'movies'
-					list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'shows'))
-					if not list_items or list_items == '[]': pass
-					else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
-					control.sleep(200)
-				traktsync.insert_popular_lists(items)
+				exists = traktsync.fetch_public_list(trakt_id)
+				if exists:
+					local = int(cleandate.iso_2_utc(exists.get('updated_at', '')))
+					remote = int(cleandate.iso_2_utc(list_item.get('updated_at', '')))
+					if remote > local: pass
+					else: return
+				i['list']['content_type'] = ''
+				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
+				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id), silent=True)
+				if not list_items: return
+				movie_items = [x for x in list_items if x.get('type', '') == 'movie']
+				if len(movie_items) > 0: i['list']['content_type'] = 'movies'
+				shows_items = [x for x in list_items if x.get('type', '') == 'show']
+				if len(shows_items) > 0:
+					i['list']['content_type'] = 'mixed' if i['list']['content_type'] == 'movies' else 'shows'
+				thrd_items.append(i)
+			threads = []
+			for i in items:
+				threads.append(workers.Thread(items_list, i))
+			[i.start() for i in threads]
+			[i.join() for i in threads]
+			traktsync.insert_public_lists(thrd_items, service_type='last_popularlist_at', new_sync=False)
 	except:
 		log_utils.error()
 
-def sync_trending_lists(activities=None, forced=False):
+def sync_trending_lists(forced=False):
 	try:
+		from datetime import timedelta
 		link = '/lists/trending?limit=300'
-		list_link = '/users/%s/lists/%s/items/%s'
-		if forced:
-			items = getTraktAsJson(link)
-			for i in items:
+		list_link = '/users/%s/lists/%s/items/movie,show'
+		db_last_trendingList = traktsync.last_sync('last_trendinglist_at')
+		cache_expiry = (datetime.utcnow() - timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+		cache_expiry = int(cleandate.iso_2_utc(cache_expiry))
+		if (cache_expiry > db_last_trendingList) or forced:
+			log_utils.log('Trakt Trending Lists Sync Update...(local db latest "trendinglist_at" = %s, cache expiry = %s)' % \
+								(str(db_last_trendingList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
+			items = getTraktAsJson(link, silent=True)
+			thrd_items = []
+			def items_list(i):
 				list_item = i.get('list', {})
-				privacy = list_item.get('privacy', '')
-				if privacy == 'private': continue
-				list_item['content_type'] = ''
-				list_owner = list_item.get('user', {}).get('username', '')
-				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
+				if list_item.get('privacy', '') == 'private': return
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
-				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'movies'))
-				if not list_items or list_items == '[]': pass
-				else: list_item['content_type'] = 'movies'
-				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'shows'))
-				if not list_items or list_items == '[]': pass
-				else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
-				control.sleep(200)
-			traktsync.insert_trending_lists(items)
-		else:
-			from datetime import timedelta
-			db_last_trendingList = traktsync.last_sync('last_trendinglist_at')
-			cache_expiry = (datetime.utcnow() - timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-			cache_expiry = int(cleandate.iso_2_utc(cache_expiry))
-			if cache_expiry > db_last_trendingList:
-				log_utils.log('Trakt Trending Lists Sync Update...(local db latest "trendinglist_at" = %s, cache expiry = %s)' % \
-									(str(db_last_trendingList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
-				items = getTraktAsJson(link)
-				for i in items:
-					list_item = i.get('list', {})
-					privacy = list_item.get('privacy', '')
-					if privacy == 'private': continue
-					list_item['content_type'] = ''
-					list_owner = list_item.get('user', {}).get('username', '')
-					list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
-					trakt_id = list_item.get('ids', {}).get('trakt', '')
-					list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'movies'))
-					if not list_items or list_items == '[]': pass
-					else: list_item['content_type'] = 'movies'
-					list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id, 'shows'))
-					if not list_items or list_items == '[]': pass
-					else: list_item['content_type'] = 'mixed' if list_item['content_type'] == 'movies' else 'shows'
-					control.sleep(200)
-				traktsync.insert_trending_lists(items)
+				exists = traktsync.fetch_public_list(trakt_id)
+				if exists:
+					local = int(cleandate.iso_2_utc(exists.get('updated_at', '')))
+					remote = int(cleandate.iso_2_utc(list_item.get('updated_at', '')))
+					if remote > local: pass
+					else: return
+				i['list']['content_type'] = ''
+				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
+				list_items = getTraktAsJson(list_link % (list_owner_slug, trakt_id), silent=True)
+				if not list_items: return
+				movie_items = [x for x in list_items if x.get('type', '') == 'movie']
+				if len(movie_items) != 0: i['list']['content_type'] = 'movies'
+				shows_items = [x for x in list_items if x.get('type', '') == 'show']
+				if len(shows_items) != 0:
+					i['list']['content_type'] = 'mixed' if i['list']['content_type'] == 'movies' else 'shows'
+				thrd_items.append(i)
+			threads = []
+			for i in items:
+				threads.append(workers.Thread(items_list, i))
+			[i.start() for i in threads]
+			[i.join() for i in threads]
+			traktsync.insert_public_lists(thrd_items, service_type='last_trendinglist_at', new_sync=False)
 	except:
 		log_utils.error()

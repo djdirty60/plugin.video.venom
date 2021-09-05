@@ -38,6 +38,7 @@ class Collections:
 		# self.user = str(self.imdb_user) + str(self.tmdb_key)
 		self.user = str(self.tmdb_key)
 		self.tmdb_link = 'https://api.themoviedb.org/4/list/%s?api_key=%s&sort_by=%s&page=1' % ('%s', self.tmdb_key, self.tmdb_sort())
+		self.tmdbCollection_link = 'https://api.themoviedb.org/3/collection/%s?api_key=%s&page=1' % ('%s', self.tmdb_key) # does not support request sort
 		self.imdb_link = 'https://www.imdb.com/search/title?title=%s&title_type=%s&num_votes=1000,&countries=us&languages=en&sort=%s' % ('%s', '%s', self.imdb_sort())
 
 # Boxing Movies
@@ -117,7 +118,8 @@ class Collections:
 		self.daddydaycare_link = self.tmdb_link % '33284'
 		self.deathwish_link = self.tmdb_link % '33285'
 		self.deltaforce_link = self.tmdb_link % '33286'
-		self.diehard_link = self.tmdb_link % '33287'
+		# self.diehard_link = self.tmdb_link % '33287'
+		self.diehard_link = self.tmdbCollection_link % '1570'
 		self.dirtydancing_link = self.tmdb_link % '33288'
 		self.dirtyharry_link = self.tmdb_link % '33289'
 		self.divergent_link = self.tmdb_link % '13311'
@@ -140,7 +142,7 @@ class Collections:
 		self.ghostbusters_link = self.tmdb_link % '33201'
 		self.godsnotdead_link = self.tmdb_link % '33304'
 		self.godfather_link = self.tmdb_link % '33305'
-		self.godzilla_link = self.tmdb_link % '33306'
+		self.godzilla_link = self.tmdb_link % '7106850'
 		self.grownups_link = self.tmdb_link % '33307'
 		self.grumpyoldmen_link = self.tmdb_link % '33308'
 		self.gunsofnavarone_link = self.tmdb_link % '33309'
@@ -424,7 +426,7 @@ class Collections:
 		self.addDirectoryItem('Ghostbusters (1984-2016)', 'collections&url=ghostbusters', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Gods Not Dead (2014-2016)', 'collections&url=godsnotdead', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('The Godfather (1972-1990)', 'collections&url=godfather', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('Godzilla (1956-2016)', 'collections&url=godzilla', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Godzilla (1956-2021)', 'collections&url=godzilla', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Grown Ups (2010-2013)', 'collections&url=grownups', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Grumpy Old Men (2010-2013)', 'collections&url=grumpyoldmen', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Guns of Navarone (1961-1978)', 'collections&url=gunsofnavarone', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
@@ -678,8 +680,9 @@ class Collections:
 			except: pass
 			try: u = urlparse(url).netloc.lower()
 			except: pass
-			if u in self.tmdb_link and '/list/' in url:
+			if u in self.tmdb_link and any(value in url for value in ['/list/', '/collection/']):
 				self.list = cache.get(tmdb_indexer.Movies().tmdb_collections_list, 168, url)
+				if '/collection/' in url: self.sort() # TMDb "/collections/" does not support request sort
 			elif u in self.imdb_link:
 				self.list = cache.get(self.imdb_list, 168, url)
 				self.worker()
@@ -709,6 +712,28 @@ class Collections:
 		tmdb_sort_order = '.asc' if (int(control.setting('sort.collections.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
 		return sort_string
+
+	def sort(self, type='collections'):
+		try:
+			if not self.list: return
+			attribute = int(control.setting('sort.%s.type' % type))
+			reverse = int(control.setting('sort.%s.order' % type)) == 1
+			if attribute == 0: reverse = False # Sorting Order is not enabled when sort method is "Default"
+			if attribute > 0:
+				if attribute == 1:
+					try: self.list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['title'].lower()), reverse=reverse)
+					except: self.list = sorted(self.list, key=lambda k: k['title'].lower(), reverse=reverse)
+				elif attribute == 2: self.list = sorted(self.list, key=lambda k: float(k['rating']), reverse=reverse)
+				elif attribute == 3:
+					for i in range(len(self.list)):
+						if 'premiered' not in self.list[i]: self.list[i]['premiered'] = ''
+					self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=reverse)
+			elif reverse:
+				self.list = list(reversed(self.list))
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+
 
 	def imdb_list(self, url, isRatinglink=False):
 		list = []

@@ -334,7 +334,7 @@ class TVshows:
 		k = control.keyboard('', control.lang(32010))
 		k.doModal()
 		q = k.getText() if k.isConfirmed() else None
-		if not q: return
+		if not q: return control.closeAll()
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
 		try:
@@ -348,7 +348,9 @@ class TVshows:
 		finally:
 			dbcur.close() ; dbcon.close()
 		url = self.search_link + quote_plus(q)
-		control.execute('Container.Update(%s?action=tvshows&url=%s)' % (argv[0], quote_plus(url)))
+		# control.execute('Container.Update(%s?action=tvshows&url=%s)' % (argv[0], quote_plus(url)))
+		control.closeAll()
+		control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=tvshows&url=%s,return)' % (quote_plus(url)))
 
 	def search_term(self, name):
 		url = self.search_link + quote_plus(name)
@@ -699,14 +701,10 @@ class TVshows:
 				list_id = list_item.get('ids', {}).get('trakt', '')
 				list_owner = list_item.get('user', {}).get('username', '')
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
-				privacy = list_item.get('privacy', '')
-				if privacy == 'private': continue
+				if list_item.get('privacy', '') == 'private': continue
 				list_url = self.traktlist_link % (list_owner_slug, list_id)
-				if '/popular' in url:
-					list_content = traktsync.fetch_popular_list(list_id)
-				elif '/trending' in url:
-					list_content = traktsync.fetch_trending_list(list_id)
-				if list_content and list_content.get('content_type', '') == 'movies': continue
+				list_content = traktsync.fetch_public_list(list_id)
+				if not list_content or list_content.get('content_type', '') == 'movies': continue
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
 				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'tvshows'})
 			except:

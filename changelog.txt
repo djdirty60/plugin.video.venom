@@ -1,4 +1,10 @@
 
+[B][COLOR red]Update - v6.2.3 - Sept. 05, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] The new Popular and Trending sync's were previousely not threaded requests and were slow.  This is now threaded.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt sync service will no longer displays Throttling notifications.[/I]
+[COLOR yellow]--[/COLOR][I] Updated a few Movie titles in [B]"Movies - Collections"[/B].[/I]
+
+
 [B][COLOR red]Update - v6.2.2 - Sept. 03, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Movie and TV Show search.[/I]
 [COLOR yellow]--[/COLOR][I] Trakt Trending and Popular lists will now sync the first 300 items.  This allows the filtering of movie and show only lists.[/I]

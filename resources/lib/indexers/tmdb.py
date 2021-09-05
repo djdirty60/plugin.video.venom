@@ -159,7 +159,8 @@ class Movies:
 	def tmdb_collections_list(self, url):
 		try:
 			result = get_request(url)
-			if '/3/' in url: items = result['items']
+			if '/collection/' in url: items = result['parts']
+			elif '/3/' in url: items = result['items']
 			else: items = result['results']
 		except: return
 		self.list = []
@@ -448,7 +449,8 @@ class TVshows:
 		if not url: return
 		try:
 			result = get_request(url)
-			if '/3/' in url: items = result['items']
+			if '/collection/' in url: items = result['parts']
+			elif '/3/' in url: items = result['items']
 			else: items = result['results']
 		except: return
 		self.list = []
