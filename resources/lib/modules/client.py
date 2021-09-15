@@ -10,7 +10,6 @@ from sys import version_info
 from time import sleep
 from resources.lib.database import cache
 from resources.lib.modules import dom_parser
-from resources.lib.modules import workers
 from http import cookiejar
 from html import unescape
 from io import BytesIO
@@ -364,9 +363,10 @@ class cfcookie:
 		self.cookie = None
 
 	def get(self, netloc, ua, timeout):
+		from threading import Thread
 		threads = []
 		for i in list(range(0, 15)):
-			threads.append(workers.Thread(self.get_cookie, netloc, ua, timeout))
+			threads.append(Thread(target=self.get_cookie, args=(netloc, ua, timeout)))
 		[i.start() for i in threads]
 		for i in list(range(0, 30)):
 			if self.cookie is not None: return self.cookie

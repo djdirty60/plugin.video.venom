@@ -69,8 +69,9 @@
 		<setting id="navi.movie.imdb.certificates" type="bool" label="32464" default="true" />
 		<setting id="navi.movie.collections" type="bool" label="32000" default="true" />
 		<setting id="navi.xmascollections" subsetting="true" type="bool" label="40064" enable="eq(-1,true)" default="false" />
-		<setting id="navi.movie.trakt.popularList" type="bool" label="32418" default="true" />
-		<setting id="navi.movie.trakt.trendingList" type="bool" label="32419" default="true" />
+		<setting id="navi.movie.trakt.popularList" type="bool" label="32417" default="true" />
+		<setting id="navi.movie.trakt.trendingList" type="bool" label="32418" default="true" />
+		<setting id="navi.movie.trakt.searchList" type="bool" label="32419" default="true" />
 		<setting type="lsep" label="32002" />
 		<setting id="navi.originals" type="bool" label="40069" default="false" />
 		<setting id="navi.tv.imdb.popular" type="bool" label="32429" default="true" />
@@ -91,8 +92,9 @@
 		<setting id="navi.tv.imdb.returningtvshows" type="bool" label="32474" default="true" />
 		<setting id="navi.tv.imdb.newtvshows" type="bool" label="32476" default="true" />
 		<setting id="navi.tv.tvmaze.calendar" type="bool" label="32450" default="true" />
-		<setting id="navi.tv.trakt.popularList" type="bool" label="32418" default="true" />
-		<setting id="navi.tv.trakt.trendingList" type="bool" label="32419" default="true" />
+		<setting id="navi.tv.trakt.popularList" type="bool" label="32417" default="true" />
+		<setting id="navi.tv.trakt.trendingList" type="bool" label="32418" default="true" />
+		<setting id="navi.tv.trakt.searchList" type="bool" label="32419" default="true" />
 	</category>
 
 	<!-- TV Shows - 2 -->
@@ -175,6 +177,7 @@
 		<!-- Sources Filtering Options -->
 		<setting type="lsep" label="32338" />
 		<setting id="hosts.quality" type="enum" label="32339" values="4K|1080p|720p|480p(SD)" default="0" />
+		<setting id="source.prioritize.hdrdv" type="bool" label="32195" default="false" />
 		<setting id="source.enable.msizelimit" type="bool" label="32165" default="false" />
 		<setting id="source.min.moviesize" type="slider" subsetting="true" label="32155" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
 		<setting id="source.max.moviesize" type="slider" subsetting="true" label="32156" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />

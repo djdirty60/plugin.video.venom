@@ -6,7 +6,7 @@
 from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
 import re
-import threading
+from threading import Thread
 from time import time, sleep
 from urllib.parse import urljoin
 from resources.lib.database import cache, traktsync
@@ -15,7 +15,6 @@ from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import utils
-from resources.lib.modules import workers
 
 BASE_URL = 'https://api.trakt.tv'
 # Venom trakt app
@@ -821,7 +820,7 @@ def watchedMoviesTime(imdb):
 		log_utils.error()
 
 def cachesyncTV(imdb):
-	threads = [threading.Thread(target=cachesyncTVShows), threading.Thread(target=cachesyncSeason, args=(imdb,))]
+	threads = [Thread(target=cachesyncTVShows), Thread(target=cachesyncSeason, args=(imdb,))]
 	[i.start() for i in threads]
 	[i.join() for i in threads]
 
@@ -915,7 +914,7 @@ def seasonCount(imdb, refresh=True, wait=False):
 		if not imdb.startswith('tt'): return None
 		indicators = cache.cache_existing(_seasonCountRetrieve, imdb) # get existing result while thread fetches new
 		if refresh:
-			thread = threading.Thread(target=_seasonCountCache, args=(imdb,))
+			thread = Thread(target=_seasonCountCache, args=(imdb,))
 			thread.start()
 			if wait: # Do not wait to retrieve a fresh count, otherwise loading show/season menus are slow.
 				thread.join()
@@ -1408,7 +1407,7 @@ def sync_liked_lists(activities=None, forced=False):
 				thrd_items.append(i)
 			threads = []
 			for i in items:
-				threads.append(workers.Thread(items_list, i))
+				threads.append(Thread(target=items_list, args=(i,)))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			traktsync.insert_liked_lists(thrd_items)
@@ -1511,7 +1510,7 @@ def sync_popular_lists(forced=False):
 				thrd_items.append(i)
 			threads = []
 			for i in items:
-				threads.append(workers.Thread(items_list, i))
+				threads.append(Thread(target=items_list, args=(i,)))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			traktsync.insert_public_lists(thrd_items, service_type='last_popularlist_at', new_sync=False)
@@ -1553,7 +1552,7 @@ def sync_trending_lists(forced=False):
 				thrd_items.append(i)
 			threads = []
 			for i in items:
-				threads.append(workers.Thread(items_list, i))
+				threads.append(Thread(target=items_list, args=(i,)))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			traktsync.insert_public_lists(thrd_items, service_type='last_trendinglist_at', new_sync=False)

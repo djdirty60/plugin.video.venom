@@ -799,11 +799,11 @@ msgid "Rescrape with All Providers"
 msgstr ""
 
 msgctxt "#32194"
-msgid ""
+msgid "Refresh Progress List"
 msgstr ""
 
 msgctxt "#32195"
-msgid ""
+msgid "Prioritize HDR and Dolby-Vision to top"
 msgstr ""
 
 msgctxt "#32196"
@@ -1302,15 +1302,15 @@ msgid ""
 msgstr ""
 
 msgctxt "#32417"
-msgid ""
-msgstr ""
-
-msgctxt "#32418"
 msgid "Trakt Popular Lists"
 msgstr ""
 
-msgctxt "#32419"
+msgctxt "#32418"
 msgid "Trakt Trending Lists"
+msgstr ""
+
+msgctxt "#32419"
+msgid "Search Trakt Lists"
 msgstr ""
 
 msgctxt "#32420"

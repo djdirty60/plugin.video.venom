@@ -799,12 +799,12 @@ msgid "Rescrape with All Providers"
 msgstr "Ponowne zdrapywanie ze wszystkimi dostawcami"
 
 msgctxt "#32194"
-msgid ""
-msgstr ""
+msgid "Refresh Progress List"
+msgstr "Odśwież listę postępów"
 
 msgctxt "#32195"
-msgid ""
-msgstr ""
+msgid "Prioritize HDR and Dolby-Vision to top"
+msgstr "Nadaj priorytet HDR i Dolby-Vision"
 
 msgctxt "#32196"
 msgid ""
@@ -1302,16 +1302,16 @@ msgid ""
 msgstr ""
 
 msgctxt "#32417"
-msgid ""
-msgstr ""
-
-msgctxt "#32418"
 msgid "Trakt Popular Lists"
 msgstr "Popularne listy Trakt"
 
-msgctxt "#32419"
+msgctxt "#32418"
 msgid "Trakt Trending Lists"
 msgstr "Traktuj listy trendów"
+
+msgctxt "#32419"
+msgid "Search Trakt Lists"
+msgstr "Przeszukaj listy tras"
 
 msgctxt "#32420"
 msgid "In Theaters"

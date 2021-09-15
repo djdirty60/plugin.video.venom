@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.2.3">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.2.4">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,10 +32,13 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.2.3 - Sept. 05, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] The new Popular and Trending sync's were previousely not threaded requests and were slow.  This is now threaded.[/I]
-[COLOR yellow]--[/COLOR][I] Trakt sync service will no longer displays Throttling notifications.[/I]
-[COLOR yellow]--[/COLOR][I] Updated a few Movie titles in [B]"Movies - Collections"[/B].[/I]
+[B][COLOR red]Update - v6.2.4 - Sept. 15, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added a new [B]"Search Trakt Lists"[/B] function to both [B]"Discover Movies"[/B] and [B]"Discover TV Shows"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Fixed IMDb query string for [B]"Discover TV Shows-Certificates-Youth Audience (TV-14)"[/B].  Previous query contained a typo so the returned list was not accurate.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed a few titles not returning sources, or limited sources, ex.  [B]"The F**k-It List"[/B] and [B]"The End of the F***ing World"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] IMDb lists will now retain their "rating" and "votes" values and not be replaced by TMDb's during the meta update process.[/I]
+[COLOR yellow]--[/COLOR][I] New setting added [B]"Prioritize HDR and DOLBY-VISION" to top of Source Select[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Previously single episodes, season pack, and show pack query scrapes were not threaded as separate instances.  This has now been changed.  Please note for 9 enabled providers/scrapers you will see the provider count be ex. 27 for the total number of threads.[/I]
 		</news>
 	</extension>
 </addon>

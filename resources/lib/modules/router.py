@@ -97,6 +97,10 @@ def router(params):
 	elif action == 'movies_PublicLists':
 		from resources.lib.menus import movies
 		movies.Movies().getTraktPublicLists(url)
+	elif action == 'movies_SearchLists':
+		from resources.lib.menus import navigator
+		media_type = params.get('media_type')
+		navigator.Navigator().traktSearchLists(media_type)
 	elif action == 'movies_LikedLists':
 		from resources.lib.menus import movies
 		movies.Movies().traktLlikedlists()
@@ -251,13 +255,18 @@ def router(params):
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().getTraktPublicLists(url)
 
-	elif action == 'shows_traktHiddenManager':
-		from resources.lib.menus import tvshows
-		tvshows.TVshows().traktHiddenManager()
+	elif action == 'tv_SearchLists':
+		from resources.lib.menus import navigator
+		media_type = params.get('media_type')
+		navigator.Navigator().traktSearchLists(media_type)
 
 	elif action == 'shows_LikedLists':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().traktLlikedlists()
+
+	elif action == 'shows_traktHiddenManager':
+		from resources.lib.menus import tvshows
+		tvshows.TVshows().traktHiddenManager()
 
 	elif action == 'shows_traktCollectionManager':
 		from resources.lib.menus import tvshows

@@ -324,7 +324,6 @@ def tvshowsUpdate(imdb, tvdb):
 		from resources.lib.database import cache
 		from resources.lib.modules import log_utils
 
-
 		# name = addonInfo('name')
 		metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 		show_meta = metaget.get_meta('tvshow', name='', imdb_id=imdb)
@@ -337,7 +336,6 @@ def tvshowsUpdate(imdb, tvdb):
 		# items = seasons.Seasons().get('', '', imdb, '', tvdb, {}, create_directory=False)
 	# def get(self, tvshowtitle, year, imdb, tmdb, tvdb, art, idx=True, create_directory=True):
 
-
 		tmdb = ''
 		if not tmdb and (imdb or tvdb):
 			try:
@@ -346,14 +344,12 @@ def tvshowsUpdate(imdb, tvdb):
 			except:
 				if control.setting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
-				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % tvshowtitle, __name__, log_utils.LOGDEBUG) # log TMDb does not have show
-
+				log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 
 		items = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 		log_utils.log('items=%s' % items)
 		items = items.get('seasons', [])
 		# for i in items:
-
 
 
 		# items = episodes.Episodes().get('', '', imdb, '', tvdb, {}, create_directory=False)

@@ -8,7 +8,6 @@ import re
 from urllib.parse import urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.modules import client
 from resources.lib.modules import trakt
-from resources.lib.modules import workers
 
 self.trakt_link = 'https://api.trakt.tv'
 # self.trakt_user = control.setting('trakt.username').strip()

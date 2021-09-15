@@ -363,7 +363,7 @@ class AllDebrid:
 			transfer_info = self.list_transfer(transfer_id)
 			# log_utils.log('transfer_info=%s' % transfer_info)
 			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == ''] #.m2ts file extension is not in "filename" so this fails
-			invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']
+			invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt', '.srt']
 			valid_results = [i for i in transfer_info.get('links') if not any(i.get('filename').lower().endswith(x) for x in invalids) and not i.get('link', '') == '']
 			if len(valid_results) == 0:
 				failed_reason = 'No valid video extension found'

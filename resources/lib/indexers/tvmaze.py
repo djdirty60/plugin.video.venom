@@ -5,6 +5,7 @@
 
 import re
 import requests
+from threading import Thread
 from urllib.parse import quote_plus
 from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
@@ -13,7 +14,7 @@ from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import trakt
-from resources.lib.modules import workers
+
 
 networks_this_season = [
 			('A&E', '/networks/29/ae', 'https://i.imgur.com/xLDfHjH.png'),
@@ -336,7 +337,7 @@ class tvshows:
 						log_utils.error()
 #################################
 				if not tmdb:
-					log_utils.log('tvshowtitle: (%s) missing tmdb_id' % values['tvshowtitle'], __name__, log_utils.LOGDEBUG) # log TMDb does not have show
+					log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (values['tvshowtitle'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 					return
 				# self.list = metacache.fetch(self.list, self.lang, self.user)
 				# if self.list['metacache'] is True: raise Exception()
@@ -364,7 +365,7 @@ class tvshows:
 		try:
 			threads = []
 			for tvmaze_id in items:
-				threads.append(workers.Thread(items_list, tvmaze_id))
+				threads.append(Thread(target=items_list, args=(tvmaze_id,)))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			sorted_list = []

@@ -4,12 +4,13 @@
 """
 
 from datetime import datetime
+from io import BytesIO
 import re
 import requests # seems faster than urlli2.urlopen
+from threading import Thread
 import zipfile
 # from urllib.request import urlopen
 from urllib.parse import quote_plus
-from io import BytesIO
 from resources.lib.database import cache
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
@@ -745,7 +746,7 @@ def _seasonCount(tvshowtitle, year, imdb, tvdb):
 	# items = items[:len(items)]
 	# threads = []
 	# for i in items:
-		# threads.append(workers.Thread(items_list, i))
+		# threads.append(Thread(target=items_list, args=(i,)))
 	# [i.start() for i in threads]
 	# [i.join() for i in threads]
 	# return self.list

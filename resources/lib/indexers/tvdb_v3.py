@@ -5,22 +5,21 @@
 
 # import copy
 from json import dumps as jsdumps, loads as jsloads
-from time import time
 import requests
+from threading import Thread
+from time import time
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import log_utils
 from resources.lib.modules import trakt
-from resources.lib.modules import workers
 
 
 class TVDBAPI:
 	def __init__(self):
 		self.apiKey  = control.setting('tvdb.api.key')
 		# self.user = 
-
 		self.baseUrl = 'https://api.thetvdb.com/'
 		self.jwToken = control.setting('tvdb.jw')
 		self.headers = {'Content-Type': 'application/json'}

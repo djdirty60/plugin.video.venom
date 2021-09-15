@@ -158,7 +158,7 @@ class TraktHiddenManagerXML(BaseDialog):
 					listitem.setProperty('venom.trailer', item.get('trailer'))
 					listitem.setProperty('venom.studio', item.get('studio'))
 					listitem.setProperty('venom.genre', item.get('genre', ''))
-					listitem.setProperty('venom.duration', str(item.get('duration')))
+					# listitem.setProperty('venom.duration', str(item.get('duration'))) # not used
 					listitem.setProperty('venom.mpaa', item.get('mpaa') or 'NA')
 					listitem.setProperty('venom.plot', item.get('plot'))
 					listitem.setProperty('venom.poster', item.get('poster', ''))

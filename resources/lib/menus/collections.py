@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps
 import re
 from sys import argv
+from threading import Thread
 from urllib.parse import quote_plus, parse_qsl, urlparse
 from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
@@ -16,7 +17,6 @@ from resources.lib.modules import control
 from resources.lib.modules.playcount import getMovieIndicators, getMovieOverlay
 from resources.lib.modules import trakt
 from resources.lib.modules import views
-from resources.lib.modules import workers
 
 
 class Collections:
@@ -783,7 +783,7 @@ class Collections:
 			for r in range(0, total, 40):
 				threads = []
 				for i in range(r, r + 40):
-					if i < total: threads.append(workers.Thread(self.super_imdb_info, i))
+					if i < total: threads.append(Thread(target=self.super_imdb_info, args=(i,)))
 				[i.start() for i in threads]
 				[i.join() for i in threads]
 			if self.meta:

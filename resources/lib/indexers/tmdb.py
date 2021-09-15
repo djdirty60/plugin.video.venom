@@ -7,11 +7,12 @@ from datetime import datetime
 import re
 import requests
 from requests.adapters import HTTPAdapter
+from threading import Thread
 from urllib3.util.retry import Retry
 from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import fanarttv
 from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, trailer as control_trailer, yesnoDialog
-from resources.lib.modules import workers
+
 API_key = getSetting('tmdb.api.key')
 if not API_key: API_key = '3320855e65a9758297fec4f7c9717698'
 base_link = 'https://api.themoviedb.org/3/'
@@ -144,7 +145,7 @@ class Movies:
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
 		for i in range(0, len(self.list)):
-			threads.append(workers.Thread(items_list, i))
+			threads.append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
@@ -208,7 +209,7 @@ class Movies:
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
 		for i in range(0, len(self.list)):
-			threads.append(workers.Thread(items_list, i))
+			threads.append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
@@ -359,7 +360,7 @@ class Movies:
 		try:
 			result = None
 			find_url = base_link + 'find/%s?api_key=%s&external_source=%s'
-			if imdb:
+			if imdb and imdb.startswith('tt'): # trakt has some bad data with url's in ids
 				url = find_url % (imdb, API_key, 'imdb_id')
 				try: result = get_request(url)['movie_results'][0]
 				except: return None
@@ -433,7 +434,7 @@ class TVshows:
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
 		for i in range(0, len(self.list)):
-			threads.append(workers.Thread(items_list, i))
+			threads.append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
@@ -497,7 +498,7 @@ class TVshows:
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
 		for i in range(0, len(self.list)):
-			threads.append(workers.Thread(items_list, i))
+			threads.append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
@@ -741,7 +742,7 @@ class TVshows:
 		try:
 			result = None
 			find_url = base_link + 'find/%s?api_key=%s&external_source=%s'
-			if imdb:
+			if imdb and imdb.startswith('tt'): # trakt has some bad data with url's in ids
 				url = find_url % (imdb, API_key, 'imdb_id')
 				try: result = get_request(url)['tv_results'][0]
 				except: pass

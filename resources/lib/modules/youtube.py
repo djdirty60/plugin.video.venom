@@ -5,8 +5,8 @@
 
 from json import loads as jsloads
 import re
+from threading import Thread
 from resources.lib.modules import client
-from resources.lib.modules import workers
 
 
 class youtube(object):
@@ -105,7 +105,7 @@ class youtube(object):
 
 			threads = []
 			for i in range(0, len(u)):
-				threads.append(workers.Thread(self.thread, u[i], i))
+				threads.append(Thread(target=self.thread, args=(u[i], i)))
 				self.data.append('')
 			[i.start() for i in threads]
 			[i.join() for i in threads]

@@ -92,7 +92,7 @@ class source:
 			for file in files:
 				try:
 					name = file.get('filename', '')
-					invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']
+					invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt', '.srt']
 					if name.lower().endswith(tuple(invalids)): continue
 					path = folder.get('filename', '').lower()
 					rt = cloud_utils.release_title_format(name)

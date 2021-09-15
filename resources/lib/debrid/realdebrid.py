@@ -6,11 +6,11 @@
 import re
 import requests
 from sys import argv, exit as sysexit
+from threading import Thread
 from urllib.parse import quote_plus, unquote
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
-from resources.lib.modules import workers
 from resources.lib.modules.source_utils import supported_video_extensions
 
 FormatDateTime = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -54,7 +54,7 @@ class RealDebrid:
 			original_url = url
 			url = rest_base_url + url
 			if self.token == '':
-				log_utils.log('No Real-Debrid Token Found', level=log_utils.LOGWARNING)
+				log_utils.log('No Real-Debrid Token Found')
 				return None
 			# if not fail_check: # with fail_check=True new token does not get added
 			if '?' not in url:
@@ -348,7 +348,7 @@ class RealDebrid:
 			ck_token = self._get('user', token_ck=True) # check token, and refresh if needed, before blasting threads at it
 			threads = []
 			for section in hashList:
-				threads.append(workers.Thread(self.check_hash_thread, section))
+				threads.append(Thread(target=self.check_hash_thread, args=(section,)))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			return self.cache_check_results

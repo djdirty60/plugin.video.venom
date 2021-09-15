@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
+from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache, fanarttv_cache, traktsync
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
@@ -16,7 +17,6 @@ from resources.lib.modules import control
 from resources.lib.modules.playcount import getTVShowIndicators, getTVShowOverlay, getShowCount
 from resources.lib.modules import trakt
 from resources.lib.modules import views
-from resources.lib.modules import workers
 
 
 class TVshows:
@@ -40,26 +40,25 @@ class TVshows:
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
 
 		self.imdb_link = 'https://www.imdb.com'
-		self.persons_link = 'https://www.imdb.com/search/name?count=100&name='
-		self.personlist_link = 'https://www.imdb.com/search/name?count=100&gender=male,female'
-		self.popular_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&release_date=,date[0]&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
-		self.airing_link = 'https://www.imdb.com/search/title?title_type=tv_episode&release_date=date[1],date[0]&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
-		self.active_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=10,&production_status=active&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
-		self.premiere_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&languages=en&num_votes=10,&release_date=date[60],date[0]&sort=release_date,desc&count=%s&start=1' % self.page_limit
-		self.rating_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=5000,&release_date=,date[0]&sort=user_rating,desc&count=%s&start=1' % self.page_limit
-		self.views_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&release_date=,date[0]&sort=num_votes,desc&count=%s&start=1' % self.page_limit
-		self.person_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&role=%s&sort=year,desc&count=%s&start=1' % ('%s', self.page_limit)
-		self.genre_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&genres=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
-		self.keyword_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&keywords=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
-		self.language_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=100,&production_status=released&primary_language=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
-		self.certification_link = 'https://www.imdb.com/search/title?title_type=tv_series,mini_series&release_date=,date[0]&certificates=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.persons_link = 'https://www.imdb.com/search/name/?count=100&name='
+		self.personlist_link = 'https://www.imdb.com/search/name/?count=100&gender=male,female'
+		self.popular_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=100,&release_date=,date[0]&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
+		self.airing_link = 'https://www.imdb.com/search/title/?title_type=tv_episode&release_date=date[1],date[0]&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
+		self.active_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=10,&production_status=active&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
+		self.premiere_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&languages=en&num_votes=10,&release_date=date[60],date[0]&sort=release_date,desc&count=%s&start=1' % self.page_limit
+		self.rating_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=5000,&release_date=,date[0]&sort=user_rating,desc&count=%s&start=1' % self.page_limit
+		self.views_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=100,&release_date=,date[0]&sort=num_votes,desc&count=%s&start=1' % self.page_limit
+		self.person_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&release_date=,date[0]&role=%s&sort=year,desc&count=%s&start=1' % ('%s', self.page_limit)
+		self.genre_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=3000,&release_date=,date[0]&genres=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.keyword_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&release_date=,date[0]&keywords=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.language_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=100,&production_status=released&primary_language=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.certification_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&release_date=,date[0]&certificates=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
 		self.imdbwatchlist_link = 'https://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user # only used to get users watchlist ID
 		self.imdbwatchlist2_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=tvSeries,tvMiniSeries&start=1' % ('%s', self.imdb_sort(type='shows.watchlist'))
 		self.imdblists_link = 'https://www.imdb.com/user/ur%s/lists?tab=all&sort=mdfd&order=desc&filter=titles' % self.imdb_user
 		self.imdblist_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=tvSeries,tvMiniSeries&start=1' % ('%s', self.imdb_sort())
 		self.imdbratings_link = 'https://www.imdb.com/user/ur%s/ratings?sort=your_rating,desc&mode=detail&start=1' % self.imdb_user # IMDb ratings does not take title_type so filter in imdb_list() function
-		self.anime_link = 'https://www.imdb.com/search/keyword?keywords=anime&title_type=tvSeries,miniSeries&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
-
+		self.anime_link = 'https://www.imdb.com/search/keyword/?keywords=anime&title_type=tvSeries,miniSeries&release_date=,date[0]&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
 		self.trakt_user = control.setting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.trakt_link = 'https://api.trakt.tv'
@@ -179,6 +178,8 @@ class TVshows:
 				self.list = cache.get(self.trakt_public_list, 168, url)
 			elif '/trending' in url:
 				self.list = cache.get(self.trakt_public_list, 48, url)
+			else:
+				self.list = cache.get(self.trakt_public_list, 24, url)
 			if self.list is None: self.list = []
 			if create_directory: self.addDirectory(self.list)
 			return self.list
@@ -413,21 +414,16 @@ class TVshows:
 
 	def certifications(self):
 		certificates = [
-			('Child Audience (TV-Y)', 'TV-Y'),
-			('Young Audience (TV-Y7)', 'TV-Y7'),
-			('General Audience (TV-G)', 'TV-G'),
-			('Parental Guidance (TV-PG)', 'TV-PG'),
-			('Youth Audience (TV-14)', 'TV-13', 'TV-14'),
-			('Mature Audience (TV-MA)', 'TV-MA')]
+			('Child Audience (TV-Y)', 'US%3ATV-Y'),
+			('Young Audience (TV-Y7)', 'US%3ATV-Y7'),
+			('General Audience (TV-G)', 'US%3ATV-G'),
+			('Parental Guidance (TV-PG)', 'US%3ATV-PG'),
+			('Youth Audience (TV-14)', 'US%3ATV-14'),
+			('Mature Audience (TV-MA)', 'US%3ATV-MA')]
 		for i in certificates:
-			self.list.append({'content': 'tags', 'name': str(i[0]), 'url': self.certification_link % self.certificatesFormat(i[1]), 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'tvshows'})
+			self.list.append({'content': 'tags', 'name': str(i[0]), 'url': self.certification_link % i[1], 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'tvshows'})
 		self.addDirectory(self.list)
 		return self.list
-
-	def certificatesFormat(self, certificates):
-		base = 'US%3A'
-		if not isinstance(certificates, (tuple, list)): certificates = [certificates]
-		return ','.join([base + i.upper() for i in certificates])
 
 	def tvshowsListToLibrary(self, url):
 		url = getattr(self, url + '_link')
@@ -580,7 +576,7 @@ class TVshows:
 			q = (urlencode(q)).replace('%2C', ',')
 			next = url.replace('?' + urlparse(url).query, '') + '?' + q
 		except: next = ''
-		for item in items:
+		for item in items: # rating and votes via TMDb, or I must use `extended=full and it slows down
 			try:
 				values = {}
 				values['next'] = next 
@@ -696,6 +692,7 @@ class TVshows:
 
 		for item in items:
 			try:
+				if item.get('type', '') == 'officiallist': continue #seems bugy so until Justin replies hold off
 				list_item = item.get('list', {})
 				list_name = list_item.get('name', '')
 				list_id = list_item.get('ids', {}).get('trakt', '')
@@ -704,7 +701,9 @@ class TVshows:
 				if list_item.get('privacy', '') == 'private': continue
 				list_url = self.traktlist_link % (list_owner_slug, list_id)
 				list_content = traktsync.fetch_public_list(list_id)
-				if not list_content or list_content.get('content_type', '') == 'movies': continue
+				if not list_content: pass
+				else: 
+					if list_content.get('content_type', '') == 'movies': continue
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
 				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'trakt.png', 'action': 'tvshows'})
 			except:
@@ -753,7 +752,26 @@ class TVshows:
 				imdb = re.findall(r'(tt\d*)', imdb)[0]
 				if imdb in dupes: raise Exception()
 				dupes.append(imdb)
-				list.append({'title': title, 'tvshowtitle': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '', 'tvdb': '', 'next': next}) # just let super_info() TMDb request provide the meta and pass min to retrieve it
+				rating = votes = ''
+				try:
+					rating = client.parseDOM(item, 'div', attrs = {'class': 'ratings-bar'})
+					rating = client.parseDOM(rating, 'strong')[0]
+				except:
+					try:
+						rating = client.parseDOM(item, 'span', attrs = {'class': 'rating-rating'})
+						rating = client.parseDOM(rating, 'span', attrs = {'class': 'value'})[0]
+					except:
+						try: rating = client.parseDOM(item, 'div', ret='data-value', attrs = {'class': '.*?imdb-rating'})[0] 
+						except:
+							try: rating = client.parseDOM(item, 'span', attrs = {'class': 'ipl-rating-star__rating'})[0]
+							except: rating = ''
+				try: votes = client.parseDOM(item, 'span', attrs = {'name': 'nv'})[0]
+				except:
+					try: votes = client.parseDOM(item, 'div', ret='title', attrs = {'class': '.*?rating-list'})[0]
+					except:
+						try: votes = re.findall(r'\((.+?) vote(?:s|)\)', votes)[0]
+						except: votes = ''
+				list.append({'title': title, 'tvshowtitle': title, 'originaltitle': title, 'year': year, 'imdb': imdb, 'tmdb': '', 'tvdb': '', 'rating': rating, 'votes': votes, 'next': next})
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
@@ -815,7 +833,7 @@ class TVshows:
 			for r in range(0, total, 40):
 				threads = []
 				for i in range(r, r + 40):
-					if i < total: threads.append(workers.Thread(self.super_info, i))
+					if i < total: threads.append(Thread(target=self.super_info, args=(i,)))
 				[i.start() for i in threads]
 				[i.join() for i in threads]
 			if self.meta:
@@ -833,7 +851,7 @@ class TVshows:
 #### -- Missing id's lookup -- ####
 			trakt_ids = None
 			if (not tmdb or not tvdb) and imdb: trakt_ids = trakt.IdLookup('imdb', imdb, 'show')
-			if (not tmdb or not imdb) and tvdb: trakt_ids = trakt.IdLookup('tvdb', tvdb, 'show')
+			elif (not tmdb or not imdb) and tvdb: trakt_ids = trakt.IdLookup('tvdb', tvdb, 'show')
 			if trakt_ids:
 				if not imdb: imdb = str(trakt_ids.get('imdb', '')) if trakt_ids.get('imdb') else ''
 				if not tmdb: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
@@ -856,11 +874,14 @@ class TVshows:
 			if not tmdb:
 				if control.setting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
-				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % self.list[i]['title'], __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
+				log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (self.list[i]['title'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 			showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 			if not showSeasons: return
 			values = {}
 			values.update(showSeasons)
+			if 'rating' in self.list[i] and self.list[i]['rating']: values['rating'] = self.list[i]['rating'] # prefer imdb,trakt rating and votes if set
+			if 'votes' in self.list[i] and self.list[i]['votes']: values['votes'] = self.list[i]['votes']
+			if 'year' in self.list[i] and self.list[i]['year'] != values.get('year'): values['year'] = self.list[i]['year']
 			if not tvdb: tvdb = values.get('tvdb', '')
 			if not values.get('imdb'): values['imdb'] = imdb
 			if not values.get('tmdb'): values['tmdb'] = tmdb
@@ -1043,7 +1064,6 @@ class TVshows:
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
-
 				cm = []
 				if (i.get('list_type', '') == 'traktPulicList') and self.traktCredentials:
 					liked = traktsync.fetch_liked_list(i['list_id'])

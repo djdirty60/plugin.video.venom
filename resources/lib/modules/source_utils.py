@@ -61,7 +61,9 @@ def seas_ep_filter(season, episode, release_title, split=False):
 				r'(s<<S>>e<<E1>>\.<<E2>>\.)|' \
 				r'(s<<S>>e<<E1>><<E2>>)'
 		string5 = r'(?<![a-z])(ep<<E>>[.-])|' \
+				r'(?<![a-z])(e<<E>>[.-])|' \
 				r'(?<![a-z])(ep[.-]<<E>>[.-])'
+
 		# string1 = r'(s<<S>>[.-]?e[p]?<<E>>)'
 		# string4 = r'(s<<S>>e<<E1>>[.-]?e?<<E2>>[.-])'
 		# string5 = r'(?<![a-z])(ep[.-]?<<E>>[.-])'

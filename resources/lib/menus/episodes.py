@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
 from sys import argv
+from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, fanarttv_cache, traktsync
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
@@ -17,7 +18,6 @@ from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverl
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
-from resources.lib.modules import workers
 
 
 class Episodes:
@@ -69,7 +69,7 @@ class Episodes:
 				try:
 					for i in showSeasons['seasons']:
 						if not self.showspecials and i['season_number'] == 0: continue
-						threads.append(workers.Thread(get_episodes, tvshowtitle, imdb, tmdb, tvdb, meta, i['season_number']))
+						threads.append(Thread(target=get_episodes, args=(tvshowtitle, imdb, tmdb, tvdb, meta, i['season_number'])))
 					[i.start() for i in threads]
 					[i.join() for i in threads]
 					self.list = sorted(all_episodes, key=lambda k: (k['season'], k['episode']), reverse=False)
@@ -317,7 +317,7 @@ class Episodes:
 			except:
 				if control.setting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
-				log_utils.log('tvshowtitle: (%s) missing tmdb_id' % tvshowtitle, __name__, log_utils.LOGDEBUG) # log TMDb does not have show
+				log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 		seasonEpisodes = cache.get(tmdb_indexer.TVshows().get_seasonEpisodes_meta, 96, tmdb, season)
 		if not seasonEpisodes: return
 		if not isinstance(meta, dict): showSeasons = jsloads(meta)
@@ -454,7 +454,7 @@ class Episodes:
 					values['tmdb'] = str(result.get('id', '')) if result.get('id') else ''
 				except:
 					from resources.lib.modules import log_utils
-					log_utils.log('tvshowtitle: (%s) missing tmdb_id' % i['tvshowtitle'], __name__, log_utils.LOGDEBUG) # log TMDb does not have show
+					log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (i['tvshowtitle'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 					return
 			try:
 				showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
@@ -519,7 +519,7 @@ class Episodes:
 				log_utils.error()
 		threads = []
 		for i in items:
-			threads.append(workers.Thread(items_list, i))
+			threads.append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		return self.list
@@ -636,7 +636,7 @@ class Episodes:
 				log_utils.error()
 		threads = []
 		for i in items:
-			threads.append(workers.Thread(items_list, i))
+			threads.append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		return self.list
@@ -769,7 +769,7 @@ class Episodes:
 			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		traktManagerMenu, playlistManagerMenu, queueMenu = control.lang(32070), control.lang(35522), control.lang(32065)
 		tvshowBrowserMenu, addToLibrary = control.lang(32071), control.lang(32551)
-		clearSourcesMenu, rescrapeMenu, rescrapeAllMenu  = control.lang(32611), control.lang(32185), control.lang(32193)
+		clearSourcesMenu, rescrapeMenu, rescrapeAllMenu, progressRefreshMenu = control.lang(32611), control.lang(32185), control.lang(32193), control.lang(32194)
 		for i in items:
 			try:
 				tvshowtitle, title, imdb, tmdb, tvdb = i.get('tvshowtitle'), i.get('title'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', '')
@@ -787,7 +787,7 @@ class Episodes:
 				if i.get('traktHistory') is True:
 					try:
 						air_datetime = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
-						if air_datetime[12] == '0': air_datetime = air_datetime[:12] + '' + air_datetime[13:]
+						if air_datetime[12] == '0': air_datetime = air_datetime[:12] + air_datetime[13:]
 						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
 					except: pass
 				if upcoming_prependDate and i.get('traktUpcomingProgress') is True:
@@ -795,8 +795,8 @@ class Episodes:
 						if premiered and i.get('airtime'): combined='%sT%s' % (premiered, i.get('airtime', ''))
 						else: raise Exception()
 						air_datetime = tools.Time.convert(stringTime=combined, zoneFrom=i.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%b %d %I:%M %p')
-						if air_datetime[7] == '0': air_datetime = air_datetime[:7] + '' + air_datetime[8:]
-						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
+						if air_datetime[7] == '0': air_datetime = air_datetime[:7] + air_datetime[8:]
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(':00 ', ''))
 					except: pass
 				systitle, systvshowtitle, syspremiered = quote_plus(title), quote_plus(tvshowtitle), quote_plus(premiered)
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
@@ -869,14 +869,8 @@ class Episodes:
 										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)
 				sysurl = quote_plus(url)
 				Folderurl = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s&art=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode, sysart)
-
-
-
 				if traktProgress:
-					cm.append(('Refresh Progress List', 'RunPlugin(%s?action=episodes_clrProgressCache&url=progress)' % sysaddon))
-
-
-
+					cm.append((progressRefreshMenu, 'RunPlugin(%s?action=episodes_clrProgressCache&url=progress)' % sysaddon))
 				if isFolder:
 					if traktProgress:
 						cm.append((progressMenu, 'PlayMedia(%s)' % url))
@@ -942,8 +936,6 @@ class Episodes:
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
-				# if not traktProgress or not isMultiList:
-					# if playlistcreate: control.playlist.add(url=url, listitem=item)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
