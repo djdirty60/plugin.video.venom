@@ -13,6 +13,7 @@ class TextViewerXML(BaseDialog):
 	def onInit(self):
 		super(TextViewerXML, self).onInit()
 		self.set_properties()
+		self.setFocusId(self.window_id)
 
 	def run(self):
 		self.doModal()

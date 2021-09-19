@@ -35,7 +35,7 @@ class Navigator:
 		if downloads: self.addDirectoryItem(32009, 'downloadNavigator', 'downloads.png', 'DefaultFolder.png')
 		if control.getMenuEnabled('navi.prem.services'): self.addDirectoryItem('Premium Services', 'premiumNavigator', 'premium.png', 'DefaultFolder.png')
 		if control.getMenuEnabled('navi.news'): self.addDirectoryItem(32013, 'tools_ShowNews', 'icon.png', 'DefaultAddonHelper.png', isFolder=False)
-		if control.getMenuEnabled('navi.changelog'): self.addDirectoryItem(32014, 'tools_ShowChangelog', 'icon.png', 'DefaultAddonHelper.png', isFolder=False)
+		if control.getMenuEnabled('navi.changelog'): self.addDirectoryItem(32014, 'tools_ShowChangelog&name=Venom', 'icon.png', 'DefaultAddonHelper.png', isFolder=False)
 		self.endDirectory()
 
 	def furk(self):
@@ -197,6 +197,19 @@ class Navigator:
 		self.addDirectoryItem(32002, 'anime_TVshows&url=anime', 'tvshows.png', 'DefaultTVShows.png')
 		self.endDirectory()
 
+	def traktSearchLists(self, media_type):
+		k = control.keyboard('', control.lang(32010))
+		k.doModal()
+		q = k.getText() if k.isConfirmed() else None
+		if not q: return control.closeAll()
+		page_limit = control.setting('page.item.limit')
+		url = 'https://api.trakt.tv/search/list?limit=%s&page=1&query=' % page_limit + quote_plus(q)
+		control.closeAll()
+		if media_type == 'movies':
+			control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=movies_PublicLists&url=%s,return)' % (quote_plus(url)))
+		else:
+			control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=tv_PublicLists&url=%s,return)' % (quote_plus(url)))
+
 	def tools(self):
 		if self.traktCredentials: self.addDirectoryItem(35057, 'tools_traktToolsNavigator', 'tools.png', 'DefaultAddonService.png', isFolder=True)
 		self.addDirectoryItem(32510, 'cache_Navigator', 'tools.png', 'DefaultAddonService.png', isFolder=True)
@@ -204,6 +217,7 @@ class Navigator:
 		self.addDirectoryItem(32506, 'tools_contextVenomSettings', 'icon.png', 'DefaultAddonProgram.png', isFolder=False)
 		#-- Providers - 4
 		self.addDirectoryItem(32651, 'tools_fenomscrapersSettings', 'fenomscrapers.png', 'DefaultAddonService.png', isFolder=False)
+		self.addDirectoryItem(32523, 'tools_loggingNavigator', 'tools.png', 'DefaultAddonService.png')
 		self.addDirectoryItem(32083, 'tools_cleanSettings', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
 		#-- General - 0
 		self.addDirectoryItem(32043, 'tools_openSettings&query=0.0', 'tools.png', 'DefaultAddonService.png', isFolder=False)
@@ -234,18 +248,18 @@ class Navigator:
 		self.addDirectoryItem(35066, 'tools_forceTraktSync', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.endDirectory()
 
-	def traktSearchLists(self, media_type):
-		k = control.keyboard('', control.lang(32010))
-		k.doModal()
-		q = k.getText() if k.isConfirmed() else None
-		if not q: return control.closeAll()
-		page_limit = control.setting('page.item.limit')
-		url = 'https://api.trakt.tv/search/list?limit=%s&page=1&query=' % page_limit + quote_plus(q)
-		control.closeAll()
-		if media_type == 'movies':
-			control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=movies_PublicLists&url=%s,return)' % (quote_plus(url)))
-		else:
-			control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=tv_PublicLists&url=%s,return)' % (quote_plus(url)))
+	def loggingNavigator(self):
+		self.addDirectoryItem(32524, 'tools_viewLogFile&name=Venom', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32525, 'tools_clearLogFile', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32526, 'tools_ShowChangelog&name=Venom', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32527, 'tools_uploadLogFile&name=Venom', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32528, 'tools_viewLogFile&name=MyAccounts', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32529, 'tools_ShowChangelog&name=MyAccounts', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32530, 'tools_viewLogFile&name=FenomScrapers', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32531, 'tools_ShowChangelog&name=FenomScrapers', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32532, 'tools_viewLogFile&name=Kodi', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.addDirectoryItem(32198, 'tools_uploadLogFile&name=Kodi', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
+		self.endDirectory()
 
 	def cf(self):
 		self.addDirectoryItem(32610, 'cache_clearAll', 'tools.png', 'DefaultAddonService.png', isFolder=False)

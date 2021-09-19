@@ -342,10 +342,27 @@ class RealDebrid:
 		except:
 			log_utils.error('Real-Debrid Error: DELETE DOWNLOAD %s : ' % name)
 
-	def check_cache_list(self, hashList):
+	# @timeIt
+	# def check_cache_list(self, hashList):
+		# if isinstance(hashList, list):
+			# hashList = [hashList[x : x + 100] for x in range(0, len(hashList), 100)]
+			# ck_token = self._get('user', token_ck=True) # check token, and refresh if needed, before blasting threads at it
+			# threads = []
+			# for section in hashList:
+				# threads.append(Thread(target=self.check_hash_thread, args=(section,)))
+			# [i.start() for i in threads]
+			# [i.join() for i in threads]
+			# return self.cache_check_results
+		# else:
+			# hashString = "/" + hashList
+			# return self._get("torrents/instantAvailability" + hashString)
+
+	# @timeIt
+	def check_cache_list(self, hashList): # this method avoids the user call and uses the last hash list item
 		if isinstance(hashList, list):
 			hashList = [hashList[x : x + 100] for x in range(0, len(hashList), 100)]
-			ck_token = self._get('user', token_ck=True) # check token, and refresh if needed, before blasting threads at it
+			lastHash = hashList.pop(-1)
+			self.check_hash_thread(lastHash) # check lastHash list, and refresh if needed, before blasting threads at it
 			threads = []
 			for section in hashList:
 				threads.append(Thread(target=self.check_hash_thread, args=(section,)))
@@ -580,7 +597,7 @@ class RealDebrid:
 					video = max(video_files, key=lambda x: x['bytes'])
 					file_id = video['id']
 				except ValueError: return _return_failed()
-				self.add_torrent_select(torrent_id,str(file_id))
+				self.add_torrent_select(torrent_id, str(file_id))
 			control.sleep(2000)
 			torrent_info = self.torrent_info(torrent_id)
 			status = torrent_info['status']

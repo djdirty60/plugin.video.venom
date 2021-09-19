@@ -14,6 +14,7 @@ class BaseDialog(WindowXMLDialog):
 		self.selection_actions = [7, 100]
 		self.context_actions = [101, 117]
 		self.info_actions = [11,]
+		# self.updn_actions = [5, 6]
 
 	def make_listitem(self):
 		return ListItem()

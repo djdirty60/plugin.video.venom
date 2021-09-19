@@ -807,23 +807,19 @@ msgid "Prioritize HDR and Dolby-Vision to top"
 msgstr ""
 
 msgctxt "#32196"
-msgid ""
-msgstr ""
-
-msgctxt "#32196"
-msgid ""
+msgid "Venom log file uploaded to:"
 msgstr ""
 
 msgctxt "#32197"
-msgid ""
+msgid "Write Venom log in reverse order"
 msgstr ""
 
 msgctxt "#32198"
-msgid ""
+msgid "[B]Kodi - Upload log file to pastebin[/B]"
 msgstr ""
 
 msgctxt "#32199"
-msgid ""
+msgid "Kodi log file uploaded to:"
 msgstr ""
 
 msgctxt "#32200"
@@ -1726,43 +1722,43 @@ msgid "Remove from [B]%s[/B]"
 msgstr ""
 
 msgctxt "#32523"
-msgid ""
+msgid "[B]Logging Tools[/B]"
 msgstr ""
 
 msgctxt "#32524"
-msgid ""
+msgid "[B]Venom - View Log File[/B]"
 msgstr ""
 
 msgctxt "#32525"
-msgid ""
+msgid "[B]Venom - Clear Log File[/B]"
 msgstr ""
 
 msgctxt "#32526
-msgid ""
+msgid "[B]Venom - Show Changelog[/B]"
 msgstr ""
 
 msgctxt "#32527"
-msgid ""
+msgid "[B]Venom - Upload log file to pastebin[/B]"
 msgstr ""
 
 msgctxt "#32528"
-msgid ""
+msgid "[B]My Accounts - View Log File[/B]"
 msgstr ""
 
 msgctxt "#32529"
-msgid ""
+msgid "[B]My Accounts - Show Changelog[/B]"
 msgstr ""
 
 msgctxt "#32530"
-msgid ""
+msgid "[B]FenomScrapers - View Log File[/B]"
 msgstr ""
 
 msgctxt "#32531"
-msgid ""
+msgid "[B]FenomScrapers - Show Changelog[/B]"
 msgstr ""
 
 msgctxt "#32532"
-msgid ""
+msgid "[B]View Kodi Log File[/B]"
 msgstr ""
 
 msgctxt "#32533"

@@ -378,6 +378,11 @@ def refresh_libPath(): # for venom global CM library actions
 	homeWindow.setProperty('venom.movieLib.path', transPath(setting('library.movie')))
 	homeWindow.setProperty('venom.tvLib.path', transPath(setting('library.tv')))
 
+def refresh_debugReversed(): # called from service "onSettingsChanged" to clear venom.log if setting to reverse has been changed
+	if homeWindow.getProperty('venom.debug.reversed') != setting('debug.reversed'):
+		homeWindow.setProperty('venom.debug.reversed', setting('debug.reversed'))
+		execute('RunPlugin(plugin://plugin.video.venom/?action=tools_clearLogFile)')
+
 def datetime_workaround(string_date, format="%Y-%m-%d", date_only=True):
 	sleep(200)
 	try:

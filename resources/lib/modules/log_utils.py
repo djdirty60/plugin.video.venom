@@ -47,10 +47,18 @@ def log(msg, caller=None, level=LOGINFO):
 			if not existsPath(log_file):
 				f = open(log_file, 'w')
 				f.close()
-			with open(log_file, 'a', encoding='utf-8') as f:
-				line = '[%s %s] %s: %s' % (datetime.now().date(), str(datetime.now().time())[:8], DEBUGPREFIX % debug_list[level], msg)
-				f.write(line.rstrip('\r\n') + '\n')
-				# f.writelines([line1, line2]) ## maybe an option for the 2 lines without using "\n"
+			reverse_log = getSetting('debug.reversed') == 'true'
+			if not reverse_log:
+				with open(log_file, 'a', encoding='utf-8') as f:  # with auto cleans up and closes
+					line = '[%s %s] %s: %s' % (datetime.now().date(), str(datetime.now().time())[:8], DEBUGPREFIX % debug_list[level], msg)
+					f.write(line.rstrip('\r\n') + '\n')
+					# f.writelines([line1, line2]) ## maybe an option for the 2 lines without using "\n"
+			else:
+				with open(log_file, 'r+', encoding='utf-8') as f:
+					line = '[%s %s] %s: %s' % (datetime.now().date(), str(datetime.now().time())[:8], DEBUGPREFIX % debug_list[level], msg)
+					log_file = f.read()
+					f.seek(0, 0)
+					f.write(line.rstrip('\r\n') + '\n' + log_file)
 		else:
 			import xbmc
 			xbmc.log('%s: %s' % (DEBUGPREFIX % debug_list[level], msg), level)
@@ -88,6 +96,8 @@ def error(message=None, exception=True):
 def clear_logFile():
 	cleared = False
 	try:
+		from resources.lib.modules.control import yesnoDialog
+		if not yesnoDialog(lang(32056), '', ''): return 'canceled'
 		log_file = joinPath(LOGPATH, 'venom.log')
 		if not existsPath(log_file):
 			f = open(log_file, 'w')
@@ -101,6 +111,61 @@ def clear_logFile():
 		xbmc.log('[ plugin.video.venom ] log_utils.clear_logFile() Failure: %s' % (e), LOGERROR)
 		cleared = False
 	return cleared
+
+def view_LogFile(name):
+	try:
+		from resources.lib.windows.textviewer import TextViewerXML
+		from resources.lib.modules.control import addonPath
+		log_file = joinPath(LOGPATH, '%s.log' % name.lower())
+		if not existsPath(log_file):
+			from resources.lib.modules.control import notification
+			return notification(message='Log File not found, likely logging is not enabled.')
+		f = open(log_file, 'r', encoding='utf-8', errors='ignore')
+		text = f.read()
+		f.close()
+		heading = '[B]%s -  LogFile[/B]' % name
+		windows = TextViewerXML('textviewer.xml', addonPath('plugin.video.venom'), heading=heading, text=text)
+		windows.run()
+		del windows
+	except:
+		error()
+
+def upload_LogFile(name):
+	from resources.lib.modules.control import notification
+	url = 'https://paste.kodi.tv/'
+	log_file = joinPath(LOGPATH, '%s.log' % name.lower())
+	if not existsPath(log_file):
+		return notification(message='Log File not found, likely logging is not enabled.')
+	try:
+		import requests
+		from resources.lib.modules.control import addonVersion, selectDialog, getHighlightColor
+		f = open(log_file, 'r', encoding='utf-8', errors='ignore')
+		text = f.read()
+		f.close()
+		UserAgent = 'Venom %s' % addonVersion('plugin.video.venom')
+		response = requests.post(url + 'documents', data=text.encode('utf-8', errors='ignore'), headers={'User-Agent': UserAgent})
+		# log('log_response=%s' % response)
+		if 'key' in response.json():
+			result = url + response.json()['key']
+			log('%s log file uploaded to: %s' % (name, result))
+			from sys import platform as sys_platform
+			supported_platform = any(value in sys_platform for value in ['win32', 'linux2'])
+			highlight_color = getHighlightColor()
+			list = [('[COLOR %s]url:[/COLOR]  %s' % (highlight_color, str(result)), str(result))]
+			if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % highlight_color, ' ')]
+			select = selectDialog([i[0] for i in list], lang(32196) if name.lower() == 'venom' else lang(32199))
+			if 'Copy url To Clipboard' in list[select][0]:
+				from resources.lib.modules.source_utils import copy2clip
+				copy2clip(list[select - 1][1])
+		elif 'message' in response.json():
+			notification(message='%s Log upload failed: %s' % (name, str(response.json()['message'])))
+			log('%s Log upload failed: %s' % (name, str(response.json()['message'])), level=LOGERROR)
+		else:
+			notification(message='%s Log upload failed' % name)
+			log('%s Log upload failed: %s' % (name, response.text), level=LOGERROR)
+	except:
+		error('%s log upload failed' % name)
+		notification(message='pastebin post failed: See log for more info')
 
 def normalize(msg):
 	try:

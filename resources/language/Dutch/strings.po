@@ -156,11 +156,7 @@ msgstr "Collectie"
 
 msgctxt "#32033"
 msgid "Watchlist"
-<<<<<<< HEAD
-msgstr "kijklijst"
-=======
-msgstr "Theaterkassa"
->>>>>>> matrix
+msgstr "Volglijst"
 
 msgctxt "#32034"
 msgid "IMDb"
@@ -336,11 +332,7 @@ msgstr "Het verwijderen van metacache resulteert in overmatige API verzoeken en\
 
 msgctxt "#32077"
 msgid "This wipes your cache, metacache, search, and providers database.  All meta must be fetched from scratch, resulting in excessive api requests and system slow down.  Best to only use this unless ABSOLUTELY necessary.[CR]Are you sure?"
-<<<<<<< HEAD
 msgstr "Hiermee worden uw cache, metacache, zoek en providers database gewist. Alle meta moet helemaal opnieuw worden opgehaald, wat resulteert in buitensporige API verzoeken en systeemvertragingen. Het is het beste om dit alleen te gebruiken tenzij het ABSOLUUT noodzakelijk is. [CR]Weet je het zeker?"
-=======
-msgstr "Hiermee worden uw cache-, metacache-, zoek- en providers database gewist. Alle meta moet helemaal opnieuw worden opgehaald, wat resulteert in buitensporige API-verzoeken en systeemvertragingen. Het is het beste om dit alleen te gebruiken tenzij het ABSOLUUT noodzakelijk is. [CR]Weet je het zeker?"
->>>>>>> matrix
 
 msgctxt "#32078"
 msgid "Show general notifications"
@@ -424,11 +416,7 @@ msgstr "Scrobbling inschakelen"
 
 msgctxt "#32098"
 msgid "NOTE: Do Not enable this if you scrobble through the Trakt add-on.[CR]Also note that only scrobble on Stop currently works."
-<<<<<<< HEAD
 msgstr "OPMERKING: Schakel dit niet in als u door de Trakt addon scrobble. [CR]Houd er ook rekening mee dat momenteel alleen scrobble op Stop werkt."
-=======
-msgstr "OPMERKING: Schakel dit niet in als u door de Trakt add-on scrobble. [CR]Houd er ook rekening mee dat momenteel alleen scrobble op Stop werkt."
->>>>>>> matrix
 
 msgctxt "#32099"
 msgid "Show notification on scrobble"
@@ -819,24 +807,20 @@ msgid "Prioritize HDR and Dolby-Vision to top"
 msgstr "Geef prioriteit aan HDR en Dolby-Vision naar boven"
 
 msgctxt "#32196"
-msgid ""
-msgstr ""
-
-msgctxt "#32196"
-msgid ""
-msgstr ""
+msgid "Venom log file uploaded to:"
+msgstr "Venom-logbestand geüpload naar:"
 
 msgctxt "#32197"
-msgid ""
-msgstr ""
+msgid "Write Venom log in reverse order"
+msgstr "Schrijf Venom-log in omgekeerde volgorde"
 
 msgctxt "#32198"
-msgid ""
-msgstr ""
+msgid "[B]Kodi - Upload log file to pastebin[/B]"
+msgstr "[B]Kodi - Upload logbestand naar pastebin[/B]"
 
 msgctxt "#32199"
-msgid ""
-msgstr ""
+msgid "Kodi log file uploaded to:"
+msgstr "Kodi-logbestand geüpload naar:"
 
 msgctxt "#32200"
 msgid ""
@@ -1738,44 +1722,44 @@ msgid "Remove from [B]%s[/B]"
 msgstr "Verwijderen van [B]%s[/B]"
 
 msgctxt "#32523"
-msgid ""
-msgstr ""
+msgid "[B]Logging Tools[/B]"
+msgstr "[B]Hulpmiddelen voor logboekregistratie[/B]"
 
 msgctxt "#32524"
-msgid ""
-msgstr ""
+msgid "[B]Venom - View Log File[/B]"
+msgstr "[B]Venom - Logbestand bekijken[/B]"
 
 msgctxt "#32525"
-msgid ""
-msgstr ""
+msgid "[B]Venom - Clear Log File[/B]"
+msgstr "[B]Venom - Logbestand wissen[/B]"
 
 msgctxt "#32526
-msgid ""
-msgstr ""
+msgid "[B]Venom - Show Changelog[/B]"
+msgstr "[B]Venom - Changelog weergeven[/B]"
 
 msgctxt "#32527"
-msgid ""
-msgstr ""
+msgid "[B]Venom - Upload log file to hastebin[/B]"
+msgstr "[B]Venom - Upload logbestand naar hastebin[/BB]"
 
 msgctxt "#32528"
-msgid ""
-msgstr ""
+msgid "[B]My Accounts - View Log File[/B]"
+msgstr "[B]Mijn accounts - Logbestand bekijken[/B]"
 
 msgctxt "#32529"
-msgid ""
-msgstr ""
+msgid "[B]My Accounts - Show Changelog[/B]"
+msgstr "[B]Mijn accounts - Changelog weergeven[/B]"
 
 msgctxt "#32530"
-msgid ""
-msgstr ""
+msgid "[B]FenomScrapers - View Log File[/B]"
+msgstr "[B]FenomScrapers - Logbestand bekijken[/B]"
 
 msgctxt "#32531"
-msgid ""
-msgstr ""
+msgid "[B]FenomScrapers - Show Changelog[/B]"
+msgstr "[B]FenomScrapers - Changelog weergeven[/B]"
 
 msgctxt "#32532"
-msgid ""
-msgstr ""
+msgid "[B]View Kodi Log File[/B]"
+msgstr "[B]Kodi-logbestand bekijken[/B]"
 
 msgctxt "#32533"
 msgid ""
@@ -1887,11 +1871,7 @@ msgstr "[B]VENOM[/B]: Film map ..."
 
 msgctxt "#32560"
 msgid "[B]VENOM[/B] : TV folder..."
-<<<<<<< HEAD
-msgstr "[B]VENOM[/B]: Serie map ..."
-=======
 msgstr "[B]VENOM[/B]: Serie  map ..."
->>>>>>> matrix
 
 msgctxt "#32561"
 msgid "[B]TRAKT[/B] : Import Collection..."
@@ -3202,19 +3182,11 @@ msgid "[COLOR %s][B]Hidden Progress Manager[/B][/COLOR]"
 msgstr "[COLOR %s][B]Verborgen voortgangs manager[/B][/COLOR]"
 
 msgctxt "#35059"
-<<<<<<< HEAD
 msgid "[COLOR %s][B]Unininished Progress Manager - Movies[/B][/COLOR]"
 msgstr "[COLOR %s][B]onvoltooid voortgangs manager - Films[/B][/COLOR]"
 
 msgctxt "#35060"
-msgid "[COLOR %s][B]Unininished Progress Manager - Episodes[/B][/COLOR]"
-=======
-msgid "[COLOR %s][B]Unfinished Progress Manager - Movies[/B][/COLOR]"
-msgstr "[COLOR %s][B]onvoltooid voortgangs manager - Films[/B][/COLOR]"
-
-msgctxt "#35060"
 msgid "[COLOR %s][B]Unfinished Progress Manager - Episodes[/B][/COLOR]"
->>>>>>> matrix
 msgstr "[COLOR %s][B]onvoltooid voortgangs manager - Afleveringen[/B][/COLOR]"
 
 msgctxt "#35061"

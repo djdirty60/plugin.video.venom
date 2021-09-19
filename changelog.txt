@@ -1,4 +1,7 @@
 
+[B][COLOR red]Update - v6.2.5 - Sept. 19, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added new [B]"Logging Tools"[/B] to the current [B]"Tools"[/B] Menu. Here you can now view, clear, and upload logs to pastebin.[/I]
+
 [B][COLOR red]Update - v6.2.4 - Sept. 15, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added a new [B]"Search Trakt Lists"[/B] function to both [B]"Discover Movies"[/B] and [B]"Discover TV Shows"[/B].[/I]
 [COLOR yellow]--[/COLOR][I] Fixed IMDb query string for [B]"Discover TV Shows-Certificates-Youth Audience (TV-14)"[/B].  Previous query contained a typo so the returned list was not accurate.[/I]

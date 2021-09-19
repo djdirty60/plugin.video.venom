@@ -31,6 +31,9 @@ class CheckSettingsFile:
 class SettingsMonitor(control.monitor_class):
 	def __init__ (self):
 		control.monitor_class.__init__(self)
+		control.refresh_playAction()
+		control.refresh_libPath()
+		window.setProperty('venom.debug.reversed', control.setting('debug.reversed'))
 		control.log('[ plugin.video.venom ]  Settings Monitor Service Starting...', LOGINFO)
 
 	def onSettingsChanged(self): 	# Kodi callback when the addon settings are changed
@@ -39,6 +42,7 @@ class SettingsMonitor(control.monitor_class):
 		refreshed = control.make_settings_dict()
 		control.refresh_playAction()
 		control.refresh_libPath()
+		control.refresh_debugReversed()
 
 class SyncMyAccounts:
 	def run(self):
@@ -116,7 +120,7 @@ class VersionIsUpdateCheck:
 			isUpdate = False
 			oldVersion, isUpdate = cache.update_cache_version()
 			if isUpdate:
-				control.homeWindow.setProperty('venom.updated', 'true')
+				window.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
 				clearDB_version = '6.2.3' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))

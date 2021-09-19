@@ -11,13 +11,13 @@ def router(params):
 	id = params.get('id')
 	name = params.get('name')
 	title = params.get('title')
+	tvshowtitle = params.get('tvshowtitle')
 	year = params.get('year')
 	imdb = params.get('imdb')
 	tmdb = params.get('tmdb')
 	tvdb = params.get('tvdb')
 	season = params.get('season')
 	episode = params.get('episode')
-	tvshowtitle = params.get('tvshowtitle')
 	type = params.get('type')
 	url = params.get('url')
 	query = params.get('query')
@@ -491,9 +491,15 @@ def router(params):
 		if action == 'tools_ShowNews':
 			from resources.lib.modules import newsinfo
 			newsinfo.news()
+
+
+
 		elif action == 'tools_ShowChangelog':
 			from resources.lib.modules import changelog
-			changelog.get()
+			changelog.get(name)
+
+
+
 		elif action == 'tools_ShowHelp':
 			from resources.help import help
 			help.get(name)
@@ -512,6 +518,9 @@ def router(params):
 		elif action == 'tools_viewsNavigator':
 			from resources.lib.menus import navigator
 			navigator.Navigator().views()
+		elif action == 'tools_loggingNavigator':
+			from resources.lib.menus import navigator
+			navigator.Navigator().loggingNavigator()
 		elif action == 'tools_addView':
 			from resources.lib.modules import views
 			content = params.get('content')
@@ -571,8 +580,15 @@ def router(params):
 		elif action == 'tools_clearLogFile':
 			from resources.lib.modules import log_utils
 			cleared = log_utils.clear_logFile()
-			if cleared: control.notification(message='Venom Log File Successfully Cleared')
+			if cleared == 'canceled': return
+			elif cleared: control.notification(message='Venom Log File Successfully Cleared')
 			else: control.notification(message='Error clearing Venom Log File, see kodi.log for more info')
+		elif action == 'tools_viewLogFile':
+			from resources.lib.modules import log_utils
+			log_utils.view_LogFile(name)
+		elif action == 'tools_uploadLogFile':
+			from resources.lib.modules import log_utils
+			log_utils.upload_LogFile(name)
 		elif action == 'tools_traktLikedListManager':
 			from resources.lib.menus import movies
 			movies.Movies().likedListsManager()
