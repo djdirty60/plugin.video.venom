@@ -30,7 +30,7 @@ def router(params):
 			control.execute('RunPlugin(plugin://plugin.video.venom/?action=tools_cleanSettings)')
 			control.homeWindow.clearProperty('venom.updated')
 			from resources.lib.modules import changelog
-			changelog.get()
+			changelog.get('Venom')
 		navigator.Navigator().root()
 
 	####################################################
@@ -491,15 +491,9 @@ def router(params):
 		if action == 'tools_ShowNews':
 			from resources.lib.modules import newsinfo
 			newsinfo.news()
-
-
-
 		elif action == 'tools_ShowChangelog':
 			from resources.lib.modules import changelog
 			changelog.get(name)
-
-
-
 		elif action == 'tools_ShowHelp':
 			from resources.help import help
 			help.get(name)
