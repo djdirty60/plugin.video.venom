@@ -523,7 +523,7 @@ msgid "No TVShow lists imports found"
 msgstr "Geen import lijsten van series gevonden"
 
 msgctxt "#32125"
-msgid "Scraper Preperation"
+msgid "Scraper Preparation"
 msgstr "Scraper voorbereiding"
 
 msgctxt "#32126"
@@ -823,6 +823,18 @@ msgid "Kodi log file uploaded to:"
 msgstr "Kodi-logbestand geüpload naar:"
 
 msgctxt "#32200"
+msgid "check title"
+msgstr "controleer titel"
+
+msgctxt "#32201"
+msgid "check year"
+msgstr "controleer jaar"
+
+msgctxt "#32202"
+msgid ""
+msgstr ""
+
+msgctxt "#32203"
 msgid ""
 msgstr ""
 

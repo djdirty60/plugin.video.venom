@@ -22,11 +22,13 @@ def get(function, duration, *args):
 		key = _hash_function(function, args)
 		cache_result = cache_get(key)
 		if cache_result:
-			result = literal_eval(cache_result['value'])
+			try: result = literal_eval(cache_result['value'])
+			except: result = None
 			if _is_cache_valid(cache_result['date'], duration):
 				return result
 
 		fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
+
 		if cache_result and len(result) == 1 and fresh_result == '[]': # fix for syncSeason mark unwatched season when it's the last item remaining
 			if result[0].isdigit():
 				remove(function, *args)
@@ -43,7 +45,10 @@ def get(function, duration, *args):
 			if cache_result: return result
 			else: return None # do not cache_insert() None type, sometimes servers just down momentarily
 		else:
-			cache_insert(key, fresh_result)
+			if '404:NOT FOUND' in fresh_result:
+				cache_insert(key, None) # cache_insert() "404:NOT FOUND" cases only as None type
+				return None
+			else: cache_insert(key, fresh_result)
 			return literal_eval(fresh_result)
 	except:
 		from resources.lib.modules import log_utils

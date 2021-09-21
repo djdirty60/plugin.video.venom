@@ -161,8 +161,10 @@
 		<setting id="play.mode" type="select" label="32331" lvalues="32333|32334" default="0" />
 		<setting id="cf.disable" type="bool" label="32364" default="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disable_cloudflare)" />
-		<setting id="imdb.year.check" type="bool" label="32017" default="true" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdbYearCheck)" />
+		<setting id="imdb.meta.check" type="bool" label="32017" default="true" />
+		<setting id="imdb.title.check" type="bool" label="32200" default="true" subsetting="true" visible="eq(-1,true)" />
+		<setting id="imdb.year.check" type="bool" label="32201" default="true" subsetting="true" visible="eq(-2,true)" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=imdbMetaCheck)" />
 
 		<!-- Scraper Progress Dialog -->
 		<setting type="lsep" label="32386" />

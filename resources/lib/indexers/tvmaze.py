@@ -11,10 +11,9 @@ from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
-from resources.lib.modules import control
+from resources.lib.modules.control import notification, sleep, apiLanguage, setting as getSetting
 from resources.lib.modules import log_utils
 from resources.lib.modules import trakt
-
 
 networks_this_season = [
 			('A&E', '/networks/29/ae', 'https://i.imgur.com/xLDfHjH.png'),
@@ -207,22 +206,20 @@ originals_view_all = [
 			('Hulu', '/shows?Show[webChannel_id]=2&page=1', 'https://i.imgur.com/gvHOZgC.png'),
 			('Netflix', '/shows?Show[webChannel_id]=1&page=1', 'https://i.postimg.cc/c4vHp9wV/netflix.png')]
 
-# API calls are rate limited to allow at least 20 calls every 10 seconds per IP address
-def get_request(url):
+def get_request(url): # API calls are rate limited to allow at least 20 calls every 10 seconds per IP address
 	try:
 		try:
 			response = requests.get(url, timeout=10)
 		except requests.exceptions.SSLError:
 			response = requests.get(url, verify=False)
 	except requests.exceptions.ConnectionError:
-		return control.notification(message=32024)
+		return notification(message=32024)
 	if '200' in str(response):
 		return response.json()
-	elif 'Retry-After' in response.headers:
-		# API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME
+	elif 'Retry-After' in response.headers: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME
 		throttleTime = response.headers['Retry-After']
-		control.notification(message='TVMAZE Throttling Applied, Sleeping for %s seconds' % throttleTime)
-		control.sleep((int(throttleTime) + 0.5) * 1000)
+		notification(message='TVMAZE Throttling Applied, Sleeping for %s seconds' % throttleTime)
+		sleep((int(throttleTime) + 0.5) * 1000)
 		return get_request(url)
 	else:
 		log_utils.log('Get request failed to TVMAZE URL: %s\n                       msg : TVMAZE Response: %s' %
@@ -238,24 +235,24 @@ class tvshows:
 		self.meta = []
 		self.threads = []
 		self.type = type
-		self.lang = control.apiLanguage()['tvdb']
+		self.lang = apiLanguage()['tvdb']
 		self.notifications = notifications
 		self.base_link = 'https://api.tvmaze.com'
 		self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed=cast'
-		self.tvdb_key = control.setting('tvdb.api.key')
-		self.imdb_user = control.setting('imdb.user').replace('ur', '')
+		self.tvdb_key = getSetting('tvdb.api.key')
+		self.imdb_user = getSetting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
-		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
+		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 
 	def tvmaze_list(self, url):
 		try:
 			result = client.request(url) # not json request
 			next = ''
-			if control.setting('tvshows.networks.view') == '0':
+			if getSetting('tvshows.networks.view') == '0':
 				result = client.parseDOM(result, 'section', attrs = {'id': 'this-seasons-shows'})
 				items = client.parseDOM(result, 'span', attrs = {'class': 'title .*'})
 				list_count = 60
-			if control.setting('tvshows.networks.view') == '1':
+			if getSetting('tvshows.networks.view') == '1':
 				result = client.parseDOM(result, 'div', attrs = {'id': 'w1'})
 				items = client.parseDOM(result, 'span', attrs = {'class': 'title'})
 				list_count = 25

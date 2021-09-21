@@ -32,22 +32,36 @@ def get_request(url):
 		except requests.exceptions.SSLError:
 			response = session.get(url, verify=False)
 	except requests.exceptions.ConnectionError:
-		return notification(message=32024)
-	if '200' in str(response): return response.json()
-	elif 'Retry-After' in response.headers: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
-		throttleTime = response.headers['Retry-After']
-		notification(message='TMDb Throttling Applied, Sleeping for %s seconds' % throttleTime)
-		sleep((int(throttleTime) + 1) * 1000)
-		return get_request(url)
-	else:
-		if getSetting('debug.level') != '1': return None
+		notification(message=32024)
 		from resources.lib.modules import log_utils
-		log_utils.log('Get request failed to TMDB URL: %s\n                       msg : TMDB Response: %s' %
-			(url, response.text), __name__, log_utils.LOGDEBUG)
+		log_utils.error()
+		return None
+	try:
+		if response.status_code in [200, 201]: return response.json()
+		elif response.status_code == 404:
+			if getSetting('debug.level') == '1':
+				from resources.lib.modules import log_utils
+				log_utils.log('TMDb get_request() failed: (404:NOT FOUND) - URL: %s' % url, level=log_utils.LOGDEBUG)
+			return '404:NOT FOUND'
+		elif 'Retry-After' in response.headers: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
+			throttleTime = response.headers['Retry-After']
+			notification(message='TMDb Throttling Applied, Sleeping for %s seconds' % throttleTime)
+			sleep((int(throttleTime) + 1) * 1000)
+			return get_request(url)
+		else:
+			if getSetting('debug.level') == '1':
+				from resources.lib.modules import log_utils
+				log_utils.log('TMDb get_request() failed: URL: %s\n                       msg : TMDB Response: %s' % (url, response.text), __name__, log_utils.LOGDEBUG)
+			return None
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+		return None
 
 def userlists(url):
 	try:
 		result = get_request(url % API_key)
+		if '404:NOT FOUND' in result: return result
 		items = result['results']
 		next = '' ; list = []
 	except: return
@@ -99,6 +113,7 @@ class Movies:
 	def tmdb_list(self, url):
 		try:
 			result = get_request(url % API_key)
+			if '404:NOT FOUND' in result: return result
 			items = result['results']
 		except: return
 		self.list = [] ; sortList = []
@@ -160,6 +175,7 @@ class Movies:
 	def tmdb_collections_list(self, url):
 		try:
 			result = get_request(url)
+			if '404:NOT FOUND' in result: return result
 			if '/collection/' in url: items = result['parts']
 			elif '/3/' in url: items = result['items']
 			else: items = result['results']
@@ -223,7 +239,7 @@ class Movies:
 		try:
 			result = None
 			if tmdb: result = get_request(self.movie_link % tmdb)
-			if not result:
+			if not result or ('404:NOT FOUND' in result):
 				if imdb: result = get_request(self.movie_link % imdb)
 		except:
 			from resources.lib.modules import log_utils
@@ -234,6 +250,7 @@ class Movies:
 		if not tmdb and not imdb: return
 		try:
 			result = self.get_movie_request(tmdb, imdb)
+			if '404:NOT FOUND' in result: return result
 			if not result: return
 			meta = {}
 		except:
@@ -305,6 +322,7 @@ class Movies:
 		if not tmdb: return None
 		url = self.art_link % tmdb
 		art3 = get_request(url)
+		if '404:NOT FOUND' in art3: return art3
 		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
@@ -347,9 +365,8 @@ class Movies:
 		try:
 			result = None
 			if tmdb: result = get_request(self.external_ids % tmdb)
-			if not result:
+			if not result or ('404:NOT FOUND' in result):
 				if imdb: result = get_request(self.external_ids % imdb)
-			return result
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -362,7 +379,9 @@ class Movies:
 			find_url = base_link + 'find/%s?api_key=%s&external_source=%s'
 			if imdb and imdb.startswith('tt'): # trakt has some bad data with url's in ids
 				url = find_url % (imdb, API_key, 'imdb_id')
-				try: result = get_request(url)['movie_results'][0]
+				result = get_request(url)
+				if '404:NOT FOUND' in result: return result
+				try: result = result['movie_results'][0]
 				except: return None
 		except:
 			from resources.lib.modules import log_utils
@@ -389,6 +408,7 @@ class TVshows:
 		if not url: return
 		try:
 			result = get_request(url % API_key)
+			if '404:NOT FOUND' in result: return result
 			items = result['results']
 		except: return
 		self.list = [] ; sortList = []
@@ -450,6 +470,7 @@ class TVshows:
 		if not url: return
 		try:
 			result = get_request(url)
+			if '404:NOT FOUND' in result: return result
 			if '/collection/' in url: items = result['parts']
 			elif '/3/' in url: items = result['items']
 			else: items = result['results']
@@ -522,6 +543,7 @@ class TVshows:
 		if not tmdb: return None
 		try:
 			result = self.get_show_request(tmdb)
+			if '404:NOT FOUND' in result: return result
 			if not result: return
 			meta = {}
 		except:
@@ -618,6 +640,7 @@ class TVshows:
 		try:
 			if not tmdb: return None
 			result = self.get_season_request(tmdb, season)
+			if '404:NOT FOUND' in result: return result
 			if not result: return
 			meta = {}
 		except:
@@ -689,6 +712,7 @@ class TVshows:
 		if not tmdb: return None
 		url = self.art_link % tmdb
 		art3 = get_request(url)
+		if '404:NOT FOUND' in art3: return art3
 		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
@@ -746,10 +770,12 @@ class TVshows:
 				url = find_url % (imdb, API_key, 'imdb_id')
 				try: result = get_request(url)['tv_results'][0]
 				except: pass
-			if tvdb and not result:
+			if tvdb and (not result or '404:NOT FOUND' in result):
 				url = find_url % (tvdb, API_key, 'tvdb_id')
-				try: result = get_request(url)['tv_results'][0]
-				except: return None
+				result = get_request(url)
+				if '404:NOT FOUND' in result: return result
+				try: result = result['tv_results'][0]
+				except: pass
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

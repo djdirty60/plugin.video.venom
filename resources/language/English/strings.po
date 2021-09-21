@@ -91,7 +91,7 @@ msgid "Browse Progress"
 msgstr ""
 
 msgctxt "#32017"
-msgid "check IMDb year for Movies"
+msgid "check IMDb Movie meta"
 msgstr ""
 
 msgctxt "#32018"
@@ -523,7 +523,7 @@ msgid "No TVShow lists imports found"
 msgstr ""
 
 msgctxt "#32125"
-msgid "Scraper Preperation"
+msgid "Scraper Preparation"
 msgstr ""
 
 msgctxt "#32126"
@@ -823,6 +823,18 @@ msgid "Kodi log file uploaded to:"
 msgstr ""
 
 msgctxt "#32200"
+msgid "check title"
+msgstr ""
+
+msgctxt "#32201"
+msgid "check year"
+msgstr ""
+
+msgctxt "#32202"
+msgid ""
+msgstr ""
+
+msgctxt "#32203"
 msgid ""
 msgstr ""
 

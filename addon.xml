@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.2.6">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.2.7">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,9 +32,11 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.2.6 - Sept. 19, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed missing [B]"amp;"[/B] in settings.xml causing settings cleaner to break.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed changlelog startup call for version update.[/I]
+[B][COLOR red]Update - v6.2.7 - Sept. 21, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed encoding issue when opening changelog file.[/I]
+[COLOR yellow]--[/COLOR][I] TMDb database now caches [B]"404"[/B] responses to avoid requesting again for a 7 day period.[/I]
+[COLOR yellow]--[/COLOR][I] The setting [B]"check IMDb year for Movies"[/B] has been changed to [B]"check IMDb Movie meta"[/B].  You can now separately enable the title and or year check.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Source Select xml to properly label Local Library files.[/I]
 		</news>
 	</extension>
 </addon>

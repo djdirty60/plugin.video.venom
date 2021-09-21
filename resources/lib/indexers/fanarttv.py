@@ -21,8 +21,7 @@ session.mount('http://', HTTPAdapter(max_retries=retries))
 
 def get_request(url):
 	try:
-		try:
-			result = session.get(url, headers=headers, timeout=5)
+		try: result = session.get(url, headers=headers, timeout=5)
 		except requests.exceptions.SSLError:
 			result = session.get(url, headers=headers, verify=False)
 	except requests.exceptions.ConnectionError:
@@ -31,19 +30,18 @@ def get_request(url):
 		log_utils.error()
 		return None
 	try:
-		if result.status_code in [200, 201]:
-			return result.json()
+		if result.status_code in [200, 201]: return result.json()
 		elif result.status_code == 404:
 			if getSetting('debug.level') == '1':
 				from resources.lib.modules import log_utils
-				log_utils.log('requests.get() failed - FANART.TV URL: %s (404:NOT FOUND)' % url, level=log_utils.LOGDEBUG)
+				log_utils.log('FANART.TV get_request() failed: (404:NOT FOUND) - URL: %s' % url, level=log_utils.LOGDEBUG)
 			return '404:NOT FOUND'
 		else:
 			if getSetting('debug.level') == '1':
 				from resources.lib.modules import log_utils
 				from resources.lib.modules.client import parseDOM
 				title = parseDOM(result.text, 'title')[0]
-				log_utils.log('requests.get() failed - FANART.TV URL: %s (%s)' % (url, title), level=log_utils.LOGDEBUG)
+				log_utils.log('FANART.TV get_request() failed - URL: %s (%s)' % (url, title), level=log_utils.LOGDEBUG)
 			return None
 	except:
 		from resources.lib.modules import log_utils

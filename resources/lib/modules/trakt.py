@@ -52,8 +52,9 @@ def getTrakt(url, post=None, extended=False, silent=False):
 			if (not silent) and server_notification: control.notification(title=32315, message=33675)
 			return None
 		elif result and code in ['404']:
-			log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
-			return None
+			# log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
+			log_utils.log('getTrakt() (404:NOT FOUND): URL=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
+			return None # change to (return '404:NOT FOUND') to cache only 404's but not server response failures
 		elif result and code in ['429']:
 			if 'Retry-After' in result[2]: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (1000 calls every 5 minutes, doubt we'll ever hit that)
 				throttleTime = result[2]['Retry-After']

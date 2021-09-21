@@ -523,7 +523,7 @@ msgid "No TVShow lists imports found"
 msgstr "Nie znaleziono importowanych list programów TV TV"
 
 msgctxt "#32125"
-msgid "Scraper Preperation"
+msgid "Scraper Preparation"
 msgstr "Przygotowanie skrobaka"
 
 msgctxt "#32126"
@@ -823,6 +823,18 @@ msgid "Kodi log file uploaded to:"
 msgstr "Plik dziennika Kodi przesłany do:"
 
 msgctxt "#32200"
+msgid "check title"
+msgstr "sprawdź tytuł"
+
+msgctxt "#32201"
+msgid "check year"
+msgstr "sprawdź rok"
+
+msgctxt "#32202"
+msgid ""
+msgstr ""
+
+msgctxt "#32203"
 msgid ""
 msgstr ""
 

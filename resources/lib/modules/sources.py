@@ -103,8 +103,8 @@ class Sources:
 			except: pass
 			self.meta = meta
 
-			if tvshowtitle is None and control.setting('imdb.year.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
-				year, title = self.movie_chk_imdb(imdb, title, year)
+			if tvshowtitle is None and control.setting('imdb.meta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
+				title, year = self.movie_chk_imdb(imdb, title, year)
 				if title == 'The F**k-It List': title = 'The Fuck-It List'
 			if tvshowtitle is not None: # get "total_seasons" and "season_isAiring" for Pack scrapers. 1st=passed meta, 2nd=matacache check, 3rd=request
 				if tvshowtitle == 'The End of the F***ing World': tvshowtitle = 'The End of the Fucking World'
@@ -1316,24 +1316,24 @@ class Sources:
 
 	def movie_chk_imdb(self, imdb, title, year):
 		try:
-			if not imdb or imdb == '0': return year, title
+			if not imdb or imdb == '0': return title, year
 			from resources.lib.modules.client import _basic_request
 			result = _basic_request('https://v2.sg.media-imdb.com/suggestion/t/{}.json'.format(imdb))
-			if not result: return year, title
+			if not result: return title, year
 			result = jsloads(result)['d'][0]
 			year_ck = str(result['y'])
 			title_ck = self.getTitle(result['l'])
-			if not year_ck or not title_ck: return year, title
-			if year != year_ck:
-				log_utils.log('IMDb year_ck: (%s) does not match meta year passed: (%s) for title: (%s)' % (year_ck, year, title), __name__, level=log_utils.LOGDEBUG)
-				year = year_ck
-			if title != title_ck:
+			if not year_ck or not title_ck: return title, year
+			if control.setting('imdb.title.check') == 'true' and (title != title_ck):
 				log_utils.log('IMDb title_ck: (%s) does not match meta tile passed: (%s)' % (title_ck, title), __name__, level=log_utils.LOGDEBUG)
 				title = title_ck
-			return year, title
+			if control.setting('imdb.year.check') == 'true' and (year != year_ck):
+				log_utils.log('IMDb year_ck: (%s) does not match meta year passed: (%s) for title: (%s)' % (year_ck, year, title), __name__, level=log_utils.LOGDEBUG)
+				year = year_ck
+			return title, year
 		except:
 			log_utils.error()
-			return year, title
+			return title, year
 
 	def get_season_info(self, imdb, tmdb, tvdb, meta, season):
 		total_seasons = None
