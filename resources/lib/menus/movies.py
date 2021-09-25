@@ -841,8 +841,7 @@ class Movies:
 			if not self.list: return
 			self.meta = []
 			total = len(self.list)
-			for i in range(0, total):
-				self.list[i].update({'metacache': False})
+			for i in range(0, total): self.list[i].update({'metacache': False})
 			self.list = metacache.fetch(self.list, self.lang, self.user)
 			for r in range(0, total, 40):
 				threads = []

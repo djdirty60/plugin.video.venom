@@ -344,25 +344,21 @@ def tvshowsUpdate(imdb, tvdb):
 			except:
 				if control.setting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
-				log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-
+				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 		items = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 		log_utils.log('items=%s' % items)
 		items = items.get('seasons', [])
 		# for i in items:
 
-
 		# items = episodes.Episodes().get('', '', imdb, '', tvdb, {}, create_directory=False)
 	# def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, create_directory=True):
 		# log_utils.log('items=%s' % items)
-
 
 		for i in range(len(items)):
 			log_utils.log('items[i]=%s' % items[i])
 
 			items[i]['season'] = int(items[i]['season'])
 			items[i]['episode'] = int(items[i]['episode'])
-
 
 		seasons = {}
 		for i in items:

@@ -1313,12 +1313,11 @@ def sync_watchedProgress(activities=None, forced=False):
 		from resources.lib.menus import episodes
 		trakt_user = control.setting('trakt.username').strip()
 		lang = control.apiLanguage()['tmdb']
-		direct = control.setting('tvshows.direct') == 'true'
+		direct = control.setting('trakt.directProgress.scrape') == 'true'
 		url = 'https://api.trakt.tv/users/me/watched/shows'
 		if forced or (getProgressActivity(activities) > cache.timeout(episodes.Episodes().trakt_progress_list, url, trakt_user, lang, direct)):
 			cache.get(episodes.Episodes().trakt_progress_list, 0, url, trakt_user, lang, direct)
-		else:
-			cache.get(episodes.Episodes().trakt_progress_list, 3, url, trakt_user, lang, direct)
+		else: cache.get(episodes.Episodes().trakt_progress_list, 3, url, trakt_user, lang, direct)
 	except:
 		log_utils.error()
 

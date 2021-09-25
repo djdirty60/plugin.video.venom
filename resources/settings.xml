@@ -126,8 +126,8 @@
 		<setting id="sort.shows.watchlist.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
 		<setting id="sort.progress.type" type="select" label="35572" lvalues="33564|33039|35187|35188|35391|35392|35393" default="6" />
 		<setting id="sort.progress.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
-		<setting id="sort.calendar.type" type="select" label="35573" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" />
-		<setting id="sort.calendar.order" type="enum" label="33679" lvalues="33649|33650" default="1" subsetting="true" enable="!eq(-1,0)" />
+		<!-- <setting id="sort.calendar.type" type="select" label="35573" lvalues="33564|33039|35187|35188|35391|35392|35393" default="4" /> -->
+		<!-- <setting id="sort.calendar.order" type="enum" label="33679" lvalues="33649|33650" default="0" subsetting="true" enable="!eq(-1,0)" /> -->
 		<setting id="tvshows.air.enabled" type="bool" label="35017" default="false" subsetting="false" />
 		<setting id="tvshows.air.zone" type="select" label="35018" lvalues="32314|35022|35023" default="0" subsetting="true" visible="eq(-1,true)" />
 		<setting id="tvshows.air.location" type="select" label="35019" lvalues="35024|35025|35026|35027" default="0" subsetting="true" visible="eq(-2,true)" />
@@ -218,7 +218,7 @@
 		<setting id="trakt.refresh" type="text" visible="false" label="" default="" />
 		<setting id="trakt.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,)" />
 		<setting id="trakt.general.notifications" type="bool" label="33052" default="true" visible="!eq(-5,)" />
-		<setting id="tvshows.direct" type="bool" label="35492" default="false" visible="!eq(-6,)" />
+		<setting id="trakt.directProgress.scrape" type="bool" label="35492" default="false" visible="!eq(-6,)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=directProgress)" visible="!eq(-7,)" />
 		<setting id="trakt.rating" type="enum" label="35187" lvalues="33564|35547" default="0" visible="!eq(-8,)" />
 		<setting id="trakt.scrobble" type="bool" label="32097" default="false" visible="!eq(-9,)" />
@@ -364,9 +364,9 @@
 	<!-- Debugging - 11 -->
 	<category label="32616">
 		<setting id="debug.enabled" type="bool" label="32374" default="false" />
-		<setting id="debug.level" type="enum" label="35528" lvalues="35529|35530" default="0" enable="eq(-1,true)" />
-		<setting id="debug.location" type="enum" label="32617" lvalues="32618|32619" default="1" enable="eq(-2,true)" />
-		<setting id="debug.reversed" type="bool" label="32197" default="false" />
+		<setting id="debug.level" type="enum" label="35528" lvalues="35529|35530" default="0" visible="eq(-1,true)" />
+		<setting id="debug.location" type="enum" label="32617" lvalues="32618|32619" default="1" visible="eq(-2,true)" />
+		<setting id="debug.reversed" type="bool" label="32197" default="false" visible="eq(-3,true) + eq(-1,1)" />
 		<setting type="action" label="32189" action="RunPlugin(plugin://plugin.video.venom/?action=tools_clearLogFile)" visible="eq(-4,true) + eq(-2,1)" />
 		<setting type="action" label="32524" action="RunPlugin(plugin://plugin.video.venom/?action=tools_viewLogFile&amp;name=Venom)" visible="eq(-5,true) + eq(-3,1)" />
 		<setting type="action" label="32532" action="RunPlugin(plugin://plugin.video.venom/?action=tools_viewLogFile&amp;name=Kodi)" />
@@ -377,10 +377,10 @@
 		<setting type="action" label="32140" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=langinvoker)" visible="eq(-3,true)" />
 		<setting id="dev.disable.single" type="bool" label="32141" default="false" visible="eq(-4,true)" />
 		<setting id="dev.disable.single.filter" type="bool" subsetting="true" label="32142" default="false" visible="eq(-5,true)" enable="eq(-1,false)" />
-		<setting id="dev.disable.season.packs" type="bool" label="32143" default="false" visible="eq(-5,true)" />
-		<setting id="dev.disable.season.filter" type="bool" subsetting="true" label="32144" default="false" visible="eq(-6,true)" enable="eq(-1,false)" />
-		<setting id="dev.disable.show.packs" type="bool" label="32145" default="false" visible="eq(-7,true)" />
-		<setting id="dev.disable.show.filter" type="bool" subsetting="true" label="32146" default="false" visible="eq(-8,true)" enable="eq(-1,false)" />
+		<setting id="dev.disable.season.packs" type="bool" label="32143" default="false" visible="eq(-6,true)" />
+		<setting id="dev.disable.season.filter" type="bool" subsetting="true" label="32144" default="false" visible="eq(-7,true)" enable="eq(-1,false)" />
+		<setting id="dev.disable.show.packs" type="bool" label="32145" default="false" visible="eq(-8,true)" />
+		<setting id="dev.disable.show.filter" type="bool" subsetting="true" label="32146" default="false" visible="eq(-9,true)" enable="eq(-1,false)" />
 	</category>
 
 	<!-- Short Cuts - 12 -->

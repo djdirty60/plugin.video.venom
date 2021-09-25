@@ -827,8 +827,7 @@ class TVshows:
 			if not self.list: return
 			self.meta = []
 			total = len(self.list)
-			for i in range(0, total): 
-				self.list[i].update({'metacache': False})
+			for i in range(0, total): self.list[i].update({'metacache': False})
 			self.list = metacache.fetch(self.list, self.lang, self.user)
 			for r in range(0, total, 40):
 				threads = []
@@ -874,7 +873,7 @@ class TVshows:
 			if not tmdb:
 				if control.setting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
-				log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (self.list[i]['title'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
+				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (self.list[i]['title'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 			showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 			if not showSeasons: return
 			values = {}

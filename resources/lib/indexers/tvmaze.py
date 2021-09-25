@@ -334,8 +334,7 @@ class tvshows:
 						log_utils.error()
 #################################
 				if not tmdb:
-					log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (values['tvshowtitle'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-					return
+					return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (values['tvshowtitle'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 				# self.list = metacache.fetch(self.list, self.lang, self.user)
 				# if self.list['metacache'] is True: raise Exception()
 

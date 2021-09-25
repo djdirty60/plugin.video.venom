@@ -1,4 +1,11 @@
 
+[B][COLOR red]Update - v6.2.8 - Sept. 25, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added new [B]"Recent Episodes, Upcoming Episodes, and Season Premiers"[/B] lists to the [B]My TV Shows[/B] lists.  These lists are Trakt Calendar lists[/I]
+[COLOR yellow]--[/COLOR][I] Support for Trakt Episode Lists under My TV Shows has been removed.[/I]
+[COLOR yellow]--[/COLOR][I] Calendar sorting has been removed and now hard coded per list type for the new lists.[/I]
+[COLOR yellow]--[/COLOR][I] Few code fixes for Trakt lists cache duration issue[/I]
+
+
 [B][COLOR red]Update - v6.2.7 - Sept. 21, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed encoding issue when opening changelog file.[/I]
 [COLOR yellow]--[/COLOR][I] TMDb database now caches [B]"404"[/B] responses to avoid requesting again for a 7 day period.[/I]

@@ -831,10 +831,18 @@ msgid "check year"
 msgstr "controleer jaar"
 
 msgctxt "#32202"
-msgid ""
-msgstr ""
+msgid "Recent Episodes"
+msgstr "Recente afleveringen"
 
 msgctxt "#32203"
+msgid "Upcoming Episodes"
+msgstr "Aankomende afleveringen"
+
+msgctxt "#32204"
+msgid "Season Premieres"
+msgstr "Seizoenpremières"
+
+msgctxt "#32205"
 msgid ""
 msgstr ""
 

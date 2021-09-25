@@ -312,10 +312,6 @@ def router(params):
 		from resources.lib.menus import episodes
 		episodes.Episodes().unfinished(url)
 
-	elif action == 'episodesUserlists':
-		from resources.lib.menus import episodes
-		episodes.Episodes().userlists()
-
 	elif action == 'episodes_traktUnfinishedManager':
 		from resources.lib.menus import episodes
 		episodes.Episodes().unfinishedManager()
