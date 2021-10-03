@@ -1,4 +1,12 @@
 
+[B][COLOR red]Update - v6.2.9 - Oct. 03, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added TMDb meta provider to "Discover Movies" for Genres, Year, and Certification.  Added TMDb meta provider to "Discover TV Shows" for Genres, and Year.  IMDb is still available so both will be shown.  You can disable ones you prefer to not use in the Navigation category settings. TMDb tends to be a little faster.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Premiered format string in [B]"Tools-Trakt Management-Unfinished Progress Manager-Episodes"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Few new strings added for HDR detection of source links.[/I]
+[COLOR yellow]--[/COLOR][I] Updated TMDb Helper player files to fix an issue with CoreElec 19.2 RC version.  Please be sure to update via TMDb Helper if addon is installed.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed quality icons case issue for Linux.[/I]
+
+
 [B][COLOR red]Update - v6.2.8 - Sept. 25, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added new [B]"Recent Episodes, Upcoming Episodes, and Season Premiers"[/B] lists to the [B]My TV Shows[/B] lists.  These lists are Trakt Calendar lists[/I]
 [COLOR yellow]--[/COLOR][I] Support for Trakt Episode Lists under My TV Shows has been removed.[/I]

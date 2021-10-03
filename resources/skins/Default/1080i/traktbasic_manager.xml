@@ -54,25 +54,27 @@
 			<height>80</height>
 			<width min="0" max="1920">auto</width>
 			<control type="textbox">
-				<left>5</left>
+				<left>0</left>
 				<top>110</top>
-				<width>110</width>
+				<width>130</width>
 				<height>40</height>
 				<font>font14</font>
 				<textcolor>white</textcolor>
 				<align>left</align>
 				<aligny>bottom</aligny>
+				<autoscroll>false</autoscroll>
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]Remove[/COLOR]</label>
 			</control>
 			<control type="textbox">
-				<left>140</left>
+				<left>160</left>
 				<top>110</top>
-				<width>200</width>
+				<width>340</width>
 				<height>40</height>
 				<font>font14</font>
 				<textcolor>white</textcolor>
 				<align>left</align>
 				<aligny>bottom</aligny>
+				<autoscroll>false</autoscroll>
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]$INFO[Window().Property(venom.total_results)] Total Items[/COLOR]</label>
 			</control>
 
@@ -198,7 +200,7 @@
 			</control>
 
 			<control type="group">
-				<left>1385</left>
+				<left>1390</left>
 				<top>50</top>
 					<control type="button" id="2051">
 						<description>OK Button</description>

@@ -24,16 +24,16 @@ from fenomscrapers import sources as fs_sources
 
 class Sources:
 	def __init__(self, all_providers=None):
+		self.sources = []
+		self.scraper_sources = []
+		self.uncached_chosen = False
+		self.isPrescrape = False
 		self.all_providers = all_providers
 		self.time = datetime.now()
 		self.single_expiry = timedelta(hours=6)
 		self.season_expiry = timedelta(hours=48)
 		self.show_expiry = timedelta(hours=48)
 		self.getConstants()
-		self.sources = []
-		self.scraper_sources = []
-		self.uncached_chosen = False
-		self.isPrescrape = False
 		self.sourceFile = control.providercacheFile
 		self.enable_playnext = control.setting('enable.playnext') == 'true'
 		self.dev_mode = control.setting('dev.mode.enable') == 'true'
@@ -63,18 +63,16 @@ class Sources:
 		if not self.debrid_resolvers and not gdriveEnabled and not easynewsEnabled and not furkEnabled:
 			control.sleep(200)
 			control.hide()
-			control.notification(message=33034)
-			return
+			return control.notification(message=33034)
 		try:
 			preResolved_nextUrl = control.homeWindow.getProperty('venom.preResolved_nextUrl')
 			if preResolved_nextUrl != '':
-				log_utils.log('Playing preResolved_nextUrl=%s' % preResolved_nextUrl, level=log_utils.LOGDEBUG)
+				log_utils.log('Playing preResolved_nextUrl = %s' % preResolved_nextUrl, level=log_utils.LOGDEBUG)
 				control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 				try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
 				except: pass
 				from resources.lib.modules import player
 				return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, preResolved_nextUrl, meta)
-
 			if title: title = self.getTitle(title)
 			if tvshowtitle: tvshowtitle = self.getTitle(tvshowtitle)
 			control.homeWindow.clearProperty(self.metaProperty)
@@ -95,14 +93,11 @@ class Sources:
 			'[COLOR %s]%s (S%02dE%02d)[/COLOR]' % (self.highlight_color, tvshowtitle, int(season), int(episode))
 			control.homeWindow.clearProperty(self.labelProperty)
 			control.homeWindow.setProperty(self.labelProperty, p_label)
-
 			url = None
 			self.mediatype = 'movie'
-
 			try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
 			except: pass
 			self.meta = meta
-
 			if tvshowtitle is None and control.setting('imdb.meta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
 				title, year = self.movie_chk_imdb(imdb, title, year)
 				if title == 'The F**k-It List': title = 'The Fuck-It List'
@@ -112,11 +107,9 @@ class Sources:
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
 			if rescrape: self.clr_item_providers(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
 			items = providerscache.get(self.getSources, 48, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
-
 			if not items:
 				self.url = url
 				return self.errorForSources()
-
 			filter = [] ; uncached_items = []
 			if control.setting('torrent.remove.uncached') == 'true':
 				uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
@@ -133,11 +126,9 @@ class Sources:
 					self.url = url
 					return self.errorForSources()
 			else: uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
-
 			if select is None:
 				if episode is not None and self.enable_playnext: select = '1'
 				else: select = control.setting('play.mode')
-
 			title = tvshowtitle if tvshowtitle is not None else title
 			self.imdb = imdb ; self.tmdb = tmdb ; self.tvdb = tvdb ; self.title = title ; self.year = year
 			self.season = season ; self.episode = episode
@@ -147,7 +138,6 @@ class Sources:
 					control.sleep(200)
 					return self.sourceSelect(title, items, uncached_items, self.meta)
 				else: url = self.sourcesAutoPlay(items)
-
 			if url == 'close://' or url is None:
 				self.url = url
 				return self.errorForSources()
@@ -315,10 +305,10 @@ class Sources:
 						if not w.is_alive(): break
 						sleep(0.5)
 
-					if not self.url: raise Exception()
+					if not self.url: continue
 					if not any(x in self.url.lower() for x in self.extensions):
 						log_utils.log('Playback not supported for (playItem()): %s' % self.url, level=log_utils.LOGWARNING)
-						raise Exception()
+						continue
 					log_utils.log('Playing url from playItem(): %s' % self.url, level=log_utils.LOGDEBUG)
 					try: progressDialog.close()
 					except: pass
@@ -348,6 +338,9 @@ class Sources:
 
 	def getSources_silent(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=90):
 		try:
+			p_label = '[COLOR %s]%s (S%02dE%02d)[/COLOR]' % (self.highlight_color, tvshowtitle, int(season), int(episode))
+			control.homeWindow.clearProperty(self.labelProperty)
+			control.homeWindow.setProperty(self.labelProperty, p_label)
 			self.prepareSources()
 			sourceDict = self.sourceDict
 			sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
@@ -564,10 +557,9 @@ class Sources:
 		except:
 			log_utils.error()
 			return control.homeWindow.clearProperty('venom.preResolved_nextUrl')
-		u = ''
 		for i in range(len(next_sources)):
 			try:
-				control.sleep(100)
+				control.sleep(200)
 				try:
 					if control.monitor.abortRequested(): return sysexit()
 					url = self.sourcesResolve(next_sources[i])
@@ -576,14 +568,15 @@ class Sources:
 						continue
 					if not any(x in url.lower() for x in self.extensions):
 						log_utils.log('preResolve Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
-						raise Exception()
-					if not u: u = url
-					log_utils.log('PreResolved url : %s' % url, level=log_utils.LOGDEBUG)
-					if url: break
+						continue
+					if url:
+						control.homeWindow.setProperty('venom.preResolved_nextUrl', url)
+						log_utils.log('preResolved_nextUrl : %s' % url, level=log_utils.LOGDEBUG)
+						break
 				except: pass
 			except:
 				log_utils.error()
-		control.homeWindow.setProperty('venom.preResolved_nextUrl', u)
+		control.sleep(200)
 
 	def prepareSources(self):
 		try:
@@ -783,8 +776,6 @@ class Sources:
 					log_utils.error()
 		for i in self.sources:
 			try:
-				# if 'name_info' in i: info_string = source_utils.getFileType(name_info=i.get('name_info'))
-				# else: info_string = source_utils.getFileType(url=i.get('url'))
 				if 'name_info' in i: info_string = getFileType(name_info=i.get('name_info'))
 				else: info_string = getFileType(url=i.get('url'))
 				i.update({'info': (i.get('info') + ' /' + info_string).lstrip(' ').lstrip('/').rstrip('/')})
@@ -864,9 +855,12 @@ class Sources:
 			self.sources += prem_filter
 
 		elif control.setting('sources.size.sort') == 'true':
+			self.sources.sort(key=lambda k: k.get('size', 0), reverse=True)
+
+		if control.setting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
 			filter = []
-			filter += [i for i in self.sources]
-			filter.sort(key=lambda k: k.get('size', 0), reverse=True)
+			filter += [i for i in self.sources if any(value in i.get('info', '') for value in [' HDR ', 'DOLBY-VISION'])]
+			filter += [i for i in self.sources if i not in filter]
 			self.sources = filter
 
 		filter = []
@@ -878,15 +872,9 @@ class Sources:
 		filter += [i for i in self.sources if i['quality'] == 'CAM']
 		self.sources = filter
 
-		if control.setting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
-			filter = []
-			filter += [i for i in self.sources if any(value in i.get('info', '') for value in [' HDR ', 'DOLBY-VISION'])]
-			filter += [i for i in self.sources if not any(value in i.get('info', '') for value in [' HDR ', 'DOLBY-VISION'])]
-			self.sources = filter
-
 		filter = [] # filter to place cloud files first
-		filter += [i for i in self.sources if i['source'] == 'cloud'] 
-		filter += [i for i in self.sources if i['source'] != 'cloud']
+		filter += [i for i in self.sources if i['source'] == 'cloud']
+		filter += [i for i in self.sources if i not in filter]
 		self.sources = filter
 
 		self.sources = self.sources[:4000]
@@ -928,7 +916,6 @@ class Sources:
 
 	def sourcesAutoPlay(self, items):
 		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p']]
-		u = None
 		header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
 		try:
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
@@ -948,17 +935,17 @@ class Sources:
 					url = self.sourcesResolve(items[i])
 					if not any(x in url.lower() for x in self.extensions):
 						log_utils.log('Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
-						raise Exception()
-					if not u: u = url
-					log_utils.log('Playing url from (sourcesAutoPlay()): %s' % url, level=log_utils.LOGDEBUG)
-					if url: break
+						continue
+					if url:
+						log_utils.log('Playing url from (sourcesAutoPlay()): %s' % url, level=log_utils.LOGDEBUG)
+						break
 				except: pass
 			except:
 				log_utils.error()
 		try: progressDialog.close()
 		except: pass
 		del progressDialog
-		return u
+		return url
 
 	def sourcesResolve(self, item):
 		try:

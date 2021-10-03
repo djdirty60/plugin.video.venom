@@ -50,7 +50,6 @@
 		</control>
 
 		<control type="group" id="1">
-			<description>ListItems</description>
 			<left>25</left>
 			<top>0</top>
 			<height>80</height>
@@ -59,17 +58,18 @@
 				<visible>!Player.HasVideo</visible>
 				<left>0</left>
 				<top>110</top>
-				<width>100</width>
+				<width>130</width>
 				<height>40</height>
 				<font>font14</font>
 				<textcolor>white</textcolor>
 				<align>left</align>
 				<aligny>bottom</aligny>
+				<autoscroll>false</autoscroll>
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]Hidden[/COLOR]</label>
 			</control>
 			<control type="textbox">
 				<visible>!Player.HasVideo</visible>
-				<left>120</left>
+				<left>160</left>
 				<top>110</top>
 				<width>300</width>
 				<height>40</height>
@@ -77,6 +77,7 @@
 				<textcolor>white</textcolor>
 				<align>left</align>
 				<aligny>bottom</aligny>
+				<autoscroll>false</autoscroll>
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]$INFO[Window().Property(venom.total_results)] Total Items[/COLOR]</label>
 			</control>
 

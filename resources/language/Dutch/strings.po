@@ -1590,16 +1590,16 @@ msgid "Recently aired (TVMaze)"
 msgstr "Onlangs uitgezonden (TVMaze)"
 
 msgctxt "#32485"
-msgid ""
-msgstr ""
+msgid "Year (TMDb)"
+msgstr "Jaar (TMDb)"
 
 msgctxt "#32486"
-msgid ""
-msgstr ""
+msgid "Genres (TMDb)"
+msgstr "Genres (TMDb)"
 
 msgctxt "#32487"
-msgid ""
-msgstr ""
+msgid "Certificates (TMDb)"
+msgstr "certificaten (TMDb)"
 
 msgctxt "#32488"
 msgid ""

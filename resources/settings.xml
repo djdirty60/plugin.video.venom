@@ -63,10 +63,13 @@
 		<setting id="navi.movie.imdb.oscarwinners" type="bool" label="32452" default="true" />
 		<setting id="navi.movie.imdb.oscarnominees" type="bool" label="32454" default="true" />
 		<setting id="navi.movie.imdb.genres" type="bool" label="32456" default="true" />
+		<setting id="navi.movie.tmdb.genres" type="bool" label="32486" default="true" />
 		<setting id="navi.movie.imdb.years" type="bool" label="32458" default="true" />
+		<setting id="navi.movie.tmdb.years" type="bool" label="32485" default="true" />
 		<setting id="navi.movie.imdb.people" type="bool" label="32460" default="true" />
 		<setting id="navi.movie.imdb.languages" type="bool" label="32462" default="true" />
 		<setting id="navi.movie.imdb.certificates" type="bool" label="32464" default="true" />
+		<setting id="navi.movie.tmdb.certificates" type="bool" label="32487" default="true" />
 		<setting id="navi.movie.collections" type="bool" label="32000" default="true" />
 		<setting id="navi.xmascollections" subsetting="true" type="bool" label="40064" enable="eq(-1,true)" default="false" />
 		<setting id="navi.movie.trakt.popularList" type="bool" label="32417" default="true" />
@@ -83,9 +86,13 @@
 		<setting id="navi.tv.imdb.highlyrated" type="bool" label="32449" default="true" />
 		<setting id="navi.tv.trakt.recommended" type="bool" label="32445" default="true" />
 		<setting id="navi.tv.imdb.genres" type="bool" label="32456" default="true" />
+		<setting id="navi.tv.tmdb.genres" type="bool" label="32486" default="true" />
 		<setting id="navi.tv.tvmaze.networks" type="bool" label="32470" default="true" />
 		<setting id="navi.tv.imdb.languages" type="bool" label="32462" default="true" />
 		<setting id="navi.tv.imdb.certificates" type="bool" label="32464" default="true" />
+		<!-- <setting id="navi.tv.tmdb.certificates" type="bool" label="32487" default="true" /> -->
+		<setting id="navi.tv.imdb.years" type="bool" label="32458" default="true" />
+		<setting id="navi.tv.tmdb.years" type="bool" label="32485" default="true" />
 		<setting id="navi.tv.tmdb.airingtoday" type="bool" label="32467" default="true" />
 		<setting id="navi.tv.imdb.airingtoday" type="bool" label="32466" default="true" />
 		<setting id="navi.tv.tmdb.ontv" type="bool" label="32472" default="true" />
@@ -385,6 +392,7 @@
 
 	<!-- Short Cuts - 12 -->
 	<category label="Shortcuts">
+		<setting type="action" label="35066" action="RunPlugin(plugin://plugin.video.venom/?action=tools_forceTraktSync)" />
 		<setting type="action" label="32610" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearAll)" />
 		<setting type="action" label="32611" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearSources)" />
 		<setting type="action" label="32612" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMeta)" />

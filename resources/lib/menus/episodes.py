@@ -21,12 +21,10 @@ from resources.lib.modules import views
 
 
 class Episodes:
-	def __init__(self, type='show', notifications=True):
+	def __init__(self, notifications=True):
+		self.list = []
 		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.count = control.setting('page.item.limit')
-		self.list = []
-		self.threads = []
-		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
 		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
@@ -720,7 +718,10 @@ class Episodes:
 				try:
 					if i['unaired'] == 'true': labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
-				if i.get('traktHistory') is True:
+
+				# zoneTo, formatInput = 'utc', '%Y-%m-%d'
+				# if 'T' in str(item.get('premiered', '')): zoneTo, formatInput = 'local', '%Y-%m-%dT%H:%M:%S.000Z'
+				if i.get('traktHistory') is True: # uses Trakt lastplayed
 					try:
 						air_datetime = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
 						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', ''))
@@ -737,6 +738,7 @@ class Episodes:
 						air_datetime = tools.Time.convert(stringTime=premiered, zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %I:%M %p')
 						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', ''))
 					except: pass
+
 				systitle, systvshowtitle, syspremiered = quote_plus(title), quote_plus(tvshowtitle), quote_plus(premiered)
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'episode', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave

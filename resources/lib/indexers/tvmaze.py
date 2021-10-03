@@ -228,15 +228,13 @@ def get_request(url): # API calls are rate limited to allow at least 20 calls ev
 
 
 class tvshows:
-	def __init__(self, type = 'show', notifications = True):
+	def __init__(self):
 		last = []
 		self.count = 40
 		self.list = []
 		self.meta = []
 		self.threads = []
-		self.type = type
 		self.lang = apiLanguage()['tvdb']
-		self.notifications = notifications
 		self.base_link = 'https://api.tvmaze.com'
 		self.tvmaze_info_link = 'https://api.tvmaze.com/shows/%s?embed=cast'
 		self.tvdb_key = getSetting('tvdb.api.key')

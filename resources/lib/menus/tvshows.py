@@ -20,13 +20,10 @@ from resources.lib.modules import views
 
 
 class TVshows:
-	def __init__(self, type='show', notifications=True):
+	def __init__(self, notifications=True):
+		self.list = []
 		self.page_limit = control.setting('page.item.limit')
 		self.search_page_limit = control.setting('search.page.limit')
-		self.list = []
-		self.meta = []
-		self.threads = []
-		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
 		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
@@ -53,6 +50,7 @@ class TVshows:
 		self.keyword_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&release_date=,date[0]&keywords=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
 		self.language_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=100,&production_status=released&primary_language=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
 		self.certification_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&release_date=,date[0]&certificates=%s&sort=%s&count=%s&start=1' % ('%s', self.imdb_sort(type='imdbshows'), self.page_limit)
+		self.year_link = 'https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&num_votes=100,&production_status=released&year=%s,%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', '%s', self.page_limit)
 		self.imdbwatchlist_link = 'https://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user # only used to get users watchlist ID
 		self.imdbwatchlist2_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=tvSeries,tvMiniSeries&start=1' % ('%s', self.imdb_sort(type='shows.watchlist'))
 		self.imdblists_link = 'https://www.imdb.com/user/ur%s/lists?tab=all&sort=mdfd&order=desc&filter=titles' % self.imdb_user
@@ -85,6 +83,11 @@ class TVshows:
 		self.tmdb_ontheair_link = 'https://api.themoviedb.org/3/tv/on_the_air?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_airingtoday_link = 'https://api.themoviedb.org/3/tv/airing_today?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_networks_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1'
+		self.tmdb_year_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&language=en-US&sort_by=popularity.desc&include_null_first_air_dates=false&first_air_date_year=%s&page=1'
+		self.tmdb_genre_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&with_genres=%s&sort_by=popularity.desc&include_null_first_air_dates=false&page=1'
+		# Ticket is in to add this feature but currently not available
+		# self.tmdb_certification_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&language=en-US&sort_by=popularity.desc&certification_country=US&certification=%s&page=1'
+
 
 	def get(self, url, idx=True, create_directory=True):
 		self.list = []
@@ -374,16 +377,21 @@ class TVshows:
 		self.addDirectory(self.list)
 		return self.list
 
-	def genres(self):
+	def genres(self, url):
+		try: url = getattr(self, url + '_link')
+		except: pass
 		genres = [
-			('Action', 'action', True), ('Adventure', 'adventure', True), ('Animation', 'animation', True), ('Anime', 'anime', False),
-			('Biography', 'biography', True), ('Comedy', 'comedy', True), ('Crime', 'crime', True), ('Drama', 'drama', True),
-			('Family', 'family', True), ('Fantasy', 'fantasy', True), ('Game-Show', 'game_show', True), ('History', 'history', True),
-			('Horror', 'horror', True), ('Music', 'music', True), ('Musical', 'musical', True), ('Mystery', 'mystery', True),
-			('News', 'news', True), ('Reality', 'reality_tv', True), ('Romance', 'romance', True), ('Science Fiction', 'sci_fi', True),
-			('Sport', 'sport', True), ('Talk-Show', 'talk_show', True), ('Thriller', 'thriller', True), ('War', 'war', True), ('Western', 'western', True)]
+			('Action', 'action', True, '10759'), ('Adventure', 'adventure', True), ('Animation', 'animation', True, '32550'), ('Anime', 'anime', False),
+			('Biography', 'biography', True), ('Comedy', 'comedy', True, '32551'), ('Crime', 'crime', True, '32552'), ('Drama', 'drama', True, '18'),
+			('Family', 'family', True, '10751'), ('Fantasy', 'fantasy', True), ('Game-Show', 'game_show', True), ('History', 'history', True),
+			('Horror', 'horror', True), ('Music', 'music', True), ('Musical', 'musical', True), ('Mystery', 'mystery', True, '9648'),
+			('News', 'news', True, '10763'), ('Reality', 'reality_tv', True, '10764'), ('Romance', 'romance', True), ('Science Fiction', 'sci_fi', True, '10765'),
+			('Sport', 'sport', True), ('Talk-Show', 'talk_show', True, '10767'), ('Thriller', 'thriller', True), ('War', 'war', True, '10768'), ('Western', 'western', True, '37')]
 		for i in genres:
-			self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': self.genre_link % i[1] if i[2] else self.keyword_link % i[1], 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'tvshows'})
+			if self.imdb_link in url: self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': url % i[1] if i[2] else self.keyword_link % i[1], 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'tvshows'})
+			if self.tmdb_link in url:
+				try: self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': url % ('%s', i[3]), 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'tmdbTvshows'})
+				except: pass
 		self.addDirectory(self.list)
 		return self.list
 
@@ -422,6 +430,16 @@ class TVshows:
 			('Mature Audience (TV-MA)', 'US%3ATV-MA')]
 		for i in certificates:
 			self.list.append({'content': 'tags', 'name': str(i[0]), 'url': self.certification_link % i[1], 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'tvshows'})
+		self.addDirectory(self.list)
+		return self.list
+
+	def years(self, url):
+		try: url = getattr(self, url + '_link')
+		except: pass
+		year = (self.date_time.strftime('%Y'))
+		for i in range(int(year)-0, 1900, -1):
+			if self.imdb_link in url: self.list.append({'content': 'years', 'name': str(i), 'url': url % (str(i), str(i)), 'image': 'years.png', 'icon': 'DefaultYear.png', 'action': 'tvshows'})
+			if self.tmdb_link in url: self.list.append({'content': 'years', 'name': str(i), 'url': url % ('%s', str(i)), 'image': 'years.png', 'icon': 'DefaultYear.png', 'action': 'tmdbTvshows'})
 		self.addDirectory(self.list)
 		return self.list
 

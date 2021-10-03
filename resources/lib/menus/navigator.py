@@ -79,15 +79,21 @@ class Navigator:
 		if control.getMenuEnabled('navi.movie.imdb.oscarnominees'):
 			self.addDirectoryItem(32454 if self.indexLabels else 32453, 'movies&url=oscarsnominees', 'imdb.png' if self.iconLogos else 'oscar-winners.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.imdb.genres'):
-			self.addDirectoryItem(32456 if self.indexLabels else 32455, 'movieGenres', 'imdb.png' if self.iconLogos else 'genres.png', 'DefaultGenre.png')
+			self.addDirectoryItem(32456 if self.indexLabels else 32455, 'movieGenres&url=genre', 'imdb.png' if self.iconLogos else 'genres.png', 'DefaultGenre.png')
+		if control.getMenuEnabled('navi.movie.tmdb.genres'):
+			self.addDirectoryItem(32486 if self.indexLabels else 32455, 'movieGenres&url=tmdb_genre', 'tmdb.png' if self.iconLogos else 'genres.png', 'DefaultGenre.png')
 		if control.getMenuEnabled('navi.movie.imdb.years'):
-			self.addDirectoryItem(32458 if self.indexLabels else 32457, 'movieYears', 'imdb.png' if self.iconLogos else 'years.png', 'DefaultYear.png')
+			self.addDirectoryItem(32458 if self.indexLabels else 32457, 'movieYears&url=year', 'imdb.png' if self.iconLogos else 'years.png', 'DefaultYear.png')
+		if control.getMenuEnabled('navi.movie.tmdb.years'):
+			self.addDirectoryItem(32485 if self.indexLabels else 32457, 'movieYears&url=tmdb_year', 'tmdb.png' if self.iconLogos else 'years.png', 'DefaultYear.png')
 		if control.getMenuEnabled('navi.movie.imdb.people'):
 			self.addDirectoryItem(32460 if self.indexLabels else 32459, 'moviePersons', 'imdb.png' if self.iconLogos else 'people.png', 'DefaultActor.png')
 		if control.getMenuEnabled('navi.movie.imdb.languages'):
 			self.addDirectoryItem(32462 if self.indexLabels else 32461, 'movieLanguages', 'imdb.png' if self.iconLogos else 'languages.png', 'DefaultAddonLanguage.png')
 		if control.getMenuEnabled('navi.movie.imdb.certificates'):
-			self.addDirectoryItem(32464 if self.indexLabels else 32463, 'movieCertificates', 'imdb.png' if self.iconLogos else 'certificates.png', 'DefaultMovies.png')
+			self.addDirectoryItem(32464 if self.indexLabels else 32463, 'movieCertificates&url=certification', 'imdb.png' if self.iconLogos else 'certificates.png', 'DefaultMovies.png')
+		if control.getMenuEnabled('navi.movie.tmdb.certificates'):
+			self.addDirectoryItem(32487 if self.indexLabels else 32463, 'movieCertificates&url=tmdb_certification', 'tmdb.png' if self.iconLogos else 'certificates.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.collections'):
 			self.addDirectoryItem(32000, 'collections_Navigator', 'boxsets.png', 'DefaultSets.png')
 		if control.getMenuEnabled('navi.movie.trakt.popularList'):
@@ -139,13 +145,20 @@ class Navigator:
 		if control.getMenuEnabled('navi.tv.trakt.recommended'):
 			self.addDirectoryItem(32445 if self.indexLabels else 32444, 'tvshows&url=traktrecommendations', 'trakt.png' if self.iconLogos else 'highly-rated.png', 'DefaultTVShows.png', queue=True)
 		if control.getMenuEnabled('navi.tv.imdb.genres'):
-			self.addDirectoryItem(32456 if self.indexLabels else 32455, 'tvGenres', 'imdb.png' if self.iconLogos else 'genres.png', 'DefaultGenre.png')
+			self.addDirectoryItem(32456 if self.indexLabels else 32455, 'tvGenres&url=genre', 'imdb.png' if self.iconLogos else 'genres.png', 'DefaultGenre.png')
+		if control.getMenuEnabled('navi.tv.tmdb.genres'):
+			self.addDirectoryItem(32486 if self.indexLabels else 32455, 'tvGenres&url=tmdb_genre', 'tmdb.png' if self.iconLogos else 'genres.png', 'DefaultGenre.png')
 		if control.getMenuEnabled('navi.tv.tvmaze.networks'):
 			self.addDirectoryItem(32468 if self.indexLabels else 32469, 'tvNetworks', 'tmdb.png' if self.iconLogos else 'networks.png', 'DefaultNetwork.png')
 		if control.getMenuEnabled('navi.tv.imdb.languages'):
 			self.addDirectoryItem(32462 if self.indexLabels else 32461, 'tvLanguages', 'imdb.png' if self.iconLogos else 'languages.png', 'DefaultAddonLanguage.png')
 		if control.getMenuEnabled('navi.tv.imdb.certificates'):
 			self.addDirectoryItem(32464 if self.indexLabels else 32463, 'tvCertificates', 'imdb.png' if self.iconLogos else 'certificates.png', 'DefaultTVShows.png')
+		# if control.getMenuEnabled('navi.tv.tmdb.certificates'):
+		if control.getMenuEnabled('navi.tv.imdb.years'):
+			self.addDirectoryItem(32458 if self.indexLabels else 32457, 'tvYears&url=year', 'imdb.png' if self.iconLogos else 'years.png', 'DefaultYear.png')
+		if control.getMenuEnabled('navi.tv.tmdb.years'):
+			self.addDirectoryItem(32485 if self.indexLabels else 32457, 'tvYears&url=tmdb_year', 'tmdb.png' if self.iconLogos else 'years.png', 'DefaultYear.png')
 		if control.getMenuEnabled('navi.tv.tmdb.airingtoday'):
 			self.addDirectoryItem(32467 if self.indexLabels else 32465, 'tmdbTvshows&url=tmdb_airingtoday', 'tmdb.png' if self.iconLogos else 'airing-today.png', 'DefaultRecentlyAddedEpisodes.png')
 		if control.getMenuEnabled('navi.tv.imdb.airingtoday'):

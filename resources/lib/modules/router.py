@@ -75,16 +75,16 @@ def router(params):
 		movies.Movies().person()
 	elif action == 'movieGenres':
 		from resources.lib.menus import movies
-		movies.Movies().genres()
+		movies.Movies().genres(url)
 	elif action == 'movieLanguages':
 		from resources.lib.menus import movies
 		movies.Movies().languages()
 	elif action == 'movieCertificates':
 		from resources.lib.menus import movies
-		movies.Movies().certifications()
+		movies.Movies().certifications(url)
 	elif action == 'movieYears':
 		from resources.lib.menus import movies
-		movies.Movies().years()
+		movies.Movies().years(url)
 	elif action == 'moviePersons':
 		from resources.lib.menus import movies
 		movies.Movies().persons(url)
@@ -225,7 +225,7 @@ def router(params):
 
 	elif action == 'tvGenres':
 		from resources.lib.menus import tvshows
-		tvshows.TVshows().genres()
+		tvshows.TVshows().genres(url)
 
 	elif action == 'tvNetworks':
 		from resources.lib.menus import tvshows
@@ -238,6 +238,10 @@ def router(params):
 	elif action == 'tvCertificates':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().certifications()
+
+	elif action == 'tvYears':
+		from resources.lib.menus import tvshows
+		tvshows.TVshows().years(url)
 
 	elif action == 'tvPersons':
 		from resources.lib.menus import tvshows
@@ -668,8 +672,6 @@ def router(params):
 			if rtype == 'movie':
 				from resources.lib.menus import movies
 				rlist = movies.Movies().get(url, create_directory=False)
-				# xbmc.log('movie rlist=%s' % rlist, 1)
-				# xbmc.log('url=%s' % url, 1)
 				r = 'plugin://plugin.video.venom/?action=play_Item'
 			elif rtype == 'episode':
 				from resources.lib.menus import episodes

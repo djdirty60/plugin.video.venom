@@ -7,16 +7,26 @@ import re
 from urllib.parse import unquote, unquote_plus
 
 VIDEO_3D = ['.3d.', '.sbs.', '.hsbs', 'sidebyside', 'side.by.side', 'stereoscopic', '.tab.', '.htab.', 'topandbottom', 'top.and.bottom']
-HDR = ['.hdr.', 'hdr10', 'hdr.10', '2160p.bluray.remux', 'uhd.bluray.2160p', '2160p.uhd.bluray', '2160p.bluray.hevc.truehd', '2160p.remux',
-			'2160p.bluray.hevc.dts.hd.ma']
-CODEC_H265 = ['hevc', 'h265', 'h.265', 'x265', 'x.265', '.dv.', 'dolby.vision', 'dolbyvision', '.hdr.', 'hdr10', 'hdr.10', '2160p.remux']
+
+DOLBY_VISION = ['dolby.vision', 'dolbyvision', '.dovi.', '.dv.']
+HDR = ['2160p.uhd.bluray', '2160p.uhd.blu.ray', '2160p.bluray.hevc.truehd', '2160p.blu.ray.hevc.truehd',
+			'2160p.bluray.hevc.dts.hd.ma', '2160p.blu.ray.hevc.dts.hd.ma', '.hdr.', 'hdr10', 'hdr.10',
+			'uhd.bluray.2160p', 'uhd.blu.ray.2160p']
+
 CODEC_H264 = ['avc', 'h264', 'h.264', 'x264', 'x.264']
+CODEC_H265 = ['h265', 'h.265', 'hevc', 'x265', 'x.265']
 CODEC_XVID = ['xvid', '.x.vid']
-CODEC_DIVX = ['divx', 'divx ', 'div2', 'div3', 'div4']
+CODEC_DIVX = ['divx', 'div2', 'div3', 'div4']
 CODEC_MPEG = ['.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', 'msmpeg', 'mpegurl']
 CODEC_MKV = ['.mkv', 'matroska']
+REMUX = ['remux', 'bdremux']
 
-DOLBY_VISION = ['.dv.', 'dolby.vision', 'dolbyvision', '.dovi.']
+BLURAY = ['bluray', 'blu.ray', 'bdrip', 'bd.rip']
+DVD = ['dvdrip', 'dvd.rip']
+WEB = ['.web.', 'webdl', 'web.dl', 'webrip', 'web.rip']
+SCR = ['scr.', 'screener']
+HDRIP = ['.hdrip', '.hd.rip']
+
 DOLBY_TRUEHD = ['true.hd', 'truehd']
 DOLBY_DIGITALPLUS = ['dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3', '.e.ac3']
 DOLBY_DIGITALEX = ['.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.']
@@ -134,8 +144,14 @@ def getFileType(name_info=None, url=None):
 
 		if any(value in fmt for value in VIDEO_3D):  type += ' 3D /'
 
+		if '.sdr' in fmt: type += ' SDR /'
+		elif any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
+		elif any(value in fmt for value in HDR): type += ' HDR /'
+		elif all(i in fmt for i in ['2160p', 'remux']): type += ' HDR /'
+
 		if any(value in fmt for value in CODEC_H264): type += ' AVC /'
 		elif any(value in fmt for value in CODEC_H265): type += ' HEVC /'
+		elif any(i in type for i in [' HDR ', ' DOLBY-VISION ']): type += ' HEVC /'
 		elif any(value in fmt for value in CODEC_XVID): type += ' XVID /'
 		elif any(value in fmt for value in CODEC_DIVX): type += ' DIVX /'
 
@@ -144,20 +160,15 @@ def getFileType(name_info=None, url=None):
 		elif '.avi' in fmt: type += ' AVI /'
 		elif any(value in fmt for value in CODEC_MKV): type += ' MKV /'
 
-		if '.sdr' in fmt: type += ' SDR /'
-		elif any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
-		elif any(value in fmt for value in HDR): type += ' HDR /'
+		if any(value in fmt for value in REMUX): type += ' REMUX /'
 
-		if 'remux' in fmt: type += ' REMUX /'
-
-		if any(value in fmt for value in ['bluray', 'blu.ray', 'bdrip', 'bd.rip', 'brrip', 'br.rip']): type += ' BLURAY /'
-		elif any(value in fmt for value in ['.web.', 'webdl', 'web.dl', 'webrip', 'web.rip']): type += ' WEB /'
-		elif any(i in fmt for i in ['dvdrip', 'dvd.rip']): type += ' DVD /'
+		if any(value in fmt for value in BLURAY): type += ' BLURAY /'
+		elif any(i in fmt for i in DVD): type += ' DVD /'
+		elif any(value in fmt for value in WEB): type += ' WEB /'
 		elif 'hdtv' in fmt: type += ' HDTV /'
 		elif 'pdtv' in fmt: type += ' PDTV /'
-		elif any(value in fmt for value in ['dvdscr', 'dvd.scr']): type += ' DVDSCR /'
-		elif any(value in fmt for value in ['screener', '.scr']): type += ' SCR /'
-		elif any(value in fmt for value in ['.hdrip', '.hd.rip']): type += ' HDRIP /'
+		elif any(value in fmt for value in SCR): type += ' SCR /'
+		elif any(value in fmt for value in HDRIP): type += ' HDRIP /'
 
 		if 'atmos' in fmt: type += ' ATMOS /'
 		if any(value in fmt for value in DOLBY_TRUEHD): type += ' DOLBY-TRUEHD /'

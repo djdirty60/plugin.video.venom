@@ -117,7 +117,9 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 					tvshowtitle = item.get('tvshowtitle')
 					listitem.setProperty('venom.tvshowtitle', tvshowtitle)
 					listitem.setProperty('venom.year', str(item.get('year')))
-					new_date = tools.Time.convert(stringTime=str(item.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')
+					zoneTo, formatInput = 'utc', '%Y-%m-%d'
+					if 'T' in str(item.get('premiered', '')): 	zoneTo, formatInput = 'local', '%Y-%m-%dT%H:%M:%S.000Z'
+					new_date = tools.Time.convert(stringTime=str(item.get('premiered', '')), formatInput=formatInput, formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo=zoneTo)
 					listitem.setProperty('venom.premiered', new_date)
 					season = str(item.get('season'))
 					listitem.setProperty('venom.season', season)

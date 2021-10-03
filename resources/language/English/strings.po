@@ -1590,15 +1590,15 @@ msgid "Recently aired (TVMaze)"
 msgstr ""
 
 msgctxt "#32485"
-msgid ""
+msgid "Year (TMDb)"
 msgstr ""
 
 msgctxt "#32486"
-msgid ""
+msgid "Genres (TMDb)"
 msgstr ""
 
 msgctxt "#32487"
-msgid ""
+msgid "Certificates (TMDb)"
 msgstr ""
 
 msgctxt "#32488"

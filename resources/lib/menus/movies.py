@@ -21,12 +21,11 @@ from resources.lib.modules import views
 
 
 class Movies:
-	def __init__(self, type='movie', notifications=True):
+	def __init__(self, notifications=True):
 		self.list = []
 		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.page_limit = control.setting('page.item.limit')
 		self.search_page_limit = control.setting('search.page.limit')
-		self.type = type
 		self.notifications = notifications
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
@@ -51,6 +50,9 @@ class Movies:
 		self.tmdb_upcoming_link = 'https://api.themoviedb.org/3/movie/upcoming?api_key=%s&language=en-US&region=US&page=1' 
 		self.tmdb_nowplaying_link = 'https://api.themoviedb.org/3/movie/now_playing?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_boxoffice_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&sort_by=revenue.desc&page=1'
+		self.tmdb_year_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&sort_by=popularity.desc&certification_country=US&primary_release_year=%s&page=1'
+		self.tmdb_genre_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&with_genres=%s&sort_by=popularity.desc&page=1'
+		self.tmdb_certification_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&sort_by=popularity.desc&certification_country=US&certification=%s&page=1'
 		self.imdb_link = 'https://www.imdb.com'
 		self.persons_link = 'https://www.imdb.com/search/name/?count=100&name='
 		self.personlist_link = 'https://www.imdb.com/search/name/?count=100&gender=male,female'
@@ -156,7 +158,7 @@ class Movies:
 			if u in self.tmdb_link and '/list/' in url:
 				self.list = cache.get(tmdb_indexer.Movies().tmdb_collections_list, 0, url)
 				self.sort()
-			elif u in self.tmdb_link and not '/list/' in url:
+			elif u in self.tmdb_link and '/list/' not in url:
 				duration = 168 if cached else 0
 				self.list = cache.get(tmdb_indexer.Movies().tmdb_list, duration, url)
 			if self.list is None: self.list = []
@@ -400,17 +402,22 @@ class Movies:
 		self.addDirectory(self.list)
 		return self.list
 
-	def genres(self):
+	def genres(self, url):
+		try: url = getattr(self, url + '_link')
+		except: pass
 		genres = [
-			('Action', 'action', True), ('Adventure', 'adventure', True), ('Animation', 'animation', True),
-			('Biography', 'biography', True), ('Comedy', 'comedy', True), ('Crime', 'crime', True),
-			('Documentary', 'documentary', True), ('Drama', 'drama', True), ('Family', 'family', True),
-			('Fantasy', 'fantasy', True), ('Film-Noir', 'film-noir', True), ('History', 'history', True),
-			('Horror', 'horror', True), ('Music', 'music', True), ('Musical', 'musical', True),
-			('Mystery', 'mystery', True), ('Romance', 'romance', True), ('Science Fiction', 'sci-fi', True),
-			('Sport', 'sport', True), ('Thriller', 'thriller', True), ('War', 'war', True), ('Western', 'western', True)]
+			('Action', 'action', True, '28'), ('Adventure', 'adventure', True, '12'), ('Animation', 'animation', True, '16'),
+			('Biography', 'biography', True), ('Comedy', 'comedy', True, '35'), ('Crime', 'crime', True, '80'),
+			('Documentary', 'documentary', True, '99'), ('Drama', 'drama', True, '18'), ('Family', 'family', True, '10751'),
+			('Fantasy', 'fantasy', True, '14'), ('Film-Noir', 'film-noir', True), ('History', 'history', True, '36'),
+			('Horror', 'horror', True, '27'), ('Music', 'music', True, '10402'), ('Musical', 'musical', True),
+			('Mystery', 'mystery', True, '9648'), ('Romance', 'romance', True, '10749'), ('Science Fiction', 'sci-fi', True, '878'),
+			('Sport', 'sport', True), ('Thriller', 'thriller', True, '53'), ('War', 'war', True, '10752'), ('Western', 'western', True, '37')]
 		for i in genres:
-			self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': self.genre_link % i[1] if i[2] else self.keyword_link % i[1], 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'movies' })
+			if self.imdb_link in url: self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': url % i[1] if i[2] else self.keyword_link % i[1], 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'movies'})
+			if self.tmdb_link in url:
+				try: self.list.append({'content': 'genres', 'name': cleangenre.lang(i[0], self.lang), 'url': url % ('%s', i[3]), 'image': i[0] + '.jpg', 'icon': i[0] + '.png', 'action': 'tmdbmovies'})
+				except: pass
 		self.addDirectory(self.list)
 		return self.list
 
@@ -425,22 +432,28 @@ class Movies:
 		self.addDirectory(self.list)
 		return self.list
 
-	def certifications(self):
+	def certifications(self, url):
+		try: url = getattr(self, url + '_link')
+		except: pass
 		certificates = [
-			('General Audience (G)', 'US%3AG'),
-			('Parental Guidance (PG)', 'US%3APG'),
-			('Parental Caution (PG-13)', 'US%3APG-13'),
-			('Parental Restriction (R)', 'US%3AR'),
-			('Mature Audience (NC-17)', 'US%3ANC-17')]
+			('General Audience (G)', 'US%3AG', 'G'),
+			('Parental Guidance (PG)', 'US%3APG', 'PG'),
+			('Parental Caution (PG-13)', 'US%3APG-13', 'PG-13'),
+			('Parental Restriction (R)', 'US%3AR', 'R'),
+			('Mature Audience (NC-17)', 'US%3ANC-17', 'NC-17')]
 		for i in certificates:
-			self.list.append({'content': 'tags', 'name': str(i[0]), 'url': self.certification_link % i[1], 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'movies'})
+			if self.imdb_link in url: self.list.append({'content': 'tags', 'name': str(i[0]), 'url': url % i[1], 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'movies'})
+			if self.tmdb_link in url: self.list.append({'content': 'tags', 'name': str(i[0]), 'url': url % ('%s', i[2]), 'image': 'certificates.png', 'icon': 'certificates.png', 'action': 'tmdbmovies'})
 		self.addDirectory(self.list)
 		return self.list
 
-	def years(self):
+	def years(self, url):
+		try: url = getattr(self, url + '_link')
+		except: pass
 		year = (self.date_time.strftime('%Y'))
 		for i in range(int(year)-0, 1900, -1):
-			self.list.append({'content': 'years', 'name': str(i), 'url': self.year_link % (str(i), str(i)), 'image': 'years.png', 'icon': 'DefaultYear.png', 'action': 'movies'})
+			if self.imdb_link in url: self.list.append({'content': 'years', 'name': str(i), 'url': url % (str(i), str(i)), 'image': 'years.png', 'icon': 'DefaultYear.png', 'action': 'movies'})
+			if self.tmdb_link in url: self.list.append({'content': 'years', 'name': str(i), 'url': url % ('%s', str(i)), 'image': 'years.png', 'icon': 'DefaultYear.png', 'action': 'tmdbmovies'})
 		self.addDirectory(self.list)
 		return self.list
 
@@ -743,6 +756,7 @@ class Movies:
 			log_utils.error()
 			return
 		next = ''
+
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
 			result = result.replace('"class="lister-page-next', '" class="lister-page-next')
@@ -1016,6 +1030,7 @@ class Movies:
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
+
 		if next:
 			try:
 				if not items: raise Exception()

@@ -139,7 +139,7 @@ class Movies:
 				log_utils.error()
 
 		def items_list(i):
-			if self.list[i]['metacache']: 	return
+			if self.list[i]['metacache']: return
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')

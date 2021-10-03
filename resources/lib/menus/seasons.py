@@ -18,9 +18,8 @@ from resources.lib.modules import views
 
 
 class Seasons:
-	def __init__(self, type='show'):
+	def __init__(self):
 		self.list = []
-		self.type = type
 		self.lang = control.apiLanguage()['tmdb']
 		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'

@@ -35,14 +35,13 @@ class Player(xbmc.Player):
 		self.playnext_time = int(control.setting('playnext.time')) or 60
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 
-
 	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta):
 		try:
 			if not url: raise Exception
 			self.media_type = 'movie' if season is None or episode is None else 'episode'
 			self.title, self.year = title, str(year)
 			if self.media_type == 'movie':
-				self.name, self.season, self.episode  = '%s (%s)' % (title, self.year), None, None
+				self.name, self.season, self.episode = '%s (%s)' % (title, self.year), None, None
 			elif self.media_type == 'episode':
 				self.name, self.season, self.episode = '%s S%02dE%02d' % (title, int(season), int(episode)), '%01d' % int(season), '%01d' % int(episode)
 			self.imdb, self.tmdb, self.tvdb = imdb or '', tmdb or '', tvdb or ''
@@ -312,7 +311,6 @@ class Player(xbmc.Player):
 
 	def onPlayBackStopped(self):
 		try:
-			# control.homeWindow.clearProperty('venom.isplaying.playlist') # not used atm
 			control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 			if self.media_length == 0: return xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGINFO)
 			Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
@@ -341,7 +339,6 @@ class Player(xbmc.Player):
 		xbmc.log('[ plugin.video.venom ] onPlayBackEnded callback', LOGINFO)
 
 	def onPlayBackError(self):
-		# control.homeWindow.clearProperty('venom.isplaying.playlist') # not used atm
 		control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 		log_utils.error()
@@ -436,8 +433,8 @@ class PlayNext(xbmc.Player):
 				sources.Sources().preResolve(next_sources, next_meta)
 			else: control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 		except:
-			control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 			log_utils.error()
+			control.homeWindow.clearProperty('venom.preResolved_nextUrl')
 
 
 class Subtitles:
