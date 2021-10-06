@@ -223,6 +223,7 @@
 		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_traktAcctMyAccounts)" visible="!eq(-1,)" />
 		<setting id="trakt.token" type="text" visible="false" label="" default="" />
 		<setting id="trakt.refresh" type="text" visible="false" label="" default="" />
+		<!-- <setting id="trakt.expires" type="text" visible="false" label="" default="" /> -->
 		<setting id="trakt.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,)" />
 		<setting id="trakt.general.notifications" type="bool" label="33052" default="true" visible="!eq(-5,)" />
 		<setting id="trakt.directProgress.scrape" type="bool" label="35492" default="false" visible="!eq(-6,)" />

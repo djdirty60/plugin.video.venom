@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.2.9">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.0">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,12 +32,10 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.2.9 - Oct. 03, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added TMDb meta provider to "Discover Movies" for Genres, Year, and Certification.  Added TMDb meta provider to "Discover TV Shows" for Genres, and Year.  IMDb is still available so both will be shown.  You can disable ones you prefer to not use in the Navigation category settings. TMDb tends to be a little faster.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed Premiered format string in [B]"Tools-Trakt Management-Unfinished Progress Manager-Episodes"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Few new strings added for HDR detection of source links.[/I]
-[COLOR yellow]--[/COLOR][I] Updated TMDb Helper player files to fix an issue with CoreElec 19.2 RC version.  Please be sure to update via TMDb Helper if addon is installed.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed quality icons case issue for Linux.[/I]
+[B][COLOR red]Update - v6.3.0 - Oct. 05, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed some rare cases of Trakt lists not loading the listItems.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed TV Shows (TMDb)-Genres, Animation, Crime, Comedy failing to load.[/I]
+[COLOR yellow]--[/COLOR][I] Please note if you had widgets pointing at either "Discover Movies" or "Discover TV Shows" for Genres and or Years you will need to recreate those due to the addion of the TMDb meta provider cases from previous update since the path is now different.[/I]
 		</news>
 	</extension>
 </addon>

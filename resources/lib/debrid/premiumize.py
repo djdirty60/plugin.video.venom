@@ -44,8 +44,11 @@ class Premiumize:
 		self.store_to_cloud = control.setting('premiumize.saveToCloud') == 'true'
 
 	def _get(self, url):
+		response = None
+		if self.token == '': return None
 		try:
 			response = requests.get(url, headers=self.headers, timeout=15).json()
+			# if response.status_code in [200, 201]: response = response.json() # need status code checking for server maintenance
 			if 'status' in response:
 				if response.get('status') == 'success': return response
 				if response.get('status') == 'error':
@@ -56,8 +59,11 @@ class Premiumize:
 		return response
 
 	def _post(self, url, data={}):
+		response = None
+		if self.token == '': return None
 		try:
 			response = requests.post(url, data, headers=self.headers, timeout=15).json()
+			# if response.status_code in [200, 201]: response = response.json() # need status code checking for server maintenance
 			if 'status' in response:
 				if response.get('status') == 'success': return response
 				if response.get('status') == 'error':

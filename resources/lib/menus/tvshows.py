@@ -88,7 +88,6 @@ class TVshows:
 		# Ticket is in to add this feature but currently not available
 		# self.tmdb_certification_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&language=en-US&sort_by=popularity.desc&certification_country=US&certification=%s&page=1'
 
-
 	def get(self, url, idx=True, create_directory=True):
 		self.list = []
 		try:
@@ -381,8 +380,8 @@ class TVshows:
 		try: url = getattr(self, url + '_link')
 		except: pass
 		genres = [
-			('Action', 'action', True, '10759'), ('Adventure', 'adventure', True), ('Animation', 'animation', True, '32550'), ('Anime', 'anime', False),
-			('Biography', 'biography', True), ('Comedy', 'comedy', True, '32551'), ('Crime', 'crime', True, '32552'), ('Drama', 'drama', True, '18'),
+			('Action', 'action', True, '10759'), ('Adventure', 'adventure', True), ('Animation', 'animation', True, '16'), ('Anime', 'anime', False),
+			('Biography', 'biography', True), ('Comedy', 'comedy', True, '35'), ('Crime', 'crime', True, '80'), ('Drama', 'drama', True, '18'),
 			('Family', 'family', True, '10751'), ('Fantasy', 'fantasy', True), ('Game-Show', 'game_show', True), ('History', 'history', True),
 			('Horror', 'horror', True), ('Music', 'music', True), ('Musical', 'musical', True), ('Mystery', 'mystery', True, '9648'),
 			('News', 'news', True, '10763'), ('Reality', 'reality_tv', True, '10764'), ('Romance', 'romance', True), ('Science Fiction', 'sci_fi', True, '10765'),
@@ -570,8 +569,9 @@ class TVshows:
 				if item['content_type'] == 'movies': continue
 				list_name = item['list_name']
 				list_owner = item['list_owner']
+				list_owner_slug = item['list_owner_slug']
 				list_id = item['trakt_id']
-				list_url = self.traktlist_link % (list_owner, list_id)
+				list_url = self.traktlist_link % (list_owner_slug, list_id)
 				next = ''
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
 				self.list.append({'name': label, 'list_type': 'traktPulicList', 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})
@@ -682,8 +682,9 @@ class TVshows:
 				if item['content_type'] == 'movies': continue
 				list_name = item['list_name']
 				list_owner = item['list_owner']
+				list_owner_slug = item['list_owner_slug']
 				list_id = item['trakt_id']
-				list_url = self.traktlist_link % (list_owner, list_id)
+				list_url = self.traktlist_link % (list_owner_slug, list_id)
 				next = ''
 				label = '%s - [COLOR %s]%s[/COLOR]' % (list_name, self.highlight_color, list_owner)
 				self.list.append({'name': label, 'url': list_url, 'list_owner': list_owner, 'list_name': list_name, 'list_id': list_id, 'context': list_url, 'next': next, 'image': 'trakt.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tvshows'})

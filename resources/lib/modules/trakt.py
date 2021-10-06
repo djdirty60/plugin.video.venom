@@ -1384,7 +1384,6 @@ def sync_liked_lists(activities=None, forced=False):
 	try:
 		link = '/users/likes/lists?limit=1000000'
 		list_link = '/users/%s/lists/%s/items/%s'
-
 		db_last_liked = traktsync.last_sync('last_liked_at')
 		listActivity = getListActivity(activities)
 		if (listActivity > db_last_liked) or forced:
