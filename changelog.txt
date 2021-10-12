@@ -1,4 +1,11 @@
 
+[B][COLOR red]Update - v6.3.1 - Oct. 12, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed Trakt Manager-Add and Remove from Collections not working.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed empty Trakt Collection list produces infinite busy dialog.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed Trakt "Popular" and "Trending" list error when list privacy api response is "private" or "friends".[/I]
+[COLOR yellow]--[/COLOR][I] Trakt "Finish Watching" lists now load faster and utilize the traktsync.db entries vs. api request.[/I]
+
+
 [B][COLOR red]Update - v6.3.0 - Oct. 05, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed some rare cases of Trakt lists not loading the listItems.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed TV Shows (TMDb)-Genres, Animation, Crime, Comedy failing to load.[/I]

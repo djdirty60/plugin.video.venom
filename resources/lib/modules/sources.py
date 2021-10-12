@@ -1028,7 +1028,7 @@ class Sources:
 			control.hide()
 			chosen = control.selectDialog(display_list, heading=name)
 			if chosen < 0: return None
-			if control.condVisibility("Window.IsActive(source_results.xml)"): 	# close "source_results.xml" here after selection is made and valid
+			if control.condVisibility("Window.IsActive(source_results.xml)"): # close "source_results.xml" here after selection is made and valid
 				control.closeAll()
 			control.busy()
 			chosen_result = debrid_files[chosen]

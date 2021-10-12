@@ -36,7 +36,7 @@ class SettingsMonitor(control.monitor_class):
 		window.setProperty('venom.debug.reversed', control.setting('debug.reversed'))
 		control.log('[ plugin.video.venom ]  Settings Monitor Service Starting...', LOGINFO)
 
-	def onSettingsChanged(self): 	# Kodi callback when the addon settings are changed
+	def onSettingsChanged(self): # Kodi callback when the addon settings are changed
 		window.clearProperty('venom_settings')
 		control.sleep(50)
 		refreshed = control.make_settings_dict()
@@ -122,14 +122,14 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				window.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.3.0' # set to desired version to force any db clearing needed
+				clearDB_version = '6.3.1' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					clr_fanarttv = False
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=True, clr_search=False, clr_bookmarks=False)
 					from resources.lib.database import traktsync
-					clr_traktSync = {'bookmarks': False, 'hiddenProgress': False, 'liked_lists': True, 'movies_collection': False, 'movies_watchlist': False, 'public_lists': True,
-											'popular_lists': True, 'service': False, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': True, 'user_lists': True}
+					clr_traktSync = {'bookmarks': True, 'hiddenProgress': False, 'liked_lists': False, 'movies_collection': False, 'movies_watchlist': False, 'public_lists': True,
+											'popular_lists': True, 'service': False, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': True, 'user_lists': False}
 					cleared = traktsync.delete_tables(clr_traktSync)
 					if cleared:
 						control.notification(message='Forced traktsync clear for version update complete.')

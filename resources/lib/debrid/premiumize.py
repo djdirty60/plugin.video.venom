@@ -246,7 +246,7 @@ class Premiumize:
 		control.busy()
 		extensions = supported_video_extensions()
 		transfer_id = self.create_transfer(magnet_url)
-		if not transfer_id: 	return control.hide()
+		if not transfer_id: return control.hide()
 		if not transfer_id['status'] == 'success': return _return_failed()
 		transfer_id = transfer_id['id']
 		transfer_info = _transfer_info(transfer_id)

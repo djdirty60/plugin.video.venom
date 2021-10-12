@@ -343,7 +343,7 @@ def update_cache_version():
 	try:
 		curVersion = control.addon('plugin.video.venom').getAddonInfo('version')
 		if oldVersion != curVersion:
-			with open(versionFile, 'w') as fh: 	fh.write(curVersion)
+			with open(versionFile, 'w') as fh: fh.write(curVersion)
 			return oldVersion, True
 		else: return oldVersion, False
 	except:

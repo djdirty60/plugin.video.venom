@@ -83,7 +83,7 @@ class youtube(object):
 				items += result['items']
 			except: pass
 		try:
-			if not pagination: 	raise Exception()
+			if not pagination: raise Exception()
 			next = cid + '&pageToken=' + result['nextPageToken']
 		except: next = ''
 		for item in items: 

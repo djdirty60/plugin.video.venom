@@ -3,9 +3,14 @@
 	Venom Add-on
 """
 
-from resources.lib.modules.control import dialog, getHighlightColor
+from json import dumps as jsdumps
+from urllib.parse import quote_plus
+import xbmc
+from resources.lib.modules.control import dialog, getHighlightColor, yesnoDialog, sleep, condVisibility
 from resources.lib.modules import tools
 from resources.lib.windows.base import BaseDialog
+
+monitor = xbmc.Monitor()
 
 
 class TraktEpisodeProgressManagerXML(BaseDialog):
@@ -17,6 +22,7 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 		self.selected_items = []
 		self.make_items()
 		self.set_properties()
+		self.hasVideo = False
 
 	def onInit(self):
 		super(TraktEpisodeProgressManagerXML, self).onInit()
@@ -69,16 +75,13 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 				cm = []
 				chosen_listitem = self.item_list[self.get_position(self.window_id)]
 				# media_type = chosen_listitem.getProperty('venom.media_type')
-
 				source_trailer = chosen_listitem.getProperty('venom.trailer')
 				if not source_trailer:
 					from resources.lib.modules import trailer
 					source_trailer = trailer.Trailer().worker('show', chosen_listitem.getProperty('venom.tvshowtitle'), chosen_listitem.getProperty('venom.year'), None, chosen_listitem.getProperty('venom.imdb'))
 
 				if source_trailer: cm += [('[B]Play Trailer[/B]', 'playTrailer')]
-
-				# cm += [('[B]Browse Series[/B]', 'browseSeries')]
-
+				cm += [('[B]Browse Series[/B]', 'browseSeries')]
 				chosen_cm_item = dialog.contextmenu([i[0] for i in cm])
 				if chosen_cm_item == -1: return
 				cm_action = cm[chosen_cm_item][1]
@@ -90,7 +93,7 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 						sleep(500)
 						total_sleep += 500
 						self.hasVideo = condVisibility('Player.HasVideo')
-						if self.hasVideo or total_sleep >= 3000: break
+						if self.hasVideo or total_sleep >= 10000: break
 					if self.hasVideo:
 						self.setFocusId(2045)
 						while (condVisibility('Player.HasVideo') and not monitor.abortRequested()):
@@ -101,13 +104,42 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 						self.setFocusId(self.window_id)
 					else: self.setFocusId(self.window_id)
 
+				if cm_action == 'browseSeries':
+					systvshowtitle = quote_plus(chosen_listitem.getProperty('venom.tvshowtitle'))
+					year = chosen_listitem.getProperty('venom.year')
+					imdb = chosen_listitem.getProperty('venom.imdb')
+					tmdb = chosen_listitem.getProperty('venom.tmdb')
+					tvdb = chosen_listitem.getProperty('venom.tvdb')
+					from resources.lib.modules.control import lang
+					if not yesnoDialog(lang(32182), '', ''): return
+					self.chosen_hide, self.chosen_unhide = None, None
+					self.close()
+					sysart = quote_plus(chosen_listitem.getProperty('venom.art'))
+					self.execute_code('ActivateWindow(Videos,plugin://plugin.video.venom/?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s,return)' % (
+							systvshowtitle, year, imdb, tmdb, tvdb, sysart))
 			elif action in self.closing_actions:
 				self.selected_items = None
-				self.close()
+				if self.hasVideo: self.execute_code('PlayerControl(Stop)')
+				else: self.close()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 			self.close()
+
+	def setProgressBar(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(self.calculate_percent())
+
+	def calculate_percent(self):
+		return (xbmc.Player().getTime() / float(xbmc.Player().getTotalTime())) * 100
+
+	def progressBarReset(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(0)
 
 	def make_items(self):
 		def builder():
@@ -118,7 +150,7 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 					listitem.setProperty('venom.tvshowtitle', tvshowtitle)
 					listitem.setProperty('venom.year', str(item.get('year')))
 					zoneTo, formatInput = 'utc', '%Y-%m-%d'
-					if 'T' in str(item.get('premiered', '')): 	zoneTo, formatInput = 'local', '%Y-%m-%dT%H:%M:%S.000Z'
+					if 'T' in str(item.get('premiered', '')): zoneTo, formatInput = 'local', '%Y-%m-%dT%H:%M:%S.000Z'
 					new_date = tools.Time.convert(stringTime=str(item.get('premiered', '')), formatInput=formatInput, formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo=zoneTo)
 					listitem.setProperty('venom.premiered', new_date)
 					season = str(item.get('season'))
@@ -127,7 +159,8 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 					listitem.setProperty('venom.episode', episode)
 					label = '%s  -  %sx%s' % (tvshowtitle, season, episode.zfill(2))
 					listitem.setProperty('venom.label', label)
-					labelProgress = str(round(float(item['progress'] * 100), 1)) + '%'
+					# labelProgress = str(round(float(item['progress'] * 100), 1)) + '%'
+					labelProgress = str(round(float(item['progress']), 1)) + '%'
 					listitem.setProperty('venom.progress', '[' + labelProgress + ']')
 					listitem.setProperty('venom.isSelected', '')
 					listitem.setProperty('venom.imdb', item.get('imdb'))
@@ -139,8 +172,15 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 					listitem.setProperty('venom.duration', str(item.get('duration')))
 					listitem.setProperty('venom.mpaa', item.get('mpaa') or 'NA')
 					listitem.setProperty('venom.plot', item.get('plot'))
-					listitem.setProperty('venom.poster', item.get('poster', ''))
-					listitem.setProperty('venom.clearlogo', item.get('clearlogo', ''))
+					poster = item.get('season_poster', '') or item.get('poster', '') or item.get('poster2', '') or item.get('poster3', '')
+					fanart = item.get('fanart', '') or item.get('fanart2', '') or item.get('fanart3', '')
+					clearlogo = item.get('clearlogo', '')
+					clearart = item.get('clearart', '')
+					art = {'poster': poster, 'tvshow.poster': poster, 'fanart': fanart, 'icon': item.get('icon') or poster, 'thumb': item.get('thumb', ''), 'banner': item.get('banner2', ''), 'clearlogo': clearlogo,
+								'tvshow.clearlogo': clearlogo, 'clearart': clearart, 'tvshow.clearart': clearart, 'landscape': item.get('landscape', '')}
+					listitem.setProperty('venom.poster', poster)
+					listitem.setProperty('venom.clearlogo', clearlogo)
+					listitem.setProperty('venom.art', jsdumps(art))
 					listitem.setProperty('venom.count', '%02d.)' % count)
 					yield listitem
 				except:

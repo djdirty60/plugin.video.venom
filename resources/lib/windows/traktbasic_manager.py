@@ -3,11 +3,12 @@
 	Venom Add-on
 """
 
+from json import dumps as jsdumps
 from urllib.parse import quote_plus
+import xbmc
 from resources.lib.modules.control import dialog, getHighlightColor, yesnoDialog, sleep, condVisibility
 from resources.lib.windows.base import BaseDialog
 
-import xbmc
 monitor = xbmc.Monitor()
 
 
@@ -88,7 +89,7 @@ class TraktBasicManagerXML(BaseDialog):
 						sleep(500)
 						total_sleep += 500
 						self.hasVideo = condVisibility('Player.HasVideo')
-						if self.hasVideo or total_sleep >= 3000: break
+						if self.hasVideo or total_sleep >= 10000: break
 					if self.hasVideo:
 						self.setFocusId(2045)
 						while (condVisibility('Player.HasVideo') and not monitor.abortRequested()):
@@ -109,7 +110,7 @@ class TraktBasicManagerXML(BaseDialog):
 					if not yesnoDialog(lang(32182), '', ''): return
 					self.chosen_hide, self.chosen_unhide = None, None
 					self.close()
-					sysart = ''
+					sysart = quote_plus(chosen_listitem.getProperty('venom.art'))
 					self.execute_code('ActivateWindow(Videos,plugin://plugin.video.venom/?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s,return)' % (
 							systvshowtitle, year, imdb, tmdb, tvdb, sysart))
 
@@ -137,7 +138,6 @@ class TraktBasicManagerXML(BaseDialog):
 		if progress_bar is not None:
 			progress_bar.setPercent(0)
 
-
 	def make_items(self):
 		def builder():
 			for count, item in enumerate(self.results, 1):
@@ -160,8 +160,15 @@ class TraktBasicManagerXML(BaseDialog):
 					listitem.setProperty('venom.duration', str(item.get('duration')))
 					listitem.setProperty('venom.mpaa', item.get('mpaa') or 'NA')
 					listitem.setProperty('venom.plot', item.get('plot'))
-					listitem.setProperty('venom.poster', item.get('poster', ''))
-					listitem.setProperty('venom.clearlogo', item.get('clearlogo', ''))
+					poster = item.get('season_poster', '') or item.get('poster', '') or item.get('poster2', '') or item.get('poster3', '')
+					fanart = item.get('fanart', '') or item.get('fanart2', '') or item.get('fanart3', '')
+					clearlogo = item.get('clearlogo', '')
+					clearart = item.get('clearart', '')
+					art = {'poster': poster, 'tvshow.poster': poster, 'fanart': fanart, 'icon': item.get('icon') or poster, 'thumb': item.get('thumb', ''), 'banner': item.get('banner2', ''), 'clearlogo': clearlogo,
+								'tvshow.clearlogo': clearlogo, 'clearart': clearart, 'tvshow.clearart': clearart, 'landscape': item.get('landscape', '')}
+					listitem.setProperty('venom.poster', poster)
+					listitem.setProperty('venom.clearlogo', clearlogo)
+					listitem.setProperty('venom.art', jsdumps(art))
 					listitem.setProperty('venom.count', '%02d.)' % count)
 					yield listitem
 				except:

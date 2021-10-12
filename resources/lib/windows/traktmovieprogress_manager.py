@@ -3,8 +3,11 @@
 	Venom Add-on
 """
 
+import xbmc
 from resources.lib.modules.control import dialog, getHighlightColor, sleep, condVisibility
 from resources.lib.windows.base import BaseDialog
+
+monitor = xbmc.Monitor()
 
 
 class TraktMovieProgressManagerXML(BaseDialog):
@@ -16,6 +19,7 @@ class TraktMovieProgressManagerXML(BaseDialog):
 		self.selected_items = []
 		self.make_items()
 		self.set_properties()
+		self.hasVideo = False
 
 	def onInit(self):
 		super(TraktMovieProgressManagerXML, self).onInit()
@@ -62,16 +66,12 @@ class TraktMovieProgressManagerXML(BaseDialog):
 				cm = []
 				chosen_listitem = self.item_list[self.get_position(self.window_id)]
 				# media_type = chosen_listitem.getProperty('venom.media_type')
-
 				source_trailer = chosen_listitem.getProperty('venom.trailer')
 				if not source_trailer:
 					from resources.lib.modules import trailer
 					source_trailer = trailer.Trailer().worker('movie', chosen_listitem.getProperty('venom.title'), chosen_listitem.getProperty('venom.year'), None, chosen_listitem.getProperty('venom.imdb'))
 
 				if source_trailer: cm += [('[B]Play Trailer[/B]', 'playTrailer')]
-
-				# cm += [('[B]Browse Series[/B]', 'browseSeries')]
-
 				chosen_cm_item = dialog.contextmenu([i[0] for i in cm])
 				if chosen_cm_item == -1: return
 				cm_action = cm[chosen_cm_item][1]
@@ -83,7 +83,7 @@ class TraktMovieProgressManagerXML(BaseDialog):
 						sleep(500)
 						total_sleep += 500
 						self.hasVideo = condVisibility('Player.HasVideo')
-						if self.hasVideo or total_sleep >= 3000: break
+						if self.hasVideo or total_sleep >= 10000: break
 					if self.hasVideo:
 						self.setFocusId(2045)
 						while (condVisibility('Player.HasVideo') and not monitor.abortRequested()):
@@ -96,11 +96,27 @@ class TraktMovieProgressManagerXML(BaseDialog):
 
 			elif action in self.closing_actions:
 				self.selected_items = None
-				self.close()
+				if self.hasVideo: self.execute_code('PlayerControl(Stop)')
+				else: self.close()
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 			self.close()
+
+	def setProgressBar(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(self.calculate_percent())
+
+	def calculate_percent(self):
+		return (xbmc.Player().getTime() / float(xbmc.Player().getTotalTime())) * 100
+
+	def progressBarReset(self):
+		try: progress_bar = self.getControlProgress(2046)
+		except: progress_bar = None
+		if progress_bar is not None:
+			progress_bar.setPercent(0)
 
 	def make_items(self):
 		def builder():
@@ -109,7 +125,8 @@ class TraktMovieProgressManagerXML(BaseDialog):
 					listitem = self.make_listitem()
 					listitem.setProperty('venom.title', item.get('title'))
 					listitem.setProperty('venom.year', str(item.get('year')))
-					labelProgress = str(round(float(item['progress'] * 100), 1)) + '%'
+					# labelProgress = str(round(float(item['progress'] * 100), 1)) + '%'
+					labelProgress = str(round(float(item['progress']), 1)) + '%'
 					listitem.setProperty('venom.progress', '[' + labelProgress + ']')
 					listitem.setProperty('venom.isSelected', '')
 					listitem.setProperty('venom.imdb', item.get('imdb'))

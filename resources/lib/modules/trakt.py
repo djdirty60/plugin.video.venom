@@ -574,9 +574,9 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 					sync_collection(forced=True)
 				if items[select][1] == '/sync/collection/remove':
 					if media_type == 'Movie':
-						traktsync.delete_collection_items([imdb], 'movies_watchlist', 'imdb')
+						traktsync.delete_collection_items([imdb], 'movies_collection', 'imdb')
 					else:
-						traktsync.delete_collection_items([tvdb], 'shows_watchlist', 'tvdb')
+						traktsync.delete_collection_items([tvdb], 'shows_collection', 'tvdb')
 
 				control.hide()
 				list = re.search('\[B](.+?)\[/B]', items[select][0]).group(1)
@@ -1157,7 +1157,7 @@ def getGenre(content, type, type_id):
 		log_utils.error()
 		return []
 
-def IdLookup(id_type, id, type): # ("id_type" can be trakt , imdb , tmdb , tvdb) (type can be one of "movie , show , episode , person , list")
+def IdLookup(id_type, id, type): # ("id_type" can be trakt, imdb, tmdb, tvdb) (type can be one of "movie , show , episode , person , list")
 	try:
 		url = '/search/%s/%s?type=%s' % (id_type, id, type)
 		result = cache.get(getTraktAsJson, 168, url)
@@ -1170,12 +1170,11 @@ def IdLookup(id_type, id, type): # ("id_type" can be trakt , imdb , tmdb , tvdb)
 def scrobbleMovie(imdb, tmdb, watched_percent):
 	try:
 		if not imdb.startswith('tt'): imdb = 'tt' + imdb
-		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
-		items = [{'progress': watched_percent, 'paused_at': timestamp, 'type': 'movie', 'movie': {'ids': {'imdb': imdb, 'tmdb': tmdb}}}]
-		traktsync.insert_bookmarks(items, new_scrobble=True)
 		success = getTrakt('/scrobble/pause', {"movie": {"ids": {"imdb": imdb}}, "progress": watched_percent})
 		if success:
 			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
+			control.sleep(1000)
+			sync_playbackProgress(forced=True)
 		else:
 			control.notification(message=32130)
 	except:
@@ -1184,12 +1183,11 @@ def scrobbleMovie(imdb, tmdb, watched_percent):
 def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 	try:
 		season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
-		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
-		items = [{'progress': watched_percent, 'paused_at': timestamp, 'type': 'episode', 'episode': {'season': season, 'number': episode}, 'show': {'ids': {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb}}}]
-		traktsync.insert_bookmarks(items, new_scrobble=True)
 		success = getTrakt('/scrobble/pause', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": watched_percent})
 		if success:
 			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
+			control.sleep(1000)
+			sync_playbackProgress(forced=True)
 		else:
 			control.notification(message=32130)
 	except:
@@ -1247,7 +1245,7 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 		control.hide()
 		if success:
 			if refresh: control.refresh()
-			if widgetRefresh: 	control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
+			if widgetRefresh: control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
 			control.notification(title='Trakt Playback Progress Manager', message='Successfuly Removed %s Item%s' % (total_items, 's' if total_items >1 else ''))
 			return True
 		else: return False
@@ -1293,7 +1291,7 @@ def force_traktSync():
 
 def sync_playbackProgress(activities=None, forced=False):
 	try:
-		link = '/sync/playback/'
+		link = '/sync/playback/?extended=full'
 		if forced:
 			items = getTraktAsJson(link, silent=True)
 			if items: traktsync.insert_bookmarks(items)
@@ -1393,7 +1391,7 @@ def sync_liked_lists(activities=None, forced=False):
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
-				if list_item.get('privacy', '') == 'private': return
+				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): return
 				i['list']['content_type'] = ''
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
@@ -1489,7 +1487,7 @@ def sync_popular_lists(forced=False):
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
-				if list_item.get('privacy', '') == 'private': return
+				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): return
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
 				exists = traktsync.fetch_public_list(trakt_id)
 				if exists:
@@ -1531,7 +1529,7 @@ def sync_trending_lists(forced=False):
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
-				if list_item.get('privacy', '') == 'private': return
+				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): return
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
 				exists = traktsync.fetch_public_list(trakt_id)
 				if exists:

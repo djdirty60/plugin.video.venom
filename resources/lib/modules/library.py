@@ -261,7 +261,7 @@ class libmovies:
 					else: items = tmdb.Movies().tmdb_collections_list(url)
 			except:
 				log_utils.error()
-			if not items: 	continue
+			if not items: continue
 			if service_notification and not control.condVisibility('Window.IsVisible(infodialog)') and not control.condVisibility('Player.HasVideo'):
 				control.notification(title='list...' + list_name + ' - ' + type, message=32552)
 			for i in items:

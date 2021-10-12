@@ -126,7 +126,7 @@ class Movies:
 				if not isTraktHistory: self.sort()
 			elif u in self.trakt_link and self.search_link in url:
 				self.list = cache.get(self.trakt_list, 6, url, self.trakt_user)
-				if idx: self.worker(level=0)
+				if idx: self.worker()
 			elif u in self.trakt_link:
 				self.list = cache.get(self.trakt_list, 24, url, self.trakt_user)
 				if idx: self.worker()
@@ -192,19 +192,12 @@ class Movies:
 	def unfinished(self, url, idx=True, create_directory=True):
 		self.list = []
 		try:
-			try: url = getattr(self, url + '_link')
-			except: pass
-			if url == self.traktunfinished_link :
-				try:
-					if trakt.getPausedActivity() > cache.timeout(self.trakt_list, self.traktunfinished_link, self.trakt_user): raise Exception()
-					self.list = cache.get(self.trakt_list, 720, self.traktunfinished_link , self.trakt_user)
-				except:
-					self.list = cache.get(self.trakt_list, 0, self.traktunfinished_link , self.trakt_user)
-				if idx: self.worker()
-				self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
-				if self.list is None: self.list = []
-				if create_directory: self.movieDirectory(self.list, unfinished=True, next=False)
-				return self.list
+			self.list = traktsync.fetch_bookmarks(imdb='', ret_all=True, ret_type='movies')
+			if idx: self.worker()
+			self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
+			if self.list is None: self.list = []
+			if create_directory: self.movieDirectory(self.list, unfinished=True, next=False)
+			return self.list
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -536,7 +529,8 @@ class Movies:
 			self.sort() # sort before local pagination
 			if control.setting('trakt.paginate.lists') == 'true':
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
-				self.list = paginated_ids[index]
+				if not paginated_ids: pass
+				else: self.list = paginated_ids[index]
 			try:
 				if int(q['limit']) != len(self.list): raise Exception()
 				q.update({'page': str(int(q['page']) + 1)})
@@ -609,13 +603,15 @@ class Movies:
 			q = (urlencode(q)).replace('%2C', ',')
 			next = url.replace('?' + urlparse(url).query, '') + '?' + q
 		except: next = ''
-		for item in items: # rating and votes via TMDb, or I must use `extended=full and it slows down
+		for item in items: # rating and votes via TMDb, or I must use "extended=full" and it slows down
 			try:
 				values = {}
 				values['next'] = next 
 				values['added'] = item.get('listed_at', '')
 				values['paused_at'] = item.get('paused_at', '') # for unfinished
-				try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
+				# try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
+				# except: values['progress'] = ''
+				try: values['progress'] = item['progress']
 				except: values['progress'] = ''
 				try: values['lastplayed'] = item.get('watched_at', '') # for history
 				except: values['lastplayed'] = ''
@@ -726,7 +722,7 @@ class Movies:
 				list_id = list_item.get('ids', {}).get('trakt', '')
 				list_owner = list_item.get('user', {}).get('username', '')
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
-				if list_item.get('privacy', '') == 'private': continue
+				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): continue
 				list_url = self.traktlist_link % (list_owner_slug, list_id)
 				list_content = traktsync.fetch_public_list(list_id)
 				if not list_content: pass
@@ -852,7 +848,7 @@ class Movies:
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
 
-	def worker(self, level=1):
+	def worker(self):
 		try:
 			if not self.list: return
 			self.meta = []
@@ -875,7 +871,7 @@ class Movies:
 
 	def super_info(self, i):
 		try:
-			if self.list[i]['metacache']: 	return
+			if self.list[i]['metacache']: return
 			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '')
 #### -- Missing id's lookup -- ####
 			if not tmdb and imdb:
@@ -950,17 +946,16 @@ class Movies:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
 				trailer, runtime = i.get('trailer'), i.get('duration')
 				label = '%s (%s)' % (title, year)
-				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
+				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress']), 1)) + '%')
 				except: labelProgress = label
 				try:
-					if int(re.sub(r'[^0-9]', '', str(i['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
+					if int(re.sub(r'[^0-9]', '', str(i['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))): 
 						labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
-				if i.get('traktHistory') is True:
+				if i.get('traktHistory') is True: # uses Trakt lastplayed
 					try:
-						air_time = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
-						if air_time[12] == '0': air_time = air_time[:12] + air_time[13:]
-						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_time)
+						air_datetime = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', ''))
 					except: pass
 				sysname, systitle = quote_plus(label), quote_plus(title)
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
@@ -1060,7 +1055,7 @@ class Movies:
 				log_utils.error()
 		control.content(syshandle, 'movies')
 		control.directory(syshandle, cacheToDisc=True)
-		control.sleep(500)
+		control.sleep(100)
 		views.setView('movies', {'skin.estuary': 55, 'skin.confluence': 500})
 
 	def addDirectory(self, items, queue=False):

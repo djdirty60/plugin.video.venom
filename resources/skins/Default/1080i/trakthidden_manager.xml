@@ -203,7 +203,7 @@
 			</control>
 
 			<control type="group">
-				<description>OK and Stop Buttons</description>
+				<description>OK and Cancel Buttons</description>
 				<visible>!Player.HasVideo</visible>
 				<left>1470</left>
 				<top>50</top>

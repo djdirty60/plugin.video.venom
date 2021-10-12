@@ -91,14 +91,14 @@ class Episodes:
 		try:
 			try: url = getattr(self, url + '_link')
 			except: pass
-			if url == self.traktunfinished_link :
-				if trakt.getPausedActivity() > cache.timeout(self.trakt_episodes_list, url, self.trakt_user, self.lang):
-					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
-				else: self.list = cache.get(self.trakt_episodes_list, 720, url, self.trakt_user, self.lang)
-				if self.list is None: self.list = []
-				self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
-				if create_directory: self.episodeDirectory(self.list, unfinished=True, next=False)
-				return self.list
+			items = traktsync.fetch_bookmarks(imdb='', ret_all=True, ret_type='episodes')
+			if trakt.getPausedActivity() > cache.timeout(self.trakt_episodes_list, url, self.trakt_user, self.lang, items):
+				self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang, items)
+			else: self.list = cache.get(self.trakt_episodes_list, 720, url, self.trakt_user, self.lang, items)
+			if self.list is None: self.list = []
+			self.list = sorted(self.list, key=lambda k: k['paused_at'], reverse=True)
+			if create_directory: self.episodeDirectory(self.list, unfinished=True, next=False)
+			return self.list
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -240,8 +240,7 @@ class Episodes:
 
 	def calendars(self, create_directory=True):
 		m = control.lang(32060).split('|')
-		try: months = [
-					(m[0], 'January'), (m[1], 'February'), (m[2], 'March'), (m[3], 'April'), (m[4], 'May'), (m[5], 'June'), (m[6], 'July'),
+		try: months = [(m[0], 'January'), (m[1], 'February'), (m[2], 'March'), (m[3], 'April'), (m[4], 'May'), (m[5], 'June'), (m[6], 'July'),
 					(m[7], 'August'), (m[8], 'September'), (m[9], 'October'), (m[10], 'November'), (m[11], 'December')]
 		except: months = []
 		d = control.lang(32061).split('|')
@@ -488,7 +487,9 @@ class Episodes:
 				tvshowtitle = item.get('show').get('title')
 				if not tvshowtitle: continue
 				year = str(item.get('show').get('year'))
-				try: progress = max(0, min(1, item['progress'] / 100.0))
+				# try: progress = max(0, min(1, item['progress'] / 100.0))
+				# except: progress = None
+				try: progress = item['progress']
 				except: progress = None
 				ids = item.get('show', {}).get('ids', {})
 				imdb = str(ids.get('imdb', '')) if ids.get('imdb') else ''
@@ -538,9 +539,9 @@ class Episodes:
 				log_utils.error()
 		return itemlist
 
-	def trakt_episodes_list(self, url, user, lang, direct=True):
+	def trakt_episodes_list(self, url, user, lang, items=None, direct=True):
 		self.list = []
-		items = self.trakt_list(url, user)
+		if not items: items = self.trakt_list(url, user)
 		def items_list(i):
 			values = i
 			tmdb, tvdb = i['tmdb'], i['tvdb']
@@ -713,14 +714,14 @@ class Episodes:
 				if (not i['label'] or i['label'] == '0'): label = '%sx%02d . %s %s' % (season, int(episode), 'Episode', episode)
 				else: label = '%sx%02d . %s' % (season, int(episode), i['label'])
 				if isMultiList: label = '[COLOR %s]%s[/COLOR] - %s' % (self.highlight_color, tvshowtitle, label)
-				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
+				# try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
+				# except: labelProgress = label
+				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress']), 1)) + '%')
 				except: labelProgress = label
 				try:
 					if i['unaired'] == 'true': labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
 
-				# zoneTo, formatInput = 'utc', '%Y-%m-%d'
-				# if 'T' in str(item.get('premiered', '')): zoneTo, formatInput = 'local', '%Y-%m-%dT%H:%M:%S.000Z'
 				if i.get('traktHistory') is True: # uses Trakt lastplayed
 					try:
 						air_datetime = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')

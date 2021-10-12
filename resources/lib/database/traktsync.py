@@ -10,35 +10,44 @@ from resources.lib.modules import cleandate
 from resources.lib.modules.control import existsPath, dataPath, makeFile, traktSyncFile
 
 
-def fetch_bookmarks(imdb, tmdb='', tvdb='', season=None, episode=None):
+def fetch_bookmarks(imdb, tmdb='', tvdb='', season=None, episode=None, ret_all=None, ret_type='movies'):
 	progress = '0'
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
 		ck_table = dbcur.execute('''SELECT * FROM sqlite_master WHERE type='table' AND name='bookmarks';''').fetchone()
 		if not ck_table:
-			dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmarks (imdb TEXT, tmdb TEXT, tvdb TEXT, season TEXT, episode TEXT, percent_played TEXT, paused_at TEXT,
-			UNIQUE(imdb, tmdb, tvdb, season, episode));''')
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmarks (tvshowtitle TEXT, title TEXT, imdb TEXT, tmdb TEXT, tvdb TEXT, season TEXT, episode TEXT, genre TEXT, mpaa TEXT, 
+									studio TEXT, duration TEXT, percent_played TEXT, paused_at TEXT, UNIQUE(imdb, tmdb, tvdb, season, episode));''')
 			dbcur.connection.commit()
 			return progress
-		if not episode:
-			try: # Lookup both IMDb and TMDb first for more accurate match.
-				match = dbcur.execute('''SELECT * FROM bookmarks WHERE (imdb=? AND tmdb=? AND NOT imdb='' AND NOT tmdb='')''', (imdb, tmdb)).fetchone()
-				progress = match[5]
-			except:
-				try:
-					match = dbcur.execute('''SELECT * FROM bookmarks WHERE (imdb=? AND NOT imdb='')''', (imdb,)).fetchone()
-					progress = match[5]
-				except: pass
+		if ret_all:
+			if ret_type == 'movies':
+				match = dbcur.execute('''SELECT * FROM bookmarks WHERE (tvshowtitle='')''').fetchall()
+				progress = [{'title': i[1], 'imdb': i[2], 'tmdb': i[3], 'duration': int(i[10]), 'progress': i[11], 'paused_at': i[12]} for i in match]
+			else:
+				match = dbcur.execute('''SELECT * FROM bookmarks WHERE NOT (tvshowtitle='')''').fetchall()
+				progress = [{'tvshowtitle': i[0], 'title': i[1], 'imdb': i[2], 'tmdb': i[3], 'tvdb': i[4], 'season': int(i[5]), 'episode': int(i[6]), 'genre': i[7], 'mpaa': i[8],
+									'studio': i[9], 'duration': int(i[10]), 'progress': i[11], 'paused_at': i[12]} for i in match]
 		else:
-			try: # Lookup both IMDb and TVDb first for more accurate match.
-				match = dbcur.execute('''SELECT * FROM bookmarks WHERE (imdb=? AND tvdb=? AND season=? AND episode=? AND NOT imdb='' AND NOT tvdb='')''', (imdb, tvdb, season, episode)).fetchone()
-				progress = match[5]
-			except:
-				try:
-					match = dbcur.execute('''SELECT * FROM bookmarks WHERE (tvdb=? AND season=? AND episode=? AND NOT tvdb='')''', (tvdb, season, episode)).fetchone()
-					progress = match[5]
-				except: pass
+			if not episode:
+				try: # Lookup both IMDb and TMDb first for more accurate movie match.
+					match = dbcur.execute('''SELECT * FROM bookmarks WHERE (imdb=? AND tmdb=? AND NOT imdb='' AND NOT tmdb='')''', (imdb, tmdb)).fetchone()
+					progress = match[11]
+				except:
+					try:
+						match = dbcur.execute('''SELECT * FROM bookmarks WHERE (imdb=? AND NOT imdb='')''', (imdb,)).fetchone()
+						progress = match[11]
+					except: pass
+			else:
+				try: # Lookup both IMDb and TVDb first for more accurate episode match.
+					match = dbcur.execute('''SELECT * FROM bookmarks WHERE (imdb=? AND tvdb=? AND season=? AND episode=? AND NOT imdb='' AND NOT tvdb='')''', (imdb, tvdb, season, episode)).fetchone()
+					progress = match[11]
+				except:
+					try:
+						match = dbcur.execute('''SELECT * FROM bookmarks WHERE (tvdb=? AND season=? AND episode=? AND NOT tvdb='')''', (tvdb, season, episode)).fetchone()
+						progress = match[11]
+					except: pass
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -50,22 +59,27 @@ def insert_bookmarks(items, new_scrobble=False):
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
-		dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmarks (imdb TEXT, tmdb TEXT, tvdb TEXT, season TEXT, episode TEXT, percent_played TEXT, paused_at TEXT,
-		UNIQUE(imdb, tmdb, tvdb, season, episode));''')
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS bookmarks (tvshowtitle TEXT, title TEXT, imdb TEXT, tmdb TEXT, tvdb TEXT, season TEXT, episode TEXT, genre TEXT, mpaa TEXT, 
+								studio TEXT, duration TEXT, percent_played TEXT, paused_at TEXT, UNIQUE(imdb, tmdb, tvdb, season, episode));''')
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 		if not new_scrobble:
 			dbcur.execute('''DELETE FROM bookmarks''')
 			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
 			dbcur.execute('''VACUUM''')
 		for i in items:
-			imdb, tmdb, tvdb, season, episode = '', '', '', '', ''
+			tvshowtitle, tvdb, season, episode = '', '', '', ''
 			if i.get('type') == 'episode':
 				ids = i.get('show').get('ids')
-				imdb, tmdb, tvdb, season, episode = str(ids.get('imdb', '')), str(ids.get('tmdb', '')), str(ids.get('tvdb', '')), str(i.get('episode').get('season')), str(i.get('episode').get('number'))
+				tvshowtitle, title, imdb, tmdb, tvdb, season, episode, mpaa, studio, duration = i.get('show').get('title'), i.get('episode').get('title'), str(ids.get('imdb', '')), str(ids.get('tmdb', '')), str(ids.get('tvdb', '')), \
+				str(i.get('episode').get('season')), str(i.get('episode').get('number')), i.get('show').get('certification') or 'NR', i.get('show').get('network'), i.get('show').get('runtime')
+				try: genre = ' / '.join([x.title() for x in i.get('show', {}).get('genres')]) or 'NA'
+				except: genre = 'NA'
 			else:
 				ids = i.get('movie').get('ids')
-				imdb, tmdb = str(ids.get('imdb', '')), str(ids.get('tmdb', ''))
-			dbcur.execute('''INSERT OR REPLACE INTO bookmarks Values (?, ?, ?, ?, ?, ?, ?)''', (imdb, tmdb, tvdb, season, episode, i.get('progress', ''), i.get('paused_at', '')))
+				title, imdb, tmdb, mpaa, studio, duration = i.get('movie').get('title'), str(ids.get('imdb', '')), str(ids.get('tmdb', '')), i.get('movie').get('certification') or 'NR', '', i.get('movie').get('runtime')
+				try: genre = ' / '.join([x.title() for x in i.get('movie', {}).get('genres')]) or 'NA'
+				except: genre = 'NA'
+			dbcur.execute('''INSERT OR REPLACE INTO bookmarks Values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (tvshowtitle, title, imdb, tmdb, tvdb, season, episode, genre, mpaa, studio, duration, i.get('progress', ''), i.get('paused_at', '')))
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_paused_at', timestamp))
 		dbcur.connection.commit()

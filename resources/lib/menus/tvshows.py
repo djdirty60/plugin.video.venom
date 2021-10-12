@@ -109,7 +109,7 @@ class TVshows:
 				self.sort()
 			elif u in self.trakt_link and self.search_link in url:
 				self.list = cache.get(self.trakt_list, 6, url, self.trakt_user)
-				if idx: self.worker(level=0)
+				if idx: self.worker()
 			elif u in self.trakt_link:
 				self.list = cache.get(self.trakt_list, 24, url, self.trakt_user)
 				if idx: self.worker()
@@ -521,7 +521,8 @@ class TVshows:
 			self.sort() # sort before local pagination
 			if control.setting('trakt.paginate.lists') == 'true':
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
-				self.list = paginated_ids[index]
+				if not paginated_ids: pass
+				else: self.list = paginated_ids[index]
 			try:
 				if int(q['limit']) != len(self.list): raise Exception()
 				q.update({'page': str(int(q['page']) + 1)})
@@ -600,8 +601,10 @@ class TVshows:
 				values['next'] = next 
 				values['added'] = item.get('listed_at', '')
 				values['paused_at'] = item.get('paused_at', '') # for unfinished
-				try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
-				except: values['progress'] = ''
+				# try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
+				# except: values['progress'] = ''
+				try: values['progress'] = item['progress']
+				except: values['progress'] = None
 				values['lastplayed'] = item.get('watched_at', '') # for history
 				show = item.get('show') or item
 				values['title'] = show.get('title')
@@ -717,7 +720,7 @@ class TVshows:
 				list_id = list_item.get('ids', {}).get('trakt', '')
 				list_owner = list_item.get('user', {}).get('username', '')
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
-				if list_item.get('privacy', '') == 'private': continue
+				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): continue
 				list_url = self.traktlist_link % (list_owner_slug, list_id)
 				list_content = traktsync.fetch_public_list(list_id)
 				if not list_content: pass
@@ -841,7 +844,7 @@ class TVshows:
 		list = sorted(list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))
 		return list
 
-	def worker(self, level=1):
+	def worker(self):
 		try:
 			if not self.list: return
 			self.meta = []
@@ -1053,7 +1056,6 @@ class TVshows:
 				log_utils.error()
 		control.content(syshandle, 'tvshows')
 		control.directory(syshandle, cacheToDisc=True)
-		# control.sleep(500)
 		views.setView('tvshows', {'skin.estuary': 55, 'skin.confluence': 500})
 
 	def addDirectory(self, items, queue=False):

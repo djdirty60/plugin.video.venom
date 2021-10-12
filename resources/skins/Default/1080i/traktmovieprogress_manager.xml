@@ -3,6 +3,7 @@
 	<!-- <defaultcontrol>2050</defaultcontrol> -->
 	<controls>
 		<control type="image">
+			<description>background</description>
 			<left>0</left>
 			<top>0</top>
 			<width>1920</width>
@@ -54,6 +55,7 @@
 			<height>80</height>
 			<width min="0" max="1920">auto</width>
 			<control type="textbox">
+				<visible>!Player.HasVideo</visible>
 				<left>0</left>
 				<top>110</top>
 				<width>130</width>
@@ -66,6 +68,7 @@
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]Remove[/COLOR]</label>
 			</control>
 			<control type="textbox">
+				<visible>!Player.HasVideo</visible>
 				<left>160</left>
 				<top>110</top>
 				<width>340</width>
@@ -200,6 +203,8 @@
 			</control>
 
 			<control type="group">
+				<description>OK, Cancel, and Select All Buttons</description>
+				<visible>!Player.HasVideo</visible>
 				<left>1390</left>
 				<top>50</top>
 					<control type="button" id="2051">
@@ -255,28 +260,28 @@
 			</control>
 
 			<control type="group">
-					<control type="image">
-						<aspectratio align="center" aligny="center">keep</aspectratio>
-						<left>400</left>
-						<top>0</top>
-						<width>600</width>
-						<height>175%</height>
-						<texture background="true">$INFO[Container(2050).ListItem.Property(venom.clearlogo)]</texture>
-						<!-- <visible>!String.IsEmpty(Container(2050).ListItem.Property(venom.clearlogo))</visible> -->
-					</control>
-					<!-- <control type="textbox"> -->
-						<!-- <description>Title when no clearlogo</description> -->
-						<!-- <left>200</left> -->
-						<!-- <top>0</top> -->
-						<!-- <width>900</width> -->
-						<!-- <height>400</height> -->
-						<!-- <font>font100caps_title</font> -->
-						<!-- <textcolor>$INFO[Window().Property(venom.highlight.color)]</textcolor> -->
-						<!-- <align>center</align> -->
-						<!-- <aligny>bottom</aligny> -->
-						<!-- <label>$INFO[Window().Property(venom.title)]</label> -->
-						<!-- <visible>String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
-					<!-- </control> -->
+				<control type="image">
+					<aspectratio align="center" aligny="center">keep</aspectratio>
+					<left>400</left>
+					<top>0</top>
+					<width>600</width>
+					<height>175%</height>
+					<texture background="true">$INFO[Container(2050).ListItem.Property(venom.clearlogo)]</texture>
+					<!-- <visible>!String.IsEmpty(Container(2050).ListItem.Property(venom.clearlogo))</visible> -->
+				</control>
+				<!-- <control type="textbox"> -->
+					<!-- <description>Title when no clearlogo</description> -->
+					<!-- <left>200</left> -->
+					<!-- <top>0</top> -->
+					<!-- <width>900</width> -->
+					<!-- <height>400</height> -->
+					<!-- <font>font100caps_title</font> -->
+					<!-- <textcolor>$INFO[Window().Property(venom.highlight.color)]</textcolor> -->
+					<!-- <align>center</align> -->
+					<!-- <aligny>bottom</aligny> -->
+					<!-- <label>$INFO[Window().Property(venom.title)]</label> -->
+					<!-- <visible>String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
+				<!-- </control> -->
 			</control>
 
 			<control type="grouplist" id="2054">

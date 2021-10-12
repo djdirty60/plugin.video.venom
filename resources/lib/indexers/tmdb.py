@@ -204,7 +204,7 @@ class Movies:
 				log_utils.error()
 
 		def items_list(i):
-			if self.list[i]['metacache']: 	return
+			if self.list[i]['metacache']: return
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
@@ -488,7 +488,7 @@ class TVshows:
 				values = {}
 				values['next'] = next 
 				media_type = item.get('media_type', '')
-				if media_type == 'movie': 	continue
+				if media_type == 'movie': continue
 				values['tmdb'] = str(item.get('id', '')) if item.get('id') else ''
 				values['metacache'] = False 
 				self.list.append(values)

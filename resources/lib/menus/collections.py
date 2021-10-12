@@ -734,7 +734,6 @@ class Collections:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 
-
 	def imdb_list(self, url, isRatinglink=False):
 		list = []
 		try:
@@ -772,7 +771,7 @@ class Collections:
 				log_utils.error()
 		return list
 
-	def worker(self, level=1):
+	def worker(self):
 		try:
 			if not self.list: return
 			self.meta = []
@@ -796,7 +795,7 @@ class Collections:
 
 	def super_imdb_info(self, i):
 		try:
-			if self.list[i]['metacache']: 	return
+			if self.list[i]['metacache']: return
 			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '')
 #### -- Missing id's lookup -- ####
 			if not tmdb and imdb:
@@ -967,7 +966,7 @@ class Collections:
 				log_utils.error()
 		control.content(syshandle, 'movies')
 		control.directory(syshandle, cacheToDisc=True)
-		control.sleep(500)
+		control.sleep(100)
 		views.setView('movies', {'skin.estuary': 55, 'skin.confluence': 500})
 
 	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True):
