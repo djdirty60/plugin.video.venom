@@ -6,7 +6,6 @@
 from datetime import datetime, timedelta
 from json import dumps as jsdumps
 import re
-from sys import argv
 from threading import Thread
 from urllib.parse import quote_plus, parse_qsl, urlparse
 from resources.lib.database import cache, metacache, fanarttv_cache
@@ -23,7 +22,7 @@ class Collections:
 	def __init__(self):
 		self.list = []
 		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
-		self.count = control.setting('page.item.limit')
+		self.page_limit = control.setting('page.item.limit')
 		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
 		self.unairedcolor = control.getColor(control.setting('movie.unaired.identify'))
@@ -38,7 +37,7 @@ class Collections:
 		# self.user = str(self.imdb_user) + str(self.tmdb_key)
 		self.user = str(self.tmdb_key)
 		self.tmdb_link = 'https://api.themoviedb.org/4/list/%s?api_key=%s&sort_by=%s&page=1' % ('%s', self.tmdb_key, self.tmdb_sort())
-		self.tmdbCollection_link = 'https://api.themoviedb.org/3/collection/%s?api_key=%s&page=1' % ('%s', self.tmdb_key) # does not support request sort
+		# self.tmdbCollection_link = 'https://api.themoviedb.org/3/collection/%s?api_key=%s&page=1' % ('%s', self.tmdb_key) # does not support request sort..do not use
 		self.imdb_link = 'https://www.imdb.com/search/title?title=%s&title_type=%s&num_votes=1000,&countries=us&languages=en&sort=%s' % ('%s', '%s', self.imdb_sort())
 
 # Boxing Movies
@@ -118,8 +117,8 @@ class Collections:
 		self.daddydaycare_link = self.tmdb_link % '33284'
 		self.deathwish_link = self.tmdb_link % '33285'
 		self.deltaforce_link = self.tmdb_link % '33286'
-		# self.diehard_link = self.tmdb_link % '33287'
-		self.diehard_link = self.tmdbCollection_link % '1570'
+		# self.diehard_link = self.tmdbCollection_link % '1570'
+		self.diehard_link = self.tmdb_link % '7112175'
 		self.dirtydancing_link = self.tmdb_link % '33288'
 		self.dirtyharry_link = self.tmdb_link % '33289'
 		self.divergent_link = self.tmdb_link % '13311'
@@ -744,6 +743,7 @@ class Collections:
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except: return
+
 		next = ''
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
@@ -776,8 +776,7 @@ class Collections:
 			if not self.list: return
 			self.meta = []
 			total = len(self.list)
-			for i in range(0, total):
-				self.list[i].update({'metacache': False})
+			for i in range(0, total): self.list[i].update({'metacache': False})
 			self.list = metacache.fetch(self.list, self.lang, self.user)
 			for r in range(0, total, 40):
 				threads = []
@@ -845,6 +844,7 @@ class Collections:
 			log_utils.error()
 
 	def movieDirectory(self, items, next=True):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32000, message=33049)
 		from resources.lib.modules.player import Bookmarks
@@ -856,10 +856,8 @@ class Collections:
 		indicators = getMovieIndicators()
 		if play_mode == '1': playbackMenu = control.lang(32063)
 		else: playbackMenu = control.lang(32064)
-		if trakt.getTraktIndicatorsInfo():
-			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
-		else:
-			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
+		if trakt.getTraktIndicatorsInfo(): watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
+		else: watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
 		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
 		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
@@ -885,7 +883,7 @@ class Collections:
 				if settingFanart:
 					if self.prefer_tmdbArt: fanart = meta.get('fanart3') or meta.get('fanart') or meta.get('fanart2') or addonFanart
 					else: fanart = meta.get('fanart2') or meta.get('fanart3') or meta.get('fanart') or addonFanart
-				landscape = meta.get('landscape')
+				landscape = meta.get('landscape') or fanart
 				thumb = meta.get('thumb') or poster or landscape
 				icon = meta.get('icon') or poster
 				banner = meta.get('banner3') or meta.get('banner2') or meta.get('banner') or addonBanner
@@ -950,7 +948,7 @@ class Collections:
 				if not url: raise Exception()
 				url_params = dict(parse_qsl(url))
 				if 'imdb.com' in url and 'start' in url_params:
-					page = '  [I](%s)[/I]' % str(((int(url_params.get('start')) - 1) / int(self.count)) + 1)
+					page = '  [I](%s)[/I]' % str(((int(url_params.get('start')) - 1) / int(self.page_limit)) + 1)
 				else:
 					page = '  [I](%s)[/I]' % url_params.get('page')
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
@@ -971,6 +969,7 @@ class Collections:
 
 	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True):
 		try:
+			from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 			if isinstance(name, int): name = control.lang(name)
 			sysaddon, syshandle = argv[0], int(argv[1])
 			artPath = control.artPath()
@@ -993,6 +992,7 @@ class Collections:
 			log_utils.error()
 
 	def endDirectory(self, content=''):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		syshandle = int(argv[1])
 		skin = control.skin
 		if content != 'actors': content = 'addons' if skin == 'skin.auramod' else ''

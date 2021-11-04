@@ -48,6 +48,8 @@ class Navigator:
 			self.addDirectoryItem(32421 if self.indexLabels else 32420, 'movies&url=theaters', 'imdb.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.tmdb.nowplaying'):
 			self.addDirectoryItem(32423 if self.indexLabels else 32422, 'tmdbmovies&url=tmdb_nowplaying', 'tmdb.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
+		if control.getMenuEnabled('navi.movie.imdb.upcoming'):
+			self.addDirectoryItem(32416 if self.indexLabels else 32426, 'movies&url=imdb_comingsoon', 'imdb.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.trakt.anticipated'):
 			self.addDirectoryItem(32425 if self.indexLabels else 32424, 'movies&url=traktanticipated', 'trakt.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.tmdb.upcoming'):
@@ -354,8 +356,8 @@ class Navigator:
 	def search(self):
 		self.addDirectoryItem(33042, 'movieSearch', 'trakt.png' if self.iconLogos else 'search.png', 'DefaultAddonsSearch.png')
 		self.addDirectoryItem(33043, 'tvSearch', 'trakt.png' if self.iconLogos else 'search.png', 'DefaultAddonsSearch.png')
-		self.addDirectoryItem(33044, 'moviePerson', 'imdb.png' if self.iconLogos else 'people-search.png', 'DefaultAddonsSearch.png')
-		self.addDirectoryItem(33045, 'tvPerson', 'imdb.png' if self.iconLogos else 'people-search.png', 'DefaultAddonsSearch.png')
+		self.addDirectoryItem(33044, 'moviePerson', 'imdb.png' if self.iconLogos else 'people-search.png', 'DefaultAddonsSearch.png', isFolder=False)
+		self.addDirectoryItem(33045, 'tvPerson', 'imdb.png' if self.iconLogos else 'people-search.png', 'DefaultAddonsSearch.png', isFolder=False)
 		self.endDirectory()
 
 	def views(self):

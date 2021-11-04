@@ -69,7 +69,8 @@ def parse_art(img):
 def get_movie_art(imdb, tmdb):
 	if not imdb and not tmdb: return None
 	art = get_request(base_url % ('movies', tmdb))
-	if art is None or '404:NOT FOUND' in art: art = get_request(base_url % ('movies', imdb))
+	if art is None or '404:NOT FOUND' in art:
+		if imdb: art = get_request(base_url % ('movies', imdb))
 	if art is None: return None
 	elif '404:NOT FOUND' in art: return art
 	try:
@@ -126,7 +127,6 @@ def get_tvshow_art(tvdb):
 	art = get_request(base_url % ('tv', tvdb))
 	if not art: return None
 	elif '404:NOT FOUND' in art: return art
-
 	try:
 		if 'tvposter' not in art: raise Exception()
 		poster2 = parse_art(art['tvposter'])

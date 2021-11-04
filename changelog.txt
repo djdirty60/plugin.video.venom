@@ -1,4 +1,15 @@
 
+[B][COLOR red]Update - v6.3.2 - Nov. 04, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added IMDb's "Coming Soon" to "Discover Movies".[/I]
+[COLOR yellow]--[/COLOR][I] AD, RD, and PM cloud scrapers have been adjusted to support some older pack file naming conventions.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed People search.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where removing an expired Furk account may not be removed during the synchronization process with the My Accounts addon.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where some empty Trakt lists would cause a hang.[/I]
+[COLOR yellow]--[/COLOR][I] "Discover Movies" - Genres, Year, Certificates for TMDb meta provider now respects the "Movie Sorting" setting.[/I]
+[COLOR yellow]--[/COLOR][I] "Discover TV Shows" - Genres and Year for TMDb meta provider now respects the "Show Sorting" setting.[/I]
+[COLOR yellow]--[/COLOR][I] The "Rescrape Item" context menu now has a pop-up select method of 4 possible choices to rescrape.  You can set a preferred default action and bypass the select dialog pop-up in settings under [B]"Source Options"[/B] category.[/I]
+
+
 [B][COLOR red]Update - v6.3.1 - Oct. 12, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Trakt Manager-Add and Remove from Collections not working.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed empty Trakt Collection list produces infinite busy dialog.[/I]
@@ -9,7 +20,7 @@
 [B][COLOR red]Update - v6.3.0 - Oct. 05, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed some rare cases of Trakt lists not loading the listItems.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed TV Shows (TMDb)-Genres, Animation, Crime, Comedy failing to load.[/I]
-[COLOR yellow]--[/COLOR][I] Please note if you had widgets pointing at either "Discover Movies" or "Discover TV Shows" for Genres and or Years you will need to recreate those due to the addion of the TMDb meta provider cases from previous update since the path is now different.[/I]
+[COLOR yellow]--[/COLOR][I] Please note if you had widgets pointing at either "Discover Movies" or "Discover TV Shows" for Genres, and or Years, you will need to recreate those due to the addition of the TMDb meta provider cases from previous update since the path is now different.[/I]
 
 
 [B][COLOR red]Update - v6.2.9 - Oct. 03, 2021[/COLOR][/B]

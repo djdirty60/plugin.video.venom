@@ -167,6 +167,7 @@ class Episodes:
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct)
 				else: self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct)
 				self.sort(type='progress')
+				if self.list is None: self.list = []
 				# place new season ep1's at top of list for 1 week
 				prior_week = int(re.sub(r'[^0-9]', '', (self.date_time - timedelta(days=7)).strftime('%Y-%m-%d')))
 				sorted_list = []
@@ -179,18 +180,21 @@ class Episodes:
 					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
 				else: self.list = cache.get(self.trakt_episodes_list, 1, url, self.trakt_user, self.lang)
 				if (url == self.mycalendarUpcoming_link) or (url == self.mycalendarPremiers_link):
-					self.list = [i for i in self.list if int(re.sub(r'[^0-9]', '', str(i['premiered']).split('T')[0])) >= int(re.sub(r'[^0-9]', '', str(self.today_date)))]
-					for i in range(len(self.list)): self.list[i]['calendar_unaired'] = True
-					self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=False)
+					if self.list:
+						self.list = [i for i in self.list if int(re.sub(r'[^0-9]', '', str(i['premiered']).split('T')[0])) >= int(re.sub(r'[^0-9]', '', str(self.today_date)))]
+						for i in range(len(self.list)): self.list[i]['calendar_unaired'] = True
+						self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=False)
 				elif url == self.mycalendarRecent_link:
-					self.list = [i for i in self.list if int(re.sub(r'[^0-9]', '', str(i['premiered']).split('T')[0])) <= int(re.sub(r'[^0-9]', '', str(self.today_date)))]
-					self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=True)
+					if self.list:
+						self.list = [i for i in self.list if int(re.sub(r'[^0-9]', '', str(i['premiered']).split('T')[0])) <= int(re.sub(r'[^0-9]', '', str(self.today_date)))]
+						self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=True)
 			elif isTraktHistory:
 				if trakt.getActivity() > cache.timeout(self.trakt_episodes_list, url, self.trakt_user, self.lang):
 					self.list = cache.get(self.trakt_episodes_list, 0, url, self.trakt_user, self.lang)
 				else: self.list = cache.get(self.trakt_episodes_list, 24, url, self.trakt_user, self.lang)
-				for i in range(len(self.list)): self.list[i]['traktHistory'] = True
-				self.list = sorted(self.list, key=lambda k: k['lastplayed'], reverse=True)
+				if self.list:
+					for i in range(len(self.list)): self.list[i]['traktHistory'] = True
+					self.list = sorted(self.list, key=lambda k: k['lastplayed'], reverse=True)
 			elif self.tvmaze_link in url and url == self.added_link:
 				urls = [i['url'] for i in self.calendars(idx=False)][:5]
 				self.list = []
@@ -487,8 +491,6 @@ class Episodes:
 				tvshowtitle = item.get('show').get('title')
 				if not tvshowtitle: continue
 				year = str(item.get('show').get('year'))
-				# try: progress = max(0, min(1, item['progress'] / 100.0))
-				# except: progress = None
 				try: progress = item['progress']
 				except: progress = None
 				ids = item.get('show', {}).get('ids', {})
@@ -688,6 +690,8 @@ class Episodes:
 		try: airEnabled = control.setting('tvshows.air.enabled') if 'ForceAirEnabled' not in items[0] else 'true'
 		except: airEnabled = 'false'
 		play_mode = control.setting('play.mode')
+		rescrape_useDefault = control.setting('rescrape.default') == 'true'
+		rescrape_method = control.setting('rescrape.default2')
 		enable_playnext = control.setting('enable.playnext') == 'true'
 		indicators = getTVShowIndicators(refresh=True)
 		isFolder = False if sysaction != 'episodes' else True
@@ -704,7 +708,8 @@ class Episodes:
 			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
 		traktManagerMenu, playlistManagerMenu, queueMenu = control.lang(32070), control.lang(35522), control.lang(32065)
 		tvshowBrowserMenu, addToLibrary = control.lang(32071), control.lang(32551)
-		clearSourcesMenu, rescrapeMenu, rescrapeAllMenu, progressRefreshMenu = control.lang(32611), control.lang(32185), control.lang(32193), control.lang(32194)
+		clearSourcesMenu, rescrapeMenu, progressRefreshMenu = control.lang(32611), control.lang(32185), control.lang(32194)
+
 		for i in items:
 			try:
 				tvshowtitle, title, imdb, tmdb, tvdb = i.get('tvshowtitle'), i.get('title'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', '')
@@ -714,8 +719,6 @@ class Episodes:
 				if (not i['label'] or i['label'] == '0'): label = '%sx%02d . %s %s' % (season, int(episode), 'Episode', episode)
 				else: label = '%sx%02d . %s' % (season, int(episode), i['label'])
 				if isMultiList: label = '[COLOR %s]%s[/COLOR] - %s' % (self.highlight_color, tvshowtitle, label)
-				# try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress'] * 100), 1)) + '%')
-				# except: labelProgress = label
 				try: labelProgress = label + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, str(round(float(i['progress']), 1)) + '%')
 				except: labelProgress = label
 				try:
@@ -819,18 +822,29 @@ class Episodes:
 					url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s&season=%s&episode=%s&art=%s' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysmeta, season, episode, sysart)
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, syslabelProgress, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, syslabelProgress)))
+				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb)))
 				if isMultiList:
 					cm.append((tvshowBrowserMenu, 'Container.Update(%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s,return)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb, sysart)))
 				if not isFolder:
 					if traktProgress: cm.append((progressMenu, 'Container.Update(%s)' % Folderurl))
 					cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-					cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
-										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
-					cm.append((rescrapeAllMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true&all_providers=true)' % (
-										sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
-				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systvshowtitle, year, imdb, tmdb, tvdb)))
+					if not rescrape_useDefault:
+						cm.append(('Rescrape Options ------>', 'PlayMedia(%s?action=rescrapeMenu&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s)' % (
+											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
+					else:
+						if rescrape_method == '0':
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
+						if rescrape_method == '1':
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
+						if rescrape_method == '2':
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
+						if rescrape_method == '3':
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
-				# cm.append(('PlayAll', 'RunPlugin(%s?action=play_All)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
 				if trailer: meta.update({'trailer': trailer}) # removed temp so it's not passed to CM items, only infoLabels for skin

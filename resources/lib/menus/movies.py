@@ -6,7 +6,6 @@
 from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
-from sys import argv
 from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache, fanarttv_cache, traktsync
@@ -47,12 +46,15 @@ class Movies:
 		self.tmdb_link = 'https://api.themoviedb.org'
 		self.tmdb_popular_link = 'https://api.themoviedb.org/3/movie/popular?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_toprated_link = 'https://api.themoviedb.org/3/movie/top_rated?api_key=%s&page=1'
-		self.tmdb_upcoming_link = 'https://api.themoviedb.org/3/movie/upcoming?api_key=%s&language=en-US&region=US&page=1' 
+		# self.tmdb_upcoming_link = 'https://api.themoviedb.org/3/movie/upcoming?api_key=%s&language=en-US&region=US&page=1'
+		self.tmdb_upcoming_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&primary_release_date.gte=%s&with_release_type=3|2|1&sort_by=popularity.desc&page=1' % ('%s', (self.date_time + timedelta(days=1)).strftime('%Y-%m-%d'))
 		self.tmdb_nowplaying_link = 'https://api.themoviedb.org/3/movie/now_playing?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_boxoffice_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&sort_by=revenue.desc&page=1'
-		self.tmdb_year_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&sort_by=popularity.desc&certification_country=US&primary_release_year=%s&page=1'
-		self.tmdb_genre_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&with_genres=%s&sort_by=popularity.desc&page=1'
-		self.tmdb_certification_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&sort_by=popularity.desc&certification_country=US&certification=%s&page=1'
+		self.tmdb_userlists_link = 'https://api.themoviedb.org/3/account/{account_id}/lists?api_key=%s&language=en-US&session_id=%s&page=1' % ('%s', self.tmdb_session_id) # used by library import only
+		self.tmdb_genre_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&primary_release_date.lte=%s&with_genres=%s&sort_by=%s&page=1' % ('%s', self.today_date, '%s', self.tmdb_DiscoverSort())
+		self.tmdb_year_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&primary_release_date.lte=%s&certification_country=US&primary_release_year=%s&sort_by=%s&page=1' % ('%s', self.today_date, '%s', self.tmdb_DiscoverSort())
+		self.tmdb_certification_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&primary_release_date.lte=%s&certification_country=US&certification=%s&sort_by=%s&page=1' % ('%s', self.today_date, '%s', self.tmdb_DiscoverSort())
+
 		self.imdb_link = 'https://www.imdb.com'
 		self.persons_link = 'https://www.imdb.com/search/name/?count=100&name='
 		self.personlist_link = 'https://www.imdb.com/search/name/?count=100&gender=male,female'
@@ -61,6 +63,7 @@ class Movies:
 		self.oscars_link = 'https://www.imdb.com/search/title/?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_winners&sort=year,desc&count=%s&start=1' % self.page_limit
 		self.oscarsnominees_link = 'https://www.imdb.com/search/title/?title_type=feature,tv_movie&production_status=released&groups=oscar_best_picture_nominees&sort=year,desc&count=%s&start=1' % self.page_limit
 		self.theaters_link = 'https://www.imdb.com/search/title/?title_type=feature&num_votes=500,&release_date=date[90],date[0]&languages=en&sort=release_date,desc&count=%s&start=1' % self.page_limit
+		self.imdb_comingsoon_link = 'https://www.imdb.com/movies-coming-soon/'
 		self.year_link = 'https://www.imdb.com/search/title/?title_type=feature,tv_movie&num_votes=100,&production_status=released&year=%s,%s&sort=moviemeter,asc&count=%s&start=1' % ('%s', '%s', self.page_limit)
 		if self.hidecinema:
 			hidecinema_rollback = str(int(control.setting('hidecinema.rollback')) * 30)
@@ -85,10 +88,12 @@ class Movies:
 		self.imdblist_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=movie,short,video,tvShort,tvMovie,tvSpecial&start=1' % ('%s', self.imdb_sort())
 		self.imdbratings_link = 'https://www.imdb.com/user/ur%s/ratings?sort=your_rating,desc&mode=detail&start=1' % self.imdb_user # IMDb ratings does not take title_type so filter is in imdb_list() function
 		self.anime_link = 'https://www.imdb.com/search/keyword/?keywords=anime&title_type=movie,tvMovie&release_date=,date[0]&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
+
 		self.trakt_link = 'https://api.trakt.tv'
 		self.search_link = 'https://api.trakt.tv/search/movie?limit=%s&page=1&query=' % self.search_page_limit
 		self.traktlistsearch_link = 'https://api.trakt.tv/search/list?limit=%s&page=1&query=' % self.page_limit
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
+		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000' # used by library import only
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/movies?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
 		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/movies?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
 		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/movies?limit=%s&page=1' % self.page_limit
@@ -120,7 +125,7 @@ class Movies:
 					else: self.list = cache.get(self.trakt_list, 720, url, self.trakt_user)
 				except:
 					self.list = self.trakt_userList(url)
-				if isTraktHistory:
+				if isTraktHistory and self.list:
 					for i in range(len(self.list)): self.list[i]['traktHistory'] = True
 				if idx: self.worker()
 				if not isTraktHistory: self.sort()
@@ -136,7 +141,9 @@ class Movies:
 				if idx: self.worker()
 				# self.sort() # switched to request sorting for imdb
 			elif u in self.imdb_link:
-				self.list = cache.get(self.imdb_list, 96, url)
+				if 'coming-soon' in url:
+					self.list = cache.get(self.imdb_list, 96, url, True)
+				else: self.list = cache.get(self.imdb_list, 96, url)
 				if idx: self.worker()
 			if self.list is None: self.list = []
 			if idx and create_directory: self.movieDirectory(self.list)
@@ -314,14 +321,17 @@ class Movies:
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
 
-	def tmdb_sort(self):
+	def tmdb_DiscoverSort(self):
 		sort = int(control.setting('sort.movies.type'))
-		tmdb_sort = 'original_order'
+		tmdb_sort = 'popularity' # default sort=0
+		# if sort == 1: tmdb_sort = 'original_title'
 		if sort == 1: tmdb_sort = 'title'
-		if sort in [2, 3]: tmdb_sort = 'vote_average'
-		if sort in [4, 5, 6]: tmdb_sort = 'release_date'
+		if sort == 2: tmdb_sort = 'vote_average'
+		if sort == 3: tmdb_sort = 'vote_count'
+		if sort in [4, 5, 6]: tmdb_sort = 'primary_release_date'
 		tmdb_sort_order = '.asc' if (int(control.setting('sort.movies.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
+		if sort == 2: sort_string = sort_string + '&vote_count.gte=500'
 		return sort_string
 
 	def search(self):
@@ -370,7 +380,6 @@ class Movies:
 		finally:
 			dbcur.close() ; dbcon.close()
 		url = self.search_link + quote_plus(q)
-		# control.execute('Container.Update(%s?action=movies&url=%s)' % (argv[0], quote_plus(url)))
 		control.closeAll()
 		control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=movies&url=%s,return)' % (quote_plus(url)))
 
@@ -382,9 +391,10 @@ class Movies:
 		k = control.keyboard('', control.lang(32010))
 		k.doModal()
 		q = k.getText().strip() if k.isConfirmed() else None
-		if not q: return
+		if not q: return control.closeAll()
 		url = self.persons_link + quote_plus(q)
-		control.execute('Container.Update(%s?action=moviePersons&url=%s)' % (argv[0], quote_plus(url)))
+		control.closeAll()
+		control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=moviePersons&url=%s,return)' % (quote_plus(url)))
 
 	def persons(self, url):
 		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
@@ -456,7 +466,10 @@ class Movies:
 		try:
 			control.hide()
 			if u in self.tmdb_link: items = tmdb_indexer.userlists(url)
-			elif u in self.trakt_link: items = self.trakt_user_lists(url, self.trakt_user)
+			elif u in self.trakt_link:
+				if url in self.traktlikedlists_link:
+					items = self.traktLlikedlists()
+				else: items = self.trakt_user_lists(url, self.trakt_user)
 			items = [(i['name'], i['url']) for i in items]
 			message = 32663
 			if 'themoviedb' in url: message = 32681
@@ -465,6 +478,7 @@ class Movies:
 			if select == -1: return
 			link = items[select][1]
 			link = link.split('&sort_by')[0]
+			link = link.split('?limit=')[0]
 			from resources.lib.modules import library
 			library.libmovies().range(link, list_name)
 		except:
@@ -527,10 +541,9 @@ class Movies:
 			index = int(q['page']) - 1
 			self.list = traktsync.fetch_collection('movies_collection')
 			self.sort() # sort before local pagination
-			if control.setting('trakt.paginate.lists') == 'true':
+			if control.setting('trakt.paginate.lists') == 'true' and self.list:
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
-				if not paginated_ids: pass
-				else: self.list = paginated_ids[index]
+				self.list = paginated_ids[index]
 			try:
 				if int(q['limit']) != len(self.list): raise Exception()
 				q.update({'page': str(int(q['page']) + 1)})
@@ -553,7 +566,7 @@ class Movies:
 			index = int(q['page']) - 1
 			self.list = traktsync.fetch_watch_list('movies_watchlist')
 			self.sort(type='movies.watchlist') # sort before local pagination
-			if control.setting('trakt.paginate.lists') == 'true':
+			if control.setting('trakt.paginate.lists') == 'true' and self.list:
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
 				self.list = paginated_ids[index]
 			try:
@@ -735,7 +748,7 @@ class Movies:
 				log_utils.error()
 		return self.list
 
-	def imdb_list(self, url, isRatinglink=False):
+	def imdb_list(self, url, comingSoon=False, isRatinglink=False):
 		list = []
 		try:
 			for i in re.findall(r'date\[(\d+)\]', url):
@@ -745,16 +758,15 @@ class Movies:
 			if url == self.imdbwatchlist_link:
 				url = cache.get(imdb_watchlist_id, 8640, url)
 				url = self.imdbwatchlist2_link % url
-			result = client.request(url)
-			result = result.replace('\n', ' ')
+			result = client.request(url).replace('\n', ' ')
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 			return
-		next = ''
 
+		next = ''
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
 			result = result.replace('"class="lister-page-next', '" class="lister-page-next')
@@ -766,18 +778,28 @@ class Movies:
 			next = url.replace(urlparse(url).query, urlparse(next[0]).query)
 			next = client.replaceHTMLCodes(next)
 		except: next = ''
+		if not next:
+			try:
+				next = client.parseDOM(result, 'div', attrs = {'class': 'see-more'})
+				next = client.parseDOM(next, 'a', ret='href')[1]
+				next = self.imdb_link + next
+			except: next = ''
+
 		for item in items:
 			try:
-				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
+				main_title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
+				title = main_title.split(' (')[0]
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
+				if not year: year = [main_title]
 				try: year = re.findall(r'(\d{4})', year[0])[0]
 				except: continue
-				if int(year) > int((self.date_time).strftime('%Y')): continue
+				if not comingSoon:
+					if int(year) > int((self.date_time).strftime('%Y')): continue
 				imdb = client.parseDOM(item, 'a', ret='href')[0]
 				imdb = re.findall(r'(tt\d*)', imdb)[0]
 				try: show = '–'.decode('utf-8') in str(year).decode('utf-8') or '-'.decode('utf-8') in str(year).decode('utf-8') # check with Matrix
 				except: show = False
-				if show or 'Episode:' in item: raise Exception() # Some lists contain TV shows.
+				if show or ('Episode:' in item): raise Exception() # Some lists contain TV shows.
 				rating = votes = ''
 				try:
 					rating = client.parseDOM(item, 'div', attrs = {'class': 'ratings-bar'})
@@ -924,11 +946,14 @@ class Movies:
 			log_utils.error()
 
 	def movieDirectory(self, items, unfinished=False, next=True):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32001, message=33049)
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
-		play_mode = control.setting('play.mode') 
+		play_mode = control.setting('play.mode')
+		rescrape_useDefault = control.setting('rescrape.default') == 'true'
+		rescrape_method = control.setting('rescrape.default2')
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = control.setting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
@@ -940,7 +965,8 @@ class Movies:
 		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
 		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
 		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
-		rescrapeMenu, rescrapeAllMenu, findSimilarMenu = control.lang(32185), control.lang(32193), control.lang(32184)
+		rescrapeMenu, findSimilarMenu = control.lang(32185), control.lang(32184)
+
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -998,11 +1024,20 @@ class Movies:
 				sysurl = quote_plus(url)
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
-				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-				cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
-				cm.append((rescrapeAllMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&all_providers=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append((findSimilarMenu, 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
+				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
+				if not rescrape_useDefault:
+					cm.append(('Rescrape Options ------>', 'PlayMedia(%s?action=rescrapeMenu&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+				else:
+					if rescrape_method == '0':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&select=1)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+					if rescrape_method == '1':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&select=0)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+					if rescrape_method == '2':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&all_providers=true&select=1)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+					if rescrape_method == '3':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&all_providers=true&select=0)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
@@ -1034,10 +1069,10 @@ class Movies:
 				url = items[0]['next']
 				if not url: raise Exception()
 				url_params = dict(parse_qsl(urlsplit(url).query))
-				if 'imdb.com' in url and 'start' in url_params:
-					page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / int(self.page_limit)) + 1))
-				else:
-					page = '  [I](%s)[/I]' % url_params.get('page')
+				if 'imdb.com' in url and 'start' in url_params: page = '  [I](%s)[/I]' % str(int(((int(url_params.get('start')) - 1) / int(self.page_limit)) + 1))
+				elif 'www.imdb.com/movies-coming-soon/' in url: page = '  [I](%s)[/I]' % re.search(r'(\d{4}-\d{2})', url).group(1)
+				else: page = '  [I](%s)[/I]' % url_params.get('page')
+				if 'None' in page: page = page.split('  [I]')[0]
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				u = urlparse(url).netloc.lower()
 				if u not in self.tmdb_link:
@@ -1059,6 +1094,7 @@ class Movies:
 		views.setView('movies', {'skin.estuary': 55, 'skin.confluence': 500})
 
 	def addDirectory(self, items, queue=False):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			content = '' ; control.hide() ; control.notification(title=32001, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
@@ -1078,8 +1114,8 @@ class Movies:
 					poster = control.joinPath(control.genrePosterPath(), i['image']) or addonThumb
 				else:
 					icon = i['icon']
-					if i['icon'].startswith('http'): pass
-					elif not i['icon'].startswith('Default'): icon = control.joinPath(artPath, i['icon'])
+					if icon.startswith('http'): pass
+					elif not icon.startswith('Default'): icon = control.joinPath(artPath, icon)
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass

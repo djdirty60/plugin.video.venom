@@ -144,7 +144,7 @@ class source:
 
 	def episode_query_list(self):
 		return [
-				'[.-]%d[.-]%02d[.-]' % (int(self.season), int(self.episode)),
+				'[.-]%d[.-]?%02d[.-]' % (int(self.season), int(self.episode)),
 				'[.-]%02d[.-]%02d[.-]' % (int(self.season), int(self.episode)),
 				'[.-]%dx%02d[.-]' % (int(self.season), int(self.episode)),
 				'[.-]%02dx%02d[.-]' % (int(self.season), int(self.episode)),

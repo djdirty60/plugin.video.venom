@@ -91,7 +91,7 @@ def tmdb_sort():
 	tmdb_sort = 'original_order'
 	if sort == 1: tmdb_sort = 'title'
 	if sort in [2, 3]: tmdb_sort = 'vote_average'
-	if sort in [4, 5, 6]: tmdb_sort = 'release_date'
+	if sort in [4, 5, 6]: tmdb_sort = 'release_date' # primary_release_date
 	tmdb_sort_order = '.asc' if int(getSetting('sort.movies.order')) == 0 else '.desc'
 	sort_string = tmdb_sort + tmdb_sort_order
 	return sort_string
@@ -299,11 +299,16 @@ class Movies:
 				except: pass
 				if len(meta['castandart']) == 150: break
 			try:
-				rel_info = [x for x in result['release_dates']['results'] if x['iso_3166_1'] == 'US'][0]
 				meta['mpaa'] = ''
+				rel_info = [x for x in result['release_dates']['results'] if x['iso_3166_1'] == 'US'][0]
+				# from resources.lib.modules import log_utils
 				for cert in rel_info.get('release_dates', {}): # loop thru all keys
 					if cert['certification']:
+						if cert['note']: continue # limited release adds region note here, use official full release that will be null
 						meta['mpaa'] = cert['certification']
+						# premiered1 = meta['premiered']
+						meta['premiered'] = cert['release_date'].split('T')[0] or meta['premiered'] # use US premiered date
+						# log_utils.log('\n title = %s \n cert = %s \n meta[premiered]1 = %s \n meta[premiered]2 = %s' % (meta['title'], cert, premiered1, meta['premiered']))
 						break
 			except: meta['mpaa'] = ''
 			try:

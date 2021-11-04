@@ -44,13 +44,12 @@ class Movies:
 				url = url.replace('date[%s]' % i, (self.date_time - timedelta(days=int(i))).strftime('%Y-%m-%d'))
 			def imdb_watchlist_id(url):
 				return client.parseDOM(client.request(url), 'meta', ret='content', attrs = {'property': 'pageId'})[0]
-				# return client.parseDOM(client.request(url).decode('iso-8859-1').encode('utf-8'), 'meta', ret='content', attrs = {'property': 'pageId'})[0]
 			if url == self.imdbwatchlist_link:
 				url = cache.get(imdb_watchlist_id, 8640, url)
-				url = self.imdblist_link % url
+				# url = self.imdblist_link % url
+				url = self.imdbwatchlist2_link % url
 			result = client.request(url)
 			result = result.replace('\n', ' ')
-			# result = result.decode('iso-8859-1').encode('utf-8')
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except:
@@ -61,29 +60,24 @@ class Movies:
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
 			result = result.replace('"class="lister-page-next', '" class="lister-page-next')
-			# next = client.parseDOM(result, 'a', ret='href', attrs = {'class': '.+?ister-page-nex.+?'})
-			next = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'lister-page-next.+?'})
+			next = client.parseDOM(result, 'a', ret='href', attrs = {'class': '.*?lister-page-next.*?'})
 			if len(next) == 0:
 				next = client.parseDOM(result, 'div', attrs = {'class': 'pagination'})[0]
 				next = zip(client.parseDOM(next, 'a', ret='href'), client.parseDOM(next, 'a'))
 				next = [i[0] for i in next if 'Next' in i[1]]
 			next = url.replace(urlparse(url).query, urlparse(next[0]).query)
 			next = client.replaceHTMLCodes(next)
-		except:
-			next = ''
-
+		except: next = ''
 		for item in items:
 			try:
 				title = client.replaceHTMLCodes(client.parseDOM(item, 'a')[1])
-
 				year = client.parseDOM(item, 'span', attrs = {'class': 'lister-item-year.+?'})
 				try: year = re.findall(r'(\d{4})', year[0])[0]
 				except: continue
 				if int(year) > int((self.date_time).strftime('%Y')): continue
-
 				try: show = '–'.decode('utf-8') in str(year).decode('utf-8') or '-'.decode('utf-8') in str(year).decode('utf-8') # check with Matrix
 				except: show = False
-				if show or 'Episode:' in item: raise Exception() # Some lists contain TV shows.
+				if show or ('Episode:' in item): raise Exception() # Some lists contain TV shows.
 
 				try: genre = client.parseDOM(item, 'span', attrs = {'class': 'genre'})[0]
 				except: genre = ''
@@ -187,7 +181,6 @@ class Movies:
 				log_utils.error()
 		return self.list
 
-
 	def imdb_person_list(self, url):
 		list = []
 		try:
@@ -196,7 +189,6 @@ class Movies:
 		except:
 			log_utils.error()
 			return
-
 		for item in items:
 			try:
 				name = client.parseDOM(item, 'img', ret='alt')[0]
@@ -213,28 +205,22 @@ class Movies:
 				log_utils.error()
 		return list
 
-
 	def imdb_user_list(self, url):
 		list = []
 		try:
 			result = client.request(url) # test .content vs. .text
 			items = client.parseDOM(result, 'li', attrs = {'class': 'ipl-zebra-list__item user-list'})
-			# Gaia uses this but seems to break the user list
-			# items = client.parseDOM(result, 'div', attrs = {'class': 'list_name'})
 		except: pass
 
 		for item in items:
 			try:
 				name = client.parseDOM(item, 'a')[0]
 				name = client.replaceHTMLCodes(name)
-				# name = name.encode('utf-8')
 				url = client.parseDOM(item, 'a', ret='href')[0]
 				url = url.split('/list/', 1)[-1].strip('/')
-				# url = url.split('/list/', 1)[-1].replace('/', '')
 				url = self.imdblist_link % url
 				url = client.replaceHTMLCodes(url)
-				# url = url.encode('utf-8')
-				list.append({'name': name, 'url': url, 'context': url})
+				list.append({'name': name, 'url': url, 'context': url, 'image': 'imdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'movies'})
 			except:
 				pass
 		list = sorted(self.list, key=lambda k: re.sub(r'(^the |^a |^an )', '', k['name'].lower()))

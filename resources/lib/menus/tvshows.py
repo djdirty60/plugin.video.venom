@@ -6,7 +6,6 @@
 from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
-from sys import argv
 from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache, fanarttv_cache, traktsync
@@ -57,11 +56,13 @@ class TVshows:
 		self.imdblist_link = 'https://www.imdb.com/list/%s/?view=detail&sort=%s&title_type=tvSeries,tvMiniSeries&start=1' % ('%s', self.imdb_sort())
 		self.imdbratings_link = 'https://www.imdb.com/user/ur%s/ratings?sort=your_rating,desc&mode=detail&start=1' % self.imdb_user # IMDb ratings does not take title_type so filter in imdb_list() function
 		self.anime_link = 'https://www.imdb.com/search/keyword/?keywords=anime&title_type=tvSeries,miniSeries&release_date=,date[0]&sort=moviemeter,asc&count=%s&start=1' % self.page_limit
+
 		self.trakt_user = control.setting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.trakt_link = 'https://api.trakt.tv'
 		self.search_link = 'https://api.trakt.tv/search/show?limit=%s&page=1&query=' % self.search_page_limit
 		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
+		self.traktlikedlists_link = 'https://api.trakt.tv/users/likes/lists?limit=1000000' # used by library import only
 		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/shows?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
 		self.traktcollection_link = 'https://api.trakt.tv/users/me/collection/shows?limit=%s&page=1' % self.page_limit # this is now a dummy link for pagination to work
 		self.traktlist_link = 'https://api.trakt.tv/users/%s/lists/%s/items/shows?limit=%s&page=1' % ('%s', '%s', self.page_limit) # local pagination, limit and page used to advance, pulled from request
@@ -78,15 +79,16 @@ class TVshows:
 			self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
 		self.tmdb_session_id = control.setting('tmdb.session_id')
 		self.tmdb_link = 'https://api.themoviedb.org'
+		self.tmdb_userlists_link = 'https://api.themoviedb.org/3/account/{account_id}/lists?api_key=%s&language=en-US&session_id=%s&page=1' % ('%s', self.tmdb_session_id) # used by library import only
 		self.tmdb_popular_link = 'https://api.themoviedb.org/3/tv/popular?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_toprated_link = 'https://api.themoviedb.org/3/tv/top_rated?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_ontheair_link = 'https://api.themoviedb.org/3/tv/on_the_air?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_airingtoday_link = 'https://api.themoviedb.org/3/tv/airing_today?api_key=%s&language=en-US&region=US&page=1'
-		self.tmdb_networks_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1'
-		self.tmdb_year_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&language=en-US&sort_by=popularity.desc&include_null_first_air_dates=false&first_air_date_year=%s&page=1'
-		self.tmdb_genre_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&with_genres=%s&sort_by=popularity.desc&include_null_first_air_dates=false&page=1'
+		self.tmdb_networks_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&with_networks=%s&sort_by=%s&page=1' % ('%s', '%s', self.tmdb_DiscoverSort())
+		self.tmdb_genre_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&with_genres=%s&include_null_first_air_dates=false&sort_by=%s&page=1' % ('%s', '%s', self.tmdb_DiscoverSort())
+		self.tmdb_year_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&language=en-US&include_null_first_air_dates=false&first_air_date_year=%s&sort_by=%s&page=1' % ('%s', '%s', self.tmdb_DiscoverSort())
 		# Ticket is in to add this feature but currently not available
-		# self.tmdb_certification_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&language=en-US&sort_by=popularity.desc&certification_country=US&certification=%s&page=1'
+		# self.tmdb_certification_link = 'https://api.themoviedb.org/3/discover/tv?api_key=%s&language=en-US&certification_country=US&certification=%s&sort_by=%s&page=1' % ('%s', '%s', self.tmdb_DiscoverSort())
 
 	def get(self, url, idx=True, create_directory=True):
 		self.list = []
@@ -305,6 +307,19 @@ class TVshows:
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
 
+	def tmdb_DiscoverSort(self):
+		sort = int(control.setting('sort.shows.type'))
+		tmdb_sort = 'popularity' # default sort=0
+		# if sort == 1: tmdb_sort = 'original_title'
+		if sort == 1: tmdb_sort = 'title'
+		if sort == 2: tmdb_sort = 'vote_average'
+		if sort == 3: tmdb_sort = 'vote_count'
+		if sort in [4, 5, 6]: tmdb_sort = 'primary_release_date'
+		tmdb_sort_order = '.asc' if (int(control.setting('sort.movies.order')) == 0) else '.desc'
+		sort_string = tmdb_sort + tmdb_sort_order
+		if sort == 2: sort_string = sort_string + '&vote_count.gte=500'
+		return sort_string
+
 	def search(self):
 		from resources.lib.menus import navigator
 		navigator.Navigator().addDirectoryItem(32603, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png', isFolder=False)
@@ -351,7 +366,6 @@ class TVshows:
 		finally:
 			dbcur.close() ; dbcon.close()
 		url = self.search_link + quote_plus(q)
-		# control.execute('Container.Update(%s?action=tvshows&url=%s)' % (argv[0], quote_plus(url)))
 		control.closeAll()
 		control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=tvshows&url=%s,return)' % (quote_plus(url)))
 
@@ -363,9 +377,10 @@ class TVshows:
 		k = control.keyboard('', control.lang(32010))
 		k.doModal()
 		q = k.getText().strip() if k.isConfirmed() else None
-		if not q: return
+		if not q: return control.closeAll()
 		url = self.persons_link + quote_plus(q)
-		control.execute('Container.Update(%s?action=tvPersons&url=%s)' % (argv[0], quote_plus(url)))
+		control.closeAll()
+		control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=tvPersons&url=%s,return)' % (quote_plus(url)))
 
 	def persons(self, url):
 		if url is None: self.list = cache.get(self.imdb_person_list, 24, self.personlist_link)
@@ -448,7 +463,10 @@ class TVshows:
 		try:
 			control.hide()
 			if u in self.tmdb_link: items = tmdb_indexer.userlists(url)
-			elif u in self.trakt_link: items = self.trakt_user_lists(url, self.trakt_user)
+			elif u in self.trakt_link:
+				if url in self.traktlikedlists_link:
+					items = self.traktLlikedlists()
+				else: items = self.trakt_user_lists(url, self.trakt_user)
 			items = [(i['name'], i['url']) for i in items]
 			message = 32663
 			if 'themoviedb' in url: message = 32681
@@ -457,6 +475,7 @@ class TVshows:
 			if select == -1: return
 			link = items[select][1]
 			link = link.split('&sort_by')[0]
+			link = link.split('?limit=')[0]
 			from resources.lib.modules import library
 			library.libtvshows().range(link, list_name)
 		except:
@@ -519,10 +538,9 @@ class TVshows:
 			index = int(q['page']) - 1
 			self.list = traktsync.fetch_collection('shows_collection')
 			self.sort() # sort before local pagination
-			if control.setting('trakt.paginate.lists') == 'true':
+			if control.setting('trakt.paginate.lists') == 'true' and self.list:
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
-				if not paginated_ids: pass
-				else: self.list = paginated_ids[index]
+				self.list = paginated_ids[index]
 			try:
 				if int(q['limit']) != len(self.list): raise Exception()
 				q.update({'page': str(int(q['page']) + 1)})
@@ -545,7 +563,7 @@ class TVshows:
 			index = int(q['page']) - 1
 			self.list = traktsync.fetch_watch_list('shows_watchlist')
 			self.sort(type='shows.watchlist') # sort before local pagination
-			if control.setting('trakt.paginate.lists') == 'true':
+			if control.setting('trakt.paginate.lists') == 'true' and self.list:
 				paginated_ids = [self.list[x:x + int(self.page_limit)] for x in range(0, len(self.list), int(self.page_limit))]
 				self.list = paginated_ids[index]
 			try:
@@ -601,8 +619,6 @@ class TVshows:
 				values['next'] = next 
 				values['added'] = item.get('listed_at', '')
 				values['paused_at'] = item.get('paused_at', '') # for unfinished
-				# try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
-				# except: values['progress'] = ''
 				try: values['progress'] = item['progress']
 				except: values['progress'] = None
 				values['lastplayed'] = item.get('watched_at', '') # for history
@@ -931,6 +947,7 @@ class TVshows:
 			log_utils.error()
 
 	def tvshowDirectory(self, items, next=True):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32002, message=33049)
@@ -1059,6 +1076,7 @@ class TVshows:
 		views.setView('tvshows', {'skin.estuary': 55, 'skin.confluence': 500})
 
 	def addDirectory(self, items, queue=False):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			content = '' ; control.hide() ; control.notification(title=32002, message=33049)
@@ -1079,8 +1097,8 @@ class TVshows:
 					poster = control.joinPath(control.genrePosterPath(), i['image']) or addonThumb
 				else:
 					icon = i['icon']
-					if i['icon'].startswith('http'): pass
-					elif not i['icon'].startswith('Default'): icon = control.joinPath(artPath, i['icon'])
+					if icon.startswith('http'): pass
+					elif not icon.startswith('Default'): icon = control.joinPath(artPath, icon)
 				url = '%s?action=%s' % (sysaddon, i['action'])
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass

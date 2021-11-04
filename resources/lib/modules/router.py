@@ -786,6 +786,19 @@ def router(params):
 			items = params.get('items')
 			sources.Sources().playItem(title, items, source, meta)
 
+	elif action == 'rescrapeMenu':
+		from resources.lib.modules import sources
+		premiered = params.get('premiered')
+		meta = params.get('meta')
+		items = [control.lang(32207), control.lang(32208), control.lang(32209), control.lang(32210)]
+		select = control.selectDialog(items, heading=control.addonInfo('name') + ' - ' + 'Rescrape Options Menu')
+		if select == -1: return control.closeAll()
+		if select >= 0:
+			if select == 0: sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='1', rescrape='true')
+			elif select == 1: sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='0', rescrape='true')
+			elif select == 2: sources.Sources(all_providers='true').play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='1', rescrape='true')
+			elif select == 3: sources.Sources(all_providers='true').play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='0', rescrape='true')
+
 	####################################################
 	#---Library Actions
 	####################################################

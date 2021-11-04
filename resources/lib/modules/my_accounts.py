@@ -67,9 +67,9 @@ def syncMyAccounts(silent=False):
 		if getSetting('furk.username') != fu_acct.get('username'):
 			setSetting('furk.username', fu_acct.get('username'))
 			setSetting('furk.password', fu_acct.get('password'))
-		if fu_acct.get('api_key', None):
-			if getSetting('furk.api') != fu_acct.get('api_key'):
-				setSetting('furk.api', fu_acct.get('api_key'))
+		if getSetting('furk.api') != fu_acct.get('api_key'):
+			setSetting('furk.api', fu_acct.get('api_key'))
+
 		if not silent: notification(message=32114)
 	except:
 		from resources.lib.modules import log_utils

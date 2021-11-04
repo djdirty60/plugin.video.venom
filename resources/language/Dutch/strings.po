@@ -843,6 +843,30 @@ msgid "Season Premieres"
 msgstr "Seizoenpremières"
 
 msgctxt "#32205"
+msgid "Use default "Rescrape" option vs Menu"
+msgstr "Gebruik de standaard "Rescrape" optie vs Menu"
+
+msgctxt "#32206"
+msgid "selected default"
+msgstr "geselecteerde standaard"
+
+msgctxt "#32207"
+msgid "Rescrape Item - AutoPlay"
+msgstr "Item opnieuw schrapen - Automatisch afspelen"
+
+msgctxt "#32208"
+msgid "Rescrape Item - Source Select"
+msgstr "Item opnieuw schrapen - Bron selecteren"
+
+msgctxt "#32209"
+msgid "Rescrape Item with All Providers - AutoPlay"
+msgstr "Item opnieuw schrapen met alle providers - AutoPlay"
+
+msgctxt "#32210"
+msgid "Rescrape Item with All Providers - Source Select"
+msgstr "Item opnieuw schrapen met alle providers - AutoPlay"
+
+msgctxt "#32211"
 msgid ""
 msgstr ""
 
@@ -1314,8 +1338,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32416"
-msgid ""
-msgstr ""
+msgid "Upcoming (IMDb)"
+msgstr "Aanstaande (IMDb)"
 
 msgctxt "#32417"
 msgid "Trakt Popular Lists"
@@ -3514,7 +3538,7 @@ msgid "Playlist Manager"
 msgstr "Afspeellijst beheer"
 
 msgctxt "#35523"
-msgid "A new verison of Venom is available from the repository. Please consider updating to v%s"
+msgid "A new version of Venom is available from the repository. Please consider updating to v%s"
 msgstr "Een nieuwe versie van Venom is beschikbaar in de repository. Overweeg om te updaten naar v%s"
 
 msgctxt "#35524"

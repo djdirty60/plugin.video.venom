@@ -516,7 +516,8 @@ class RealDebrid:
 			torrent_keys = ','.join(video_only_items)
 			self.add_torrent_select(torrent_id, torrent_keys)
 			torrent_info = self.torrent_info(torrent_id)
-			list_file_items = [dict(i, **{'link':torrent_info['links'][idx]})  for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
+			# log_utils.log('torrent_info=%s' % torrent_info) # torrent_info['links'] is often "[]" because it stalled
+			list_file_items = [dict(i, **{'link':torrent_info['links'][idx]}) for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
 			list_file_items = [{'link': i['link'], 'filename': i['path'].replace('/', ''), 'size': float(i['bytes']) / 1073741824} for i in list_file_items]
 			self.delete_torrent(torrent_id)
 			return list_file_items

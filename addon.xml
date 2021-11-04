@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.1">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.2">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -13,7 +13,7 @@
 		<provides>video</provides>
 	</extension>
 	<extension library="service.py" point="xbmc.service" start="startup" />
-	<extension library="resources/lib/" point="xbmc.python.module" /> 
+	<extension library="resources/lib/" point="xbmc.python.module" />
 	<extension point="xbmc.addon.metadata">
 		<reuselanguageinvoker>true</reuselanguageinvoker>
 		<summary lang="en">[B][COLOR red]Venom[/COLOR][/B] - We do not host any of the contents streamed</summary>
@@ -32,11 +32,15 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.3.1 - Oct. 12, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed Trakt Manager-Add and Remove from Collections not working.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed empty Trakt Collection list produces infinite busy dialog.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed Trakt "Popular" and "Trending" list error when list privacy api response is "private" or "friends".[/I]
-[COLOR yellow]--[/COLOR][I] Trakt "Finish Watching" lists now load faster and utilize the traktsync.db entries vs. api request.[/I]
+[B][COLOR red]Update - v6.3.2 - Nov. 04, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added IMDb's "Coming Soon" to "Discover Movies".[/I]
+[COLOR yellow]--[/COLOR][I] AD, RD, and PM cloud scrapers have been adjusted to support some older pack file naming conventions.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed People search.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where removing an expired Furk account may not be removed during the synchronization process with the My Accounts addon.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where some empty Trakt lists would cause a hang.[/I]
+[COLOR yellow]--[/COLOR][I] "Discover Movies" - Genres, Year, Certificates for TMDb meta provider now respects the "Movie Sorting" setting.[/I]
+[COLOR yellow]--[/COLOR][I] "Discover TV Shows" - Genres and Year for TMDb meta provider now respects the "Show Sorting" setting.[/I]
+[COLOR yellow]--[/COLOR][I] The "Rescrape Item" context menu now has a pop-up select method of 4 possible choices to rescrape.  You can set a preferred default action and bypass the select dialog pop-up in settings under [B]"Source Options"[/B] category.[/I]
 		</news>
 	</extension>
 </addon>

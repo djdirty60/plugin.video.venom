@@ -6,7 +6,6 @@
 from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
 import re
-from sys import argv
 from urllib.parse import quote_plus
 from resources.lib.database import cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
@@ -29,8 +28,8 @@ class Seasons:
 		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w342'
 		self.trakt_user = control.setting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
-		self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/seasons'
-		self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
+		# self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/seasons'
+		# self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.showunaired = control.setting('showunaired') == 'true'
 		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
 		self.showspecials = control.setting('tv.specials') == 'true'
@@ -105,6 +104,7 @@ class Seasons:
 		return self.list
 
 	def seasonDirectory(self, items):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32054, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
