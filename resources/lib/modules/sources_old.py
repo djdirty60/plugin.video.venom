@@ -343,8 +343,8 @@ class Sources:
 			control.homeWindow.setProperty(self.labelProperty, p_label)
 			self.prepareSources()
 			sourceDict = self.sourceDict
-			sourceDict = [(i[0], i[1], i[1].tvshow) for i in sourceDict]
-			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2]]
+			sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
+			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2] is not None]
 			aliases = []
 			try:
 				meta = self.meta
@@ -369,12 +369,13 @@ class Sources:
 					if i == 'GB': i = 'UK'
 					alias = {'title': tvshowtitle + ' ' + i, 'country': i.lower()}
 					if not alias in aliases: aliases.append(alias)
-			data = {'title': title, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'season': season, 'episode': episode, 'tvshowtitle': tvshowtitle, 'aliases': aliases, 'premiered': premiered}
+			aliases = jsdumps(aliases)
 			for i in scraperDict:
-				name, pack = i[0].upper(), i[2]
+				name = i[0].upper()
+				pack = i[2]
 				if pack == 'season': name = '%s (season pack)' % name
 				elif pack == 'show': name = '%s (show pack)' % name
-				threads.append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
+				threads.append(Thread(target=self.getEpisodeSource, args=(title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1], pack), name=name))
 			[i.start() for i in threads]
 			end_time = time() + timeout
 		except:
@@ -405,30 +406,38 @@ class Sources:
 			progressDialog.create(header, '')
 			self.prepareSources()
 			sourceDict = self.sourceDict
-			progressDialog.update(0, control.lang(32600)) # preparing sources
+			progressDialog.update(0, control.lang(32600))
+
+			start = time()
+
 			content = 'movie' if tvshowtitle is None else 'episode'
-			if content == 'movie': sourceDict = [(i[0], i[1], i[1].movie) for i in sourceDict]
-			else: sourceDict = [(i[0], i[1], i[1].tvshow) for i in sourceDict]
-			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2]]
+			if content == 'movie': sourceDict = [(i[0], i[1], getattr(i[1], 'movie', None)) for i in sourceDict]
+			else: sourceDict = [(i[0], i[1], getattr(i[1], 'tvshow', None)) for i in sourceDict]
+			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2] is not None]
+
+			log_utils.log('total time1= %s' % (time() - start))
 			if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
-			if control.setting('scrapers.prioritize') == 'true': 
-				sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
-				sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
+			# sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
+			# sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
+			log_utils.log('total time2= %s' % (time() - start))
+
 			aliases = []
 			try:
+				# meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"')))
 				meta = self.meta
 				aliases = meta.get('aliases', [])
 			except: pass
-
 			threads = []
 			if content == 'movie':
 				trakt_aliases = self.getAliasTitles(imdb, content)
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
-				data = {'title': title, 'aliases': aliases, 'year': year, 'imdb': imdb}
+				aliases = jsdumps(aliases)
 				for i in sourceDict:
-					threads.append(Thread(target=self.getMovieSource, args=(imdb, data, i[0], i[1]), name=i[0].upper()))
+					threads.append(Thread(target=self.getMovieSource, args=(title, aliases, year, imdb, i[0], i[1]), name=i[0].upper()))
 			else:
+
+				log_utils.log('total time3= %s' % (time() - start))
 				from fenomscrapers import pack_sources
 				packCapableList = pack_sources()
 				scraperDict = [(i[0], i[1], '') for i in sourceDict] if ((not self.dev_mode) or (not self.dev_disable_single)) else []
@@ -439,6 +448,8 @@ class Sources:
 					if (not self.dev_mode) or (not self.dev_disable_show_packs):
 						showpacksourceDict = fs_sources(ret_all=(self.all_providers == 'true'))
 						scraperDict.extend([(i[0], i[1], 'show') for i in showpacksourceDict if i[0] in packCapableList])
+				log_utils.log('total time4= %s' % (time() - start))
+
 				trakt_aliases = self.getAliasTitles(imdb, content)
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
@@ -449,13 +460,20 @@ class Sources:
 						if i == 'GB': i = 'UK'
 						alias = {'title': tvshowtitle + ' ' + i, 'country': i.lower()}
 						if not alias in aliases: aliases.append(alias)
-				data = {'title': title, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'season': season, 'episode': episode, 'tvshowtitle': tvshowtitle, 'aliases': aliases, 'premiered': premiered}
+				aliases = jsdumps(aliases)
+
+				log_utils.log('total time5= %s' % (time() - start))
+
 				for i in scraperDict:
-					name, pack = i[0].upper(), i[2]
+					name = i[0].upper()
+					pack = i[2]
 					if pack == 'season': name = '%s (season pack)' % name
 					elif pack == 'show': name = '%s (show pack)' % name
-					threads.append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
+					threads.append(Thread(target=self.getEpisodeSource, args=(title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, i[0], i[1], pack), name=name))
+
+			log_utils.log('total time6= %s' % (time() - start))
 			[i.start() for i in threads]
+			log_utils.log('total time7= %s' % (time() - start))
 
 			sdc = control.getColor(control.setting('scraper.dialog.color'))
 			string1 = control.lang(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
@@ -478,6 +496,8 @@ class Sources:
 			pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % \
 				(self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s')
 			control.hide()
+
+			log_utils.log('total time8= %s' % (time() - start))
 		except:
 			log_utils.error()
 			try: progressDialog.close()
@@ -582,6 +602,7 @@ class Sources:
 			control.makeFile(control.dataPath)
 			dbcon = database.connect(self.sourceFile)
 			dbcur = dbcon.cursor()
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS rel_url (source TEXT, imdb_id TEXT, season TEXT, episode TEXT, rel_url TEXT, UNIQUE(source, imdb_id, season, episode));''')
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS rel_src (source TEXT, imdb_id TEXT, season TEXT, episode TEXT, hosts TEXT, added TEXT, UNIQUE(source, imdb_id, season, episode));''')
 			dbcur.connection.commit()
 		except:
@@ -589,16 +610,14 @@ class Sources:
 		finally:
 			dbcur.close() ; dbcon.close()
 
-	def getMovieSource(self, imdb, data, source, call):
+	def getMovieSource(self, title, aliases, year, imdb, source, call):
 		try:
 			dbcon = database.connect(self.sourceFile, timeout=60)
 			dbcur = dbcon.cursor()
-			dbcur.execute('''PRAGMA synchronous = OFF''')
-			dbcur.execute('''PRAGMA journal_mode = OFF''')
 		except: pass
-		if not imdb: # Fix to stop items passed with null IMDB_id pulling old unrelated sources from the database
+		if not imdb: # Fix to stop items passed with a 0 IMDB id pulling old unrelated sources from the database
 			try:
-				dbcur.execute('''DELETE FROM rel_src WHERE (source=? AND imdb_id='' AND season='' AND episode='')''', (source,))
+				for table in ["rel_src", "rel_url"]: dbcur.execute('''DELETE FROM {} WHERE (source=? AND imdb_id='' AND season='' AND episode='')'''.format(table), (source, ))
 				dbcur.connection.commit()
 			except:
 				log_utils.error()
@@ -614,28 +633,39 @@ class Sources:
 		except:
 			log_utils.error()
 		try:
+			url = None
+			url = dbcur.execute('''SELECT * FROM rel_url WHERE (source=? AND imdb_id=? AND season='' AND episode='')''', (source, imdb)).fetchone()
+			if url: url = eval(url[4])
+		except:
+			log_utils.error()
+		try:
+			if not url: url = call.movie(imdb, title, aliases, year)
+			if url:
+				dbcur.execute('''INSERT OR REPLACE INTO rel_url Values (?, ?, ?, ?, ?)''', (source, imdb, '', '', repr(url)))
+				dbcur.connection.commit()
+		except:
+			log_utils.error()
+		try:
 			sources = []
-			sources = call.sources(data, self.hostprDict)
+			sources = call.sources(url, self.hostprDict)
 			if sources:
-				# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
+				sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)]
 				self.scraper_sources.extend(sources)
 				dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, '', '', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 				dbcur.connection.commit()
 		except:
 			log_utils.error()
 
-	def getEpisodeSource(self, imdb, season, episode, data, source, call, pack):
+	def getEpisodeSource(self, title, year, imdb, tvdb, season, episode, tvshowtitle, aliases, premiered, source, call, pack):
 		try:
 			dbcon = database.connect(self.sourceFile, timeout=60)
 			dbcur = dbcon.cursor()
-			dbcur.execute('''PRAGMA synchronous = OFF''')
-			dbcur.execute('''PRAGMA journal_mode = OFF''')
 		except: pass
-		if not imdb: # Fix to stop items passed with null IMDB_id pulling old unrelated sources from the database
+		if not imdb: # Fix to stop items passed with a 0 IMDB id pulling old unrelated sources from the database
 			try:
-				dbcur.execute('''DELETE FROM rel_src WHERE (source=? AND imdb_id='' AND season=? AND episode=?)''', (source, season, episode))
-				dbcur.execute('''DELETE FROM rel_src WHERE (source=? AND imdb_id='' AND season=? AND episode='')''', (source, season))
-				dbcur.execute('''DELETE FROM rel_src WHERE (source=? AND imdb_id='' AND season='' AND episode='')''', (source, ))
+				for table in ["rel_src", "rel_url"]: dbcur.execute('''DELETE FROM {} WHERE (source=? AND imdb_id='' AND season=? AND episode=?)'''.format(table), (source, season, episode))
+				dbcur.execute('''DELETE FROM rel_src WHERE (source = ? AND imdb_id = '' AND season = ? AND episode = '')''', (source, season))
+				for table in ["rel_src", "rel_url"]: dbcur.execute('''DELETE FROM {} WHERE (source=? AND imdb_id='' AND season='' AND episode='')'''.format(table), (source, ))
 				dbcur.connection.commit()
 			except:
 				log_utils.error()
@@ -650,6 +680,7 @@ class Sources:
 						return self.scraper_sources.extend(sources)
 			except:
 				log_utils.error()
+
 		elif pack == 'season': # seasonPacks db check
 			try:
 				db_seasonPacks = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season=? AND episode='')''', (source, imdb, season)).fetchone()
@@ -661,6 +692,7 @@ class Sources:
 						return self.scraper_sources.extend(sources)
 			except:
 				log_utils.error()
+
 		elif pack == 'show': # showPacks db check
 			try:
 				db_showPacks = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season='' AND episode='')''', (source, imdb)).fetchone()
@@ -673,43 +705,66 @@ class Sources:
 						return self.scraper_sources.extend(sources)
 			except:
 				log_utils.error()
-
-		try: #dummy write or threads wait till return from scrapers...write for each is needed
-			dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', ('dummy write', '', '', '', '', ''))
-			dbcur.connection.commit()
+		try:
+			url = None
+			url = dbcur.execute('''SELECT * FROM rel_url WHERE (source=? AND imdb_id=? AND season='' AND episode='')''', (source, imdb)).fetchone()
+			if url: url = eval(url[4])
+		except:
+			log_utils.error()
+		try:
+			if not url: url = call.tvshow(imdb, tvdb, tvshowtitle, aliases, year)
+			if url:
+				dbcur.execute('''INSERT OR REPLACE INTO rel_url Values (?, ?, ?, ?, ?)''', (source, imdb, '', '', repr(url)))
+				dbcur.connection.commit()
+		except:
+			log_utils.error()
+		try:
+			ep_url = None
+			ep_url = dbcur.execute('''SELECT * FROM rel_url WHERE (source=? AND imdb_id=? AND season=? AND episode=?)''', (source, imdb, season, episode)).fetchone()
+			if ep_url: ep_url = eval(ep_url[4])
+		except:
+			log_utils.error()
+		try:
+			if url:
+				if not ep_url: ep_url = call.episode(url, imdb, tvdb, title, premiered, season, episode)
+				if ep_url:
+					dbcur.execute('''INSERT OR REPLACE INTO rel_url Values (?, ?, ?, ?, ?)''', (source, imdb, season, episode, repr(ep_url)))
+					dbcur.connection.commit()
 		except:
 			log_utils.error()
 
 		if not pack: # singleEpisodes scraper call
 			try:
 				sources = []
-				sources = call.sources(data, self.hostprDict)
+				sources = call.sources(ep_url, self.hostprDict)
 				if sources:
-					# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
+					sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)]
 					dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, season, episode, repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 					dbcur.connection.commit()
 					return self.scraper_sources.extend(sources)
 				return
 			except:
 				return log_utils.error()
+
 		elif pack == 'season': # seasonPacks scraper call
 			try:
 				sources = []
-				sources = call.sources_packs(data, self.hostprDict, bypass_filter=self.dev_disable_season_filter)
+				sources = call.sources_packs(ep_url, self.hostprDict, bypass_filter=self.dev_disable_season_filter)
 				if sources:
-					# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
+					sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)]
 					dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, season,'', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 					dbcur.connection.commit()
 					return self.scraper_sources.extend(sources)
 				return
 			except:
 				return log_utils.error()
+
 		elif pack == 'show': # showPacks scraper call
 			try:
 				sources = []
-				sources = call.sources_packs(data, self.hostprDict, search_series=True, total_seasons=self.total_seasons, bypass_filter=self.dev_disable_show_filter)
+				sources = call.sources_packs(ep_url, self.hostprDict, search_series=True, total_seasons=self.total_seasons, bypass_filter=self.dev_disable_show_filter)
 				if sources:
-					# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
+					sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)]
 					sources = [i for i in sources if i.get('last_season') >= int(season)] # filter out range items that do not apply to current season
 					dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, '', '', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 					dbcur.connection.commit()
@@ -817,9 +872,9 @@ class Sources:
 			self.sources = torr_filter
 			self.sources += aact_filter
 			self.sources += prem_filter
+
 		elif control.setting('sources.size.sort') == 'true':
-			reverse_sort = True if control.setting('sources.sizeSort.reverse') == 'false' else False
-			self.sources.sort(key=lambda k: k.get('size', 0), reverse=reverse_sort)
+			self.sources.sort(key=lambda k: k.get('size', 0), reverse=True)
 
 		if control.setting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
 			filter = []
@@ -1257,9 +1312,8 @@ class Sources:
 			dbcur.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='rel_src';''') # table exists so both will
 			if dbcur.fetchone()[0] == 1:
 				dbcur.execute('''DELETE FROM rel_src WHERE imdb_id=?''', (imdb,)) # DEL the "rel_src" list of cached links
-
-				# if not tvshowtitle: # table was removed 11-5-21
-					# dbcur.execute('''DELETE FROM rel_url WHERE imdb_id=?''', (imdb,)) #only DEL movies "rel_url" so imdb year check may update for setting change
+				if not tvshowtitle:
+					dbcur.execute('''DELETE FROM rel_url WHERE imdb_id=?''', (imdb,)) #only DEL movies "rel_url" so imdb year check may update for setting change
 				dbcur.connection.commit()
 		except:
 			log_utils.error()

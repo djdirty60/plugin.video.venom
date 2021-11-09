@@ -169,6 +169,7 @@
 		<setting id="play.mode" type="select" label="32331" lvalues="32333|32334" default="0" />
 		<setting id="rescrape.default" label="32205" type="bool" default="false" />
 		<setting id="rescrape.default2" label="32206" type="select" subsetting="true" lvalues="32207|32208|32209|32210" default="3" visible="eq(-1,true)" />
+		<setting id="scrapers.prioritize" type="bool" label="32211" default="false" />
 		<setting id="cf.disable" type="bool" label="32364" default="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disable_cloudflare)" />
 		<setting id="imdb.meta.check" type="bool" label="32017" default="true" />
@@ -213,6 +214,7 @@
 		<setting id="sources.highlight.color" type="select" label="32132" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" />
 		<setting id="sources.group.sort" type="select" label="32133" lvalues="32021|32022" default="0" visible = "true" />
 		<setting id="sources.size.sort" type="bool" label="32134" default="true" />
+		<setting id="sources.sizeSort.reverse" type="bool" label="32212" subsetting="true" default="false" visible="eq(-1,true)" />
 		<setting id="autoplay.sd" type="bool" label="32656" default="false" />
 	</category>
 

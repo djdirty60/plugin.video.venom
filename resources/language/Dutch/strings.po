@@ -867,6 +867,14 @@ msgid "Rescrape Item with All Providers - Source Select"
 msgstr "Item opnieuw schrapen met alle providers - AutoPlay"
 
 msgctxt "#32211"
+msgid "Use provider priority run ordering"
+msgstr "Prioriteitsvolgorde van provider gebruiken"
+
+msgctxt "#32212"
+msgid "Reverse Size Sort (Low to High)"
+msgstr "Omgekeerde grootte sorteren (laag naar hoog)"
+
+msgctxt "#32213"
 msgid ""
 msgstr ""
 

@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.2">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.3">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,15 +32,10 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.3.2 - Nov. 04, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added IMDb's "Coming Soon" to "Discover Movies".[/I]
-[COLOR yellow]--[/COLOR][I] AD, RD, and PM cloud scrapers have been adjusted to support some older pack file naming conventions.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed People search.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where removing an expired Furk account may not be removed during the synchronization process with the My Accounts addon.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where some empty Trakt lists would cause a hang.[/I]
-[COLOR yellow]--[/COLOR][I] "Discover Movies" - Genres, Year, Certificates for TMDb meta provider now respects the "Movie Sorting" setting.[/I]
-[COLOR yellow]--[/COLOR][I] "Discover TV Shows" - Genres and Year for TMDb meta provider now respects the "Show Sorting" setting.[/I]
-[COLOR yellow]--[/COLOR][I] The "Rescrape Item" context menu now has a pop-up select method of 4 possible choices to rescrape.  You can set a preferred default action and bypass the select dialog pop-up in settings under [B]"Source Options"[/B] category.[/I]
+[B][COLOR red]Update - v6.3.3 - Nov. 08, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Scraping process has been modified to elliminate some overhead to speed up completion time.[/I]
+[COLOR yellow]--[/COLOR][I] Each provider/scraper has a priority value that determines the order the providers/scrapers run at.  Previousely this was hardcoded to always be used.  You can now enable/disable if priorty ordering is used.  In a case where one may be using pre-emptive termination this may best be suited on while without pre-emptive termination it yields little benefit and can be slightly faster with it off.[/I]
+[COLOR yellow]--[/COLOR][I] Providers in Source Select can now be reverse sorted low to high in settings.[/I]
 		</news>
 	</extension>
 </addon>

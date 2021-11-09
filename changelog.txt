@@ -1,4 +1,10 @@
 
+[B][COLOR red]Update - v6.3.3 - Nov. 08, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Scraping process has been modified to elliminate some overhead to speed up completion time.[/I]
+[COLOR yellow]--[/COLOR][I] Each provider/scraper has a priority value that determines the order the providers/scrapers run at.  Previousely this was hardcoded to always be used.  You can now enable/disable if priorty ordering is used.  In a case where one may be using pre-emptive termination this may best be suited on while without pre-emptive termination it yields little benefit and can be slightly faster with it off.[/I]
+[COLOR yellow]--[/COLOR][I] Providers in Source Select can now be reverse sorted low to high in settings.[/I]
+
+
 [B][COLOR red]Update - v6.3.2 - Nov. 04, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Added IMDb's "Coming Soon" to "Discover Movies".[/I]
 [COLOR yellow]--[/COLOR][I] AD, RD, and PM cloud scrapers have been adjusted to support some older pack file naming conventions.[/I]

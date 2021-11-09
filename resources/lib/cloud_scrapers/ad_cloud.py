@@ -5,7 +5,6 @@
 """
 
 import re
-from urllib.parse import parse_qs, urlencode
 from resources.lib.cloud_scrapers import cloud_utils
 from resources.lib.debrid import alldebrid
 from resources.lib.modules.control import setting as getSetting
@@ -17,41 +16,13 @@ class source:
 	def __init__(self):
 		self.priority = 0 # force cloud scraper to run first
 		self.language = ['en']
+		self.movie = True
+		self.tvshow = True
 
-	def movie(self, imdb, title, aliases, year):
-		try:
-			url = {'imdb': imdb, 'title': title, 'aliases': aliases, 'year': year}
-			url = urlencode(url)
-			return url
-		except:
-			return
-
-	def tvshow(self, imdb, tvdb, tvshowtitle, aliases, year):
-		try:
-			url = {'imdb': imdb, 'tvdb': tvdb, 'tvshowtitle': tvshowtitle, 'aliases': aliases, 'year': year}
-			url = urlencode(url)
-			return url
-		except:
-			return
-
-	def episode(self, url, imdb, tvdb, title, premiered, season, episode):
-		try:
-			if not url: return
-			url = parse_qs(url)
-			url = dict([(i, url[i][0]) if url[i] else (i, '') for i in url])
-			url['title'], url['premiered'], url['season'], url['episode'] = title, premiered, season, episode
-			url = urlencode(url)
-			return url
-		except:
-			return
-
-	def sources(self, url, hostDict):
+	def sources(self, data, hostDict):
 		sources = []
-		if not url: return sources
+		if not data: return sources
 		try:
-			data = parse_qs(url)
-			data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
-
 			title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
 			title = title.replace('&', 'and').replace('Special Victims Unit', 'SVU')
 			aliases = data['aliases']

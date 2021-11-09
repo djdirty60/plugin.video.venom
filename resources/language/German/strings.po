@@ -867,6 +867,14 @@ msgid "Rescrape Item with All Providers - Source Select"
 msgstr "Artikel mit allen Anbietern neu erstellen - AutoPlay"
 
 msgctxt "#32211"
+msgid "Use provider priority run ordering"
+msgstr "Verwenden Sie die Provider-Prioritätslaufreihenfolge"
+
+msgctxt "#32212"
+msgid "Reverse Size Sort (Low to High)"
+msgstr "Umgekehrte Größensortierung (Niedrig nach Hoch)"
+
+msgctxt "#32213"
 msgid ""
 msgstr ""
 

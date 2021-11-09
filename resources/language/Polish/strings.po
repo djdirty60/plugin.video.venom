@@ -867,6 +867,14 @@ msgid "Rescrape Item with All Providers - Source Select"
 msgstr "Ponowne zdrapywanie przedmiotu u wszystkich dostawców — autoodtwarzanie"
 
 msgctxt "#32211"
+msgid "Use provider priority run ordering"
+msgstr "Użyj zamawiania priorytetów przez dostawcę"
+
+msgctxt "#32212"
+msgid "Reverse Size Sort (Low to High)"
+msgstr "Odwrotne sortowanie według rozmiaru (od małej do dużej)"
+
+msgctxt "#32213"
 msgid ""
 msgstr ""
 
