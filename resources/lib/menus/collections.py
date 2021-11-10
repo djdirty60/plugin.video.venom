@@ -679,7 +679,7 @@ class Collections:
 			except: pass
 			try: u = urlparse(url).netloc.lower()
 			except: pass
-			if u in self.tmdb_link and any(value in url for value in ['/list/', '/collection/']):
+			if u in self.tmdb_link and any(value in url for value in ('/list/', '/collection/')):
 				self.list = cache.get(tmdb_indexer.Movies().tmdb_collections_list, 168, url)
 				if '/collection/' in url: self.sort() # TMDb "/collections/" does not support request sort
 			elif u in self.imdb_link:

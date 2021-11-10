@@ -875,6 +875,18 @@ msgid "Reverse Size Sort (Low to High)"
 msgstr "Umgekehrte Größensortierung (Niedrig nach Hoch)"
 
 msgctxt "#32213"
+msgid "Uncached Torrents sort by seeders"
+msgstr "Ungecachte Torrents nach Seedern sortieren"
+
+msgctxt "#32214"
+msgid "Coming Soon"
+msgstr "Kommt bald"
+
+msgctxt "#32215"
+msgid "Coming Soon (IMDb)"
+msgstr "Kommt bald (IMDb)"
+
+msgctxt "#32216"
 msgid ""
 msgstr ""
 
@@ -1346,8 +1358,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32416"
-msgid "Upcoming (IMDb)"
-msgstr "Bevorstehende (IMDb)"
+msgid ""
+msgstr ""
 
 msgctxt "#32417"
 msgid "Trakt Popular Lists"

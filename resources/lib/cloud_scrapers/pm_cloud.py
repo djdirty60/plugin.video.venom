@@ -48,8 +48,9 @@ class source:
 			is_m2ts = False
 			try:
 				name = item.get('name', '')
-				invalids = ['.img', '.bin', '.dat', '.mpls', '.mpl', '.bdmv', '.bdm', '.disc']
-				if name.lower().endswith(tuple(invalids)): continue
+				invalids = ('.img', '.bin', '.dat', '.mpls', '.mpl', '.bdmv', '.bdm', '.disc')
+				if name.lower().endswith(invalids): continue
+
 				path = item.get('path', '').lower()
 				if not cloud_utils.cloud_check_title(title, aliases, path): continue
 				rt = cloud_utils.release_title_format(name)

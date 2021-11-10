@@ -97,7 +97,7 @@ def cache_clear_providers():
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
-		for t in ['cache', 'rel_src', 'rel_url']:
+		for t in ('cache', 'rel_src', 'rel_url'): # rel_url table was removed 11-8-21
 			dbcur.execute('''DROP TABLE IF EXISTS {}'''.format(t))
 			dbcur.execute('''VACUUM''')
 			dbcur.connection.commit()

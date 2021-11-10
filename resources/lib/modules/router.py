@@ -691,7 +691,7 @@ def router(params):
 			from json import dumps as jsdumps
 			try:
 				rand = randint(1,len(rlist))-1
-				for p in ['title', 'year', 'imdb', 'tmdb', 'tvdb', 'season', 'episode', 'tvshowtitle', 'premiered', 'select']:
+				for p in ('title', 'year', 'imdb', 'tmdb', 'tvdb', 'season', 'episode', 'tvshowtitle', 'premiered', 'select'):
 					if rtype == "show" and p == "tvshowtitle":
 						try: r += '&' + p + '=' + quote_plus(rlist[rand]['title'])
 						except: pass

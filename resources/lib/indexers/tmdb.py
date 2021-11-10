@@ -37,7 +37,7 @@ def get_request(url):
 		log_utils.error()
 		return None
 	try:
-		if response.status_code in [200, 201]: return response.json()
+		if response.status_code in (200, 201): return response.json()
 		elif response.status_code == 404:
 			if getSetting('debug.level') == '1':
 				from resources.lib.modules import log_utils
@@ -90,8 +90,8 @@ def tmdb_sort():
 	sort = int(getSetting('sort.movies.type'))
 	tmdb_sort = 'original_order'
 	if sort == 1: tmdb_sort = 'title'
-	if sort in [2, 3]: tmdb_sort = 'vote_average'
-	if sort in [4, 5, 6]: tmdb_sort = 'release_date' # primary_release_date
+	if sort in (2, 3): tmdb_sort = 'vote_average'
+	if sort in (4, 5, 6): tmdb_sort = 'release_date' # primary_release_date
 	tmdb_sort_order = '.asc' if int(getSetting('sort.movies.order')) == 0 else '.desc'
 	sort_string = tmdb_sort + tmdb_sort_order
 	return sort_string
@@ -291,7 +291,7 @@ class Movies:
 			crew = result.get('credits', {}).get('crew')
 			try: meta['director'] = ', '.join([d['name'] for d in [x for x in crew if x['job'] == 'Director']])
 			except: meta['director'] = ''
-			try: meta['writer'] = ', '.join([w['name'] for w in [y for y in crew if y['job'] in ['Writer', 'Screenplay', 'Author', 'Novel']]])
+			try: meta['writer'] = ', '.join([w['name'] for w in [y for y in crew if y['job'] in ('Writer', 'Screenplay', 'Author', 'Novel')]])
 			except: meta['writer'] = ''
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
@@ -301,14 +301,11 @@ class Movies:
 			try:
 				meta['mpaa'] = ''
 				rel_info = [x for x in result['release_dates']['results'] if x['iso_3166_1'] == 'US'][0]
-				# from resources.lib.modules import log_utils
 				for cert in rel_info.get('release_dates', {}): # loop thru all keys
 					if cert['certification']:
 						if cert['note']: continue # limited release adds region note here, use official full release that will be null
 						meta['mpaa'] = cert['certification']
-						# premiered1 = meta['premiered']
 						meta['premiered'] = cert['release_date'].split('T')[0] or meta['premiered'] # use US premiered date
-						# log_utils.log('\n title = %s \n cert = %s \n meta[premiered]1 = %s \n meta[premiered]2 = %s' % (meta['title'], cert, premiered1, meta['premiered']))
 						break
 			except: meta['mpaa'] = ''
 			try:
@@ -343,7 +340,7 @@ class Movies:
 	def parse_art(self, img):
 		if not img: return None
 		try:
-			ret_img = [(x['file_path'], x['vote_average']) for x in img if any(value == x.get('iso_639_1') for value in [self.lang, 'null', '', None])]
+			ret_img = [(x['file_path'], x['vote_average']) for x in img if any(value == x.get('iso_639_1') for value in (self.lang, 'null', '', None))]
 			if not ret_img: ret_img = [(x['file_path'], x['vote_average']) for x in img]
 			if not ret_img: return None
 			if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
@@ -733,7 +730,7 @@ class TVshows:
 	def parse_art(self, img):
 		if not img: return None
 		try:
-			ret_img = [(x['file_path'], x['vote_average']) for x in img if any(value == x.get('iso_639_1') for value in [self.lang, 'null', '', None])]
+			ret_img = [(x['file_path'], x['vote_average']) for x in img if any(value == x.get('iso_639_1') for value in (self.lang, 'null', '', None))]
 			if not ret_img: ret_img = [(x['file_path'], x['vote_average']) for x in img]
 			if not ret_img: return None
 			if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)

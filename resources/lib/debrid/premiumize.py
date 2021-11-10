@@ -48,7 +48,7 @@ class Premiumize:
 		if self.token == '': return None
 		try:
 			response = requests.get(url, headers=self.headers, timeout=15).json()
-			# if response.status_code in [200, 201]: response = response.json() # need status code checking for server maintenance
+			# if response.status_code in (200, 201): response = response.json() # need status code checking for server maintenance
 			if 'status' in response:
 				if response.get('status') == 'success': return response
 				if response.get('status') == 'error':
@@ -63,7 +63,7 @@ class Premiumize:
 		if self.token == '': return None
 		try:
 			response = requests.post(url, data, headers=self.headers, timeout=15).json()
-			# if response.status_code in [200, 201]: response = response.json() # need status code checking for server maintenance
+			# if response.status_code in (200, 201): response = response.json() # need status code checking for server maintenance
 			if 'status' in response:
 				if response.get('status') == 'success': return response
 				if response.get('status') == 'error':
@@ -292,7 +292,7 @@ class Premiumize:
 			media_id = media_id.replace(' ', '')
 			url = '%s?items[]=%s' % (cache_check_url, media_id)
 			result = requests.get(url, headers=self.headers)
-			if any(value in response for value in ['500', '502', '504']):
+			if any(value in response for value in ('500', '502', '504')):
 				log_utils.log('Premiumize.me Service Unavailable: %s' % response, __name__, log_utils.LOGDEBUG)
 			else: response = response.json()
 			if 'status' in result:
@@ -310,7 +310,7 @@ class Premiumize:
 		try:
 			postData = {'items[]': hashList}
 			response = requests.post(cache_check_url, data=postData, headers=self.headers, timeout=10)
-			if any(value in response for value in ['500', '502', '504']):
+			if any(value in response for value in ('500', '502', '504')):
 				log_utils.log('Premiumize.me Service Unavailable: %s' % response, __name__, log_utils.LOGDEBUG)
 			else: response = response.json()
 			if 'status' in response:

@@ -47,7 +47,7 @@
 		<setting type="lsep" label="32001" />
 		<setting id="navi.movie.imdb.intheater" type="bool" label="32421" default="true" />
 		<setting id="navi.movie.tmdb.nowplaying" type="bool" label="32423" default="true" />
-		<setting id="navi.movie.imdb.upcoming" type="bool" label="32416" default="true" />
+		<setting id="navi.movie.imdb.comingsoon" type="bool" label="32215" default="true" />
 		<setting id="navi.movie.trakt.anticipated" type="bool" label="32425" default="true" />
 		<setting id="navi.movie.tmdb.upcoming" type="bool" label="32427" default="true" />
 		<setting id="navi.movie.imdb.popular" type="bool" label="32429" default="true" />
@@ -215,6 +215,7 @@
 		<setting id="sources.group.sort" type="select" label="32133" lvalues="32021|32022" default="0" visible = "true" />
 		<setting id="sources.size.sort" type="bool" label="32134" default="true" />
 		<setting id="sources.sizeSort.reverse" type="bool" label="32212" subsetting="true" default="false" visible="eq(-1,true)" />
+		<setting id="uncached.seeder.sort" type="bool" label="32213" default="false" />
 		<setting id="autoplay.sd" type="bool" label="32656" default="false" />
 	</category>
 

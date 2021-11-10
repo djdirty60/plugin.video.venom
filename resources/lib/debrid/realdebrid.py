@@ -67,7 +67,7 @@ class RealDebrid:
 				log_utils.log('Real-Debrid Temporarily Down For Maintenance', level=log_utils.LOGWARNING)
 				return None
 			else: response = response.json()
-			if any(value in str(response) for value in ['bad_token', 'Bad Request']):
+			if any(value in str(response) for value in ('bad_token', 'Bad Request')):
 				if not fail_check:
 					if self.refresh_token() and token_ck: return
 					response = self._get(original_url, fail_check=True)
@@ -94,7 +94,7 @@ class RealDebrid:
 				log_utils.log('Real-Debrid Temporarily Down For Maintenance', level=log_utils.LOGWARNING)
 				return None
 			else: response = response.json()
-			if any(value in str(response) for value in ['bad_token', 'Bad Request']):
+			if any(value in str(response) for value in ('bad_token', 'Bad Request')):
 				self.refresh_token()
 				response = self._post(original_url, data)
 			elif 'error' in response:
@@ -773,7 +773,7 @@ class RealDebrid:
 			success, error = self.get_token()
 			if not success:
 				if not 'Temporarily Down For Maintenance' in error:
-					if any(value == error.get('error_code') for value in [9, 12, 13, 14]):
+					if any(value == error.get('error_code') for value in (9, 12, 13, 14)):
 						self.reset_authorization() # empty all auth settings to force a re-auth on next use
 						if self.server_notifications: control.notification(message='Real-Debrid Auth revoked due to:  %s' % error.get('error'), icon=rd_icon)
 				log_utils.log('Unable to Refresh Real Debrid Token: %s' % error.get('error'), level=log_utils.LOGWARNING)

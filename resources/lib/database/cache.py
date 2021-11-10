@@ -184,7 +184,7 @@ def cache_clear_search():
 	try:
 		dbcon = get_connection_search()
 		dbcur = dbcon.cursor()
-		for t in ['tvshow', 'movies']:
+		for t in ('tvshow', 'movies'):
 			dbcur.execute('''DROP TABLE IF EXISTS {}'''.format(t))
 			dbcur.execute('''VACUUM''')
 			dbcur.connection.commit()
@@ -274,7 +274,7 @@ def clear_local_bookmarks(): # clear all venom bookmarks from kodi database
 		dbcur = dbcon.cursor()
 		dbcur.execute('''SELECT * FROM files WHERE strFilename LIKE "%plugin.video.venom%"''')
 		file_ids = [str(i[0]) for i in dbcur.fetchall()]
-		for table in ["bookmark", "streamdetails", "files"]:
+		for table in ('bookmark', 'streamdetails', 'files'):
 			dbcur.execute('''DELETE FROM {} WHERE idFile IN ({})'''.format(table, ','.join(file_ids)))
 		dbcur.connection.commit()
 	except:
@@ -290,7 +290,7 @@ def clear_local_bookmark(url): # clear all item specific bookmarks from kodi dat
 		dbcur.execute('''SELECT * FROM files WHERE strFilename LIKE "%{}%"'''.format(url))
 		file_ids = [str(i[0]) for i in dbcur.fetchall()]
 		if not file_ids: return
-		for table in ["bookmark", "streamdetails", "files"]:
+		for table in ('bookmark', 'streamdetails', 'files'):
 			dbcur.execute('''DELETE FROM {} WHERE idFile IN ({})'''.format(table, ','.join(file_ids)))
 		dbcur.connection.commit()
 	except:

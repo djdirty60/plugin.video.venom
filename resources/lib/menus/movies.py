@@ -316,7 +316,7 @@ class Movies:
 		if sort == 2: imdb_sort = 'user_rating'
 		if sort == 3: imdb_sort = 'num_votes'
 		if sort == 4: imdb_sort = 'release_date'
-		if sort in [5, 6]: imdb_sort = 'date_added'
+		if sort in (5, 6): imdb_sort = 'date_added'
 		imdb_sort_order = ',asc' if (int(control.setting('sort.%s.order' % type)) == 0 or sort == 0) else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
@@ -328,7 +328,7 @@ class Movies:
 		if sort == 1: tmdb_sort = 'title'
 		if sort == 2: tmdb_sort = 'vote_average'
 		if sort == 3: tmdb_sort = 'vote_count'
-		if sort in [4, 5, 6]: tmdb_sort = 'primary_release_date'
+		if sort in (4, 5, 6): tmdb_sort = 'primary_release_date'
 		tmdb_sort_order = '.asc' if (int(control.setting('sort.movies.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
 		if sort == 2: sort_string = sort_string + '&vote_count.gte=500'
@@ -735,7 +735,7 @@ class Movies:
 				list_id = list_item.get('ids', {}).get('trakt', '')
 				list_owner = list_item.get('user', {}).get('username', '')
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
-				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): continue
+				if any(list_item.get('privacy', '') == value for value in ('private', 'friends')): continue
 				list_url = self.traktlist_link % (list_owner_slug, list_id)
 				list_content = traktsync.fetch_public_list(list_id)
 				if not list_content: pass
@@ -1165,9 +1165,9 @@ class Movies:
 
 		skin = control.skin
 		if skin == 'skin.arctic.horizon': pass
-		elif skin in ['skin.estuary', 'skin.aeon.nox.silvo']: content = ''
+		elif skin in ('skin.estuary', 'skin.aeon.nox.silvo'): content = ''
 		elif skin == 'skin.auramod':
-			if content not in ['actors', 'genres']: content = 'addons'
+			if content not in ('actors', 'genres'): content = 'addons'
 			else: content = ''
 		control.content(syshandle, content) # some skins use their own thumb for things like "genres" when content type is set here
 		control.directory(syshandle, cacheToDisc=True)

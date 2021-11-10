@@ -26,7 +26,7 @@ def google(url, ref=None):
 			url = '%s|Cookie=%s' % (loc, c)
 			return url
 
-		if any(x in url for x in ['youtube.', 'docid=']):
+		if any(x in url for x in ('youtube.', 'docid=')):
 			url = 'https://drive.google.com/file/d/%s/view' % re.compile(r'docid=([\w-]+)').findall(url)[0]
 
 		netloc = urlparse(url.strip().lower()).netloc
@@ -80,7 +80,7 @@ def google(url, ref=None):
 		result = sorted(result, key=lambda i: i.get('height', 0), reverse=True)
 		url = []
 
-		for q in ['4K', '1440p', '1080p', 'HD', 'SD']:
+		for q in ('4K', '1440p', '1080p', 'HD', 'SD'):
 			try: url += [[i for i in result if i.get('quality') == q][0]]
 			except: pass
 

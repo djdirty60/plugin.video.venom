@@ -182,38 +182,38 @@ def appearance():
 def addonIcon():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']): return joinPath(art, 'icon.png')
+	if not (art is None and theme in ('-', '')): return joinPath(art, 'icon.png')
 	return addonInfo('icon')
 
 def addonThumb():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']): return joinPath(art, 'poster.png')
+	if not (art is None and theme in ('-', '')): return joinPath(art, 'poster.png')
 	elif theme == '-': return 'DefaultFolder.png'
 	return addonInfo('icon')
 
 def addonPoster():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']): return joinPath(art, 'poster.png')
+	if not (art is None and theme in ('-', '')): return joinPath(art, 'poster.png')
 	return 'DefaultVideo.png'
 
 def addonFanart():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']): return joinPath(art, 'fanart.jpg')
+	if not (art is None and theme in ('-', '')): return joinPath(art, 'fanart.jpg')
 	return addonInfo('fanart')
 
 def addonBanner():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']): return joinPath(art, 'banner.png')
+	if not (art is None and theme in ('-', '')): return joinPath(art, 'banner.png')
 	return 'DefaultVideo.png'
 
 def addonNext():
 	theme = appearance()
 	art = artPath()
-	if not (art is None and theme in ['-', '']): return joinPath(art, 'next.png')
+	if not (art is None and theme in ('-', '')): return joinPath(art, 'next.png')
 	return 'DefaultVideo.png'
 
 ####################################################

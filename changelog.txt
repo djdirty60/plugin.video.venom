@@ -1,7 +1,14 @@
 
+[B][COLOR red]Update - v6.3.4 - Nov. 09, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fix airtime "Daylight Savings Time" issue with [B]My TV Shows-Upcoming Progress, Upcoming Episodes,[/B] and [B]Season Premieres[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Added setting to sort uncached torrents by seeder count, see [B]Source Options[/B] under heading [B]Sources Select[/B].  Results are still sorted by quality as primary but this new setting will change the secondary sort to seeders vs. file size.[/I]
+[COLOR yellow]--[/COLOR][I] Changed "Discover Movies" - [B]Upcoming (IMDb)[/B] to [B]Coming Soon (IMDb)[/B] to match the IMDb url and previous changelog notation of it's addition.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where sync process with MA would disable AD, PM, or RD if account changes took place.  This caused any new auth to have the debrid provider remaining disabled and user would not notice and the scrape process would then fail.  This has been changed to always remain enabled, unless user disables it.  The debrid service will not function unless both a token and service is enabled so leaving in an always enabled state is preferred.[/I]
+
+
 [B][COLOR red]Update - v6.3.3 - Nov. 08, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Scraping process has been modified to elliminate some overhead to speed up completion time.[/I]
-[COLOR yellow]--[/COLOR][I] Each provider/scraper has a priority value that determines the order the providers/scrapers run at.  Previousely this was hardcoded to always be used.  You can now enable/disable if priorty ordering is used.  In a case where one may be using pre-emptive termination this may best be suited on while without pre-emptive termination it yields little benefit and can be slightly faster with it off.[/I]
+[COLOR yellow]--[/COLOR][I] Scraping process has been modified to eliminate some overhead to speed up completion time.[/I]
+[COLOR yellow]--[/COLOR][I] Each provider/scraper has a priority value that determines the order the providers/scrapers run at.  Previously this was hardcoded to always be used.  You can now enable/disable if priorty ordering is used.  In a case where one may be using pre-emptive termination this may best be suited on while without pre-emptive termination it yields little benefit and can be slightly faster with it off.[/I]
 [COLOR yellow]--[/COLOR][I] Providers in Source Select can now be reverse sorted low to high in settings.[/I]
 
 

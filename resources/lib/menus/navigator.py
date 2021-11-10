@@ -48,8 +48,8 @@ class Navigator:
 			self.addDirectoryItem(32421 if self.indexLabels else 32420, 'movies&url=theaters', 'imdb.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.tmdb.nowplaying'):
 			self.addDirectoryItem(32423 if self.indexLabels else 32422, 'tmdbmovies&url=tmdb_nowplaying', 'tmdb.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
-		if control.getMenuEnabled('navi.movie.imdb.upcoming'):
-			self.addDirectoryItem(32416 if self.indexLabels else 32426, 'movies&url=imdb_comingsoon', 'imdb.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
+		if control.getMenuEnabled('navi.movie.imdb.comingsoon'):
+			self.addDirectoryItem(32215 if self.indexLabels else 32214, 'movies&url=imdb_comingsoon', 'imdb.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.trakt.anticipated'):
 			self.addDirectoryItem(32425 if self.indexLabels else 32424, 'movies&url=traktanticipated', 'trakt.png' if self.iconLogos else 'in-theaters.png', 'DefaultMovies.png')
 		if control.getMenuEnabled('navi.movie.tmdb.upcoming'):

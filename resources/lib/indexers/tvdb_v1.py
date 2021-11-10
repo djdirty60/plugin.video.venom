@@ -622,7 +622,7 @@ def _seasonCount(tvshowtitle, year, imdb, tvdb):
 			# item2 = result[0]
 
 			# try: # TVDB en.xml sort order is by ID now so we resort by season then episode for proper indexing of nextup item to watch.
-				# sorted_item = [y for y in item if any(re.compile(r'<SeasonNumber>(.+?)</SeasonNumber>').findall(y)[0] == z for z in [str(i['snum']), str(int(i['snum']) + 1)])]
+				# sorted_item = [y for y in item if any(re.compile(r'<SeasonNumber>(.+?)</SeasonNumber>').findall(y)[0] == z for z in (str(i['snum']), str(int(i['snum']) + 1)))]
 				# sorted_item = sorted(sorted_item, key= lambda t:(int(re.compile(r'<SeasonNumber>(\d+)</SeasonNumber>').findall(t)[-1]), int(re.compile(r'<EpisodeNumber>(\d+)</EpisodeNumber>').findall(t)[-1])))
 				# num = [x for x,y in enumerate(sorted_item) if re.compile(r'<SeasonNumber>(.+?)</SeasonNumber>').findall(y)[0] == str(i['snum']) and re.compile(r'<EpisodeNumber>(.+?)</EpisodeNumber>').findall(y)[0] == str(i['enum'])][-1]
 				# item = [y for x,y in enumerate(sorted_item) if x > num][0]

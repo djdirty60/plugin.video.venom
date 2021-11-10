@@ -14,7 +14,7 @@ if not client_key: client_key = 'cf0ebcc2f7b824bd04cf3a318f15c17d'
 headers.update({'client-key': client_key})
 base_url = "http://webservice.fanart.tv/v3/%s/%s"
 lang = apiLanguage()['trakt']
-error_codes = ['500 Internal Server Error', '502 Bad Gateway', '503 Service Unavailable', '504 Gateway Timeout']
+error_codes = ('500 Internal Server Error', '502 Bad Gateway', '503 Service Unavailable', '504 Gateway Timeout')
 session = requests.Session()
 retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
 session.mount('http://', HTTPAdapter(max_retries=retries))
@@ -30,7 +30,7 @@ def get_request(url):
 		log_utils.error()
 		return None
 	try:
-		if result.status_code in [200, 201]: return result.json()
+		if result.status_code in (200, 201): return result.json()
 		elif result.status_code == 404:
 			if getSetting('debug.level') == '1':
 				from resources.lib.modules import log_utils
@@ -56,7 +56,7 @@ def parse_art(img):
 		if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 		elif len(ret_img) == 1: pass
 		else:
-			ret_img = [(x['url'], x['likes']) for x in img if any(value == x.get('lang') for value in ['en', '00', ''])]
+			ret_img = [(x['url'], x['likes']) for x in img if any(value == x.get('lang') for value in ('en', '00', ''))]
 			if len(ret_img) >1: ret_img = sorted(ret_img, key=lambda x: int(x[1]), reverse=True)
 		if not ret_img: return None
 		ret_img = [x[0] for x in ret_img][0]
@@ -115,7 +115,7 @@ def get_movie_art(imdb, tmdb):
 	except: landscape = ''
 	try:
 		keyart = art['movieposter']
-		keyart = [(x['url'], x['likes']) for x in keyart if any(value == x.get('lang') for value in ['00', 'None', None])]
+		keyart = [(x['url'], x['likes']) for x in keyart if any(value == x.get('lang') for value in ('00', 'None', None))]
 		if len(keyart) >1:keyart = sorted(keyart, key=lambda x: int(x[1]), reverse=True)
 		keyart = [x[0] for x in keyart][0]
 	except: keyart = ''

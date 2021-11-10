@@ -332,7 +332,7 @@ class AllDebrid:
 				cm = []
 				url_link = item['link']
 				name = control.strip_non_ascii_and_unprintable(item['filename'])
-				if any(value in name for value in ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt']): continue
+				if any(value in name for value in ('.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt')): continue
 				size = item['size']
 				display_size = float(int(size)) / 1073741824
 				label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, display_size, name)
@@ -363,7 +363,7 @@ class AllDebrid:
 			transfer_info = self.list_transfer(transfer_id)
 			# log_utils.log('transfer_info=%s' % transfer_info)
 			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == ''] #.m2ts file extension is not in "filename" so this fails
-			invalids = ['.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt', '.srt']
+			invalids = ('.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt', '.srt')
 			valid_results = [i for i in transfer_info.get('links') if not any(i.get('filename').lower().endswith(x) for x in invalids) and not i.get('link', '') == '']
 			if len(valid_results) == 0:
 				failed_reason = 'No valid video extension found'

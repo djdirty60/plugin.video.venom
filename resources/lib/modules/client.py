@@ -122,7 +122,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 			except: ignore = False
 
 			if not ignore:
-				if response.code in [301, 307, 308, 503, 403]: # 403:Forbidden added 3/3/21 for cloudflare, fails on bad User-Agent
+				if response.code in (301, 307, 308, 503, 403): # 403:Forbidden added 3/3/21 for cloudflare, fails on bad User-Agent
 					cf_result = response.read(5242880)
 					try: encoding = response.headers["Content-Encoding"]
 					except: encoding = None
@@ -169,7 +169,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 						from resources.lib.modules import log_utils
 						log_utils.error('Request-Error url=(%s)' % url)
 						return None
-					elif error is True and response.code in [401, 404, 405]: # no point in continuing after this exception runs with these response.code's
+					elif error is True and response.code in (401, 404, 405): # no point in continuing after this exception runs with these response.code's
 						try: response_headers = dict([(item[0].title(), item[1]) for item in list(response.info().items())]) # behaves differently 18 to 19. 18 I had 3 "Set-Cookie:" it combined all 3 values into 1 key. In 19 only the last keys value was present.
 						except:
 							from resources.lib.modules import log_utils

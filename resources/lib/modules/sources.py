@@ -246,7 +246,9 @@ class Sources:
 				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'tvshow.poster', 'season_poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode', 'castandrole']
 				return {k: v for k, v in iter(metadata.items()) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
-			# uncached_items = sorted(uncached_items, key=lambda k: (k['size'], k['seeders']), reverse=True)
+			if control.setting('uncached.seeder.sort') == 'true':
+				uncached_items = sorted(uncached_items, key=lambda k: k['seeders'], reverse=True)
+				uncached_items = self.sort_byQuality(source_list=uncached_items)
 			if items == uncached_items:
 				from resources.lib.windows.uncached_results import UncachedResultsXML
 				window = UncachedResultsXML('uncached_results.xml', control.addonPath(control.addonId()), uncached=uncached_items, meta=self.meta)
@@ -365,7 +367,7 @@ class Sources:
 			try: country_codes = meta.get('country_codes', [])
 			except: country_codes = []
 			for i in country_codes:
-				if i in ['CA', 'US', 'UK', 'GB']:
+				if i in ('CA', 'US', 'UK', 'GB'):
 					if i == 'GB': i = 'UK'
 					alias = {'title': tvshowtitle + ' ' + i, 'country': i.lower()}
 					if not alias in aliases: aliases.append(alias)
@@ -397,7 +399,7 @@ class Sources:
 		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
 
-	@timeIt
+	# @timeIt
 	def getSources_dialog(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=90):
 		try:
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
@@ -445,7 +447,7 @@ class Sources:
 				try: country_codes = meta.get('country_codes', [])
 				except: country_codes = []
 				for i in country_codes:
-					if i in ['CA', 'US', 'UK', 'GB']:
+					if i in ('CA', 'US', 'UK', 'GB'):
 						if i == 'GB': i = 'UK'
 						alias = {'title': tvshowtitle + ' ' + i, 'country': i.lower()}
 						if not alias in aliases: aliases.append(alias)
@@ -503,16 +505,16 @@ class Sources:
 					source_4k = len([e for e in self.scraper_sources if e['quality'] == '4K'])
 					source_1080 = len([e for e in self.scraper_sources if e['quality'] == '1080p'])
 					source_720 = len([e for e in self.scraper_sources if e['quality'] == '720p'])
-					source_sd = len([e for e in self.scraper_sources if e['quality'] in ['SD', 'SCR', 'CAM']])
+					source_sd = len([e for e in self.scraper_sources if e['quality'] in ('SD', 'SCR', 'CAM')])
 				elif quality == '1':
 					source_1080 = len([e for e in self.scraper_sources if e['quality'] == '1080p'])
 					source_720 = len([e for e in self.scraper_sources if e['quality'] == '720p'])
-					source_sd = len([e for e in self.scraper_sources if e['quality'] in ['SD', 'SCR', 'CAM']])
+					source_sd = len([e for e in self.scraper_sources if e['quality'] in ('SD', 'SCR', 'CAM')])
 				elif quality == '2':
 					source_720 = len([e for e in self.scraper_sources if e['quality'] == '720p'])
-					source_sd = len([e for e in self.scraper_sources if e['quality'] in ['SD', 'SCR', 'CAM']])
+					source_sd = len([e for e in self.scraper_sources if e['quality'] in ('SD', 'SCR', 'CAM')])
 				else:
-					source_sd = len([e for e in self.scraper_sources if e['quality'] in ['SD', 'SCR', 'CAM']])
+					source_sd = len([e for e in self.scraper_sources if e['quality'] in ('SD', 'SCR', 'CAM')])
 				total = source_4k + source_1080 + source_720 + source_sd
 
 				source_4k_label = total_format % ('red', source_4k) if source_4k == 0 else total_format % (sdc, source_4k)
@@ -550,7 +552,7 @@ class Sources:
 	def preResolve(self, next_sources, next_meta):
 		try:
 			control.homeWindow.setProperty(self.metaProperty, jsdumps(next_meta))
-			if control.setting('autoplay.sd') == 'true': next_sources = [i for i in next_sources if not i['quality'] in ['4K', '1080p', '720p']]
+			if control.setting('autoplay.sd') == 'true': next_sources = [i for i in next_sources if not i['quality'] in ('4K', '1080p', '720p')]
 			uncached_filter = [i for i in next_sources if re.match(r'^uncached.*torrent', i['source'])]
 			next_sources = [i for i in next_sources if i not in uncached_filter]
 		except:
@@ -754,7 +756,7 @@ class Sources:
 		if control.setting('remove.cam.sources') == 'true':
 			self.sources = [i for i in self.sources if i['quality'] != 'CAM']
 		if control.setting('remove.sd.sources') == 'true':
-			if any(i for i in self.sources if any(value in i['quality'] for value in ['4K', '1080p', '720p'])): #only remove SD if better quality does exist
+			if any(i for i in self.sources if any(value in i['quality'] for value in ('4K', '1080p', '720p'))): #only remove SD if better quality does exist
 				self.sources = [i for i in self.sources if i['quality'] != 'SD']
 		if control.setting('remove.3D.sources') == 'true':
 			self.sources = [i for i in self.sources if '3D' not in i.get('info', '')]
@@ -823,18 +825,11 @@ class Sources:
 
 		if control.setting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
 			filter = []
-			filter += [i for i in self.sources if any(value in i.get('info', '') for value in [' HDR ', 'DOLBY-VISION'])]
+			filter += [i for i in self.sources if any(value in i.get('info', '') for value in (' HDR ', 'DOLBY-VISION'))]
 			filter += [i for i in self.sources if i not in filter]
 			self.sources = filter
 
-		filter = []
-		if quality in ['0']: filter += [i for i in self.sources if i['quality'] == '4K']
-		if quality in ['0', '1']: filter += [i for i in self.sources if i['quality'] == '1080p']
-		if quality in ['0', '1', '2']: filter += [i for i in self.sources if i['quality'] == '720p']
-		filter += [i for i in self.sources if i['quality'] == 'SCR']
-		filter += [i for i in self.sources if i['quality'] == 'SD']
-		filter += [i for i in self.sources if i['quality'] == 'CAM']
-		self.sources = filter
+		self.sources = self.sort_byQuality(source_list=self.sources)
 
 		filter = [] # filter to place cloud files first
 		filter += [i for i in self.sources if i['source'] == 'cloud']
@@ -879,7 +874,7 @@ class Sources:
 		return filter
 
 	def sourcesAutoPlay(self, items):
-		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ['4K', '1080p', '720p']]
+		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ('4K', '1080p', '720p')]
 		header = control.homeWindow.getProperty(self.labelProperty) + ': Resolving...'
 		try:
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
@@ -921,7 +916,7 @@ class Sources:
 		if 'magnet:' in url:
 			if not 'uncached' in item['source']:
 				try:
-					meta = control.homeWindow.getProperty(self.metaProperty) # need for CM "downlod" action
+					meta = control.homeWindow.getProperty(self.metaProperty) # need for CM "download" action
 					if meta:
 						meta = jsloads(unquote(meta.replace('%22', '\\"')))
 						season, episode, title = meta.get('season'), meta.get('episode'), meta.get('title')
@@ -973,11 +968,11 @@ class Sources:
 
 	def debridPackDialog(self, provider, name, magnet_url, info_hash):
 		try:
-			if provider in ['Real-Debrid', 'RD']:
+			if provider in ('Real-Debrid', 'RD'):
 				from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
-			elif provider in ['Premiumize.me', 'PM']:
+			elif provider in ('Premiumize.me', 'PM'):
 				from resources.lib.debrid.premiumize import Premiumize as debrid_function
-			elif provider in ['AllDebrid', 'AD']:
+			elif provider in ('AllDebrid', 'AD'):
 				from resources.lib.debrid.alldebrid import AllDebrid as debrid_function
 			else: return
 			debrid_files = None
@@ -996,11 +991,11 @@ class Sources:
 				control.closeAll()
 			control.busy()
 			chosen_result = debrid_files[chosen]
-			if provider	 in ['Real-Debrid', 'RD']:
+			if provider in ('Real-Debrid', 'RD'):
 				self.url = debrid_function().unrestrict_link(chosen_result['link'])
-			elif provider in ['Premiumize.me', 'PM']:
+			elif provider in ('Premiumize.me', 'PM'):
 				self.url = debrid_function().add_headers_to_url(chosen_result['link'])
-			elif provider in ['AllDebrid', 'AD']:
+			elif provider in ('AllDebrid', 'AD'):
 				self.url = debrid_function().unrestrict_link(chosen_result['link'])
 			from resources.lib.modules import player
 			meta = jsloads(unquote(control.homeWindow.getProperty(self.metaProperty).replace('%22', '\\"'))) # needed for CM "showDebridPack" action
@@ -1025,7 +1020,7 @@ class Sources:
 	def sourceInfo(self, item):
 		try:
 			from sys import platform as sys_platform
-			supported_platform = any(value in sys_platform for value in ['win32', 'linux2'])
+			supported_platform = any(value in sys_platform for value in ('win32', 'linux2'))
 			source = jsloads(item)[0]
 			list = [('[COLOR %s]url:[/COLOR]  %s' % (self.highlight_color, source.get('url')), source.get('url'))]
 			if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % self.highlight_color, ' ')] # "&" in magnets causes copy2clip to fail .replace('&', '^&').strip() used in copy2clip() method
@@ -1037,7 +1032,7 @@ class Sources:
 				if supported_platform: list += [('[COLOR %s]  -- Copy hash To Clipboard[/COLOR]' % self.highlight_color, ' ')]
 				list += [('[COLOR %s]seeders:[/COLOR]  %s' % (self.highlight_color, source.get('seeders')), ' ')]
 			select = control.selectDialog([i[0] for i in list], 'Source Info')
-			if any(x in list[select][0] for x in ['Copy url To Clipboard', 'Copy name To Clipboard', 'Copy hash To Clipboard']):
+			if any(x in list[select][0] for x in ('Copy url To Clipboard', 'Copy name To Clipboard', 'Copy hash To Clipboard')):
 				from resources.lib.modules.source_utils import copy2clip
 				copy2clip(list[select - 1][1])
 			return
@@ -1071,7 +1066,7 @@ class Sources:
 				from resources.lib.modules.trakt import getTVShowAliases
 				t = getTVShowAliases(imdb)
 			if not t: return []
-			t = [i for i in t if i.get('country', '').lower() in ['en', '', 'ca', 'us', 'uk', 'gb']]
+			t = [i for i in t if i.get('country', '').lower() in ('en', '', 'ca', 'us', 'uk', 'gb')]
 			return t
 		except:
 			log_utils.error()
@@ -1257,9 +1252,6 @@ class Sources:
 			dbcur.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='rel_src';''') # table exists so both will
 			if dbcur.fetchone()[0] == 1:
 				dbcur.execute('''DELETE FROM rel_src WHERE imdb_id=?''', (imdb,)) # DEL the "rel_src" list of cached links
-
-				# if not tvshowtitle: # table was removed 11-5-21
-					# dbcur.execute('''DELETE FROM rel_url WHERE imdb_id=?''', (imdb,)) #only DEL movies "rel_url" so imdb year check may update for setting change
 				dbcur.connection.commit()
 		except:
 			log_utils.error()
@@ -1325,6 +1317,17 @@ class Sources:
 			except:
 				log_utils.error()
 		return total_seasons, season_isAiring
+
+	def sort_byQuality(self, source_list):
+		filter = []
+		quality = control.setting('hosts.quality') or '0'
+		if quality == '0': filter += [i for i in source_list if i['quality'] == '4K']
+		if quality in ('0', '1'): filter += [i for i in source_list if i['quality'] == '1080p']
+		if quality in ('0', '1', '2'): filter += [i for i in source_list if i['quality'] == '720p']
+		filter += [i for i in source_list if i['quality'] == 'SCR']
+		filter += [i for i in source_list if i['quality'] == 'SD']
+		filter += [i for i in source_list if i['quality'] == 'CAM']
+		return filter
 
 	def debrid_abv(self, debrid):
 		try:

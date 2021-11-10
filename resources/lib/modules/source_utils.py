@@ -6,47 +6,47 @@
 import re
 from urllib.parse import unquote, unquote_plus
 
-VIDEO_3D = ['.3d.', '.sbs.', '.hsbs', 'sidebyside', 'side.by.side', 'stereoscopic', '.tab.', '.htab.', 'topandbottom', 'top.and.bottom']
+VIDEO_3D = ('.3d.', '.sbs.', '.hsbs', 'sidebyside', 'side.by.side', 'stereoscopic', '.tab.', '.htab.', 'topandbottom', 'top.and.bottom')
 
-DOLBY_VISION = ['dolby.vision', 'dolbyvision', '.dovi.', '.dv.']
-HDR = ['2160p.uhd.bluray', '2160p.uhd.blu.ray', '2160p.bluray.hevc.truehd', '2160p.blu.ray.hevc.truehd',
+DOLBY_VISION = ('dolby.vision', 'dolbyvision', '.dovi.', '.dv.')
+HDR = ('2160p.uhd.bluray', '2160p.uhd.blu.ray', '2160p.bluray.hevc.truehd', '2160p.blu.ray.hevc.truehd',
 			'2160p.bluray.hevc.dts.hd.ma', '2160p.blu.ray.hevc.dts.hd.ma', '.hdr.', 'hdr10', 'hdr.10',
-			'uhd.bluray.2160p', 'uhd.blu.ray.2160p']
+			'uhd.bluray.2160p', 'uhd.blu.ray.2160p')
 
-CODEC_H264 = ['avc', 'h264', 'h.264', 'x264', 'x.264']
-CODEC_H265 = ['h265', 'h.265', 'hevc', 'x265', 'x.265']
-CODEC_XVID = ['xvid', '.x.vid']
-CODEC_DIVX = ['divx', 'div2', 'div3', 'div4']
-CODEC_MPEG = ['.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', 'msmpeg', 'mpegurl']
-CODEC_MKV = ['.mkv', 'matroska']
-REMUX = ['remux', 'bdremux']
+CODEC_H264 = ('avc', 'h264', 'h.264', 'x264', 'x.264')
+CODEC_H265 = ('h265', 'h.265', 'hevc', 'x265', 'x.265')
+CODEC_XVID = ('xvid', '.x.vid')
+CODEC_DIVX = ('divx', 'div2', 'div3', 'div4')
+CODEC_MPEG = ('.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', 'msmpeg', 'mpegurl')
+CODEC_MKV = ('.mkv', 'matroska')
+REMUX = ('remux', 'bdremux')
 
-BLURAY = ['bluray', 'blu.ray', 'bdrip', 'bd.rip']
-DVD = ['dvdrip', 'dvd.rip']
-WEB = ['.web.', 'webdl', 'web.dl', 'webrip', 'web.rip']
-SCR = ['scr.', 'screener']
-HDRIP = ['.hdrip', '.hd.rip']
+BLURAY = ('bluray', 'blu.ray', 'bdrip', 'bd.rip')
+DVD = ('dvdrip', 'dvd.rip')
+WEB = ('.web.', 'webdl', 'web.dl', 'webrip', 'web.rip')
+SCR = ('scr.', 'screener')
+HDRIP = ('.hdrip', '.hd.rip')
 
-DOLBY_TRUEHD = ['true.hd', 'truehd']
-DOLBY_DIGITALPLUS = ['dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3', '.e.ac3']
-DOLBY_DIGITALEX = ['.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.']
-DOLBYDIGITAL = ['dd2.', 'dd5', 'dd7', 'dolby.digital', 'dolbydigital', '.ac3', '.ac.3.', '.dd.']
+DOLBY_TRUEHD = ('true.hd', 'truehd')
+DOLBY_DIGITALPLUS = ('dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3', '.e.ac3')
+DOLBY_DIGITALEX = ('.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.')
+DOLBYDIGITAL = ('dd2.', 'dd5', 'dd7', 'dolby.digital', 'dolbydigital', '.ac3', '.ac.3.', '.dd.')
 
-DTSX = ['dts.x.', 'dtsx']
-DTS_HDMA = ['hd.ma', 'hdma']
-DTS_HD = ['dts.hd.', 'dtshd']
+DTSX = ('dts.x.', 'dtsx')
+DTS_HDMA = ('hd.ma', 'hdma')
+DTS_HD = ('dts.hd.', 'dtshd')
 
-AUDIO_8CH = ['ch8.', '8ch.', '7.1ch', '7.1.']
-AUDIO_7CH = ['ch7.', '7ch.', '6.1ch', '6.1.']
-AUDIO_6CH = ['ch6.', '6ch.', '5.1ch', '5.1.']
-AUDIO_2CH = ['ch2', '2ch', '2.0ch', '2.0.', 'audio.2.0.', 'stereo']
+AUDIO_8CH = ('ch8.', '8ch.', '7.1ch', '7.1.')
+AUDIO_7CH = ('ch7.', '7ch.', '6.1ch', '6.1.')
+AUDIO_6CH = ('ch6.', '6ch.', '5.1ch', '5.1.')
+AUDIO_2CH = ('ch2', '2ch', '2.0ch', '2.0.', 'audio.2.0.', 'stereo')
 
-MULTI_LANG = ['hindi.eng', 'ara.eng', 'ces.eng', 'chi.eng', 'cze.eng', 'dan.eng', 'dut.eng', 'ell.eng', 'esl.eng', 'esp.eng', 'fin.eng', 'fra.eng', 'fre.eng',
+MULTI_LANG = ('hindi.eng', 'ara.eng', 'ces.eng', 'chi.eng', 'cze.eng', 'dan.eng', 'dut.eng', 'ell.eng', 'esl.eng', 'esp.eng', 'fin.eng', 'fra.eng', 'fre.eng',
 				'frn.eng', 'gai.eng', 'ger.eng', 'gle.eng', 'gre.eng', 'gtm.eng', 'heb.eng', 'hin.eng', 'hun.eng', 'ind.eng', 'iri.eng', 'ita.eng', 'jap.eng', 'jpn.eng',
 				'kor.eng', 'lat.eng', 'lebb.eng', 'lit.eng', 'nor.eng', 'pol.eng', 'por.eng', 'rus.eng', 'som.eng', 'spa.eng', 'sve.eng', 'swe.eng', 'tha.eng', 'tur.eng',
-				'uae.eng', 'ukr.eng', 'vie.eng', 'zho.eng', 'dual.audio', 'multi']
-SUBS = ['subita', 'subfrench', 'subspanish', 'subtitula', 'swesub', 'nl.subs']
-ADS = ['1xbet', 'betwin']
+				'uae.eng', 'ukr.eng', 'vie.eng', 'zho.eng', 'dual.audio', 'multi')
+SUBS = ('subita', 'subfrench', 'subspanish', 'subtitula', 'swesub', 'nl.subs')
+ADS = ('1xbet', 'betwin')
 
 
 def seas_ep_filter(season, episode, release_title, split=False):
@@ -124,7 +124,7 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		# return None
 
 def extras_filter():
-	return ['sample', 'extra', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer']
+	return ('sample', 'extra', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer')
 
 def supported_video_extensions():
 	try:
@@ -147,11 +147,11 @@ def getFileType(name_info=None, url=None):
 		if '.sdr' in fmt: type += ' SDR /'
 		elif any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
 		elif any(value in fmt for value in HDR): type += ' HDR /'
-		elif all(i in fmt for i in ['2160p', 'remux']): type += ' HDR /'
+		elif all(i in fmt for i in ('2160p', 'remux')): type += ' HDR /'
 
 		if any(value in fmt for value in CODEC_H264): type += ' AVC /'
 		elif any(value in fmt for value in CODEC_H265): type += ' HEVC /'
-		elif any(i in type for i in [' HDR ', ' DOLBY-VISION ']): type += ' HEVC /'
+		elif any(i in type for i in (' HDR ', ' DOLBY-VISION ')): type += ' HEVC /'
 		elif any(value in fmt for value in CODEC_XVID): type += ' XVID /'
 		elif any(value in fmt for value in CODEC_DIVX): type += ' DIVX /'
 
@@ -189,7 +189,7 @@ def getFileType(name_info=None, url=None):
 		elif any(value in fmt for value in AUDIO_6CH): type += ' 6CH /'
 		elif any(value in fmt for value in AUDIO_2CH): type += ' 2CH /'
 
-		if any(value in fmt for value in ['.hc', 'korsub', 'kor.sub']): type += ' HC /'
+		if any(value in fmt for value in ('.hc', 'korsub', 'kor.sub')): type += ' HC /'
 		if any(value in fmt for value in MULTI_LANG): type += ' MULTI-LANG /'
 		if any(value in fmt for value in ADS): type += ' ADS /'
 		if any(value in fmt for value in SUBS):

@@ -71,7 +71,7 @@ def download(name, image, url, meta_name=None):
 			if file_format == '0' and not meta_name:
 				transname = transtvshowtitle + ' S%sE%s' % (content[1], content[2])
 		ext = os.path.splitext(urlparse(url).path)[1][1:]
-		if not ext in ['.m4v', '.mp4', '.mpg', '.mkv', '.flv', '.avi', 'wmv']:
+		if not ext in ('.m4v', '.mp4', '.mpg', '.mkv', '.flv', '.avi', 'wmv'):
 			ext = 'mp4'
 		dest = os.path.join(dest, transname + '.' + ext)
 		doDownload(url, dest, name, image, headers)

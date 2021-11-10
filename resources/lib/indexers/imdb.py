@@ -87,7 +87,7 @@ class Movies:
 				try: mpaa = client.parseDOM(item, 'span', attrs = {'class': 'certificate'})[0]
 				except: mpaa = ''
 				if isRatinglink and 'Short' not in genre:
-					if mpaa in ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-13', 'TV-14', 'TV-MA']:
+					if mpaa in ('TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-13', 'TV-14', 'TV-MA'):
 						raise Exception()
 				if mpaa == '' or mpaa == 'NOT_RATED': mpaa = ''
 				mpaa = mpaa.replace('_', '-')

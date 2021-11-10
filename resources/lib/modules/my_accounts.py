@@ -23,19 +23,19 @@ def syncMyAccounts(silent=False):
 		ad_acct = all_acct.get('alldebrid')
 		if getSetting('alldebrid.username') != ad_acct.get('username'):
 			setSetting('alldebrid.token', ad_acct.get('token'))
-			if getSetting('alldebrid.token') == '': setSetting('alldebrid.enable', 'false')
+			# if getSetting('alldebrid.token') == '': setSetting('alldebrid.enable', 'false')
 			setSetting('alldebrid.username', ad_acct.get('username'))
 
 		pm_acct = all_acct.get('premiumize')
 		if getSetting('premiumize.username') != pm_acct.get('username'):
 			setSetting('premiumize.token', pm_acct.get('token'))
-			if getSetting('premiumize.token') == '': setSetting('premiumize.enable', 'false')
+			# if getSetting('premiumize.token') == '': setSetting('premiumize.enable', 'false')
 			setSetting('premiumize.username', pm_acct.get('username'))
 
 		rd_acct = all_acct.get('realdebrid') # token refresh 1hr expiry, Venom handles this internally
 		if getSetting('realdebrid.username') != rd_acct.get('username'):
 			setSetting('realdebrid.token', rd_acct.get('token'))
-			if getSetting('realdebrid.token') == '': setSetting('realdebrid.enable', 'false')
+			# if getSetting('realdebrid.token') == '': setSetting('realdebrid.enable', 'false')
 			setSetting('realdebrid.username', rd_acct.get('username'))
 			setSetting('realdebrid.client_id', rd_acct.get('client_id'))
 			setSetting('realdebrid.refresh', rd_acct.get('refresh'))

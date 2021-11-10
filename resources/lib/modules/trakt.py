@@ -47,24 +47,24 @@ def getTrakt(url, post=None, extended=False, silent=False):
 			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGINFO)
 			if (not silent) and server_notification: control.notification(title=32315, message=33676)
 			return None
-		elif result and code in ['423']:
+		elif result and code == '423':
 			log_utils.log('Locked User Account - Contact Trakt Support: %s' % str(result[0]), level=log_utils.LOGWARNING)
 			if (not silent) and server_notification: control.notification(title=32315, message=33675)
 			return None
-		elif result and code in ['404']:
+		elif result and code == '404':
 			# log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
 			log_utils.log('getTrakt() (404:NOT FOUND): URL=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
 			return None # change to (return '404:NOT FOUND') to cache only 404's but not server response failures
-		elif result and code in ['429']:
+		elif result and code == '429':
 			if 'Retry-After' in result[2]: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (1000 calls every 5 minutes, doubt we'll ever hit that)
 				throttleTime = result[2]['Retry-After']
 				if (not silent) and server_notification: control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message lang code 33674
 				control.sleep((int(throttleTime) + 1) * 1000)
 				return getTrakt(url, post=post, extended=extended, silent=silent)
-		elif result and code in ['401']: # Re-Auth token
+		elif result and code == '401': # Re-Auth token
 			success = re_auth(headers)
 			if success: return getTrakt(url, post=post, extended=extended, silent=silent)
-		if result and code not in ['401', '405']:
+		if result and code not in ('401', '405'):
 			if extended: return result[0], result[2]
 			else: return result[0]
 	except:
@@ -110,12 +110,12 @@ def re_auth(headers):
 			log_utils.log('Temporary Trakt Server Problems', level=log_utils.LOGINFO)
 			control.notification(title=32315, message=33676)
 			return False
-		elif result and code in ['423']:
+		elif result and code == '423':
 			log_utils.log('Locked User Account - Contact Trakt Support: %s' % str(result[0]), level=log_utils.LOGINFO)
 			control.notification(title=32315, message=33675)
 			return False
 
-		if result and code not in ['401', '405']:
+		if result and code not in ('401', '405'):
 			try: result = jsloads(result) # result = utils.json_loads_as_str(result) # which json method here?
 			except:
 				log_utils.error()
@@ -417,7 +417,7 @@ def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True
 		control.busy()
 		if episode: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
 		else: post = {"movies": [{"ids": {"imdb": imdb}}]}
-		if selection in [0, 1]:
+		if selection in (0, 1):
 			section = sections[selection]
 			success = getTrakt('users/hidden/%s' % section, post=post)
 		else:
@@ -1391,7 +1391,7 @@ def sync_liked_lists(activities=None, forced=False):
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
-				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): return
+				if any(list_item.get('privacy', '') == value for value in ('private', 'friends')): return
 				i['list']['content_type'] = ''
 				list_owner_slug = list_item.get('user', {}).get('ids', {}).get('slug', '')
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
@@ -1487,7 +1487,7 @@ def sync_popular_lists(forced=False):
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
-				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): return
+				if any(list_item.get('privacy', '') == value for value in ('private', 'friends')): return
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
 				exists = traktsync.fetch_public_list(trakt_id)
 				if exists:
@@ -1529,7 +1529,7 @@ def sync_trending_lists(forced=False):
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
-				if any(list_item.get('privacy', '') == value for value in ['private', 'friends']): return
+				if any(list_item.get('privacy', '') == value for value in ('private', 'friends')): return
 				trakt_id = list_item.get('ids', {}).get('trakt', '')
 				exists = traktsync.fetch_public_list(trakt_id)
 				if exists:

@@ -149,7 +149,7 @@ def upload_LogFile(name):
 			result = url + response.json()['key']
 			log('%s log file uploaded to: %s' % (name, result))
 			from sys import platform as sys_platform
-			supported_platform = any(value in sys_platform for value in ['win32', 'linux2'])
+			supported_platform = any(value in sys_platform for value in ('win32', 'linux2'))
 			highlight_color = getHighlightColor()
 			list = [('[COLOR %s]url:[/COLOR]  %s' % (highlight_color, str(result)), str(result))]
 			if supported_platform: list += [('[COLOR %s]  -- Copy url To Clipboard[/COLOR]' % highlight_color, ' ')]

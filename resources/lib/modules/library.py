@@ -289,7 +289,7 @@ class libmovies:
 				id = [imdb, tmdb] if tmdb else [imdb]
 				lib = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["imdbnumber", "title", "originaltitle", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
 				lib = jsloads(lib)['result']['movies']
-				lib = [i for i in lib if str(i['imdbnumber']) in id or (cleantitle.get(title) in [cleantitle.get(i['title']), cleantitle.get(i['originaltitle'])] and str(i['year']) == year)]
+				lib = [i for i in lib if str(i['imdbnumber']) in id or (cleantitle.get(title) in (cleantitle.get(i['title']), cleantitle.get(i['originaltitle'])) and str(i['year']) == year)]
 			except: lib = []
 			files_added = 0
 			try:
@@ -337,11 +337,11 @@ class libmovies:
 		try:
 			if 'traktcollection' in url: message = 32661
 			elif 'traktwatchlist' in url: message = 32662
-			elif all(i in url for i in ['trakt', '/me/', '/lists/']): message = 32663
-			elif all(i in url for i in ['trakt', '/lists/']) and '/me/' not in url: message = 32664
+			elif all(i in url for i in ('trakt', '/me/', '/lists/')): message = 32663
+			elif all(i in url for i in ('trakt', '/lists/')) and '/me/' not in url: message = 32664
 			elif 'tmdb_watchlist' in url: message = 32679
 			elif 'tmdb_favorites' in url: message = 32680
-			elif all(i in url for i in ['themoviedb', '/list/']): message = 32681
+			elif all(i in url for i in ('themoviedb', '/list/')): message = 32681
 			else: message = 'list import'
 		except:
 			log_utils.error()
@@ -362,7 +362,7 @@ class libmovies:
 					url = 'https://api.themoviedb.org/3/account/{account_id}/favorite/movies?api_key=%s&session_id=%s' % ('%s', tmdb_session_id) 
 				from resources.lib.indexers import tmdb
 				items = tmdb.Movies().tmdb_list(url)
-			if (all(i in url for i in ['themoviedb', '/list/'])):
+			if (all(i in url for i in ('themoviedb', '/list/'))):
 				url = url.split('&sort_by')[0]
 				from resources.lib.indexers import tmdb
 				items = tmdb.Movies().tmdb_collections_list(url)
@@ -574,11 +574,11 @@ class libtvshows:
 		try:
 			if 'traktcollection' in url: message = 32661
 			elif 'traktwatchlist' in url: message = 32662
-			elif all(i in url for i in ['trakt', '/me/', '/lists/']): message = 32663
-			elif all(i in url for i in ['trakt', '/lists/']) and '/me/' not in url: message = 32664
+			elif all(i in url for i in ('trakt', '/me/', '/lists/')): message = 32663
+			elif all(i in url for i in ('trakt', '/lists/')) and '/me/' not in url: message = 32664
 			elif 'tmdb_watchlist' in url: message = 32679
 			elif 'tmdb_favorites' in url: message = 32680
-			elif all(i in url for i in ['themoviedb', '/list/']): message = 32681
+			elif all(i in url for i in ('themoviedb', '/list/')): message = 32681
 			else: message = 'list import'
 		except:
 			log_utils.error()
@@ -599,7 +599,7 @@ class libtvshows:
 					url = 'https://api.themoviedb.org/3/account/{account_id}/favorite/tv?api_key=%s&session_id=%s' % ('%s', tmdb_session_id) 
 				from resources.lib.indexers import tmdb
 				items = tmdb.TVshows().tmdb_list(url)
-			if (all(i in url for i in ['themoviedb', '/list/'])):
+			if (all(i in url for i in ('themoviedb', '/list/'))):
 				url = url.split('&sort_by')[0]
 				from resources.lib.indexers import tmdb
 				items = tmdb.TVshows().tmdb_collections_list(url)
@@ -754,7 +754,7 @@ class libepisodes:
 					episodes = episodesX.Episodes().tmdb_list(item['tvshowtitle'], item['imdb'], item['tmdb'], item['tvdb'], meta=season, season=season['season']) # fetch fresh meta (uncached)
 					it += [{'tvshowtitle': i['tvshowtitle'], 'status': status, 'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'premiered': i['premiered']} for i in episodes]
 					# it += [{'tvshowtitle': i['tvshowtitle'], 'status': status, 'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tmdb': i['tmdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'premiered': i['premiered'], 'aliases': i['aliases'], 'country_codes': i['country_codes']} for i in episodes]
-				# if not status or any(value in status for value in ['continuing', 'returning series']): raise Exception() # only write db entry for completed(Ended) shows
+				# if not status or any(value in status for value in ('continuing', 'returning series')): raise Exception() # only write db entry for completed(Ended) shows
 				if status == 'ended':
 					dbcur.execute('''INSERT INTO tvshows Values (?, ?)''', (item['tvdb'], repr(it)))
 					dbcur.connection.commit()
