@@ -776,7 +776,7 @@ class Sources:
 			try:
 				cached = None
 				if deepcopy_sources: cached = function(deepcopy_sources)
-				if cached: self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in cached if 'magnet:' in i['url']]
+				if cached: self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in cached] # this makes a new instance so no need for deepcopy beyond the one time done now
 				self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in self.sources if i['source'] in valid_hoster and 'magnet:' not in i['url']]
 			except:
 				log_utils.error()
@@ -802,6 +802,11 @@ class Sources:
 		if threads:
 			[i.start() for i in threads]
 			[i.join() for i in threads]
+
+		if len(self.debrid_resolvers) > 1: # resort for debrid priorty, when more than 1 account, because of order cache check threads finish
+			debrid_names = [d.name for d in self.debrid_resolvers]
+			self.filter.sort(key=lambda k: debrid_names.index(k['debrid']))
+
 		self.filter += direct
 		self.filter += local
 		self.sources = self.filter
@@ -1328,12 +1333,3 @@ class Sources:
 		filter += [i for i in source_list if i['quality'] == 'SD']
 		filter += [i for i in source_list if i['quality'] == 'CAM']
 		return filter
-
-	def debrid_abv(self, debrid):
-		try:
-			d_dict = {'AllDebrid': 'AD', 'Premiumize.me': 'PM', 'Real-Debrid': 'RD'}
-			d = d_dict[debrid]
-		except:
-			log_utils.error()
-			d = ''
-		return d

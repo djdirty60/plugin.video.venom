@@ -1010,8 +1010,8 @@ msgid "Playback Canceled"
 msgstr "Kijken geannuleerd"
 
 msgctxt "#32329"
-msgid "My Lists"
-msgstr "Mijn Lijsten"
+msgid "My Lists (My Movies, My TV Shows)"
+msgstr "Mijn Lijsten (Mijn Films, Mijn Series)"
 
 msgctxt "#32330"
 msgid "Playback"

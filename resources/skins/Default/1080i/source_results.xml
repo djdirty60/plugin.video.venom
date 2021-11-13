@@ -134,6 +134,20 @@
 						<align>left</align>
 						<aligny>bottom</aligny>
 						<label>[COLOR $INFO[Window().Property(venom.highlight.color)]][B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.name)][/B][/COLOR]</label>
+						<visible>!String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
+					</control>
+					<control type="label">
+						<description>Line1 link name-UNCACHED TORRENTS</description>
+						<left>110</left>
+						<top>15</top>
+						<width>1240</width>
+						<height>25</height>
+						<font>font13</font>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<aligny>bottom</aligny>
+						<label>[B]$INFO[ListItem.Property(venom.count)]  $INFO[ListItem.Property(venom.name)][/B]</label>
+						<visible>String.Contains(ListItem.Property(venom.source),UNCACHED)</visible>
 					</control>
 					<control type="label">
 						<description>Line2 cloud file</description>

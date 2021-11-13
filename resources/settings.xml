@@ -18,7 +18,7 @@
 		<setting type="action" label="32620" subsetting="true" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMetaAndCache)" visible="eq(-2,true)" />
 		<setting id="prefer.tmdbArt" type="bool" label="32079" subsetting="true" default="true" visible="eq(-3,true)" />
 		<setting id="hidecinema" type="bool" label="32571" default="false" />
-		<setting id="hidecinema.rollback" type="slider" label="40063" enable="eq(-1,true)" default="6" range="1,12" option="int" />
+		<setting id="hidecinema.rollback" type="slider" label="40063"  subsetting="true" default="6" range="1,12" option="int" visible="eq(-1,true)" />
 		<setting id="movie.unaired.identify" type="select" label="35526" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" />
 		<setting id="notification.sound" type="bool" label="35527" default="false" />
 		<setting id="general.checkAddonUpdates" type="bool" label="35524" default="true" />
@@ -91,7 +91,7 @@
 		<setting id="navi.tv.tvmaze.networks" type="bool" label="32470" default="true" />
 		<setting id="navi.tv.imdb.languages" type="bool" label="32462" default="true" />
 		<setting id="navi.tv.imdb.certificates" type="bool" label="32464" default="true" />
-		<!-- <setting id="navi.tv.tmdb.certificates" type="bool" label="32487" default="true" /> -->
+		<!-- <setting id="navi.tv.tmdb.certificates" type="bool" label="32487" default="true" /> --> <!-- future for when TMDb adds to api per ticket request -->
 		<setting id="navi.tv.imdb.years" type="bool" label="32458" default="true" />
 		<setting id="navi.tv.tmdb.years" type="bool" label="32485" default="true" />
 		<setting id="navi.tv.tmdb.airingtoday" type="bool" label="32467" default="true" />
@@ -107,21 +107,21 @@
 
 	<!-- TV Shows - 2 -->
 	<category label="32002">
-		<setting id="flatten.tvshows" type="bool" label="32317" default="false" visible="true" /> <!-- invisible for now till I code to flatten new TMDb results -->
+		<setting id="flatten.tvshows" type="bool" label="32317" default="false" visible="true" />
 		<setting id="tv.specials" type="bool" label="32649" default="false" />
 		<setting id="showunaired" type="bool" label="32570" default="false" />
 		<setting id="unaired.identify" type="select" label="32608" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" enable="eq(-1,true)" />
 		<setting id="tvshows.unwatched.enabled" type="bool" label="33891" default="false" />
-		<setting id="multi.unwatched.enabled" type="bool" subsetting="true" label="32163" default="false" visible="eq(-1,true)" />
+		<setting id="multi.unwatched.enabled" type="bool" label="32163" subsetting="true" default="false" visible="eq(-1,true)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=multi.unwatched)" visible="eq(-2,true)" />
 		<setting id="tvshows.calendar.extended" type="bool" label="32023" default="false" />
 
 		<setting type="lsep" label="40027" />
-		<setting id="enable.playnext" type="bool" default="false" label="40028" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=playnext)" visible="eq(-1,true)" />
-		<setting id="playnext.time" type="slider" subsetting="true" visible="eq(-2,true)" default="60" label="40029" option="int" range="10,60" />
+		<setting id="enable.playnext" type="bool" label="40028" default="false" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=playnext)" />
+		<setting id="playnext.time" type="slider" label="40029" subsetting="true" visible="eq(-2,true)" default="60" option="int" range="10,60" />
 		<setting id="playnext.default.action" type="select" label="40065" subsetting="true" visible="eq(-3,true)" lvalues="32176|32177|32178" default="0" />
-		<setting id="stillwatching.count" type="slider" subsetting="true" visible="eq(-4,true)" default="3" label="40026" option="int" range="2,10" />
+		<setting id="stillwatching.count" type="slider" label="40026" subsetting="true" visible="eq(-4,true)" default="3" option="int" range="2,10" />
 		<setting id="stillwatching.default.action" type="select" label="40025" subsetting="true" visible="eq(-5,true)" lvalues="32176|32177|32178" default="2" />
 
 		<setting label="35056" type="lsep" />
@@ -167,9 +167,10 @@
 		<!-- Scraper Preperation -->
 		<setting type="lsep" label="32125" />
 		<setting id="play.mode" type="select" label="32331" lvalues="32333|32334" default="0" />
-		<setting id="rescrape.default" label="32205" type="bool" default="false" />
-		<setting id="rescrape.default2" label="32206" type="select" subsetting="true" lvalues="32207|32208|32209|32210" default="3" visible="eq(-1,true)" />
+		<setting id="rescrape.default" type="bool" label="32205" default="false" />
+		<setting id="rescrape.default2" type="select" label="32206" subsetting="true" lvalues="32207|32208|32209|32210" default="3" visible="eq(-1,true)" />
 		<setting id="scrapers.prioritize" type="bool" label="32211" default="false" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=scrapersPrioritize)" />
 		<setting id="cf.disable" type="bool" label="32364" default="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disable_cloudflare)" />
 		<setting id="imdb.meta.check" type="bool" label="32017" default="true" />
@@ -192,13 +193,13 @@
 		<setting id="hosts.quality" type="enum" label="32339" values="4K|1080p|720p|480p(SD)" default="0" />
 		<setting id="source.prioritize.hdrdv" type="bool" label="32195" default="false" />
 		<setting id="source.enable.msizelimit" type="bool" label="32165" default="false" />
-		<setting id="source.min.moviesize" type="slider" subsetting="true" label="32155" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
-		<setting id="source.max.moviesize" type="slider" subsetting="true" label="32156" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />
+		<setting id="source.min.moviesize" type="slider" label="32155" subsetting="true" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
+		<setting id="source.max.moviesize" type="slider" label="32156" subsetting="true" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />
 		<setting id="source.enable.esizelimit" type="bool" label="32166" default="false" />
-		<setting id="source.min.epsize" type="slider" subsetting="true" label="32157" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
-		<setting id="source.max.epsize" type="slider" subsetting="true" label="32158" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />
+		<setting id="source.min.epsize" type="slider" label="32157" subsetting="true" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
+		<setting id="source.max.epsize" type="slider" label="32158" subsetting="true" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />
 		<setting id="remove.duplicates" type="bool" label="32035" default="true" />
-		<setting id="remove.duplicates.logging" type="bool" subsetting="true" label="32159" default="true" enable="eq(-1,true)" />
+		<setting id="remove.duplicates.logging" type="bool" label="32159" subsetting="true" default="true" visible="eq(-1,true)" />
 		<setting id="remove.dolby.vision" type="bool" label="32388" default="false" />
 		<setting id="remove.hevc" type="bool" label="32363" default="false" />
 		<setting id="remove.hdr" type="bool" label="32389" default="false" />
@@ -225,11 +226,11 @@
 		<setting type="action" label="32135" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=0.3&amp;opensettings=true&amp;query2=6.1)" />
 		<setting type="action" label="32136" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_syncMyAccount&amp;opensettings=true&amp;query=6.2)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=myAccountsSync)" />
-		<setting id="trakt.username" type="text" default="" label="40062" enable="false" visible="true" />
+		<setting id="trakt.username" type="text" label="40062" default="" enable="false" visible="true" />
 		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_traktAcctMyAccounts)" visible="!eq(-1,)" />
-		<setting id="trakt.token" type="text" visible="false" label="" default="" />
-		<setting id="trakt.refresh" type="text" visible="false" label="" default="" />
-		<!-- <setting id="trakt.expires" type="text" visible="false" label="" default="" /> -->
+		<setting id="trakt.token" type="text" label="" visible="false" default="" />
+		<setting id="trakt.refresh" type="text" label="" visible="false" default="" />
+		<!-- <setting id="trakt.expires" type="text" label="" visible="false" default="" /> -->
 		<setting id="trakt.server.notifications" type="bool" label="33051" default="true" visible="!eq(-4,)" />
 		<setting id="trakt.general.notifications" type="bool" label="33052" default="true" visible="!eq(-5,)" />
 		<setting id="trakt.directProgress.scrape" type="bool" label="35492" default="false" visible="!eq(-6,)" />
@@ -263,12 +264,12 @@
 		<setting type="lsep" label="40059" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.5&amp;opensettings=true&amp;query2=7.4)" visible="eq(2,)" />
 		<setting id="alldebrid.enable" type="bool" label="32081" default="true" visible="!eq(1,)" />
-		<setting id="alldebrid.token" label="32152" type="text" default="" visible="false" />
-		<setting id="alldebrid.username" label="40006" type="text" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
+		<setting id="alldebrid.token" type="text" label="32152" default="" visible="false" />
+		<setting id="alldebrid.username" type="text" label="40006" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
 		<setting id="alldebrid.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-2,) + eq(-3,true)" />
 		<setting id="alldebrid.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-3,) + eq(-4,true)" />
 		<setting id="ad_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-4,) + eq(-5,true)" />
-		<setting id="ad_cloud.ignore.m2ts" type="bool" subsetting="true" label="32052" default="true" visible="!eq(-5,) + eq(-6,true) + eq(-1,true)" />
+		<setting id="ad_cloud.ignore.m2ts" type="bool" label="32052" subsetting="true" default="true" visible="!eq(-5,) + eq(-6,true) + eq(-1,true)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=ignoreM2ts)" visible="!eq(-6,) + eq(-7,true) + eq(-2,true)" />
 		<setting id="alldebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-7,) + eq(-8,true)" />
 		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_adAcctMyAccounts)" visible="!eq(-8,) + eq(-9,true)" />
@@ -276,12 +277,12 @@
 		<setting type="lsep" label="40057" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.13&amp;opensettings=true&amp;query2=7.11)" visible="eq(2,)" />
 		<setting id="premiumize.enable" type="bool" label="32081" default="true" visible="!eq(1,)" />
-		<setting id="premiumize.token" label="32154" type="text" default="" visible="false" />
-		<setting id="premiumize.username" label="40006" type="text" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
+		<setting id="premiumize.token" type="text" label="32154" default="" visible="false" />
+		<setting id="premiumize.username" type="text" label="40006" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
 		<setting id="premiumize.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-2,) + eq(-3,true)" />
 		<setting id="premiumize.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-3,) + eq(-4,true)" />
 		<setting id="pm_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-4,) + eq(-5,true)" />
-		<setting id="pm_cloud.ignore.m2ts" type="bool" subsetting="true" label="32052" default="true" visible="!eq(-5,) + eq(-6,true) + eq(-1,true)" />
+		<setting id="pm_cloud.ignore.m2ts" type="bool" label="32052" subsetting="true" default="true" visible="!eq(-5,) + eq(-6,true) + eq(-1,true)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=ignoreM2ts)" visible="!eq(-6,) + eq(-7,true) + eq(-2,true)" />
 		<setting id="premiumize.server.notifications" type="bool" label="33051" default="true" visible="!eq(-7,) + eq(-8,true)" />
 		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_pmAcctMyAccounts)" visible="!eq(-8,) + eq(-9,true)" />
@@ -289,15 +290,15 @@
 		<setting type="lsep" label="40058" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.21&amp;opensettings=true&amp;query2=7.26)" visible="eq(2,)" />
 		<setting id="realdebrid.enable" type="bool" label="32081" default="true" visible="!eq(1,)" />
-		<setting id="realdebrid.token" label="realdebrid token" type="text" default="" visible="false" />
-		<setting id="realdebrid.username" label="40006" type="text" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
-		<setting id="realdebrid.client_id" label="realdebrid client_id" type="text" default="" visible="false" />
-		<setting id="realdebrid.refresh" label="realdebrid refresh" type = "text" default="" visible="false" />
-		<setting id="realdebrid.secret" label="realdebrid secret" type = "text" default="" visible="false" />
+		<setting id="realdebrid.token" type="text" label="realdebrid token" default="" visible="false" />
+		<setting id="realdebrid.username" type="text" label="40006" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
+		<setting id="realdebrid.client_id" type="text" label="realdebrid client_id" default="" visible="false" />
+		<setting id="realdebrid.refresh" type = "text" label="realdebrid refresh" default="" visible="false" />
+		<setting id="realdebrid.secret" type = "text" label="realdebrid secret" default="" visible="false" />
 		<setting id="realdebrid.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-5,) + eq(-6,true)" />
 		<setting id="realdebrid.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-6,) +eq(-7,true)" />
 		<setting id="rd_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-7,) + eq(-8,true)" />
-		<setting id="rd_cloud.ignore.m2ts" type="bool" subsetting="true" label="32052" default="true" visible="!eq(-8,) + eq(-9,true) + eq(-1,true)" />
+		<setting id="rd_cloud.ignore.m2ts" type="bool" label="32052" subsetting="true" default="true" visible="!eq(-8,) + eq(-9,true) + eq(-1,true)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=ignoreM2ts)" visible="!eq(-9,) + eq(-10,true) + eq(-2,true)" />
 		<setting id="realdebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-10,) + eq(-11,true)" />
 		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_rdAcctMyAccounts)" visible="!eq(-11,) + eq(-12,true)" />
@@ -308,7 +309,7 @@
 
 		<setting type="lsep" label="TMDb" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=2.4&amp;opensettings=true&amp;query2=7.42)" visible="eq(1,)" />
-		<setting id="tmdb.api.key" type="text" option="hidden" label="TMDb API" default="" enable="false" />
+		<setting id="tmdb.api.key" type="text" label="TMDb API" option="hidden" default="" enable="false" />
 		<setting id="tmdb.username" type="text" label="TMDb username" default="" enable="false" />
 		<setting id="tmdb.password" type="text" label="TMDb password" default="" enable="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=tmdbUser)" />
@@ -356,7 +357,7 @@
 		<setting type="sep" />
 		<setting id="movie.download.path" type="folder" label="32349" enable="eq(-2,true)" default="" />
 		<setting id="tv.download.path" type="folder" label="32350" enable="eq(-3,true)" default="" />
-		<setting id="downloads.file.format" type="select" subsetting="true" label="40022" lvalues="40023|40024" default="1" enable="eq(-4,true)" />
+		<setting id="downloads.file.format" type="select" label="40022" subsetting="true" lvalues="40023|40024" default="1" enable="eq(-4,true)" />
 		<setting type="sep" />
 		<setting id="downloads.message1" type="text" label="32351" enable="false" />
 		<setting id="downloads.message2" type="text" label="32352" default="" enable="false" />
@@ -369,7 +370,7 @@
 		<setting type="sep" />
 		<setting id="subtitles.utf" type="bool" label="32355" default="false" enable="eq(-3,true)" />
 		<setting id="subtitles.lang.1" type="select" label="32356" values="Afrikaans|Albanian|Arabic|Armenian|Basque|Bengali|Bosnian|Breton|Bulgarian|Burmese|Catalan|Chinese|Croatian|Czech|Danish|Dutch|English|Esperanto|Estonian|Finnish|French|Galician|Georgian|German|Greek|Hebrew|Hindi|Hungarian|Icelandic|Indonesian|Italian|Japanese|Kazakh|Khmer|Korean|Latvian|Lithuanian|Luxembourgish|Macedonian|Malay|Malayalam|Manipuri|Mongolian|Montenegrin|Norwegian|Occitan|Persian|Polish|Portuguese|Portuguese(Brazil)|Romanian|Russian|Serbian|Sinhalese|Slovak|Slovenian|Spanish|Swahili|Swedish|Syriac|Tagalog|Tamil|Telugu|Thai|Turkish|Ukrainian|Urdu" default="English" enable="eq(-4,true)" />
-		<setting id="subtitles.lang.2" type="select" label="32357" values="Afrikaans|Albanian|Arabic|Armenian|Basque|Bengali|Bosnian|Breton|Bulgarian|Burmese|Catalan|Chinese|Croatian|Czech|Danish|Dutch|English|Esperanto|Estonian|Finnish|French|Galician|Georgian|German|Greek|Hebrew|Hindi|Hungarian|Icelandic|Indonesian|Italian|Japanese|Kazakh|Khmer|Korean|Latvian|Lithuanian|Luxembourgish|Macedonian|Malay|Malayalam|Manipuri|Mongolian|Montenegrin|Norwegian|Occitan|Persian|Polish|Portuguese|Portuguese(Brazil)|Romanian|Russian|Serbian|Sinhalese|Slovak|Slovenian|Spanish|Swahili|Swedish|Syriac|Tagalog|Tamil|Telugu|Thai|Turkish|Ukrainian|Urdu" default="English" enable="eq(-5,true)"/>
+		<setting id="subtitles.lang.2" type="select" label="32357" values="Afrikaans|Albanian|Arabic|Armenian|Basque|Bengali|Bosnian|Breton|Bulgarian|Burmese|Catalan|Chinese|Croatian|Czech|Danish|Dutch|English|Esperanto|Estonian|Finnish|French|Galician|Georgian|German|Greek|Hebrew|Hindi|Hungarian|Icelandic|Indonesian|Italian|Japanese|Kazakh|Khmer|Korean|Latvian|Lithuanian|Luxembourgish|Macedonian|Malay|Malayalam|Manipuri|Mongolian|Montenegrin|Norwegian|Occitan|Persian|Polish|Portuguese|Portuguese(Brazil)|Romanian|Russian|Serbian|Sinhalese|Slovak|Slovenian|Spanish|Swahili|Swedish|Syriac|Tagalog|Tamil|Telugu|Thai|Turkish|Ukrainian|Urdu" default="English" enable="eq(-5,true)" />
 		<setting type="sep" />
 		<setting id="subtitles.message1" type="text" label="32358" enable="false" />
 		<setting id="subtitles.message2" type="text" label="32359" enable="false" />
@@ -387,14 +388,14 @@
 		<setting type="sep" />
 		<setting id="dev.mode.enable" type="bool" label="32147" default="false" />
 		<setting type="action" label="32138" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=devMode)" />
-		<setting id="reuse.languageinvoker" type="action" option="close" default="true" label="32139" action="RunPlugin(plugin://plugin.video.venom/?action=tools_LanguageInvoker)" visible="eq(-2,true)" />
+		<setting id="reuse.languageinvoker" type="action" label="32139" option="close" default="true" action="RunPlugin(plugin://plugin.video.venom/?action=tools_LanguageInvoker)" visible="eq(-2,true)" />
 		<setting type="action" label="32140" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=langinvoker)" visible="eq(-3,true)" />
 		<setting id="dev.disable.single" type="bool" label="32141" default="false" visible="eq(-4,true)" />
-		<setting id="dev.disable.single.filter" type="bool" subsetting="true" label="32142" default="false" visible="eq(-5,true)" enable="eq(-1,false)" />
+		<setting id="dev.disable.single.filter" type="bool" label="32142" subsetting="true" default="false" visible="eq(-5,true)" enable="eq(-1,false)" />
 		<setting id="dev.disable.season.packs" type="bool" label="32143" default="false" visible="eq(-6,true)" />
-		<setting id="dev.disable.season.filter" type="bool" subsetting="true" label="32144" default="false" visible="eq(-7,true)" enable="eq(-1,false)" />
+		<setting id="dev.disable.season.filter" type="bool" label="32144" subsetting="true" default="false" visible="eq(-7,true)" enable="eq(-1,false)" />
 		<setting id="dev.disable.show.packs" type="bool" label="32145" default="false" visible="eq(-8,true)" />
-		<setting id="dev.disable.show.filter" type="bool" subsetting="true" label="32146" default="false" visible="eq(-9,true)" enable="eq(-1,false)" />
+		<setting id="dev.disable.show.filter" type="bool" label="32146" subsetting="true" default="false" visible="eq(-9,true)" enable="eq(-1,false)" />
 	</category>
 
 	<!-- Short Cuts - 12 -->

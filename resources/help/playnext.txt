@@ -6,3 +6,5 @@ You must use the Kodi context menu option [COLOR red][B]"Play from Here"[/B][/CO
 popup notification.  You can also set Kodi's settings to use [COLOR red][B]"Play from Here"[/B][/COLOR] as default select method
 for Episodes.  See [COLOR red][B]"System - Settings - Player - Videos - Play next video automatically"[/B][/COLOR].  Then
 select [B][COLOR red]Episodes[/B][/COLOR].
+
+NOTE: If you call up [B]Source Select[/B] continual playback will not function.  Continual playback ONLY operates in AutoPlay mode per above.

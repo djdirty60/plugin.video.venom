@@ -1010,8 +1010,8 @@ msgid "Playback Canceled"
 msgstr "Odtwarzanie anulowane"
 
 msgctxt "#32329"
-msgid "My Lists"
-msgstr "Moje Listy"
+msgid "My Lists (My Movies, My TV Shows)"
+msgstr "Moje Listy (Moje Filmy, Moje Seriale)"
 
 msgctxt "#32330"
 msgid "Playback"

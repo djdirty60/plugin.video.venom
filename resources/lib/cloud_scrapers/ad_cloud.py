@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# created by Venom (updated 7-04-2021)
+# created by Venom (updated 11-09-2021)
 """
 	Venom Add-on
 """
@@ -26,11 +26,9 @@ class source:
 			title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
 			title = title.replace('&', 'and').replace('Special Victims Unit', 'SVU')
 			aliases = data['aliases']
-
 			episode_title = data['title'] if 'tvshowtitle' in data else None
 			self.year = data['year']
 			hdlr = 'S%02dE%02d' % (int(data['season']), int(data['episode'])) if 'tvshowtitle' in data else self.year
-
 			self.season = str(data['season']) if 'tvshowtitle' in data else None
 			self.episode = str(data['episode']) if 'tvshowtitle' in data else None
 			query_list = self.episode_query_list() if 'tvshowtitle' in data else self.year_query_list()
@@ -63,7 +61,7 @@ class source:
 			for file in files:
 				try:
 					name = file.get('filename', '')
-					invalids = ('.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt', '.srt')
+					invalids = ('.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt', '.srt', '.nfo')
 					if name.lower().endswith(invalids): continue
 					path = folder.get('filename', '').lower()
 					rt = cloud_utils.release_title_format(name)
