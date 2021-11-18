@@ -27,6 +27,7 @@ def log(msg, caller=None, level=LOGINFO):
 	debug_level = getSetting('debug.level')
 	if level == LOGDEBUG and debug_level != '1': return
 	debug_location = getSetting('debug.location')
+
 	if isinstance(msg, int): msg = lang(msg) # for strings.po translations
 	try:
 		if not msg.isprintable(): # ex. "\n" is not a printable character so returns False on those cases
@@ -49,7 +50,7 @@ def log(msg, caller=None, level=LOGINFO):
 				f.close()
 			reverse_log = getSetting('debug.reversed') == 'true'
 			if not reverse_log:
-				with open(log_file, 'a', encoding='utf-8') as f:  # with auto cleans up and closes
+				with open(log_file, 'a', encoding='utf-8') as f:  # "with" auto cleans up and closes
 					line = '[%s %s] %s: %s' % (datetime.now().date(), str(datetime.now().time())[:8], DEBUGPREFIX % debug_list[level], msg)
 					f.write(line.rstrip('\r\n') + '\n')
 					# f.writelines([line1, line2]) ## maybe an option for the 2 lines without using "\n"

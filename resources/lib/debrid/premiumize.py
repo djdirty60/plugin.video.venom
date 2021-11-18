@@ -6,7 +6,7 @@
 import re
 import requests
 from sys import argv, exit as sysexit
-from urllib.parse import quote_plus, urlencode, unquote
+from urllib.parse import quote_plus, urlencode
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -158,10 +158,11 @@ class Premiumize:
 	def get_hosts(self):
 		hosts_dict = {'Premiumize.me': []}
 		hosts = []
+		append = hosts.append
 		try:
 			result = cache.get(self._get, 168, list_services_path_url)
 			for x in result['directdl']:
-				for alias in result['aliases'][x]: hosts.append(alias)
+				for alias in result['aliases'][x]: append(alias)
 			hosts_dict['Premiumize.me'] = list(set(hosts))
 		except:
 			log_utils.error()
@@ -182,6 +183,7 @@ class Premiumize:
 		try:
 			file_url = None
 			correct_files = []
+			append = correct_files.append
 			extensions = supported_video_extensions()
 			extras_filtering_list = extras_filter()
 			data = {'src': magnet_url}
@@ -192,7 +194,7 @@ class Premiumize:
 			if season:
 				episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', ep_title.replace('\'', '')).lower()
 				for item in valid_results:
-					if seas_ep_filter(season, episode, item['path'].split('/')[-1]): correct_files.append(item)
+					if seas_ep_filter(season, episode, item['path'].split('/')[-1]): append(item)
 					if len(correct_files) == 0: continue
 					for i in correct_files:
 						compare_link = seas_ep_filter(season, episode, i['path'], split=True)
@@ -214,6 +216,7 @@ class Premiumize:
 	def display_magnet_pack(self, magnet_url, info_hash):
 		try:
 			end_results = []
+			append = end_results.append
 			extensions = supported_video_extensions()
 			data = {'src': magnet_url}
 			result = self._post(transfer_directdl_url, data=data)
@@ -222,7 +225,7 @@ class Premiumize:
 				if any(item.get('path').lower().endswith(x) for x in extensions) and not item.get('link', '') == '':
 					try: path = item['path'].split('/')[-1]
 					except: path = item['path']
-					end_results.append({'link': item['link'], 'filename': path, 'size': float(item['size']) / 1073741824})
+					append({'link': item['link'], 'filename': path, 'size': float(item['size']) / 1073741824})
 			return end_results
 		except Exception as e:
 			log_utils.log('Error display_magnet_pack: %s' % str(e), __name__, log_utils.LOGDEBUG)

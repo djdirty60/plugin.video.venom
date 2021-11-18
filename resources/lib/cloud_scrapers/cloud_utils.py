@@ -22,19 +22,20 @@ def aliases_to_array(aliases, filter=None):
 def cloud_check_title(title, aliases, release_title):
 	aliases = aliases_to_array(aliases)
 	title_list = []
+	append = title_list.append
 	if aliases:
 		for item in aliases:
 			try:
 				alias = item.replace('!', '').replace('(', '').replace(')', '').replace('&', 'and')
 				if alias in title_list: continue
-				title_list.append(alias)
+				append(alias)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
 	try:
 		match = True
 		title = title.replace('!', '').replace('(', '').replace(')', '').replace('&', 'and')
-		title_list.append(title)
+		append(title)
 		release_title = release_title_format(release_title).replace('!', '').replace('(', '').replace(')', '').replace('&', 'and') # converts to .lower()
 		release_title = re.split(r'(?:19|20)[0-9]{2}', release_title)[0] # split by 4 digit year
 		if all(cleantitle.get(i) not in cleantitle.get(release_title) for i in title_list): match = False

@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.5">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.6">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,12 +32,9 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.3.5 - Nov. 13, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed Debrid Provider priority sorting.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed AllDebrid Cloud Storage issue where a pack file with a folder structure would return the "release_title" and not the actual playable filename.[/I]
-[COLOR yellow]--[/COLOR][I] Source Select will now no longer use the same color for "uncached torrents" as well as "cached torrents" if user elects to not remove the "uncache torrents".[/I]
-[COLOR yellow]--[/COLOR][I] Fixed aliases handling of cloud files.[/I]
-[COLOR yellow]--[/COLOR][I] Added Help file for the setting [B]"Use provider priority run ordering"[/B].[/I]
+[B][COLOR red]Update - v6.3.6 - Nov. 17, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed RD playback of m2ts files in user cloud.[/I]
+[COLOR yellow]--[/COLOR][I] Some performance tweaks to scraper call methods.[/I]
 		</news>
 	</extension>
 </addon>

@@ -58,12 +58,13 @@ class Episodes:
 					all_episodes.extend(episodes)
 				all_episodes = []
 				threads = []
+				append = threads.append
 				if not isinstance(meta, dict): showSeasons = jsloads(meta)
 				else: showSeasons = meta
 				try:
 					for i in showSeasons['seasons']:
 						if not self.showspecials and i['season_number'] == 0: continue
-						threads.append(Thread(target=get_episodes, args=(tvshowtitle, imdb, tmdb, tvdb, meta, i['season_number'])))
+						append(Thread(target=get_episodes, args=(tvshowtitle, imdb, tmdb, tvdb, meta, i['season_number'])))
 					[i.start() for i in threads]
 					[i.join() for i in threads]
 					self.list = sorted(all_episodes, key=lambda k: (k['season'], k['episode']), reverse=False)
@@ -453,8 +454,9 @@ class Episodes:
 				from resources.lib.modules import log_utils
 				log_utils.error()
 		threads = []
+		append = threads.append
 		for i in items:
-			threads.append(Thread(target=items_list, args=(i,)))
+			append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		return self.list
@@ -572,8 +574,9 @@ class Episodes:
 				from resources.lib.modules import log_utils
 				log_utils.error()
 		threads = []
+		append = threads.append
 		for i in items:
-			threads.append(Thread(target=items_list, args=(i,)))
+			append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		return self.list

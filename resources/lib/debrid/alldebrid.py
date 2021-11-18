@@ -373,6 +373,7 @@ class AllDebrid:
 			media_id = None
 			failed_reason = 'Unknown'
 			correct_files = []
+			append = correct_files.append
 			extensions = supported_video_extensions()
 			extras_filtering_list = extras_filter()
 			transfer_id = self.create_transfer(magnet_url)
@@ -392,7 +393,7 @@ class AllDebrid:
 						failed_reason = '.m2ts season disk incapable of determining episode'
 						continue
 					if seas_ep_filter(season, episode, item['filename']):
-						correct_files.append(item)
+						append(item)
 					if len(correct_files) == 0:
 						failed_reason = 'no matching episode found'
 						continue
@@ -426,9 +427,11 @@ class AllDebrid:
 			transfer_id = self.create_transfer(magnet_url)
 			transfer_info = self.list_transfer(transfer_id)
 			end_results = []
+			append = end_results.append
 			for item in transfer_info.get('links'):
 				if any(item.get('filename').lower().endswith(x) for x in extensions) and not item.get('link', '') == '':
-					end_results.append({'link': item['link'], 'filename': item['filename'], 'size': item['size']})
+					# end_results.append({'link': item['link'], 'filename': item['filename'], 'size': item['size']})
+					append({'link': item['link'], 'filename': item['filename'], 'size': float(item['size']) / 1073741824})
 			self.delete_transfer(transfer_id)
 			return end_results
 		except:
@@ -507,11 +510,12 @@ class AllDebrid:
 		url = 'hosts'
 		hosts_dict = {'AllDebrid': []}
 		hosts = []
+		extend = hosts.extend
 		try:
 			result = cache.get(self._get, 168, url)
 			result = result['hosts']
 			for k, v in result.items():
-				try: hosts.extend(v['domains'])
+				try: extend(v['domains'])
 				except: pass
 			hosts_dict['AllDebrid'] = list(set(hosts))
 		except:

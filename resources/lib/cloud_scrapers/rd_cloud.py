@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# created by Venom (updated 11-09-2021)
+# created by Venom (updated 11-17-2021)
 """
 	Venom Add-on
 """
@@ -13,11 +13,13 @@ from fenomscrapers.modules import source_utils as fs_utils
 
 
 class source:
+	priority = 0 # force cloud scraper to run first
+	pack_capable = False # to avoid being added to pack scrape threads
+	hasMovies = True
+	hasEpisodes = True
+
 	def __init__(self):
-		self.priority = 0 # force cloud scraper to run first
 		self.language = ['en']
-		self.movie = True
-		self.tvshow = True
 
 	def sources(self, data, hostDict):
 		sources = []
@@ -68,6 +70,7 @@ class source:
 					if name.endswith('m2ts'):
 						if ignoreM2ts: continue
 						name = folder_name
+						rt = cloud_utils.release_title_format(name)
 						if name in str(sources): continue
 						if all(not bool(re.search(i, rt)) for i in query_list): continue  # check if this newly added causes any movie titles that do not have the year to get dropped
 						is_m2ts = True
@@ -103,7 +106,7 @@ class source:
 						info.insert(0, isize)
 					except: dsize = 0
 					if is_m2ts: info.append('M2TS')
-					info = ' | '.join(info)
+					info = ' / '.join(info)
 
 					sources.append({'provider': 'rd_cloud', 'source': 'cloud', 'debrid': 'Real-Debrid', 'seeders': '', 'hash': hash, 'name': name, 'name_info': name_info,
 												'quality': quality, 'language': 'en', 'url': link, 'info': info, 'direct': True, 'debridonly': True, 'size': dsize})

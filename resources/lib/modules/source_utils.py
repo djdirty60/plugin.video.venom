@@ -79,17 +79,18 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		# string5 = r'(?<![a-z])(ep[.-]?<<E>>[.-])'
 
 		string_list = []
-		string_list.append(string1.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
-		string_list.append(string1.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
-		string_list.append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
-		string_list.append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
-		string_list.append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode)))
-		string_list.append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode)))
-		string_list.append(string3.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
-		string_list.append(string3.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
-		string_list.append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(int(episode)-1).zfill(2)).replace('<<E2>>', str(episode).zfill(2)))
-		string_list.append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(episode).zfill(2)).replace('<<E2>>', str(int(episode)+1).zfill(2)))
-		string_list.append(string5.replace('<<E>>', str(episode).zfill(2)))
+		append = string_list.append
+		append(string1.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
+		append(string1.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
+		append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
+		append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
+		append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode)))
+		append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode)))
+		append(string3.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
+		append(string3.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
+		append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(int(episode)-1).zfill(2)).replace('<<E2>>', str(episode).zfill(2)))
+		append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(episode).zfill(2)).replace('<<E2>>', str(int(episode)+1).zfill(2)))
+		append(string5.replace('<<E>>', str(episode).zfill(2)))
 
 		final_string = '|'.join(string_list)
 		reg_pattern = re.compile(final_string)

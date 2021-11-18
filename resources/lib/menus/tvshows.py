@@ -869,8 +869,9 @@ class TVshows:
 			self.list = metacache.fetch(self.list, self.lang, self.user)
 			for r in range(0, total, 40):
 				threads = []
+				append = threads.append
 				for i in range(r, r + 40):
-					if i < total: threads.append(Thread(target=self.super_info, args=(i,)))
+					if i < total: append(Thread(target=self.super_info, args=(i,)))
 				[i.start() for i in threads]
 				[i.join() for i in threads]
 			if self.meta:

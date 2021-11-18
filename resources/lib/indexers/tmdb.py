@@ -159,8 +159,9 @@ class Movies:
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
+		append = threads.append
 		for i in range(0, len(self.list)):
-			threads.append(Thread(target=items_list, args=(i,)))
+			append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
@@ -224,8 +225,9 @@ class Movies:
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
+		append = threads.append
 		for i in range(0, len(self.list)):
-			threads.append(Thread(target=items_list, args=(i,)))
+			append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
@@ -455,8 +457,9 @@ class TVshows:
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
+		append = threads.append
 		for i in range(0, len(self.list)):
-			threads.append(Thread(target=items_list, args=(i,)))
+			append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:
@@ -520,8 +523,9 @@ class TVshows:
 
 		self.list = metacache.fetch(self.list, self.lang, self.user)
 		threads = []
+		append = threads.append
 		for i in range(0, len(self.list)):
-			threads.append(Thread(target=items_list, args=(i,)))
+			append(Thread(target=items_list, args=(i,)))
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 		if self.meta:

@@ -358,8 +358,9 @@ class tvshows:
 				log_utils.error()
 		try:
 			threads = []
+			append = threads.append
 			for tvmaze_id in items:
-				threads.append(Thread(target=items_list, args=(tvmaze_id,)))
+				append(Thread(target=items_list, args=(tvmaze_id,)))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			sorted_list = []

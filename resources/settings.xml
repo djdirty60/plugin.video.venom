@@ -390,7 +390,7 @@
 		<setting type="action" label="32138" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=devMode)" />
 		<setting id="reuse.languageinvoker" type="action" label="32139" option="close" default="true" action="RunPlugin(plugin://plugin.video.venom/?action=tools_LanguageInvoker)" visible="eq(-2,true)" />
 		<setting type="action" label="32140" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=langinvoker)" visible="eq(-3,true)" />
-		<setting id="dev.disable.single" type="bool" label="32141" default="false" visible="eq(-4,true)" />
+		<setting id="dev.disable.single" type="bool" label="32141" default="false" visible="eq(-4,true)" /> <!-- Not functional atm -->
 		<setting id="dev.disable.single.filter" type="bool" label="32142" subsetting="true" default="false" visible="eq(-5,true)" enable="eq(-1,false)" />
 		<setting id="dev.disable.season.packs" type="bool" label="32143" default="false" visible="eq(-6,true)" />
 		<setting id="dev.disable.season.filter" type="bool" label="32144" subsetting="true" default="false" visible="eq(-7,true)" enable="eq(-1,false)" />

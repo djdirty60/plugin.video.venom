@@ -345,7 +345,7 @@ class Sources:
 			control.homeWindow.setProperty(self.labelProperty, p_label)
 			self.prepareSources()
 			sourceDict = self.sourceDict
-			sourceDict = [(i[0], i[1], i[1].tvshow) for i in sourceDict]
+			sourceDict = [(i[0], i[1], i[1].hasEpisodes) for i in sourceDict]
 			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2]]
 			aliases = []
 			try:
@@ -354,13 +354,10 @@ class Sources:
 			except: pass
 			threads = []
 			from fenomscrapers import pack_sources
-			packCapableList = pack_sources()
 			scraperDict = [(i[0], i[1], '') for i in sourceDict]
 			if self.season_isAiring == 'false':
-				seasonpacksourceDict = fs_sources(ret_all=(self.all_providers == 'true'))
-				scraperDict.extend([(i[0], i[1], 'season') for i in seasonpacksourceDict if i[0] in packCapableList])
-				showpacksourceDict = fs_sources(ret_all=(self.all_providers == 'true'))
-				scraperDict.extend([(i[0], i[1], 'show') for i in showpacksourceDict if i[0] in packCapableList])
+				scraperDict.extend([(i[0], i[1], 'season') for i in sourceDict if i[1].pack_capable])
+				scraperDict.extend([(i[0], i[1], 'show') for i in sourceDict if i[1].pack_capable])
 			trakt_aliases = self.getAliasTitles(imdb, 'episode')
 			try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 			except: pass
@@ -409,8 +406,8 @@ class Sources:
 			sourceDict = self.sourceDict
 			progressDialog.update(0, control.lang(32600)) # preparing sources
 			content = 'movie' if tvshowtitle is None else 'episode'
-			if content == 'movie': sourceDict = [(i[0], i[1], i[1].movie) for i in sourceDict]
-			else: sourceDict = [(i[0], i[1], i[1].tvshow) for i in sourceDict]
+			if content == 'movie': sourceDict = [(i[0], i[1], i[1].hasMovies) for i in sourceDict]
+			else: sourceDict = [(i[0], i[1], i[1].hasEpisodes) for i in sourceDict]
 			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2]]
 			if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
 			if control.setting('scrapers.prioritize') == 'true': 
@@ -423,24 +420,21 @@ class Sources:
 			except: pass
 
 			threads = []
+			append = threads.append
 			if content == 'movie':
 				trakt_aliases = self.getAliasTitles(imdb, content)
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
 				data = {'title': title, 'aliases': aliases, 'year': year, 'imdb': imdb}
 				for i in sourceDict:
-					threads.append(Thread(target=self.getMovieSource, args=(imdb, data, i[0], i[1]), name=i[0].upper()))
+					append(Thread(target=self.getMovieSource, args=(imdb, data, i[0], i[1]), name=i[0].upper()))
 			else:
-				from fenomscrapers import pack_sources
-				packCapableList = pack_sources()
 				scraperDict = [(i[0], i[1], '') for i in sourceDict] if ((not self.dev_mode) or (not self.dev_disable_single)) else []
 				if self.season_isAiring == 'false':
 					if (not self.dev_mode) or (not self.dev_disable_season_packs):
-						seasonpacksourceDict = fs_sources(ret_all=(self.all_providers == 'true'))
-						scraperDict.extend([(i[0], i[1], 'season') for i in seasonpacksourceDict if i[0] in packCapableList])
+						scraperDict.extend([(i[0], i[1], 'season') for i in sourceDict if i[1].pack_capable])
 					if (not self.dev_mode) or (not self.dev_disable_show_packs):
-						showpacksourceDict = fs_sources(ret_all=(self.all_providers == 'true'))
-						scraperDict.extend([(i[0], i[1], 'show') for i in showpacksourceDict if i[0] in packCapableList])
+						scraperDict.extend([(i[0], i[1], 'show') for i in sourceDict if i[1].pack_capable])
 				trakt_aliases = self.getAliasTitles(imdb, content)
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
@@ -456,9 +450,9 @@ class Sources:
 					name, pack = i[0].upper(), i[2]
 					if pack == 'season': name = '%s (season pack)' % name
 					elif pack == 'show': name = '%s (show pack)' % name
-					threads.append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
-			[i.start() for i in threads]
+					append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
 
+			[i.start() for i in threads]
 			sdc = control.getColor(control.setting('scraper.dialog.color'))
 			string1 = control.lang(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
 			string3 = control.lang(32406) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Remaining providers:[/COLOR] [COLOR %s]%s[/COLOR]"
@@ -617,9 +611,8 @@ class Sources:
 			log_utils.error()
 		try:
 			sources = []
-			sources = call.sources(data, self.hostprDict)
+			sources = call().sources(data, self.hostprDict)
 			if sources:
-				# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
 				self.scraper_sources.extend(sources)
 				dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, '', '', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 				dbcur.connection.commit()
@@ -671,7 +664,7 @@ class Sources:
 					db_showPacks_valid = abs(self.time - timestamp) < self.show_expiry
 					if db_showPacks_valid:
 						sources = eval(db_showPacks[4])
-						sources = [i for i in sources if i.get('last_season') >= int(season)] # filter out range items that do not apply to current season
+						sources = [i for i in sources if i.get('last_season') >= int(season)] #  filter out range items that do not apply to current season for return
 						return self.scraper_sources.extend(sources)
 			except:
 				log_utils.error()
@@ -685,9 +678,8 @@ class Sources:
 		if not pack: # singleEpisodes scraper call
 			try:
 				sources = []
-				sources = call.sources(data, self.hostprDict)
+				sources = call().sources(data, self.hostprDict)
 				if sources:
-					# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
 					dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, season, episode, repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 					dbcur.connection.commit()
 					return self.scraper_sources.extend(sources)
@@ -697,9 +689,8 @@ class Sources:
 		elif pack == 'season': # seasonPacks scraper call
 			try:
 				sources = []
-				sources = call.sources_packs(data, self.hostprDict, bypass_filter=self.dev_disable_season_filter)
+				sources = call().sources_packs(data, self.hostprDict, bypass_filter=self.dev_disable_season_filter)
 				if sources:
-					# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
 					dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, season,'', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 					dbcur.connection.commit()
 					return self.scraper_sources.extend(sources)
@@ -709,14 +700,12 @@ class Sources:
 		elif pack == 'show': # showPacks scraper call
 			try:
 				sources = []
-				sources = call.sources_packs(data, self.hostprDict, search_series=True, total_seasons=self.total_seasons, bypass_filter=self.dev_disable_show_filter)
+				sources = call().sources_packs(data, self.hostprDict, search_series=True, total_seasons=self.total_seasons, bypass_filter=self.dev_disable_show_filter)
 				if sources:
-					# sources = [jsloads(t) for t in set(jsdumps(d, sort_keys=True) for d in sources)] # why sorted by keys?
-					sources = [i for i in sources if i.get('last_season') >= int(season)] # filter out range items that do not apply to current season
 					dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, '', '', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 					dbcur.connection.commit()
+					sources = [i for i in sources if i.get('last_season') >= int(season)] # filter out range items that do not apply to current season for return
 					return self.scraper_sources.extend(sources)
-				return
 			except:
 				log_utils.error()
 
@@ -770,6 +759,7 @@ class Sources:
 		deepcopy_sources = deepcopy(self.sources)
 		deepcopy_sources = [i for i in deepcopy_sources if 'magnet:' in i['url']]
 		threads = [] ; self.filter = []
+
 		valid_hosters = set([i['source'] for i in self.sources])
 
 		def checkStatus(function, debrid_name, valid_hoster):
@@ -847,6 +837,8 @@ class Sources:
 
 	def filter_dupes(self):
 		filter = []
+		append = filter.append
+		remove = filter.remove
 		log_dupes = control.setting('remove.duplicates.logging') == 'false'
 		for i in self.sources:
 			larger = False
@@ -861,17 +853,17 @@ class Sources:
 							if len(sublist['name']) > len(i['name']): # keep matching hash with longer name, possible more file info.
 								larger = True
 								break
-							filter.remove(sublist)
+							remove(sublist)
 							if log_dupes: log_utils.log('Removing %s - %s (DUPLICATE TORRENT) ALREADY IN :: %s' % (sublist['provider'], b, i['provider']), level=log_utils.LOGDEBUG)
 							break
 					elif a == b:
-						filter.remove(sublist)
+						remove(sublist)
 						if log_dupes: log_utils.log('Removing %s - %s (DUPLICATE LINK) ALREADY IN :: %s' % (sublist['source'], i['url'], i['provider']), level=log_utils.LOGDEBUG)
 						break
 				except:
 					log_utils.error('Error filter_dupes: ')
 			if not larger: #sublist['name'] len() was larger so do not append
-				filter.append(i)
+				append(i)
 		header = control.homeWindow.getProperty(self.labelProperty)
 		if not self.enable_playnext:
 			control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
@@ -950,7 +942,7 @@ class Sources:
 					if item['provider'] in direct_sources:
 						try:
 							call = [i[1] for i in self.sourceDict if i[0] == item['provider']][0]
-							url = call.resolve(url)
+							url = call().resolve(url)
 							self.url = url
 							return url
 						except: pass

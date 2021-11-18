@@ -745,8 +745,9 @@ def _seasonCount(tvshowtitle, year, imdb, tvdb):
 
 	# items = items[:len(items)]
 	# threads = []
+	# append = threads.append
 	# for i in items:
-		# threads.append(Thread(target=items_list, args=(i,)))
+		# append(Thread(target=items_list, args=(i,)))
 	# [i.start() for i in threads]
 	# [i.join() for i in threads]
 	# return self.list

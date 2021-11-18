@@ -10,12 +10,11 @@ def cloudSources():
 		sourceDict = []
 		sourceFolderLocation = os.path.dirname(__file__)
 		for loader, module_name, is_pkg in walk_packages([sourceFolderLocation]):
-			if is_pkg: continue
-			if 'cloud_utils' in module_name: continue
+			if is_pkg or 'cloud_utils' in module_name: continue
 			if enabledCheck(module_name):
 				try:
 					module = loader.find_module(module_name).load_module(module_name)
-					sourceDict.append((module_name, module.source()))
+					sourceDict.append((module_name, module.source))
 				except Exception as e:
 					if debug_enabled:
 						from resources.lib.modules import log_utils

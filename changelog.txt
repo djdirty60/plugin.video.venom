@@ -1,4 +1,9 @@
 
+[B][COLOR red]Update - v6.3.6 - Nov. 17, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed RD playback of m2ts files in user cloud.[/I]
+[COLOR yellow]--[/COLOR][I] Some performance tweaks to scraper call methods.[/I]
+
+
 [B][COLOR red]Update - v6.3.5 - Nov. 13, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed Debrid Provider priority sorting.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed AllDebrid Cloud Storage issue where a pack file with a folder structure would return the "release_title" and not the actual playable filename.[/I]

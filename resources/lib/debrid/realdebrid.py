@@ -7,7 +7,7 @@ import re
 import requests
 from sys import argv, exit as sysexit
 from threading import Thread
-from urllib.parse import quote_plus, unquote
+from urllib.parse import quote_plus
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
@@ -348,8 +348,9 @@ class RealDebrid:
 			# hashList = [hashList[x : x + 100] for x in range(0, len(hashList), 100)]
 			# ck_token = self._get('user', token_ck=True) # check token, and refresh if needed, before blasting threads at it
 			# threads = []
+			# append = threads.append
 			# for section in hashList:
-				# threads.append(Thread(target=self.check_hash_thread, args=(section,)))
+				# append(Thread(target=self.check_hash_thread, args=(section,)))
 			# [i.start() for i in threads]
 			# [i.join() for i in threads]
 			# return self.cache_check_results
@@ -364,8 +365,9 @@ class RealDebrid:
 			lastHash = hashList.pop(-1)
 			self.check_hash_thread(lastHash) # check lastHash list, and refresh if needed, before blasting threads at it
 			threads = []
+			append = threads.append
 			for section in hashList:
-				threads.append(Thread(target=self.check_hash_thread, args=(section,)))
+				append(Thread(target=self.check_hash_thread, args=(section,)))
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			return self.cache_check_results
@@ -436,12 +438,13 @@ class RealDebrid:
 					selected_files = [(idx, i) for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
 					if season:
 						correct_files = []
+						append = correct_files.append
 						correct_file_check = False
 						for value in selected_files:
 							correct_file_check = seas_ep_filter(season, episode, value[1]['path'])
 							# log_utils.log('correct_file_check=%s' % correct_file_check)
 							if correct_file_check:
-								correct_files.append(value[1])
+								append(value[1])
 								break
 						if len(correct_files) == 0: continue
 						episode_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace("\'", '').replace('&', 'and').replace('%', '.percent')).lower()
@@ -495,9 +498,8 @@ class RealDebrid:
 	def display_magnet_pack(self, magnet_url, info_hash):
 		try:
 			torrent_id = None
-			rd_url = None
-			match = False
 			video_only_items = []
+			append = video_only_items.append
 			list_file_items = []
 			info_hash = info_hash.lower()
 			extensions = supported_video_extensions()
@@ -511,7 +513,7 @@ class RealDebrid:
 				if not video_only: continue
 				torrent_keys = item.keys()
 				if len(torrent_keys) == 0: continue
-				video_only_items.append(torrent_keys)
+				append(torrent_keys)
 			video_only_items = max(video_only_items, key=len)
 			torrent_keys = ','.join(video_only_items)
 			self.add_torrent_select(torrent_id, torrent_keys)
@@ -578,13 +580,14 @@ class RealDebrid:
 		if any(x in status for x in stalled): return _return_failed(status)
 		if status == 'waiting_files_selection': 
 			video_files = []
+			append = video_files.append
 			all_files = torrent_info['files']
 			for item in all_files:
-				if any(item['path'].lower().endswith(x) for x in extensions): video_files.append(item)
+				if any(item['path'].lower().endswith(x) for x in extensions): append(item)
 			if pack:
 				try:
 					if len(video_files) == 0: return _return_failed()
-					video_files = sorted(video_files, key=lambda x: x['path'])
+					video_files.sort(key=lambda x: x['path'])
 					torrent_keys = [str(i['id']) for i in video_files]
 					if not torrent_keys: return _return_failed(control.lang(40014))
 					torrent_keys = ','.join(torrent_keys)
