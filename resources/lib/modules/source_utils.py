@@ -219,6 +219,19 @@ def url_strip(url):
 		log_utils.error()
 		return None
 
+def aliases_check(title, aliases):
+	fixed_aliases = []
+	try:
+		bad_aliases = {'Dexter': ['Dexter: New Blood',], 'Titans': ['Teen Titans', 'Untitled Teen Titans Project']}
+		if title in bad_aliases:
+			for i in aliases:
+				if i.get('title') not in bad_aliases.get(title): fixed_aliases.append(i)
+			aliases = fixed_aliases
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	return aliases
+
 def copy2clip(txt):
 	from sys import platform as sys_platform
 	platform = sys_platform

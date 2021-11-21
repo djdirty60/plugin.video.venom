@@ -18,17 +18,18 @@ from resources.lib.modules import cleantitle
 from resources.lib.modules import control
 from resources.lib.modules import debrid
 from resources.lib.modules import log_utils
-from resources.lib.modules.source_utils import supported_video_extensions, getFileType
+from resources.lib.modules.source_utils import supported_video_extensions, getFileType, aliases_check
 from resources.lib.cloud_scrapers import cloudSources
 from fenomscrapers import sources as fs_sources
 
 class Sources:
-	def __init__(self, all_providers=None):
+	def __init__(self, all_providers=False, custom_query=False):
 		self.sources = []
 		self.scraper_sources = []
 		self.uncached_chosen = False
 		self.isPrescrape = False
 		self.all_providers = all_providers
+		self.custom_query = custom_query
 		self.time = datetime.now()
 		self.single_expiry = timedelta(hours=6)
 		self.season_expiry = timedelta(hours=48)
@@ -57,12 +58,8 @@ class Sources:
 		return wrap
 
 	def play(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape=None):
-		gdriveEnabled = control.addon('script.module.fenomscrapers').getSetting('gdrive.cloudflare_url') != ''
-		easynewsEnabled = control.addon('script.module.fenomscrapers').getSetting('easynews.user') != ''
-		furkEnabled = control.addon('script.module.fenomscrapers').getSetting('furk.user_name') != ''
-		if not self.debrid_resolvers and not gdriveEnabled and not easynewsEnabled and not furkEnabled:
-			control.sleep(200)
-			control.hide()
+		if not self.prem_providers:
+			control.sleep(200) ; control.hide()
 			return control.notification(message=33034)
 		try:
 			preResolved_nextUrl = control.homeWindow.getProperty('venom.preResolved_nextUrl')
@@ -399,26 +396,58 @@ class Sources:
 	# @timeIt
 	def getSources_dialog(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=90):
 		try:
+			content = 'movie' if tvshowtitle is None else 'episode'
+			if self.custom_query == 'true':
+				try:
+					custom_title = control.dialog.input('[COLOR %s][B]%s[/B][/COLOR]' % (self.highlight_color, control.lang(32038)), defaultt=tvshowtitle if tvshowtitle else title)
+					if content == 'movie':
+						if custom_title:
+							title = custom_title ; self.meta.update({'title': title})
+						custom_year = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, control.lang(32457), control.lang(32488)), type=control.numeric_input, defaultt=str(year))
+						if custom_year:
+							year = str(custom_year) ; self.meta.update({'year': year})
+					else:
+						if custom_title:
+							tvshowtitle = custom_title ; self.meta.update({'tvshowtitle': tvshowtitle})
+						custom_season = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, control.lang(32055), control.lang(32488)), type=control.numeric_input, defaultt=str(season))
+						if custom_season:
+							season = str(custom_season) ; self.meta.update({'season': season})
+						custom_episode = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, control.lang(32325), control.lang(32488)), type=control.numeric_input, defaultt=str(episode))
+						if custom_episode:
+							episode = str(custom_episode) ; self.meta.update({'episode': episode})
+					p_label = '[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, title, year) if tvshowtitle is None else '[COLOR %s]%s (S%02dE%02d)[/COLOR]' % (self.highlight_color, tvshowtitle, int(season), int(episode))
+					control.homeWindow.clearProperty(self.labelProperty)
+					control.homeWindow.setProperty(self.labelProperty, p_label)
+					control.homeWindow.clearProperty(self.metaProperty)
+					control.homeWindow.setProperty(self.metaProperty, jsdumps(self.meta))
+					control.homeWindow.clearProperty(self.seasonProperty)
+					control.homeWindow.setProperty(self.seasonProperty, season)
+					control.homeWindow.clearProperty(self.episodeProperty)
+					control.homeWindow.setProperty(self.episodeProperty, episode)
+					control.homeWindow.clearProperty(self.titleProperty)
+					control.homeWindow.setProperty(self.titleProperty, title)
+					log_utils.log('Custom query scrape ran using: %s' % p_label, level=log_utils.LOGDEBUG)
+				except:
+					log_utils.error()
+					pass
 			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
 			header = control.homeWindow.getProperty(self.labelProperty) + ': Scraping...'
 			progressDialog.create(header, '')
 			self.prepareSources()
 			sourceDict = self.sourceDict
 			progressDialog.update(0, control.lang(32600)) # preparing sources
-			content = 'movie' if tvshowtitle is None else 'episode'
 			if content == 'movie': sourceDict = [(i[0], i[1], i[1].hasMovies) for i in sourceDict]
 			else: sourceDict = [(i[0], i[1], i[1].hasEpisodes) for i in sourceDict]
 			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2]]
 			if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
 			if control.setting('scrapers.prioritize') == 'true': 
 				sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
-				sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority num
+				sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority
 			aliases = []
 			try:
 				meta = self.meta
 				aliases = meta.get('aliases', [])
 			except: pass
-
 			threads = []
 			append = threads.append
 			if content == 'movie':
@@ -445,6 +474,7 @@ class Sources:
 						if i == 'GB': i = 'UK'
 						alias = {'title': tvshowtitle + ' ' + i, 'country': i.lower()}
 						if not alias in aliases: aliases.append(alias)
+				aliases = aliases_check(tvshowtitle, aliases)
 				data = {'title': title, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'season': season, 'episode': episode, 'tvshowtitle': tvshowtitle, 'aliases': aliases, 'premiered': premiered}
 				for i in scraperDict:
 					name, pack = i[0].upper(), i[2]
@@ -759,7 +789,6 @@ class Sources:
 		deepcopy_sources = deepcopy(self.sources)
 		deepcopy_sources = [i for i in deepcopy_sources if 'magnet:' in i['url']]
 		threads = [] ; self.filter = []
-
 		valid_hosters = set([i['source'] for i in self.sources])
 
 		def checkStatus(function, debrid_name, valid_hoster):
@@ -793,30 +822,34 @@ class Sources:
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 
-		if len(self.debrid_resolvers) > 1: # resort for debrid priorty, when more than 1 account, because of order cache check threads finish
-			debrid_names = [d.name for d in self.debrid_resolvers]
-			self.filter.sort(key=lambda k: debrid_names.index(k['debrid']))
+		self.filter += direct # add direct links in to be considered in priority sorting
+		try:
+			if len(self.prem_providers) > 1: # resort for debrid/direct priorty, when more than 1 account, because of order cache check threads finish
+				self.prem_providers.sort(key=lambda k: k[1])
+				self.prem_providers = [i[0] for i in self.prem_providers]
+				log_utils.log('self.prem_providers sort order=%s' % self.prem_providers, level=log_utils.LOGDEBUG)
+				self.filter.sort(key=lambda k: self.prem_providers.index(k['debrid'] if k.get('debrid', '') else k['provider']))
+		except: log_utils.error()
 
-		self.filter += direct
-		self.filter += local
+		self.filter += local # library and video scraper sources
 		self.sources = self.filter
 
 		if control.setting('sources.group.sort') == '1':
 			torr_filter = []
 			torr_filter += [i for i in self.sources if 'torrent' in i['source']]  #torrents first
-			if control.setting('sources.size.sort') == 'true': torr_filter.sort(key=lambda k: k.get('size', 0), reverse=True)
+			if control.setting('sources.size.sort') == 'true': torr_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
 			aact_filter = []
 			aact_filter += [i for i in self.sources if i['direct'] == True]  #account scrapers and local/library next
-			if control.setting('sources.size.sort') == 'true': aact_filter.sort(key=lambda k: k.get('size', 0), reverse=True)
+			if control.setting('sources.size.sort') == 'true': aact_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
 			prem_filter = []
 			prem_filter += [i for i in self.sources if 'torrent' not in i['source'] and i['debridonly'] is True]  #prem.hosters last
-			if control.setting('sources.size.sort') == 'true': prem_filter.sort(key=lambda k: k.get('size', 0), reverse=True)
+			if control.setting('sources.size.sort') == 'true': prem_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
 			self.sources = torr_filter
 			self.sources += aact_filter
 			self.sources += prem_filter
 		elif control.setting('sources.size.sort') == 'true':
 			reverse_sort = True if control.setting('sources.sizeSort.reverse') == 'false' else False
-			self.sources.sort(key=lambda k: k.get('size', 0), reverse=reverse_sort)
+			self.sources.sort(key=lambda k: round(k.get('size', 0), 2), reverse=reverse_sort)
 
 		if control.setting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
 			filter = []
@@ -1091,6 +1124,15 @@ class Sources:
 
 		from resources.lib.debrid import premium_hosters
 		self.debrid_resolvers = debrid.debrid_resolvers()
+
+		self.prem_providers = [] # for sorting by debrid and direct source links priority
+		if control.addon('script.module.fenomscrapers').getSetting('easynews.user'): self.prem_providers += [('easynews', int(control.setting('easynews.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('filepursuit.api'): self.prem_providers += [('filepursuit', int(control.setting('filepursuit.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('furk.user_name'): self.prem_providers += [('furk', int(control.setting('furk.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('gdrive.cloudflare_url'): self.prem_providers += [('gdrive', int(control.setting('gdrive.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('ororo.user'): self.prem_providers += [('ororo', int(control.setting('ororo.priority')))]
+		self.prem_providers += [(d.name, int(d.sort_priority)) for d in self.debrid_resolvers]
+
 		def cache_prDict():
 			try:
 				hosts = []

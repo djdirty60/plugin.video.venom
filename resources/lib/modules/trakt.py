@@ -1346,6 +1346,7 @@ def sync_user_lists(activities=None, forced=False):
 		list_link = '/users/me/lists/%s/items/%s'
 		if forced:
 			items = getTraktAsJson(link, silent=True)
+			if not items: return
 			for i in items:
 				i['content_type'] = ''
 				trakt_id = i['ids']['trakt']
@@ -1364,6 +1365,7 @@ def sync_user_lists(activities=None, forced=False):
 				log_utils.log('Trakt User Lists Sync Update...(local db latest "lists_updatedat" = %s, trakt api latest "lists_updatedat" = %s)' % \
 									(str(db_last_lists_updatedat), str(user_listActivity)), __name__, log_utils.LOGDEBUG)
 				items = getTraktAsJson(link, silent=True)
+				if not items: return
 				for i in items:
 					i['content_type'] = ''
 					trakt_id = i['ids']['trakt']
@@ -1388,6 +1390,7 @@ def sync_liked_lists(activities=None, forced=False):
 			log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
 								(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
 			items = getTraktAsJson(link, silent=True)
+			if not items: return
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
@@ -1484,6 +1487,7 @@ def sync_popular_lists(forced=False):
 			log_utils.log('Trakt Popular Lists Sync Update...(local db latest "popularlist_at" = %s, cache expiry = %s)' % \
 								(str(db_last_popularList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
 			items = getTraktAsJson(link, silent=True)
+			if not items: return
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})
@@ -1526,6 +1530,7 @@ def sync_trending_lists(forced=False):
 			log_utils.log('Trakt Trending Lists Sync Update...(local db latest "trendinglist_at" = %s, cache expiry = %s)' % \
 								(str(db_last_trendingList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
 			items = getTraktAsJson(link, silent=True)
+			if not items: return
 			thrd_items = []
 			def items_list(i):
 				list_item = i.get('list', {})

@@ -35,6 +35,7 @@ addonFanart = control.addonFanart()
 
 class Premiumize:
 	name = "Premiumize.me"
+	sort_priority = control.setting('premiumize.priority')
 	def __init__(self):
 		self.hosts = []
 		self.patterns = []

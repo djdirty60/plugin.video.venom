@@ -175,8 +175,8 @@ msgid "Progress"
 msgstr "Process"
 
 msgctxt "#32038"
-msgid "Episodes"
-msgstr "Afleveringen"
+msgid "ENTER CUSTOM TITLE"
+msgstr "VOER AANGEPASTE TITEL IN"
 
 msgctxt "#32039"
 msgid "Movie Lists"
@@ -859,12 +859,12 @@ msgid "Rescrape Item - Source Select"
 msgstr "Item opnieuw schrapen - Bron selecteren"
 
 msgctxt "#32209"
-msgid "Rescrape Item with All Providers - AutoPlay"
-msgstr "Item opnieuw schrapen met alle providers - AutoPlay"
+msgid "Rescrape Item with [COLOR %s][B]All Providers[/B][/COLOR] - AutoPlay"
+msgstr "Item opnieuw schrapen met [COLOR %s][B]Alle providers[/B][/COLOR] - Automatisch afspelen"
 
 msgctxt "#32210"
-msgid "Rescrape Item with All Providers - Source Select"
-msgstr "Item opnieuw schrapen met alle providers - AutoPlay"
+msgid "Rescrape Item with [COLOR %s][B]All Providers[/B][/COLOR] - Source Select"
+msgstr "Item opnieuw schrapen met [COLOR %s][B]Alle providers[/B][/COLOR] - Bron selecteren"
 
 msgctxt "#32211"
 msgid "Use provider priority run ordering"
@@ -887,6 +887,14 @@ msgid "Coming Soon (IMDb)"
 msgstr "Komt binnenkort (IMDb)"
 
 msgctxt "#32216"
+msgid "Rescrape Item with [COLOR %s][B]Custom Query[/B][/COLOR] - Source Select"
+msgstr "Item opnieuw schrapen met [COLOR %s][B]Aangepaste zoekopdracht[/B][/COLOR] - Bron selecteren"
+
+msgctxt "#32217"
+msgid "Rescrape Item with [COLOR %s][B]Custom Query and All Providers[/B][/COLOR] - Source Select"
+msgstr "Item opnieuw schrapen met [COLOR %s][B]Aangepaste zoekopdracht en alle providers[/B][/COLOR] - Bron selecteren"
+
+msgctxt "#32218"
 msgid ""
 msgstr ""
 
@@ -922,8 +930,8 @@ msgid "Authorization..."
 msgstr "Autoriseren..."
 
 msgctxt "#32307"
-msgid "Password"
-msgstr "Wachtwoord"
+msgid "password"
+msgstr "wachtwoord"
 
 msgctxt "#32308"
 msgid "PIN"
@@ -994,8 +1002,8 @@ msgid "In Theaters"
 msgstr "In de Bioscoop"
 
 msgctxt "#32325"
-msgid ""
-msgstr ""
+msgid "Episode"
+msgstr "Aflevering"
 
 msgctxt "#32326"
 msgid "Episodes"
@@ -1254,8 +1262,8 @@ msgid "Remove HDR sources"
 msgstr "Verwijder HDR bronnen"
 
 msgctxt "#32390"
-msgid ""
-msgstr ""
+msgid "Accounts(Meta)"
+msgstr "rekeningen (meta)"
 
 msgctxt "#32391"
 msgid ""
@@ -1646,8 +1654,8 @@ msgid "Certificates (TMDb)"
 msgstr "certificaten (TMDb)"
 
 msgctxt "#32488"
-msgid ""
-msgstr ""
+msgid "Optional"
+msgstr "Optioneel"
 
 msgctxt "#32489"
 msgid ""

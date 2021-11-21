@@ -21,6 +21,7 @@ invalid_extensions = ('.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '
 
 class AllDebrid:
 	name = "AllDebrid"
+	sort_priority = control.setting('alldebrid.priority')
 	def __init__(self):
 		self.token = control.setting('alldebrid.token')
 		self.timeout = 15

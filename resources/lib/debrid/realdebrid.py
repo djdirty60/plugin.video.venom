@@ -35,6 +35,7 @@ addonFanart = control.addonFanart()
 
 class RealDebrid:
 	name = "Real-Debrid"
+	sort_priority = control.setting('realdebrid.priority')
 	def __init__(self):
 		self.hosters = None
 		self.hosts = None

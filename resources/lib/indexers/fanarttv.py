@@ -9,7 +9,7 @@ from urllib3.util.retry import Retry
 from resources.lib.modules.control import setting as getSetting, apiLanguage, notification
 
 headers = {'api-key': '9f846e7ec1ea94fad5d8a431d1d26b43'}
-client_key = getSetting('fanart.tv.api.key')
+client_key = getSetting('fanart_tv.api_key')
 if not client_key: client_key = 'cf0ebcc2f7b824bd04cf3a318f15c17d'
 headers.update({'client-key': client_key})
 base_url = "http://webservice.fanart.tv/v3/%s/%s"

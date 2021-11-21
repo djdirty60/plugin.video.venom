@@ -175,7 +175,7 @@ msgid "Progress"
 msgstr ""
 
 msgctxt "#32038"
-msgid "Episodes"
+msgid "ENTER CUSTOM TITLE"
 msgstr ""
 
 msgctxt "#32039"
@@ -859,11 +859,11 @@ msgid "Rescrape Item - Source Select"
 msgstr ""
 
 msgctxt "#32209"
-msgid "Rescrape Item with All Providers - AutoPlay"
+msgid "Rescrape Item with [COLOR %s][B]All Providers[/B][/COLOR] - AutoPlay"
 msgstr ""
 
 msgctxt "#32210"
-msgid "Rescrape Item with All Providers - Source Select"
+msgid "Rescrape Item with [COLOR %s][B]All Providers[/B][/COLOR] - Source Select"
 msgstr ""
 
 msgctxt "#32211"
@@ -887,6 +887,14 @@ msgid "Coming Soon (IMDb)"
 msgstr ""
 
 msgctxt "#32216"
+msgid "Rescrape Item with [COLOR %s][B]Custom Query[/B][/COLOR] - Source Select"
+msgstr ""
+
+msgctxt "#32217"
+msgid "Rescrape Item with [COLOR %s][B]Custom Query and All Providers[/B][/COLOR] - Source Select"
+msgstr ""
+
+msgctxt "#32218"
 msgid ""
 msgstr ""
 
@@ -922,7 +930,7 @@ msgid "Authorization..."
 msgstr ""
 
 msgctxt "#32307"
-msgid "Password"
+msgid "password"
 msgstr ""
 
 msgctxt "#32308"
@@ -994,7 +1002,7 @@ msgid "In Theaters"
 msgstr ""
 
 msgctxt "#32325"
-msgid ""
+msgid "Episode"
 msgstr ""
 
 msgctxt "#32326"
@@ -1254,7 +1262,7 @@ msgid "Remove HDR sources"
 msgstr ""
 
 msgctxt "#32390"
-msgid ""
+msgid "Accounts(Meta)"
 msgstr ""
 
 msgctxt "#32391"
@@ -1646,7 +1654,7 @@ msgid "Certificates (TMDb)"
 msgstr ""
 
 msgctxt "#32488"
-msgid ""
+msgid "Optional"
 msgstr ""
 
 msgctxt "#32489"

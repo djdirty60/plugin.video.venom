@@ -25,6 +25,7 @@ addonVersion = addonInfo('version')
 getLangString = xbmcaddon.Addon().getLocalizedString
 
 dialog = xbmcgui.Dialog()
+numeric_input = xbmcgui.INPUT_NUMERIC
 getCurrentDialogId = xbmcgui.getCurrentWindowDialogId()
 getCurrentWindowId = xbmcgui.getCurrentWindowId()
 homeWindow = xbmcgui.Window(10000)

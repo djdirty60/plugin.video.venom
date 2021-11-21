@@ -608,6 +608,7 @@ def router(params):
 			meta = params.get('meta')
 			select = params.get('select')
 			rescrape = params.get('rescrape')
+			# custom_query = params.get('custom_query')
 			all_providers = params.get('all_providers')
 			sources.Sources(all_providers).play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
 
@@ -790,7 +791,8 @@ def router(params):
 		from resources.lib.modules import sources
 		premiered = params.get('premiered')
 		meta = params.get('meta')
-		items = [control.lang(32207), control.lang(32208), control.lang(32209), control.lang(32210)]
+		highlight_color = control.getHighlightColor()
+		items = [control.lang(32207), control.lang(32208), control.lang(32209) % highlight_color, control.lang(32210) % highlight_color, control.lang(32216) % highlight_color, control.lang(32217) % highlight_color]
 		select = control.selectDialog(items, heading=control.addonInfo('name') + ' - ' + 'Rescrape Options Menu')
 		if select == -1: return control.closeAll()
 		if select >= 0:
@@ -798,6 +800,8 @@ def router(params):
 			elif select == 1: sources.Sources().play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='0', rescrape='true')
 			elif select == 2: sources.Sources(all_providers='true').play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='1', rescrape='true')
 			elif select == 3: sources.Sources(all_providers='true').play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='0', rescrape='true')
+			elif select == 4: sources.Sources(custom_query='true').play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='0', rescrape='true')
+			elif select == 5: sources.Sources(all_providers='true', custom_query='true').play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select='0', rescrape='true')
 
 	####################################################
 	#---Library Actions

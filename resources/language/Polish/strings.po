@@ -175,8 +175,8 @@ msgid "Progress"
 msgstr "Postęp"
 
 msgctxt "#32038"
-msgid "Episodes"
-msgstr "Odcinki"
+msgid "ENTER CUSTOM TITLE"
+msgstr "WPISZ WŁASNY TYTUŁ"
 
 msgctxt "#32039"
 msgid "Movie Lists"
@@ -859,12 +859,12 @@ msgid "Rescrape Item - Source Select"
 msgstr "Ponowne zdrapywanie elementu — wybór źródła"
 
 msgctxt "#32209"
-msgid "Rescrape Item with All Providers - AutoPlay"
-msgstr "Ponowne zdrapywanie przedmiotu u wszystkich dostawców — autoodtwarzanie"
+msgid "Rescrape Item with [COLOR %s][B]All Providers[/B][/COLOR] - AutoPlay"
+msgstr "Ponownie zeskrob przedmiot za pomocą [COLOR %s][B]Wszystkich dostawców[/B][/COLOR] - Autoodtwarzanie"
 
 msgctxt "#32210"
-msgid "Rescrape Item with All Providers - Source Select"
-msgstr "Ponowne zdrapywanie przedmiotu u wszystkich dostawców — autoodtwarzanie"
+msgid "Rescrape Item with [COLOR %s][B]All Providers[/B][/COLOR] - Source Select"
+msgstr "Ponownie zeskrob przedmiot za pomocą [COLOR %s][B]Wszystkich dostawców[/B][/COLOR] - Wybór źródła"
 
 msgctxt "#32211"
 msgid "Use provider priority run ordering"
@@ -887,6 +887,14 @@ msgid "Coming Soon (IMDb)"
 msgstr "Wkrótce (IMDb)"
 
 msgctxt "#32216"
+msgid "Rescrape Item with [COLOR %s][B]Custom Query[/B][/COLOR] - Source Select"
+msgstr "Ponowne zdrapywanie elementu za pomocą [COLOR %s][B]Niestandardowego zapytania[/B][/COLOR] - Wybór źródła"
+
+msgctxt "#32217"
+msgid "Rescrape Item with [COLOR %s][B]Custom Query and All Providers[/B][/COLOR] - Source Select"
+msgstr "Ponowne skanowanie elementu za pomocą [COLOR %s][B]Niestandardowego zapytania i wszystkich dostawców[/B][/COLOR] - Wybór źródła"
+
+msgctxt "#32218"
 msgid ""
 msgstr ""
 
@@ -922,8 +930,8 @@ msgid "Authorization..."
 msgstr "Autoryzacja..."
 
 msgctxt "#32307"
-msgid "Password"
-msgstr "Hasło"
+msgid "password"
+msgstr "hasło"
 
 msgctxt "#32308"
 msgid "PIN"
@@ -994,8 +1002,8 @@ msgid "In Theaters"
 msgstr "W kinach"
 
 msgctxt "#32325"
-msgid ""
-msgstr ""
+msgid "Episode"
+msgstr "Epizod"
 
 msgctxt "#32326"
 msgid "Episodes"
@@ -1254,8 +1262,8 @@ msgid "Remove HDR sources"
 msgstr "Usuń źródła HDR"
 
 msgctxt "#32390"
-msgid ""
-msgstr ""
+msgid "Accounts(Meta)"
+msgstr "Konta (meta)"
 
 msgctxt "#32391"
 msgid ""
@@ -1646,8 +1654,8 @@ msgid "Certificates (TMDb)"
 msgstr "Certyfikaty (TMDb)"
 
 msgctxt "#32488"
-msgid ""
-msgstr ""
+msgid "Optional"
+msgstr "Opcjonalny"
 
 msgctxt "#32489"
 msgid ""
