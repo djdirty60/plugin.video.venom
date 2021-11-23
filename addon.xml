@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.7">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.8">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,11 +32,9 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.3.7 - Nov. 21, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Added a new "aliases_check" method to correct some bad alias strings returned from Trakt. Known cases are the original show [B]"Dexter"[/B] Trakt returns [B]"Dexter: New Blood"[/B], [B]"Titans"[/B] Trakt returns [B]"Teen Titans"[/B].  In both cases these are NOT the same shows so the title check would allow them returned in the scrape results. This fixes that problem.[/I]
-[COLOR yellow]--[/COLOR][I] Added a new custom query scrape method.  This can be found in the [B]"Rescrape Options"[/B] context menu.  This will allow you to over-ride ex. [B]"Dexter: New Blood S01E01"[/B] with [B]"Dexter S09E01"[/B].  Movies allows for a Title and Year change, while Episodes allows for a Title, Season, and Episode change.  Please do not abuse this flipping to a completely different title as the intent is only to scrape for scene release title variations for the same Movie, TV Show title.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed settings issue where Trakt resume source duplicate setting would show for both Trakt auth and non Trakt users.  Now only one will show for either condition.[/I]
-[COLOR yellow]--[/COLOR][I] Added [B]Priority[/B] setting for Direct Premium account links to be able to prioritize with [B]"AD, PM, and RD"[/B].  Now you can have for ex. [B] Easy News[/B] links appear before debrid links.[/I]
+[B][COLOR red]Update - v6.3.8 - Nov. 23, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed issue with RLSBB returning hoster "USERCLOUD.COM" and would alter the label for users AD, PM, and RD cloud files listed in the Source Select xml.[/I]
+[COLOR yellow]--[/COLOR][I] Some performance tweaks to sources module. Mainly avoided iterations when all hosters were turned off.[/I]
 		</news>
 	</extension>
 </addon>

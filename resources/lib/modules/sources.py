@@ -562,7 +562,7 @@ class Sources:
 				except:
 					log_utils.error()
 					break
-				control.sleep(100)
+				control.sleep(75)
 			except:
 				log_utils.error()
 		try: progressDialog.close()
@@ -784,32 +784,32 @@ class Sources:
 		self.sources = [i for i in self.sources if not i in local]
 		direct = [i for i in self.sources if i['direct'] == True] # acct scrapers (skips cache check)
 		self.sources = [i for i in self.sources if not i in direct]
-
 		from copy import deepcopy
 		deepcopy_sources = deepcopy(self.sources)
 		deepcopy_sources = [i for i in deepcopy_sources if 'magnet:' in i['url']]
 		threads = [] ; self.filter = []
-		valid_hosters = set([i['source'] for i in self.sources])
+		valid_hosters = set([i['source'] for i in self.sources if 'magnet:' not in i['url']])
 
 		def checkStatus(function, debrid_name, valid_hoster):
 			try:
 				cached = None
 				if deepcopy_sources: cached = function(deepcopy_sources)
 				if cached: self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in cached] # this makes a new instance so no need for deepcopy beyond the one time done now
-				self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in self.sources if i['source'] in valid_hoster and 'magnet:' not in i['url']]
+				if valid_hoster:
+					self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in self.sources if i['source'] in valid_hoster and 'magnet:' not in i['url']]
 			except:
 				log_utils.error()
 		for d in self.debrid_resolvers:
-			if d.name == 'Premiumize.me' and control.setting('premiumize.enable') == 'true':
-				try:
-					valid_hoster = [i for i in valid_hosters if d.valid_url(i)]
-					threads.append(Thread(target=checkStatus, args=(self.pm_cache_chk_list, d.name, valid_hoster)))
-				except:
-					log_utils.error()
 			if d.name == 'Real-Debrid' and control.setting('realdebrid.enable') == 'true':
 				try:
 					valid_hoster = [i for i in valid_hosters if d.valid_url(i)]
 					threads.append(Thread(target=checkStatus, args=(self.rd_cache_chk_list, d.name, valid_hoster)))
+				except:
+					log_utils.error()
+			if d.name == 'Premiumize.me' and control.setting('premiumize.enable') == 'true':
+				try:
+					valid_hoster = [i for i in valid_hosters if d.valid_url(i)]
+					threads.append(Thread(target=checkStatus, args=(self.pm_cache_chk_list, d.name, valid_hoster)))
 				except:
 					log_utils.error()
 			if d.name == 'AllDebrid' and control.setting('alldebrid.enable') == 'true':

@@ -249,7 +249,7 @@
 		<setting type="lsep" label="32645" />
 		<setting id="autoTraktOnStart" type="bool" label="32646" default="False" enable="!eq(-21,)" />
 		<setting id="schedTraktTime" type="slider" label="32647" default="0" range="0,24" option="int" enable="eq(-1,true)" />
-		<setting id="trakt.message2" type="text" label="32648" default="" enable="false" />
+		<setting id="trakt.message2" type="text" label="32648" default="" enable="false" /> <!-- for dummy settings write on addon update -->
 	</category>
 
 	<!-- Accounts - 7 -->

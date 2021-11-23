@@ -160,7 +160,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.source)]</label>
-						<visible>String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
+						<visible>String.IsEqual(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 					<control type="label">
 						<description>Line2 cached torrents</description>
@@ -212,7 +212,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>$INFO[ListItem.Property(venom.size_label)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR $INFO[Window().Property(venom.highlight.color)]]|[/COLOR]   HOSTER</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),LOCAL) + !String.Contains(ListItem.Property(venom.source),TORRENT) + !String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
+						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),LOCAL) + !String.Contains(ListItem.Property(venom.source),TORRENT) + !String.IsEqual(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 				</itemlayout>
 				<focusedlayout height="100" width="1325">
@@ -264,7 +264,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)][/B]</label>
-						<visible>String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
+						<visible>String.IsEqual(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 					<control type="label">
 						<description>Line2 cached torrents</description>
@@ -316,7 +316,7 @@
 						<align>left</align>
 						<aligny>top</aligny>
 						<label>[B]$INFO[ListItem.Property(venom.size_label)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.debrid)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.provider)]   [COLOR black]|[/COLOR]   $INFO[ListItem.Property(venom.source)]   [COLOR black]|[/COLOR]   HOSTER[/B]</label>
-						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),LOCAL) + !String.Contains(ListItem.Property(venom.source),TORRENT) + !String.Contains(ListItem.Property(venom.source),CLOUD)</visible>
+						<visible>!String.Contains(ListItem.Property(venom.source),DIRECT) + !String.Contains(ListItem.Property(venom.source),LOCAL) + !String.Contains(ListItem.Property(venom.source),TORRENT) + !String.IsEqual(ListItem.Property(venom.source),CLOUD)</visible>
 					</control>
 				</focusedlayout>
 			</control>
