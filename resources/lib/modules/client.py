@@ -151,7 +151,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 								return None
 						except:
 							log_utils.error()
-					elif 'cf-browser-verification' in cf_result:
+					elif 'cf-browser-verification' in str(cf_result):
 						netloc = '%s://%s' % (urlparse(url).scheme, urlparse(url).netloc)
 						ua = headers['User-Agent']
 						cf = cache.get(cfcookie().get, 168, netloc, ua, timeout)

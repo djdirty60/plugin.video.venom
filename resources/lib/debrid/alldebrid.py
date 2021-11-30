@@ -348,8 +348,6 @@ class AllDebrid:
 						else: return control.strip_non_ascii_and_unprintable(name)
 					if not name.lower().endswith(tuple(extensions)):
 						name = entry_loop(entry)
-
-				# log_utils.log('name=%s' % name)
 				size = item['size']
 				display_size = float(int(size)) / 1073741824
 				label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, display_size, name)
@@ -379,7 +377,6 @@ class AllDebrid:
 			extras_filtering_list = extras_filter()
 			transfer_id = self.create_transfer(magnet_url)
 			transfer_info = self.list_transfer(transfer_id)
-			# log_utils.log('transfer_info=%s' % transfer_info)
 			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == ''] #.m2ts file extension is not in "filename" so this fails
 			valid_results = [i for i in transfer_info.get('links') if not any(i.get('filename').lower().endswith(x) for x in invalid_extensions) and not i.get('link', '') == '']
 
@@ -407,7 +404,6 @@ class AllDebrid:
 							break
 			else:
 				media_id = max(valid_results, key=lambda x: x.get('size')).get('link', None)
-				# log_utils.log('media_id=%s' % media_id)
 			if not self.store_to_cloud: self.delete_transfer(transfer_id)
 			if not media_id:
 				log_utils.log('AllDebrid: FAILED TO RESOLVE MAGNET %s : (%s)' % (magnet_url, failed_reason), __name__, log_utils.LOGWARNING)
@@ -431,7 +427,6 @@ class AllDebrid:
 			append = end_results.append
 			for item in transfer_info.get('links'):
 				if any(item.get('filename').lower().endswith(x) for x in extensions) and not item.get('link', '') == '':
-					# end_results.append({'link': item['link'], 'filename': item['filename'], 'size': item['size']})
 					append({'link': item['link'], 'filename': item['filename'], 'size': float(item['size']) / 1073741824})
 			self.delete_transfer(transfer_id)
 			return end_results

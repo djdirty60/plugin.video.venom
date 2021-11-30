@@ -1,4 +1,9 @@
 
+[B][COLOR red]Update - v6.3.9 - Nov. 29, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Temp fix for PM timeout for post request.  This should get resolve for playback working till PM better addresses the issue.[/I]
+[COLOR yellow]--[/COLOR][I] The new TORRENTIO scraper in Fenom Scrapers returns an individual episode file size for pack files.  This caused Venom to also do a re-calc for file size because all other torrent scrapers return the full pack size and must be re-calculated for an individual episode size. The re-calc is now bypassed if the source provider is TORRENTIO and file size is once again correct for pack files from this provider.[/I]
+
+
 [B][COLOR red]Update - v6.3.8 - Nov. 23, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue with RLSBB returning hoster "USERCLOUD.COM" and would alter the label for users AD, PM, and RD cloud files listed in the Source Select xml.[/I]
 [COLOR yellow]--[/COLOR][I] Some performance tweaks to sources module. Mainly avoided iterations when all hosters were turned off.[/I]

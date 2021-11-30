@@ -332,7 +332,7 @@
 
 	<!-- Accounts(Meta) - 8 -->
 	<category label="32390">
-		<setting type="action" label="32135" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=1.0&amp;opensettings=true&amp;query2=8.0)" />
+		<setting type="action" label="32135" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=2.0&amp;opensettings=true&amp;query2=8.0)" />
 		<setting type="action" label="32136" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_syncMyAccount&amp;opensettings=true&amp;query=8.1)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=myAccountsSync)" />
 

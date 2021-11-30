@@ -63,7 +63,7 @@ class Premiumize:
 		response = None
 		if self.token == '': return None
 		try:
-			response = requests.post(url, data, headers=self.headers, timeout=15).json()
+			response = requests.post(url, data, headers=self.headers, timeout=45).json() # disgusting temp timeout change to fix server response lag
 			# if response.status_code in (200, 201): response = response.json() # need status code checking for server maintenance
 			if 'status' in response:
 				if response.get('status') == 'success': return response
@@ -95,7 +95,7 @@ class Premiumize:
 		progressDialog.close()
 		if success:
 			control.notification(message=40052, icon=pm_icon)
-			log_utils.log('Premiumize.me Successfully Authorized', __name__, log_utils.LOGDEBUG)
+			log_utils.log('Premiumize.me Successfully Authorized', level=log_utils.LOGDEBUG)
 
 	def poll_token(self, device_code):
 		data = {'client_id': CLIENT_ID, 'code': device_code, 'grant_type': 'device_code'}
@@ -189,13 +189,15 @@ class Premiumize:
 			extras_filtering_list = extras_filter()
 			data = {'src': magnet_url}
 			response = self._post(transfer_directdl_url, data)
-			if not 'status' in response or response['status'] != 'success': return None
+			if not response: return log_utils.log('Premiumize.me Error RESOLVE MAGNET %s : Server Failed to respond' % magnet_url)
+			if not 'status' in response or response['status'] != 'success': raise Exception()
 			valid_results = [i for i in response.get('content') if any(i.get('path').lower().endswith(x) for x in extensions) and not i.get('link', '') == '']
 			if len(valid_results) == 0: return
 			if season:
 				episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', ep_title.replace('\'', '')).lower()
 				for item in valid_results:
-					if seas_ep_filter(season, episode, item['path'].split('/')[-1]): append(item)
+					if seas_ep_filter(season, episode, item['path'].split('/')[-1]):
+						append(item)
 					if len(correct_files) == 0: continue
 					for i in correct_files:
 						compare_link = seas_ep_filter(season, episode, i['path'], split=True)
@@ -215,13 +217,14 @@ class Premiumize:
 			return None
 
 	def display_magnet_pack(self, magnet_url, info_hash):
+		end_results = []
 		try:
-			end_results = []
 			append = end_results.append
 			extensions = supported_video_extensions()
 			data = {'src': magnet_url}
 			result = self._post(transfer_directdl_url, data=data)
-			if not 'status' in result or result['status'] != 'success': return None
+			if not result: return log_utils.log('Premiumize.me Error display_magnet_pack: %s : Server Failed to respond' % magnet_url)
+			if not 'status' in result or result['status'] != 'success': raise Exception()
 			for item in result.get('content'):
 				if any(item.get('path').lower().endswith(x) for x in extensions) and not item.get('link', '') == '':
 					try: path = item['path'].split('/')[-1]
@@ -229,7 +232,7 @@ class Premiumize:
 					append({'link': item['link'], 'filename': path, 'size': float(item['size']) / 1073741824})
 			return end_results
 		except Exception as e:
-			log_utils.log('Error display_magnet_pack: %s' % str(e), __name__, log_utils.LOGDEBUG)
+			log_utils.log('Premiumize.me Error display_magnet_pack: %s' % str(e), __name__, log_utils.LOGDEBUG)
 			return None
 
 	def add_uncached_torrent(self, magnet_url, pack=False):
@@ -339,8 +342,7 @@ class Premiumize:
 	def clear_finished_transfers(self):
 		try:
 			response = self._post(transfer_clearfinished_url)
-			if not response:
-				return
+			if not response: return
 			if 'status' in response:
 				if response.get('status') == 'success':
 					log_utils.log('Finished transfers successfully cleared from the Premiumize.me cloud', __name__, log_utils.LOGDEBUG)
