@@ -15,24 +15,27 @@ from resources.lib.modules.playcount import getSeasonIndicators, getSeasonOverla
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 
+getLS = control.lang
+getSetting = control.setting
+
 
 class Seasons:
 	def __init__(self):
 		self.list = []
 		self.lang = control.apiLanguage()['tmdb']
-		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
-		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
+		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
+		self.prefer_tmdbArt = getSetting('prefer.tmdbArt') == 'true'
 		self.season_special = False
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w342'
-		self.trakt_user = control.setting('trakt.username').strip()
+		self.trakt_user = getSetting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		# self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/seasons'
 		# self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
-		self.showunaired = control.setting('showunaired') == 'true'
-		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
-		self.showspecials = control.setting('tv.specials') == 'true'
+		self.showunaired = getSetting('showunaired') == 'true'
+		self.unairedcolor = control.getColor(getSetting('unaired.identify'))
+		self.showspecials = getSetting('tv.specials') == 'true'
 
 	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, art, idx=True, create_directory=True): # may need to add a cache duration over-ride param to pass
 		self.list = []
@@ -51,7 +54,7 @@ class Seasons:
 				result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
 				tmdb = str(result.get('id')) if result else ''
 			except:
-				if control.setting('debug.level') != '1': return
+				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 		showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
@@ -109,19 +112,19 @@ class Seasons:
 			control.hide() ; control.notification(title=32054, message=33049)
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
-		settingFanart = control.setting('fanart') == 'true'
+		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		try: indicators = getSeasonIndicators(items[0]['imdb'], refresh=True)
 		except: indicators = None
-		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
+		unwatchedEnabled = getSetting('tvshows.unwatched.enabled') == 'true'
 		if trakt.getTraktIndicatorsInfo():
-			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
+			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
 		else:
-			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
-		traktManagerMenu, queueMenu = control.lang(32070), control.lang(32065)
-		showPlaylistMenu, clearPlaylistMenu = control.lang(35517), control.lang(35516)
-		labelMenu, playRandom = control.lang(32055), control.lang(32535)
-		addToLibrary = control.lang(32551)
+			watchedMenu, unwatchedMenu = getLS(32066), getLS(32067)
+		traktManagerMenu, queueMenu = getLS(32070), getLS(32065)
+		showPlaylistMenu, clearPlaylistMenu = getLS(35517), getLS(35516)
+		labelMenu, playRandom = getLS(32055), getLS(32535)
+		addToLibrary = getLS(32551)
 		try: multi = [i['tvshowtitle'] for i in items]
 		except: multi = []
 		multi = True if len([x for y,x in enumerate(multi) if x not in multi[:y]]) > 1 else False

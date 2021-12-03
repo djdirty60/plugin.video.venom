@@ -19,24 +19,26 @@ from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 
+getLS = control.lang
+getSetting = control.setting
 
 class Episodes:
 	def __init__(self, notifications=True):
 		self.list = []
 		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
-		self.count = control.setting('page.item.limit')
+		self.count = getSetting('page.item.limit')
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
-		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
-		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
-		self.showunaired = control.setting('showunaired') == 'true'
-		self.unairedcolor = control.getColor(control.setting('unaired.identify'))
-		self.showspecials = control.setting('tv.specials') == 'true'
+		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
+		self.prefer_tmdbArt = getSetting('prefer.tmdbArt') == 'true'
+		self.showunaired = getSetting('showunaired') == 'true'
+		self.unairedcolor = control.getColor(getSetting('unaired.identify'))
+		self.showspecials = getSetting('tv.specials') == 'true'
 		self.highlight_color = control.getHighlightColor()
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 
-		self.trakt_user = control.setting('trakt.username').strip()
+		self.trakt_user = getSetting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.trakt_link = 'https://api.trakt.tv'
 		self.trakthistory_link = 'https://api.trakt.tv/users/me/history/shows?limit=%s&page=1' % self.count
@@ -127,7 +129,7 @@ class Episodes:
 			try: url = getattr(self, url + '_link')
 			except: pass
 			if self.trakt_link in url and url == self.progress_link:
-				direct = control.setting('trakt.directProgress.scrape') == 'true'
+				direct = getSetting('trakt.directProgress.scrape') == 'true'
 				if trakt.getProgressActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct, True):
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct, True)
 				else: self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct, True)
@@ -151,7 +153,7 @@ class Episodes:
 	def clr_progress_cache(self, url):
 		try: url = getattr(self, url + '_link')
 		except: pass
-		direct = control.setting('trakt.directProgress.scrape') == 'true'
+		direct = getSetting('trakt.directProgress.scrape') == 'true'
 		cache.remove(self.trakt_progress_list, url, self.trakt_user, self.lang, direct)
 		control.sleep(200)
 		control.refresh()
@@ -163,7 +165,7 @@ class Episodes:
 			except: pass
 			isTraktHistory = (url.split('&page=')[0] in self.trakthistory_link)
 			if self.trakt_link in url and url == self.progress_link:
-				direct = control.setting('trakt.directProgress.scrape') == 'true'
+				direct = getSetting('trakt.directProgress.scrape') == 'true'
 				if trakt.getProgressActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct):
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct)
 				else: self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct)
@@ -216,8 +218,8 @@ class Episodes:
 	def sort(self, type='shows'):
 		try:
 			if not self.list: return
-			attribute = int(control.setting('sort.%s.type' % type))
-			reverse = int(control.setting('sort.%s.order' % type)) == 1
+			attribute = int(getSetting('sort.%s.type' % type))
+			reverse = int(getSetting('sort.%s.order' % type)) == 1
 			if attribute == 0: reverse = False # Sorting Order is not enabled when sort method is "Default"
 			if attribute > 0:
 				if attribute == 1:
@@ -244,17 +246,17 @@ class Episodes:
 			log_utils.error()
 
 	def calendars(self, create_directory=True):
-		m = control.lang(32060).split('|')
+		m = getLS(32060).split('|')
 		try: months = [(m[0], 'January'), (m[1], 'February'), (m[2], 'March'), (m[3], 'April'), (m[4], 'May'), (m[5], 'June'), (m[6], 'July'),
 					(m[7], 'August'), (m[8], 'September'), (m[9], 'October'), (m[10], 'November'), (m[11], 'December')]
 		except: months = []
-		d = control.lang(32061).split('|')
+		d = getLS(32061).split('|')
 		try: days = [(d[0], 'Monday'), (d[1], 'Tuesday'), (d[2], 'Wednesday'), (d[3], 'Thursday'), (d[4], 'Friday'), (d[5], 'Saturday'), (d[6], 'Sunday')]
 		except: days = []
 		for i in range(0, 30):
 			try:
 				name = (self.date_time - timedelta(days=i))
-				name = (control.lang(32062) % (name.strftime('%A'), name.strftime('%d %B')))
+				name = (getLS(32062) % (name.strftime('%A'), name.strftime('%d %B')))
 				for m in months: name = name.replace(m[1], m[0])
 				for d in days: name = name.replace(d[1], d[0])
 				url = self.calendar_link % (self.date_time - timedelta(days=i)).strftime('%Y-%m-%d')
@@ -269,7 +271,7 @@ class Episodes:
 				result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
 				tmdb = str(result.get('id')) if result.get('id') else ''
 			except:
-				if control.setting('debug.level') != '1': return
+				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 		seasonEpisodes = cache.get(tmdb_indexer.TVshows().get_seasonEpisodes_meta, 96, tmdb, season)
@@ -337,7 +339,7 @@ class Episodes:
 			result = jsloads(result)
 		except: return
 		items = []
-		progress_showunaired = control.setting('trakt.progress.showunaired') == 'true'
+		progress_showunaired = getSetting('trakt.progress.showunaired') == 'true'
 		for item in result:
 			try:
 				values = {} ; num_1 = 0
@@ -632,7 +634,7 @@ class Episodes:
 				except: values['airzone'] = ''
 				values['extended'] = True
 				values['ForceAirEnabled'] = True
-				if control.setting('tvshows.calendar.extended') == 'true':
+				if getSetting('tvshows.calendar.extended') == 'true':
 					if imdb: 
 						trakt_ids = trakt.IdLookup('imdb', imdb, 'show')
 						if trakt_ids:
@@ -671,12 +673,12 @@ class Episodes:
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		if not is_widget: control.playlist.clear()
-		settingFanart = control.setting('fanart') == 'true'
+		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		try: traktProgress = False if 'traktProgress' not in items[0] else True
 		except: traktProgress = False
-		if traktProgress and control.setting('trakt.directProgress.scrape') == 'false': progressMenu = control.lang(32015)
-		else: progressMenu = control.lang(32016)
+		if traktProgress and getSetting('trakt.directProgress.scrape') == 'false': progressMenu = getLS(32015)
+		else: progressMenu = getLS(32016)
 		if traktProgress: isMultiList = True
 		else:
 			try: multi = [i['tvshowtitle'] for i in items]
@@ -685,33 +687,33 @@ class Episodes:
 			try:
 				if '/users/me/history/' in items[0]['next']: isMultiList = True
 			except: pass
-		upcoming_prependDate = control.setting('trakt.UpcomingProgress.prependDate') == 'true'
+		upcoming_prependDate = getSetting('trakt.UpcomingProgress.prependDate') == 'true'
 		try: sysaction = items[0]['action']
 		except: sysaction = ''
-		unwatchedEnabled = control.setting('tvshows.unwatched.enabled') == 'true'
-		multi_unwatchedEnabled = control.setting('multi.unwatched.enabled') == 'true'
-		try: airEnabled = control.setting('tvshows.air.enabled') if 'ForceAirEnabled' not in items[0] else 'true'
+		unwatchedEnabled = getSetting('tvshows.unwatched.enabled') == 'true'
+		multi_unwatchedEnabled = getSetting('multi.unwatched.enabled') == 'true'
+		try: airEnabled = getSetting('tvshows.air.enabled') if 'ForceAirEnabled' not in items[0] else 'true'
 		except: airEnabled = 'false'
-		play_mode = control.setting('play.mode')
-		rescrape_useDefault = control.setting('rescrape.default') == 'true'
-		rescrape_method = control.setting('rescrape.default2')
-		enable_playnext = control.setting('enable.playnext') == 'true'
+		play_mode = getSetting('play.mode')
+		rescrape_useDefault = getSetting('rescrape.default') == 'true'
+		rescrape_method = getSetting('rescrape.default2')
+		enable_playnext = getSetting('enable.playnext') == 'true'
 		indicators = getTVShowIndicators(refresh=True)
 		isFolder = False if sysaction != 'episodes' else True
 		if airEnabled == 'true':
-			airZone, airLocation = control.setting('tvshows.air.zone'), control.setting('tvshows.air.location')
-			airFormat, airFormatDay = control.setting('tvshows.air.format'), control.setting('tvshows.air.day')
-			airFormatTime, airBold = control.setting('tvshows.air.time'), control.setting('tvshows.air.bold')
-			airLabel = control.lang(35032)
-		if play_mode == '1' or enable_playnext: playbackMenu = control.lang(32063)
-		else: playbackMenu = control.lang(32064)
+			airZone, airLocation = getSetting('tvshows.air.zone'), getSetting('tvshows.air.location')
+			airFormat, airFormatDay = getSetting('tvshows.air.format'), getSetting('tvshows.air.day')
+			airFormatTime, airBold = getSetting('tvshows.air.time'), getSetting('tvshows.air.bold')
+			airLabel = getLS(35032)
+		if play_mode == '1' or enable_playnext: playbackMenu = getLS(32063)
+		else: playbackMenu = getLS(32064)
 		if trakt.getTraktIndicatorsInfo():
-			watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
+			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
 		else:
-			watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
-		traktManagerMenu, playlistManagerMenu, queueMenu = control.lang(32070), control.lang(35522), control.lang(32065)
-		tvshowBrowserMenu, addToLibrary = control.lang(32071), control.lang(32551)
-		clearSourcesMenu, rescrapeMenu, progressRefreshMenu = control.lang(32611), control.lang(32185), control.lang(32194)
+			watchedMenu, unwatchedMenu = getLS(32066), getLS(32067)
+		traktManagerMenu, playlistManagerMenu, queueMenu = getLS(32070), getLS(35522), getLS(32065)
+		tvshowBrowserMenu, addToLibrary = getLS(32071), getLS(32551)
+		clearSourcesMenu, rescrapeMenu, progressRefreshMenu = getLS(32611), getLS(32185), getLS(32194)
 
 		for i in items:
 			try:
@@ -902,7 +904,7 @@ class Episodes:
 				if not items: raise Exception()
 				url = items[0]['next']
 				if not url: raise Exception()
-				nextMenu = control.lang(32053)
+				nextMenu = getLS(32053)
 				url_params = dict(parse_qsl(url))
 				if 'imdb.com' in url:
 					start = int(url_params.get('start'))
@@ -934,7 +936,7 @@ class Episodes:
 		sysaddon, syshandle = argv[0], int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
-		queueMenu = control.lang(32065)
+		queueMenu = getLS(32065)
 		for i in items:
 			try:
 				name = i['name']

@@ -16,6 +16,9 @@ from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import utils
 
+getLS = control.lang
+getSetting = control.setting
+setSetting = control.setSetting
 BASE_URL = 'https://api.trakt.tv'
 # Venom trakt app
 # V2_API_KEY = 'c622fa66e6cdd783b23f2fc1a1abedc1f1e6ea739d8755248487d1dcfeda66e5'
@@ -26,7 +29,8 @@ CLIENT_SECRET = '0c5134e5d15b57653fefed29d813bfbd58d73d51fb9bcd6442b5065f30c4d4d
 headers = {'Content-Type': 'application/json', 'trakt-api-key': V2_API_KEY, 'trakt-api-version': '2'}
 REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 highlight_color = control.getHighlightColor()
-server_notification = control.setting('trakt.server.notifications') == 'true'
+server_notification = getSetting('trakt.server.notifications') == 'true'
+
 
 def getTrakt(url, post=None, extended=False, silent=False):
 	try:
@@ -35,7 +39,7 @@ def getTrakt(url, post=None, extended=False, silent=False):
 		if not getTraktCredentialsInfo():
 			return client.request(url, post=post, headers=headers)
 
-		# headers['Authorization'] = 'Bearer %s' % control.setting('trakt.token')
+		# headers['Authorization'] = 'Bearer %s' % getSetting('trakt.token')
 		headers['Authorization'] = 'Bearer %s' % control.addon('script.module.myaccounts').getSetting('trakt.token')
 
 		result = client.request(url, post=post, headers=headers, output='extended', error=True)
@@ -90,7 +94,7 @@ def re_auth(headers):
 	try:
 		ma_token = control.addon('script.module.myaccounts').getSetting('trakt.token')
 		ma_refresh = control.addon('script.module.myaccounts').getSetting('trakt.refresh')
-		if ma_token != control.setting('trakt.token') or ma_refresh != control.setting('trakt.refresh'):
+		if ma_token != getSetting('trakt.token') or ma_refresh != getSetting('trakt.refresh'):
 			log_utils.log('Syncing My Accounts Trakt Token', level=log_utils.LOGINFO)
 			from resources.lib.modules import my_accounts
 			my_accounts.syncMyAccounts(silent=True)
@@ -98,7 +102,7 @@ def re_auth(headers):
 
 		log_utils.log('Re-Authenticating Trakt Token', level=log_utils.LOGINFO)
 		oauth = urljoin(BASE_URL, '/oauth/token')
-		# opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': control.setting('trakt.refresh')}
+		# opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': getSetting('trakt.refresh')}
 		opost = {'client_id': V2_API_KEY, 'client_secret': CLIENT_SECRET, 'redirect_uri': REDIRECT_URI, 'grant_type': 'refresh_token', 'refresh_token': control.addon('script.module.myaccounts').getSetting('trakt.refresh')}
 
 		result = client.request(oauth, post=jsdumps(opost), headers=headers, error=True)
@@ -127,10 +131,10 @@ def re_auth(headers):
 
 			token, refresh = result['access_token'], result['refresh_token']
 			expires = str(time() + 7776000)
-			control.setSetting('trakt.isauthed', 'true')
-			control.setSetting('trakt.token', token)
-			control.setSetting('trakt.refresh', refresh)
-			control.setSetting('trakt.expires', expires)
+			setSetting('trakt.isauthed', 'true')
+			setSetting('trakt.token', token)
+			setSetting('trakt.refresh', refresh)
+			setSetting('trakt.expires', expires)
 			control.addon('script.module.myaccounts').setSetting('trakt.token', token)
 			control.addon('script.module.myaccounts').setSetting('trakt.refresh', refresh)
 			control.addon('script.module.myaccounts').setSetting('trakt.expires', expires)
@@ -145,16 +149,16 @@ def re_auth(headers):
 def authTrakt():
 	try:
 		if getTraktCredentialsInfo():
-			if control.yesnoDialog(control.lang(32511), control.lang(32512), '', 'Trakt'):
-				control.setSetting('trakt.isauthed', '')
-				control.setSetting('trakt.username', '')
-				control.setSetting('trakt.token', '')
-				control.setSetting('trakt.refresh', '')
-				control.setSetting('trakt.expires', '')
+			if control.yesnoDialog(getLS(32511), getLS(32512), '', 'Trakt'):
+				setSetting('trakt.isauthed', '')
+				setSetting('trakt.username', '')
+				setSetting('trakt.token', '')
+				setSetting('trakt.refresh', '')
+				setSetting('trakt.expires', '')
 			raise Exception()
 		result = getTraktAsJson('/oauth/device/code', {'client_id': V2_API_KEY})
-		verification_url = (control.lang(32513) % result['verification_url'])
-		user_code = (control.lang(32514) % result['user_code'])
+		verification_url = (getLS(32513) % result['verification_url'])
+		user_code = (getLS(32514) % result['user_code'])
 		expires_in = int(result['expires_in'])
 		device_code = result['device_code']
 		interval = result['interval']
@@ -182,24 +186,24 @@ def authTrakt():
 		username = result['username']
 		expires = str(time() + 7776000)
 
-		control.setSetting('trakt.isauthed', 'true')
-		control.setSetting('trakt.username', username)
-		control.setSetting('trakt.token', token)
-		control.setSetting('trakt.refresh', refresh)
-		control.setSetting('trakt.expires', expires)
+		setSetting('trakt.isauthed', 'true')
+		setSetting('trakt.username', username)
+		setSetting('trakt.token', token)
+		setSetting('trakt.refresh', refresh)
+		setSetting('trakt.expires', expires)
 		raise Exception()
 	except:
 		log_utils.error()
 
 def getTraktCredentialsInfo():
-	username = control.setting('trakt.username').strip()
-	token = control.setting('trakt.token')
-	refresh = control.setting('trakt.refresh')
+	username = getSetting('trakt.username').strip()
+	token = getSetting('trakt.token')
+	refresh = getSetting('trakt.refresh')
 	if (username == '' or token == '' or refresh == ''): return False
 	return True
 
 def getTraktIndicatorsInfo():
-	indicators = control.setting('indicators') if not getTraktCredentialsInfo() else control.setting('indicators.alt')
+	indicators = getSetting('indicators') if not getTraktCredentialsInfo() else getSetting('indicators.alt')
 	indicators = True if indicators == '1' else False
 	return indicators
 
@@ -245,10 +249,10 @@ def watch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	control.hide()
 	if refresh: control.refresh()
 	control.trigger_widget_refresh()
-	if control.setting('trakt.general.notifications') == 'true':
+	if getSetting('trakt.general.notifications') == 'true':
 		if season and not episode: name = '%s-Season%s...' % (name, season)
 		if season and episode: name = '%s-S%sxE%02d...' % (name, season, int(episode))
-		control.notification(title=32315, message=control.lang(35502) % name)
+		control.notification(title=32315, message=getLS(35502) % name)
 
 def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	control.busy()
@@ -270,10 +274,10 @@ def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 	control.hide()
 	if refresh: control.refresh()
 	control.trigger_widget_refresh()
-	if control.setting('trakt.general.notifications') == 'true':
+	if getSetting('trakt.general.notifications') == 'true':
 		if season and not episode: name = '%s-Season%s...' % (name, season)
 		if season and episode: name = '%s-S%sxE%02d...' % (name, season, int(episode))
-		control.notification(title=32315, message=control.lang(35503) % name)
+		control.notification(title=32315, message=getLS(35503) % name)
 
 def like_list(list_owner, list_name, list_id):
 	try:
@@ -325,7 +329,7 @@ def unrate(imdb=None, tvdb=None, season=None, episode=None):
 	return _rating(action='unrate', imdb=imdb, tvdb=tvdb, season=season, episode=episode)
 
 def rateShow(imdb=None, tvdb=None, season=None, episode=None):
-	if control.setting('trakt.rating') == 1:
+	if getSetting('trakt.rating') == 1:
 		rate(imdb=imdb, tvdb=tvdb, season=season, episode=episode)
 
 def _rating(action, imdb=None, tvdb=None, season=None, episode=None):
@@ -411,8 +415,8 @@ def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True
 	success = None
 	try:
 		sections = ['progress_watched', 'calendar']
-		sections_display = [control.lang(40072), control.lang(40073), control.lang(32181)]
-		selection = control.selectDialog([i for i in sections_display], heading=control.addonInfo('name') + ' - ' + control.lang(40074))
+		sections_display = [getLS(40072), getLS(40073), getLS(32181)]
+		selection = control.selectDialog([i for i in sections_display], heading=control.addonInfo('name') + ' - ' + getLS(40074))
 		if selection == -1: return
 		control.busy()
 		if episode: post = {"shows": [{"ids": {"tvdb": tvdb}}]}
@@ -429,8 +433,8 @@ def hideItem(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True
 			sync_hidden_progress(forced=True)
 			if refresh: control.refresh()
 			control.trigger_widget_refresh()
-			if control.setting('trakt.general.notifications') == 'true':
-				control.notification(title=32315, message=control.lang(33053) % (name, sections_display[selection]))
+			if getSetting('trakt.general.notifications') == 'true':
+				control.notification(title=32315, message=getLS(33053) % (name, sections_display[selection]))
 	except:
 		log_utils.error()
 
@@ -448,7 +452,7 @@ def removeCollectionItems(type, id_list):
 			control.trigger_widget_refresh()
 			if type == 'movies': traktsync.delete_collection_items(id_list, 'movies_collection')
 			else: traktsync.delete_collection_items(id_list, 'shows_collection')
-			if control.setting('trakt.general.notifications') == 'true':
+			if getSetting('trakt.general.notifications') == 'true':
 				control.notification(title='Trakt Collection Manager', message='Successfuly Removed %s Item%s' % (total_items, 's' if total_items >1 else ''))
 	except:
 		log_utils.error()
@@ -467,7 +471,7 @@ def removeWatchlistItems(type, id_list):
 			control.trigger_widget_refresh()
 			if type == 'movies': traktsync.delete_watchList_items(id_list, 'movies_watchlist')
 			else: traktsync.delete_watchList_items(id_list, 'shows_watchlist')
-			if control.setting('trakt.general.notifications') == 'true':
+			if getSetting('trakt.general.notifications') == 'true':
 				control.notification(title='Trakt Watch List Manager', message='Successfuly Removed %s Item%s' % (total_items, 's' if total_items >1 else ''))
 	except:
 		log_utils.error()
@@ -480,45 +484,45 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 		media_type = 'Show' if tvdb else 'Movie'
 		if watched is not None:
 			if watched is True:
-				items = [(control.lang(33652) % highlight_color, 'unwatch')]
+				items = [(getLS(33652) % highlight_color, 'unwatch')]
 			else:
-				items = [(control.lang(33651) % highlight_color, 'watch')]
+				items = [(getLS(33651) % highlight_color, 'watch')]
 		else:
-			items = [(control.lang(33651) % highlight_color, 'watch')]
-			items += [(control.lang(33652) % highlight_color, 'unwatch')]
+			items = [(getLS(33651) % highlight_color, 'watch')]
+			items += [(getLS(33652) % highlight_color, 'unwatch')]
 		if control.condVisibility('System.HasAddon(script.trakt)'):
-			items += [(control.lang(33653) % highlight_color, 'rate')]
-			items += [(control.lang(33654) % highlight_color, 'unrate')]
+			items += [(getLS(33653) % highlight_color, 'rate')]
+			items += [(getLS(33654) % highlight_color, 'unrate')]
 		if tvdb:
-			items += [(control.lang(40075) % (highlight_color, media_type), 'hideItem')]
-			items += [(control.lang(35058) % highlight_color, 'hiddenManager')]
+			items += [(getLS(40075) % (highlight_color, media_type), 'hideItem')]
+			items += [(getLS(35058) % highlight_color, 'hiddenManager')]
 		if unfinished is True:
-			if media_type == 'Movie': items += [(control.lang(35059) % highlight_color, 'unfinishedMovieManager')]
-			elif episode: items += [(control.lang(35060) % highlight_color, 'unfinishedEpisodeManager')]
-		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
+			if media_type == 'Movie': items += [(getLS(35059) % highlight_color, 'unfinishedMovieManager')]
+			elif episode: items += [(getLS(35060) % highlight_color, 'unfinishedEpisodeManager')]
+		if getSetting('trakt.scrobble') == 'true' and getSetting('resume.source') == '1':
 			if media_type == 'Movie' or episode:
-				items += [(control.lang(40076) % highlight_color, 'scrobbleReset')]
+				items += [(getLS(40076) % highlight_color, 'scrobbleReset')]
 		if season or episode:
-			items += [(control.lang(33573) % highlight_color, '/sync/watchlist')]
-			items += [(control.lang(33574) % highlight_color, '/sync/watchlist/remove')]
-		items += [(control.lang(33577) % highlight_color, '/sync/watchlist')]
-		items += [(control.lang(33578) % highlight_color, '/sync/watchlist/remove')]
-		items += [(control.lang(33575) % highlight_color, '/sync/collection')]
-		items += [(control.lang(33576) % highlight_color, '/sync/collection/remove')]
-		items += [(control.lang(33579), '/users/me/lists/%s/items')]
+			items += [(getLS(33573) % highlight_color, '/sync/watchlist')]
+			items += [(getLS(33574) % highlight_color, '/sync/watchlist/remove')]
+		items += [(getLS(33577) % highlight_color, '/sync/watchlist')]
+		items += [(getLS(33578) % highlight_color, '/sync/watchlist/remove')]
+		items += [(getLS(33575) % highlight_color, '/sync/collection')]
+		items += [(getLS(33576) % highlight_color, '/sync/collection/remove')]
+		items += [(getLS(33579), '/users/me/lists/%s/items')]
 
 		result = getTraktAsJson('/users/me/lists')
 		lists = [(i['name'], i['ids']['slug']) for i in result]
 		lists = [lists[i//2] for i in range(len(lists)*2)]
 
 		for i in range(0, len(lists), 2):
-			lists[i] = ((control.lang(33580) % (highlight_color, lists[i][0])), '/users/me/lists/%s/items' % lists[i][1])
+			lists[i] = ((getLS(33580) % (highlight_color, lists[i][0])), '/users/me/lists/%s/items' % lists[i][1])
 		for i in range(1, len(lists), 2):
-			lists[i] = ((control.lang(33581) % (highlight_color, lists[i][0])), '/users/me/lists/%s/items/remove' % lists[i][1])
+			lists[i] = ((getLS(33581) % (highlight_color, lists[i][0])), '/users/me/lists/%s/items/remove' % lists[i][1])
 		items += lists
 
 		control.hide()
-		select = control.selectDialog([i[0] for i in items], heading=control.addonInfo('name') + ' - ' + control.lang(32515))
+		select = control.selectDialog([i[0] for i in items], heading=control.addonInfo('name') + ' - ' + getLS(32515))
 
 		if select == -1: return
 		if select >= 0:
@@ -580,19 +584,19 @@ def manager(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True,
 
 				control.hide()
 				list = re.search('\[B](.+?)\[/B]', items[select][0]).group(1)
-				message = control.lang(33583) if 'remove' in items[select][1] else control.lang(33582)
+				message = getLS(33583) if 'remove' in items[select][1] else getLS(33582)
 				if items[select][0].startswith('Add'): refresh = False
 				control.hide()
 				if refresh: control.refresh()
 				control.trigger_widget_refresh()
-				if control.setting('trakt.general.notifications') == 'true':
+				if getSetting('trakt.general.notifications') == 'true':
 					control.notification(title=name, message=message + ' (%s)' % list)
 	except:
 		log_utils.error()
 		control.hide()
 
 def listAdd(successNotification=True):
-	t = control.lang(32520)
+	t = getLS(32520)
 	k = control.keyboard('', t) ; k.doModal()
 	new = k.getText() if k.isConfirmed() else None
 	if not new: return
@@ -880,7 +884,7 @@ def timeoutsyncSeason(imdb):
 def syncSeason(imdb):
 	try:
 		if not getTraktCredentialsInfo(): return
-		if control.setting('tv.specials') == 'true':
+		if getSetting('tv.specials') == 'true':
 			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=true&hidden=false&count_specials=true' % imdb)
 		else:
 			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % imdb)
@@ -932,7 +936,7 @@ def _seasonCountCache(imdb):
 def _seasonCountRetrieve(imdb):
 	try:
 		if not getTraktCredentialsInfo(): return
-		if control.setting('tv.specials') == 'true':
+		if getSetting('tv.specials') == 'true':
 			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=true&hidden=false&count_specials=true' % imdb)
 		else:
 			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % imdb)
@@ -1172,7 +1176,7 @@ def scrobbleMovie(imdb, tmdb, watched_percent):
 		if not imdb.startswith('tt'): imdb = 'tt' + imdb
 		success = getTrakt('/scrobble/pause', {"movie": {"ids": {"imdb": imdb}}, "progress": watched_percent})
 		if success:
-			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
+			if getSetting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
 			control.sleep(1000)
 			sync_playbackProgress(forced=True)
 		else:
@@ -1185,7 +1189,7 @@ def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 		season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
 		success = getTrakt('/scrobble/pause', {"show": {"ids": {"tvdb": tvdb}}, "episode": {"season": season, "number": episode}, "progress": watched_percent})
 		if success:
-			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
+			if getSetting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
 			control.sleep(1000)
 			sync_playbackProgress(forced=True)
 		else:
@@ -1211,7 +1215,7 @@ def scrobbleReset(imdb, tvdb=None, season=None, episode=None, refresh=True, widg
 		if success:
 			if refresh: control.refresh()
 			if widgetRefresh: control.trigger_widget_refresh() # skinshortcuts handles the widget_refresh when plyback ends, but not a manual clear from Trakt Manager
-			if control.setting('trakt.scrobble.notify') == 'true': control.notification(message=32082)
+			if getSetting('trakt.scrobble.notify') == 'true': control.notification(message=32082)
 		else: control.notification(message=32131)
 	except:
 		log_utils.error()
@@ -1259,10 +1263,10 @@ def trakt_service_sync():
 	while not control.monitor.abortRequested():
 		if getTraktCredentialsInfo: # run service in case user auth's trakt later
 			activities = getTraktAsJson('/sync/last_activities', silent=True)
-			if control.setting('bookmarks') == 'true' and control.setting('resume.source') == '1':
+			if getSetting('bookmarks') == 'true' and getSetting('resume.source') == '1':
 				sync_playbackProgress(activities)
 			sync_watchedProgress(activities)
-			if control.setting('indicators.alt') == '1':
+			if getSetting('indicators.alt') == '1':
 				sync_watched(activities) # still writes to cache.db
 			sync_user_lists(activities)
 			sync_liked_lists(activities)
@@ -1274,7 +1278,7 @@ def trakt_service_sync():
 		if control.monitor.waitForAbort(60*15): break
 
 def force_traktSync():
-	if not control.yesnoDialog(control.lang(32056), '', ''): return
+	if not control.yesnoDialog(getLS(32056), '', ''): return
 	control.busy()
 	sync_playbackProgress(forced=True)
 	sync_watchedProgress(forced=True)
@@ -1309,9 +1313,9 @@ def sync_playbackProgress(activities=None, forced=False):
 def sync_watchedProgress(activities=None, forced=False):
 	try:
 		from resources.lib.menus import episodes
-		trakt_user = control.setting('trakt.username').strip()
+		trakt_user = getSetting('trakt.username').strip()
 		lang = control.apiLanguage()['tmdb']
-		direct = control.setting('trakt.directProgress.scrape') == 'true'
+		direct = getSetting('trakt.directProgress.scrape') == 'true'
 		url = 'https://api.trakt.tv/users/me/watched/shows'
 		if forced or (getProgressActivity(activities) > cache.timeout(episodes.Episodes().trakt_progress_list, url, trakt_user, lang, direct)):
 			cache.get(episodes.Episodes().trakt_progress_list, 0, url, trakt_user, lang, direct)

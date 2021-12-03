@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.3.9">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.0">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,9 +32,11 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.3.9 - Nov. 29, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Temp fix for PM timeout for post request.  This should get resolve for playback working till PM better addresses the issue.[/I]
-[COLOR yellow]--[/COLOR][I] The new TORRENTIO scraper in Fenom Scrapers returns an individual episode file size for pack files.  This caused Venom to also do a re-calc for file size because all other torrent scrapers return the full pack size and must be re-calculated for an individual episode size. The re-calc is now bypassed if the source provider is TORRENTIO and file size is once again correct for pack files from this provider.[/I]
+[B][COLOR red]Update - v6.4.0 - Dec. 03, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added a new setting to require source links to contain the year of reboot shows.  See [B]"Settings-Source Options"[/B] under [B]"Source Filtering Options"[/B].  There is also a new help file for more information.[/I]
+[COLOR yellow]--[/COLOR][I] Furk has been moved from the main menu to the [[B]"Premium Service"[/B] menu.[/I]
+[COLOR yellow]--[/COLOR][I] EasyNews has been added to the [B]"Premium Services"[/B] menu.  You can now Search titles and review your Account Information.[/I]
+[COLOR yellow]--[/COLOR][I] The settings category [B]"Navigation"[/B] now contains options to allow enabling or disabling of supported [B]"Premium Services"[/B] you do not have and wish to not show.[/I]
 		</news>
 	</extension>
 </addon>

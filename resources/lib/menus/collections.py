@@ -17,21 +17,24 @@ from resources.lib.modules.playcount import getMovieIndicators, getMovieOverlay
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 
+getLS = control.lang
+getSetting = control.setting
+
 
 class Collections:
 	def __init__(self):
 		self.list = []
 		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
-		self.page_limit = control.setting('page.item.limit')
-		self.enable_fanarttv = control.setting('enable.fanarttv') == 'true'
-		self.prefer_tmdbArt = control.setting('prefer.tmdbArt') == 'true'
-		self.unairedcolor = control.getColor(control.setting('movie.unaired.identify'))
+		self.page_limit = getSetting('page.item.limit')
+		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
+		self.prefer_tmdbArt = getSetting('prefer.tmdbArt') == 'true'
+		self.unairedcolor = control.getColor(getSetting('movie.unaired.identify'))
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 		self.lang = control.apiLanguage()['trakt']
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
-		self.imdb_user = control.setting('imdb.user').replace('ur', '')
-		self.tmdb_key = control.setting('tmdb.api.key')
+		self.imdb_user = getSetting('imdb.user').replace('ur', '')
+		self.tmdb_key = getSetting('tmdb.api.key')
 		if self.tmdb_key == '' or self.tmdb_key is None:
 			self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
 		# self.user = str(self.imdb_user) + str(self.tmdb_key)
@@ -693,30 +696,30 @@ class Collections:
 			log_utils.error()
 
 	def imdb_sort(self):
-		sort = int(control.setting('sort.collections.type'))
+		sort = int(getSetting('sort.collections.type'))
 		imdb_sort = 'alpha'
 		if sort == 1: imdb_sort = 'alpha'
 		if sort == 2: imdb_sort = 'user_rating'
 		if sort == 3: imdb_sort = 'release_date'
-		imdb_sort_order = ',asc' if (int(control.setting('sort.collections.order')) == 0) else ',desc'
+		imdb_sort_order = ',asc' if (int(getSetting('sort.collections.order')) == 0) else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
 
 	def tmdb_sort(self):
-		sort = int(control.setting('sort.collections.type'))
+		sort = int(getSetting('sort.collections.type'))
 		tmdb_sort = 'title'
 		if sort == 1: tmdb_sort = 'title'
 		if sort == 2: tmdb_sort = 'vote_average'
 		if sort == 3: tmdb_sort = 'primary_release_date'
-		tmdb_sort_order = '.asc' if (int(control.setting('sort.collections.order')) == 0) else '.desc'
+		tmdb_sort_order = '.asc' if (int(getSetting('sort.collections.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
 		return sort_string
 
 	def sort(self, type='collections'):
 		try:
 			if not self.list: return
-			attribute = int(control.setting('sort.%s.type' % type))
-			reverse = int(control.setting('sort.%s.order' % type)) == 1
+			attribute = int(getSetting('sort.%s.type' % type))
+			reverse = int(getSetting('sort.%s.order' % type)) == 1
 			if attribute == 0: reverse = False # Sorting Order is not enabled when sort method is "Default"
 			if attribute > 0:
 				if attribute == 1:
@@ -850,19 +853,19 @@ class Collections:
 			control.hide() ; control.notification(title=32000, message=33049)
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
-		play_mode = control.setting('play.mode') 
+		play_mode = getSetting('play.mode') 
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
-		settingFanart = control.setting('fanart') == 'true'
+		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
 		indicators = getMovieIndicators()
-		if play_mode == '1': playbackMenu = control.lang(32063)
-		else: playbackMenu = control.lang(32064)
-		if trakt.getTraktIndicatorsInfo(): watchedMenu, unwatchedMenu = control.lang(32068), control.lang(32069)
-		else: watchedMenu, unwatchedMenu = control.lang(32066), control.lang(32067)
-		playlistManagerMenu, queueMenu = control.lang(35522), control.lang(32065)
-		traktManagerMenu, addToLibrary = control.lang(32070), control.lang(32551)
-		nextMenu, clearSourcesMenu = control.lang(32053), control.lang(32611)
-		rescrapeMenu, rescrapeAllMenu, findSimilarMenu = control.lang(32185), control.lang(32193), control.lang(32184)
+		if play_mode == '1': playbackMenu = getLS(32063)
+		else: playbackMenu = getLS(32064)
+		if trakt.getTraktIndicatorsInfo(): watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
+		else: watchedMenu, unwatchedMenu = getLS(32066), getLS(32067)
+		playlistManagerMenu, queueMenu = getLS(35522), getLS(32065)
+		traktManagerMenu, addToLibrary = getLS(32070), getLS(32551)
+		nextMenu, clearSourcesMenu = getLS(32053), getLS(32611)
+		rescrapeMenu, rescrapeAllMenu, findSimilarMenu = getLS(32185), getLS(32193), getLS(32184)
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -971,7 +974,7 @@ class Collections:
 	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True):
 		try:
 			from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
-			if isinstance(name, int): name = control.lang(name)
+			if isinstance(name, int): name = getLS(name)
 			sysaddon, syshandle = argv[0], int(argv[1])
 			artPath = control.artPath()
 			if not icon.startswith('Default'): icon = control.joinPath(artPath, icon)
@@ -980,7 +983,7 @@ class Collections:
 			url = '%s?action=%s' % (sysaddon, query) if isAction else query
 			cm = []
 			if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
-			if context: cm.append((control.lang(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
+			if context: cm.append((getLS(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
 			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 			item = control.item(label=name, offscreen=True)
 			item.setProperty('IsPlayable', 'false')

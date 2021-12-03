@@ -88,15 +88,6 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 		if 'Accept-Encoding' in headers: pass
 		elif compression and limit is None: headers['Accept-Encoding'] = 'gzip'
 
-		# if redirect is False:
-			# class NoRedirection(urllib2.HTTPErrorProcessor):
-				# def http_response(self, request, response):
-					# return response
-			# opener = urllib2.build_opener(NoRedirection)
-			# urllib2.install_opener(opener)
-			# try: del headers['Referer']
-			# except: pass
-
 		if redirect is False:
 			class NoRedirectHandler(urllib2.HTTPRedirectHandler):
 				def http_error_302(self, reqst, fp, code, msg, head):

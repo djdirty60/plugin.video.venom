@@ -222,7 +222,7 @@ def url_strip(url):
 def aliases_check(title, aliases):
 	fixed_aliases = []
 	try:
-		bad_aliases = {'Dexter': ['Dexter: New Blood',], 'Titans': ['Teen Titans', 'Untitled Teen Titans Project']}
+		bad_aliases = {'Dexter': ['Dexter: New Blood',], 'Titans': ['Teen Titans',]}
 		if title in bad_aliases:
 			for i in aliases:
 				if i.get('title') not in bad_aliases.get(title): fixed_aliases.append(i)
@@ -231,6 +231,16 @@ def aliases_check(title, aliases):
 		from resources.lib.modules import log_utils
 		log_utils.error()
 	return aliases
+
+def tvshow_reboots():
+	reboots = {
+		"Adam-12": "1990", "Battlestar Galactica": "2004", "Charlie's Angels": "2011", "Charmed": "2018", "Dynasty": "2017", "Fantasy Island": "2021",
+		"The Flash": "2014", "The Fugitive": "2000", "The Fugitive": "2020", "Ghostwriter": "2019", "Gossip Girl": "2021", "Ironside": "2013", "Kojak": "2005",
+		"Kung Fu": "2021", "Lost in Space": "2018", "MacGyver": "2016", "Magnum P.I.": "2018", "Nancy Drew": "2019", "The Odd Couple": "2015",
+		"One Day at a Time": "2017", "The Outer Limits": "1995", "Party of Five": "2020", "Perry Mason": "2020", "S.W.A.T.": "2017",
+		"The Twilight Zone": "1985", "The Twilight Zone": "2002", "The Twilight Zone": "2019", "The Untouchables": "1993", "V": "2009",
+		"The Wonder Years": "2021"}
+	return reboots
 
 def copy2clip(txt):
 	from sys import platform as sys_platform

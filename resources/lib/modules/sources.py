@@ -21,7 +21,13 @@ from resources.lib.modules import log_utils
 from resources.lib.modules.source_utils import supported_video_extensions, getFileType, aliases_check
 from resources.lib.cloud_scrapers import cloudSources
 from fenomscrapers import sources as fs_sources
+
+
 homeWindow = control.homeWindow
+
+getLS = control.lang
+getSetting = control.setting
+
 
 class Sources:
 	def __init__(self, all_providers=False, custom_query=False):
@@ -37,14 +43,14 @@ class Sources:
 		self.show_expiry = timedelta(hours=48)
 		self.getConstants()
 		self.sourceFile = control.providercacheFile
-		self.enable_playnext = control.setting('enable.playnext') == 'true'
-		self.dev_mode = control.setting('dev.mode.enable') == 'true'
-		self.dev_disable_single = control.setting('dev.disable.single') == 'true'
-		# self.dev_disable_single_filter = control.setting('dev.disable.single.filter') == 'true'
-		self.dev_disable_season_packs = control.setting('dev.disable.season.packs') == 'true'
-		self.dev_disable_season_filter = control.setting('dev.disable.season.filter') == 'true'
-		self.dev_disable_show_packs = control.setting('dev.disable.show.packs') == 'true'
-		self.dev_disable_show_filter = control.setting('dev.disable.show.filter') == 'true'
+		self.enable_playnext = getSetting('enable.playnext') == 'true'
+		self.dev_mode = getSetting('dev.mode.enable') == 'true'
+		self.dev_disable_single = getSetting('dev.disable.single') == 'true'
+		# self.dev_disable_single_filter = getSetting('dev.disable.single.filter') == 'true'
+		self.dev_disable_season_packs = getSetting('dev.disable.season.packs') == 'true'
+		self.dev_disable_season_filter = getSetting('dev.disable.season.filter') == 'true'
+		self.dev_disable_show_packs = getSetting('dev.disable.show.packs') == 'true'
+		self.dev_disable_show_filter = getSetting('dev.disable.show.filter') == 'true'
 		self.extensions = supported_video_extensions()
 		self.highlight_color = control.getHighlightColor()
 
@@ -86,7 +92,7 @@ class Sources:
 			try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
 			except: pass
 			self.meta = meta
-			if tvshowtitle is None and control.setting('imdb.meta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
+			if tvshowtitle is None and getSetting('imdb.meta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
 				title, year = self.movie_chk_imdb(imdb, title, year)
 				if title == 'The F**k-It List': title = 'The Fuck-It List'
 			if tvshowtitle is not None: # get "total_seasons" and "season_isAiring" for Pack scrapers. 1st=passed meta, 2nd=matacache check, 3rd=request
@@ -99,7 +105,7 @@ class Sources:
 				self.url = url
 				return self.errorForSources()
 			filter = [] ; uncached_items = []
-			if control.setting('torrent.remove.uncached') == 'true':
+			if getSetting('torrent.remove.uncached') == 'true':
 				uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 				filter += [i for i in items if i not in uncached_items]
 				if filter: pass
@@ -116,7 +122,7 @@ class Sources:
 			else: uncached_items += [i for i in items if re.match(r'^uncached.*torrent', i['source'])]
 			if select is None:
 				if episode is not None and self.enable_playnext: select = '1'
-				else: select = control.setting('play.mode')
+				else: select = getSetting('play.mode')
 			title = tvshowtitle if tvshowtitle is not None else title
 			self.imdb = imdb ; self.tmdb = tmdb ; self.tvdb = tvdb ; self.title = title ; self.year = year
 			self.season = season ; self.episode = episode
@@ -143,10 +149,10 @@ class Sources:
 			if not items:
 				control.sleep(200) ; control.hide() ; sysexit()
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
-			self.imdb_user = control.setting('imdb.user').replace('ur', '')
-			self.tmdb_key = control.setting('tmdb.api.key')
+			self.imdb_user = getSetting('imdb.user').replace('ur', '')
+			self.tmdb_key = getSetting('tmdb.api.key')
 			if not self.tmdb_key: self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
-			self.tvdb_key = control.setting('tvdb.api.key')
+			self.tvdb_key = getSetting('tvdb.api.key')
 			if self.mediatype == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
 			else: self.user = str(self.tmdb_key)
 			self.lang = control.apiLanguage()['tvdb']
@@ -234,7 +240,7 @@ class Sources:
 				allowed = ['mediatype', 'imdb', 'tmdb', 'tvdb', 'poster', 'tvshow.poster', 'season_poster', 'season_poster', 'fanart', 'clearart', 'clearlogo', 'discart', 'thumb', 'title', 'tvshowtitle', 'year', 'premiered', 'rating', 'plot', 'duration', 'mpaa', 'season', 'episode', 'castandrole']
 				return {k: v for k, v in iter(metadata.items()) if k in allowed}
 			self.meta = sourcesDirMeta(self.meta)
-			if control.setting('uncached.seeder.sort') == 'true':
+			if getSetting('uncached.seeder.sort') == 'true':
 				uncached_items = sorted(uncached_items, key=lambda k: k['seeders'], reverse=True)
 				uncached_items = self.sort_byQuality(source_list=uncached_items)
 			if items == uncached_items:
@@ -268,7 +274,7 @@ class Sources:
 			except:
 				log_utils.error()
 			header = homeWindow.getProperty(self.labelProperty) + ': Resolving...'
-			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
+			progressDialog = control.progressDialog if getSetting('progress.dialog') == '0' else control.progressDialogBG
 			progressDialog.create(header, '')
 			for i in range(len(items)):
 				try:
@@ -381,6 +387,8 @@ class Sources:
 				log_utils.error()
 		del threads[:] # Make sure any remaining providers are stopped.
 		self.sources.extend(self.scraper_sources)
+		self.tvshowtitle = tvshowtitle
+		self.year = year
 		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
 
@@ -389,20 +397,20 @@ class Sources:
 			content = 'movie' if tvshowtitle is None else 'episode'
 			if self.custom_query == 'true':
 				try:
-					custom_title = control.dialog.input('[COLOR %s][B]%s[/B][/COLOR]' % (self.highlight_color, control.lang(32038)), defaultt=tvshowtitle if tvshowtitle else title)
+					custom_title = control.dialog.input('[COLOR %s][B]%s[/B][/COLOR]' % (self.highlight_color, getLS(32038)), defaultt=tvshowtitle if tvshowtitle else title)
 					if content == 'movie':
 						if custom_title:
 							title = custom_title ; self.meta.update({'title': title})
-						custom_year = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, control.lang(32457), control.lang(32488)), type=control.numeric_input, defaultt=str(year))
+						custom_year = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, getLS(32457), getLS(32488)), type=control.numeric_input, defaultt=str(year))
 						if custom_year:
 							year = str(custom_year) ; self.meta.update({'year': year})
 					else:
 						if custom_title:
 							tvshowtitle = custom_title ; self.meta.update({'tvshowtitle': tvshowtitle})
-						custom_season = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, control.lang(32055), control.lang(32488)), type=control.numeric_input, defaultt=str(season))
+						custom_season = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, getLS(32055), getLS(32488)), type=control.numeric_input, defaultt=str(season))
 						if custom_season:
 							season = str(custom_season) ; self.meta.update({'season': season})
-						custom_episode = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, control.lang(32325), control.lang(32488)), type=control.numeric_input, defaultt=str(episode))
+						custom_episode = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, getLS(32325), getLS(32488)), type=control.numeric_input, defaultt=str(episode))
 						if custom_episode:
 							episode = str(custom_episode) ; self.meta.update({'episode': episode})
 					p_label = '[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, title, year) if tvshowtitle is None else '[COLOR %s]%s (S%02dE%02d)[/COLOR]' % (self.highlight_color, tvshowtitle, int(season), int(episode))
@@ -420,17 +428,17 @@ class Sources:
 				except:
 					log_utils.error()
 					pass
-			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
+			progressDialog = control.progressDialog if getSetting('progress.dialog') == '0' else control.progressDialogBG
 			header = homeWindow.getProperty(self.labelProperty) + ': Scraping...'
 			progressDialog.create(header, '')
 			self.prepareSources()
 			sourceDict = self.sourceDict
-			progressDialog.update(0, control.lang(32600)) # preparing sources
+			progressDialog.update(0, getLS(32600)) # preparing sources
 			if content == 'movie': sourceDict = [(i[0], i[1], i[1].hasMovies) for i in sourceDict]
 			else: sourceDict = [(i[0], i[1], i[1].hasEpisodes) for i in sourceDict]
 			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2]]
-			if control.setting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
-			if control.setting('scrapers.prioritize') == 'true': 
+			if getSetting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
+			if getSetting('scrapers.prioritize') == 'true': 
 				sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
 				sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority
 			aliases = []
@@ -473,22 +481,22 @@ class Sources:
 					append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
 
 			[i.start() for i in threads]
-			sdc = control.getColor(control.setting('scraper.dialog.color'))
-			string1 = control.lang(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
-			string3 = control.lang(32406) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Remaining providers:[/COLOR] [COLOR %s]%s[/COLOR]"
-			string4 = control.lang(32407) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Unfiltered Total: [/COLOR]  [COLOR %s]%s[/COLOR]"
+			sdc = control.getColor(getSetting('scraper.dialog.color'))
+			string1 = getLS(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
+			string3 = getLS(32406) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Remaining providers:[/COLOR] [COLOR %s]%s[/COLOR]"
+			string4 = getLS(32407) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Unfiltered Total: [/COLOR]  [COLOR %s]%s[/COLOR]"
 
-			try: timeout = int(control.setting('scrapers.timeout'))
+			try: timeout = int(getSetting('scrapers.timeout'))
 			except: pass
 			if self.all_providers == 'true': timeout = 90
 			start_time = time()
 			end_time = start_time + timeout
-			quality = control.setting('hosts.quality') or '0'
+			quality = getSetting('hosts.quality') or '0'
 			line1 = line2 = line3 = ""
-			terminate_onCloud = control.setting('terminate.onCloud.sources') == 'true'
-			pre_emp = control.setting('preemptive.termination') == 'true'
-			pre_emp_limit = int(control.setting('preemptive.limit'))
-			pre_emp_res = control.setting('preemptive.res') or '0'
+			terminate_onCloud = getSetting('terminate.onCloud.sources') == 'true'
+			pre_emp = getSetting('preemptive.termination') == 'true'
+			pre_emp_limit = int(getSetting('preemptive.limit'))
+			pre_emp_res = getSetting('preemptive.res') or '0'
 			source_4k = source_1080 = source_720 = source_sd = total = 0
 			total_format = '[COLOR %s][B]%s[/B][/COLOR]'
 			pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % \
@@ -560,13 +568,15 @@ class Sources:
 		del progressDialog
 		del threads[:] # Make sure any remaining providers are stopped.
 		self.sources.extend(self.scraper_sources)
+		self.tvshowtitle = tvshowtitle
+		self.year = year
 		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
 
 	def preResolve(self, next_sources, next_meta):
 		try:
 			homeWindow.setProperty(self.metaProperty, jsdumps(next_meta))
-			if control.setting('autoplay.sd') == 'true': next_sources = [i for i in next_sources if not i['quality'] in ('4K', '1080p', '720p')]
+			if getSetting('autoplay.sd') == 'true': next_sources = [i for i in next_sources if not i['quality'] in ('4K', '1080p', '720p')]
 			uncached_filter = [i for i in next_sources if re.match(r'^uncached.*torrent', i['source'])]
 			next_sources = [i for i in next_sources if i not in uncached_filter]
 		except:
@@ -731,40 +741,48 @@ class Sources:
 
 	def sourcesFilter(self):
 		if not self.isPrescrape: control.busy()
-		quality = control.setting('hosts.quality') or '0'
-		if control.setting('remove.duplicates') == 'true': self.sources = self.filter_dupes()
+		quality = getSetting('hosts.quality') or '0'
+		if getSetting('remove.duplicates') == 'true': self.sources = self.filter_dupes()
 		if self.mediatype == 'movie':
-			if control.setting('source.enable.msizelimit') == 'true':
+			if getSetting('source.enable.msizelimit') == 'true':
 				try:
-					movie_minSize, movie_maxSize = float(control.setting('source.min.moviesize')), float(control.setting('source.max.moviesize'))
+					movie_minSize, movie_maxSize = float(getSetting('source.min.moviesize')), float(getSetting('source.max.moviesize'))
 					self.sources = [i for i in self.sources if (i.get('size', 0) >= movie_minSize and i.get('size', 0) <= movie_maxSize)]
 				except: log_utils.error()
 		else:
-			try: self.sources = self.calc_pack_size()
-			except: pass
-			if control.setting('source.enable.esizelimit') == 'true':
+			if getSetting('source.checkReboots') == 'true':
 				try:
-					episode_minSize, episode_maxSize = float(control.setting('source.min.epsize')), float(control.setting('source.max.epsize'))
+					from resources.lib.modules.source_utils import tvshow_reboots
+					reboots = tvshow_reboots()
+					if self.tvshowtitle in reboots and reboots.get(self.tvshowtitle) == self.year:
+						log_utils.log('tvshowtitle is a REBOOT, filtering for year match', level= log_utils.LOGDEBUG)
+						self.sources = [i for i in self.sources if self.year in i.get('name')]
+				except: log_utils.error()
+			if getSetting('source.enable.esizelimit') == 'true':
+				try:
+					episode_minSize, episode_maxSize = float(getSetting('source.min.epsize')), float(getSetting('source.max.epsize'))
 					self.sources = [i for i in self.sources if (i.get('size', 0) >= episode_minSize and i.get('size', 0) <= episode_maxSize)]
 				except: log_utils.error()
+			try: self.sources = self.calc_pack_size()
+			except: pass
 		for i in self.sources:
 			try:
 				if 'name_info' in i: info_string = getFileType(name_info=i.get('name_info'))
 				else: info_string = getFileType(url=i.get('url'))
 				i.update({'info': (i.get('info') + ' /' + info_string).lstrip(' ').lstrip('/').rstrip('/')})
 			except: log_utils.error()
-		if control.setting('remove.hevc') == 'true':
+		if getSetting('remove.hevc') == 'true':
 			self.sources = [i for i in self.sources if 'HEVC' not in i.get('info', '')]
-		if control.setting('remove.hdr') == 'true':
+		if getSetting('remove.hdr') == 'true':
 			self.sources = [i for i in self.sources if ' HDR ' not in i.get('info', '')] # needs space before and aft because of "HDRIP"
-		if control.setting('remove.dolby.vision') == 'true':
+		if getSetting('remove.dolby.vision') == 'true':
 			self.sources = [i for i in self.sources if  'DOLBY-VISION' not in i.get('info', '')]
-		if control.setting('remove.cam.sources') == 'true':
+		if getSetting('remove.cam.sources') == 'true':
 			self.sources = [i for i in self.sources if i['quality'] != 'CAM']
-		if control.setting('remove.sd.sources') == 'true':
+		if getSetting('remove.sd.sources') == 'true':
 			if any(i for i in self.sources if any(value in i['quality'] for value in ('4K', '1080p', '720p'))): #only remove SD if better quality does exist
 				self.sources = [i for i in self.sources if i['quality'] != 'SD']
-		if control.setting('remove.3D.sources') == 'true':
+		if getSetting('remove.3D.sources') == 'true':
 			self.sources = [i for i in self.sources if '3D' not in i.get('info', '')]
 
 		local = [i for i in self.sources if 'local' in i and i['local'] is True] # for library and videoscraper (skips cache check)
@@ -787,17 +805,17 @@ class Sources:
 			except:
 				log_utils.error()
 		for d in self.debrid_resolvers:
-			if d.name == 'Real-Debrid' and control.setting('realdebrid.enable') == 'true':
+			if d.name == 'Real-Debrid' and getSetting('realdebrid.enable') == 'true':
 				try:
 					valid_hoster = [i for i in valid_hosters if d.valid_url(i)]
 					threads.append(Thread(target=checkStatus, args=(self.rd_cache_chk_list, d.name, valid_hoster)))
 				except: log_utils.error()
-			if d.name == 'Premiumize.me' and control.setting('premiumize.enable') == 'true':
+			if d.name == 'Premiumize.me' and getSetting('premiumize.enable') == 'true':
 				try:
 					valid_hoster = [i for i in valid_hosters if d.valid_url(i)]
 					threads.append(Thread(target=checkStatus, args=(self.pm_cache_chk_list, d.name, valid_hoster)))
 				except: log_utils.error()
-			if d.name == 'AllDebrid' and control.setting('alldebrid.enable') == 'true':
+			if d.name == 'AllDebrid' and getSetting('alldebrid.enable') == 'true':
 				try:
 					valid_hoster = [i for i in valid_hosters if d.valid_url(i)]
 					threads.append(Thread(target=checkStatus, args=(self.ad_cache_chk_list, d.name, valid_hoster)))
@@ -819,24 +837,24 @@ class Sources:
 		self.filter += local # library and video scraper sources
 		self.sources = self.filter
 
-		if control.setting('sources.group.sort') == '1':
+		if getSetting('sources.group.sort') == '1':
 			torr_filter = []
 			torr_filter += [i for i in self.sources if 'torrent' in i['source']]  #torrents first
-			if control.setting('sources.size.sort') == 'true': torr_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
+			if getSetting('sources.size.sort') == 'true': torr_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
 			aact_filter = []
 			aact_filter += [i for i in self.sources if i['direct'] == True]  #account scrapers and local/library next
-			if control.setting('sources.size.sort') == 'true': aact_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
+			if getSetting('sources.size.sort') == 'true': aact_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
 			prem_filter = []
 			prem_filter += [i for i in self.sources if 'torrent' not in i['source'] and i['debridonly'] is True]  #prem.hosters last
-			if control.setting('sources.size.sort') == 'true': prem_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
+			if getSetting('sources.size.sort') == 'true': prem_filter.sort(key=lambda k: round(k.get('size', 0)), reverse=True)
 			self.sources = torr_filter
 			self.sources += aact_filter
 			self.sources += prem_filter
-		elif control.setting('sources.size.sort') == 'true':
-			reverse_sort = True if control.setting('sources.sizeSort.reverse') == 'false' else False
+		elif getSetting('sources.size.sort') == 'true':
+			reverse_sort = True if getSetting('sources.sizeSort.reverse') == 'false' else False
 			self.sources.sort(key=lambda k: round(k.get('size', 0), 2), reverse=reverse_sort)
 
-		if control.setting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
+		if getSetting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
 			filter = []
 			filter += [i for i in self.sources if any(value in i.get('info', '') for value in (' HDR ', 'DOLBY-VISION'))]
 			filter += [i for i in self.sources if i not in filter]
@@ -857,7 +875,7 @@ class Sources:
 		filter = []
 		append = filter.append
 		remove = filter.remove
-		log_dupes = control.setting('remove.duplicates.logging') == 'false'
+		log_dupes = getSetting('remove.duplicates.logging') == 'false'
 		for i in self.sources:
 			larger = False
 			a = i['url'].lower()
@@ -889,10 +907,10 @@ class Sources:
 		return filter
 
 	def sourcesAutoPlay(self, items):
-		if control.setting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ('4K', '1080p', '720p')]
+		if getSetting('autoplay.sd') == 'true': items = [i for i in items if not i['quality'] in ('4K', '1080p', '720p')]
 		header = homeWindow.getProperty(self.labelProperty) + ': Resolving...'
 		try:
-			progressDialog = control.progressDialog if control.setting('progress.dialog') == '0' else control.progressDialogBG
+			progressDialog = control.progressDialog if getSetting('progress.dialog') == '0' else control.progressDialogBG
 			progressDialog.create(header, '')
 		except: pass
 		for i in range(len(items)):
@@ -1056,7 +1074,7 @@ class Sources:
 
 	def alterSources(self, url, meta):
 		try:
-			if control.setting('play.mode') == '1' or (self.enable_playnext and 'episode' in meta): url += '&select=0'
+			if getSetting('play.mode') == '1' or (self.enable_playnext and 'episode' in meta): url += '&select=0'
 			else: url += '&select=1'
 			control.execute('PlayMedia(%s)' % url)
 		except:
@@ -1111,11 +1129,11 @@ class Sources:
 		self.debrid_resolvers = debrid.debrid_resolvers()
 
 		self.prem_providers = [] # for sorting by debrid and direct source links priority
-		if control.addon('script.module.fenomscrapers').getSetting('easynews.user'): self.prem_providers += [('easynews', int(control.setting('easynews.priority')))]
-		if control.addon('script.module.fenomscrapers').getSetting('filepursuit.api'): self.prem_providers += [('filepursuit', int(control.setting('filepursuit.priority')))]
-		if control.addon('script.module.fenomscrapers').getSetting('furk.user_name'): self.prem_providers += [('furk', int(control.setting('furk.priority')))]
-		if control.addon('script.module.fenomscrapers').getSetting('gdrive.cloudflare_url'): self.prem_providers += [('gdrive', int(control.setting('gdrive.priority')))]
-		if control.addon('script.module.fenomscrapers').getSetting('ororo.user'): self.prem_providers += [('ororo', int(control.setting('ororo.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('easynews.user'): self.prem_providers += [('easynews', int(getSetting('easynews.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('filepursuit.api'): self.prem_providers += [('filepursuit', int(getSetting('filepursuit.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('furk.user_name'): self.prem_providers += [('furk', int(getSetting('furk.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('gdrive.cloudflare_url'): self.prem_providers += [('gdrive', int(getSetting('gdrive.priority')))]
+		if control.addon('script.module.fenomscrapers').getSetting('ororo.user'): self.prem_providers += [('ororo', int(getSetting('ororo.priority')))]
 		self.prem_providers += [(d.name, int(d.sort_priority)) for d in self.debrid_resolvers]
 
 		def cache_prDict():
@@ -1138,8 +1156,8 @@ class Sources:
 			log_utils.error()
 		if not seasoncount or not counts: # check metacache, 2nd fallback
 			try:
-				imdb_user = control.setting('imdb.user').replace('ur', '')
-				tvdb_key = control.setting('tvdb.api.key')
+				imdb_user = getSetting('imdb.user').replace('ur', '')
+				tvdb_key = getSetting('tvdb.api.key')
 				user = str(imdb_user) + str(tvdb_key)
 				meta_lang = control.apiLanguage()['tvdb']
 				if meta:
@@ -1293,10 +1311,10 @@ class Sources:
 			year_ck = str(result['y'])
 			title_ck = self.getTitle(result['l'])
 			if not year_ck or not title_ck: return title, year
-			if control.setting('imdb.title.check') == 'true' and (title != title_ck):
+			if getSetting('imdb.title.check') == 'true' and (title != title_ck):
 				log_utils.log('IMDb title_ck: (%s) does not match meta title passed: (%s)' % (title_ck, title), __name__, level=log_utils.LOGDEBUG)
 				title = title_ck
-			if control.setting('imdb.year.check') == 'true' and (year != year_ck):
+			if getSetting('imdb.year.check') == 'true' and (year != year_ck):
 				log_utils.log('IMDb year_ck: (%s) does not match meta year passed: (%s) for title: (%s)' % (year_ck, year, title), __name__, level=log_utils.LOGDEBUG)
 				year = year_ck
 			return title, year
@@ -1313,8 +1331,8 @@ class Sources:
 		except: pass
 		if not total_seasons or season_isAiring is None: # check metacache, 2nd fallback
 			try:
-				imdb_user = control.setting('imdb.user').replace('ur', '')
-				tvdb_key = control.setting('tvdb.api.key')
+				imdb_user = getSetting('imdb.user').replace('ur', '')
+				tvdb_key = getSetting('tvdb.api.key')
 				user = str(imdb_user) + str(tvdb_key)
 				meta_lang = control.apiLanguage()['tvdb']
 				ids = [{'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb}]
@@ -1345,7 +1363,7 @@ class Sources:
 
 	def sort_byQuality(self, source_list):
 		filter = []
-		quality = control.setting('hosts.quality') or '0'
+		quality = getSetting('hosts.quality') or '0'
 		if quality == '0': filter += [i for i in source_list if i['quality'] == '4K']
 		if quality in ('0', '1'): filter += [i for i in source_list if i['quality'] == '1080p']
 		if quality in ('0', '1', '2'): filter += [i for i in source_list if i['quality'] == '720p']

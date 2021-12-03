@@ -39,9 +39,13 @@
 		<setting type="lsep" label="32005" />
 		<setting id="mylists.widget" type="bool" label="32329" default="true" />
 		<setting id="navi.anime" type="bool" label="40068" default="false" />
-		<setting id="navi.furk" type="bool" label="32129" default="true" />
 		<setting id="navi.youtube" type="bool" label="40061" default="true" />
 		<setting id="navi.prem.services" type="bool" label="40060" default="true" />
+		<setting id="navi.alldebrid" type="bool" label="32223" subsetting="true" default="true" visible="eq(-1,true)"/>
+		<setting id="navi.easynews" type="bool" label="32224" subsetting="true" default="true" visible="eq(-2,true)" />
+		<setting id="navi.furk" type="bool" label="32129" subsetting="true" default="true" visible="eq(-3,true)" />
+		<setting id="navi.premiumize" type="bool" label="32225" subsetting="true" default="true" visible="eq(-4,true)" />
+		<setting id="navi.realdebrid" type="bool" label="32226" subsetting="true" default="true" visible="eq(-5,true)" />
 		<setting id="navi.news" type="bool" label="32013" default="true" />
 		<setting id="navi.changelog" type="bool" label="32014" default="true" />
 		<setting type="lsep" label="32001" />
@@ -191,6 +195,8 @@
 		<!-- Sources Filtering Options -->
 		<setting type="lsep" label="32338" />
 		<setting id="hosts.quality" type="enum" label="32339" values="4K|1080p|720p|480p(SD)" default="0" />
+		<setting id="source.checkReboots" type="bool" label="32227" default="false" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=checkReboots)" />
 		<setting id="source.prioritize.hdrdv" type="bool" label="32195" default="false" />
 		<setting id="source.enable.msizelimit" type="bool" label="32165" default="false" />
 		<setting id="source.min.moviesize" type="slider" label="32155" subsetting="true" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />

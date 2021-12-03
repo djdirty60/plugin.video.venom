@@ -895,6 +895,46 @@ msgid "Rescrape Item with [COLOR %s][B]Custom Query and All Providers[/B][/COLOR
 msgstr "Ponowne skanowanie elementu za pomocą [COLOR %s][B]Niestandardowego zapytania i wszystkich dostawców[/B][/COLOR] - Wybór źródła"
 
 msgctxt "#32218"
+msgid "[B]Loyalty:[/B] %s"
+msgstr "[B]Lojalność:[/B] %s"
+
+msgctxt "#32219"
+msgid "[B]Data Used:[/B] %s"
+msgstr "[B]Wykorzystane dane:[/B] %s"
+
+msgctxt "#32220"
+msgid "[B]Data Remaining:[/B] %s"
+msgstr "[B]Pozostałe dane:[/B] %s"
+
+msgctxt "#32221"
+msgid "Error retrieving EasyNews Account Info"
+msgstr "Błąd podczas pobierania informacji o koncie EasyNews"
+
+msgctxt "#32222"
+msgid "Enter search Term"
+msgstr "Wpisz wyszukiwane hasło"
+
+msgctxt "#32223"
+msgid "Enable AllDebrid Menu"
+msgstr "Włącz menu AllDebrid"
+
+msgctxt "#32224"
+msgid "Enable EasyNews Menu"
+msgstr "Włącz menu EasyNews"
+
+msgctxt "#32225"
+msgid "Enable Premiumize.me Menu"
+msgstr "Włącz menu Premiumize.me"
+
+msgctxt "#32226"
+msgid "Enable Real-Debrid Menu"
+msgstr "Włącz menu Real-Debrid"
+
+msgctxt "#32227"
+msgid "Require Year in source for known Reboot shows"
+msgstr "Wymagaj roku w źródle dla znanych programów Reboot"
+
+msgctxt "#32228"
 msgid ""
 msgstr ""
 
@@ -1010,8 +1050,8 @@ msgid "Episodes"
 msgstr "Odcinki"
 
 msgctxt "#32327"
-msgid ""
-msgstr ""
+msgid "Easy News"
+msgstr "Easy News"
 
 msgctxt "#32328"
 msgid "Playback Canceled"
@@ -1658,40 +1698,40 @@ msgid "Optional"
 msgstr "Opcjonalny"
 
 msgctxt "#32489"
-msgid ""
-msgstr ""
+msgid "[B]Account:[/B] %s"
+msgstr "[B]Konto:[/B] %s"
 
 msgctxt "#32490"
-msgid ""
-msgstr ""
+msgid "[B]Monthly Limit:[/B] %s GB"
+msgstr "[B]Miesięczny limit:[/B] %s GB"
 
 msgctxt "#32491"
-msgid ""
-msgstr ""
+msgid "[B]Current Month:[/B]"
+msgstr "[B]Obecny miesiąc:[/B]"
 
 msgctxt "#32492"
-msgid ""
-msgstr ""
+msgid "[B]Days Remaining:[/B] %s"
+msgstr "[B]Pozostało Dni:[/B] %s"
 
 msgctxt "#32493"
-msgid ""
-msgstr ""
+msgid "[B]Data Used:[/B] %s"
+msgstr "[B]Wykorzystane dane:[/B] %s"
 
 msgctxt "#32494"
-msgid ""
-msgstr ""
+msgid "[B]Data Remaining:[/B] %s"
+msgstr "[B]Pozostałe dane:[/B] %s"
 
 msgctxt "#32495"
-msgid ""
-msgstr ""
+msgid "[B]Current Subscription:[/B]"
+msgstr "[B]Aktualna subskrypcja:[/B]"
 
 msgctxt "#32496"
-msgid ""
-msgstr ""
+msgid "[B]Resets On:[/B] %s"
+msgstr "[B]Resetuje się:[/B] %s"
 
 msgctxt "#32497"
-msgid ""
-msgstr ""
+msgid "[B]Renewal Needed On:[/B] %s"
+msgstr "[B]Wymagane odnowienie dnia:[/B] %s"
 
 msgctxt "#32498"
 msgid ""
@@ -4153,8 +4193,8 @@ msgid "PlayNext default action"
 msgstr "Domyślna akcja PlayNext"
 
 msgctxt "#40066"
-msgid ""
-msgstr ""
+msgid "[B]Plan:[/B] %s"
+msgstr "[B]Plan:[/B] %s"
 
 msgctxt "#40067"
 msgid "Clear Providers Cache After Changing Scraper Provider"

@@ -426,8 +426,7 @@ class Premiumize:
 								(sysaddon, type, item['id'], quote_plus(name))))
 				cm.append((deleteMenu % type.capitalize(), 'RunPlugin(%s?action=pm_Delete&type=%s&id=%s&name=%s)' %
 								(sysaddon, type, item['id'], quote_plus(name))))
-
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': pm_icon, 'poster': pm_icon, 'thumb': pm_icon, 'fanart': addonFanart, 'banner': pm_icon})
 				item.setInfo(type='video', infoLabels='')
@@ -496,7 +495,7 @@ class Premiumize:
 
 				cm.append((deleteMenu % 'Transfer', 'RunPlugin(%s?action=pm_DeleteTransfer&id=%s&name=%s)' %
 							(sysaddon, item['id'], quote_plus(name))))
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': pm_icon, 'poster': pm_icon, 'thumb': pm_icon, 'fanart': addonFanart, 'banner': pm_icon})
 				item.setInfo(type='video', infoLabels='')

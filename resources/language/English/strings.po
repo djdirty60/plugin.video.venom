@@ -895,6 +895,46 @@ msgid "Rescrape Item with [COLOR %s][B]Custom Query and All Providers[/B][/COLOR
 msgstr ""
 
 msgctxt "#32218"
+msgid "[B]Loyalty:[/B] %s"
+msgstr ""
+
+msgctxt "#32219"
+msgid "[B]Data Used:[/B] %s"
+msgstr ""
+
+msgctxt "#32220"
+msgid "[B]Data Remaining:[/B] %s"
+msgstr ""
+
+msgctxt "#32221"
+msgid "Error retrieving EasyNews Account Info"
+msgstr ""
+
+msgctxt "#32222"
+msgid "Enter search Term"
+msgstr ""
+
+msgctxt "#32223"
+msgid "Enable AllDebrid Menu"
+msgstr ""
+
+msgctxt "#32224"
+msgid "Enable EasyNews Menu"
+msgstr ""
+
+msgctxt "#32225"
+msgid "Enable Premiumize.me Menu"
+msgstr ""
+
+msgctxt "#32226"
+msgid "Enable Real-Debrid Menu"
+msgstr ""
+
+msgctxt "#32227"
+msgid "Require Year in source for known Reboot shows"
+msgstr ""
+
+msgctxt "#32228"
 msgid ""
 msgstr ""
 
@@ -1010,7 +1050,7 @@ msgid "Episodes"
 msgstr ""
 
 msgctxt "#32327"
-msgid ""
+msgid "Easy News"
 msgstr ""
 
 msgctxt "#32328"
@@ -1658,39 +1698,39 @@ msgid "Optional"
 msgstr ""
 
 msgctxt "#32489"
-msgid ""
+msgid "[B]Account:[/B] %s"
 msgstr ""
 
 msgctxt "#32490"
-msgid ""
+msgid "[B]Monthly Limit:[/B] %s GB"
 msgstr ""
 
 msgctxt "#32491"
-msgid ""
+msgid "[B]Current Month:[/B]"
 msgstr ""
 
 msgctxt "#32492"
-msgid ""
+msgid "[B]Days Remaining:[/B] %s"
 msgstr ""
 
 msgctxt "#32493"
-msgid ""
+msgid "[B]Data Used:[/B] %s"
 msgstr ""
 
 msgctxt "#32494"
-msgid ""
+msgid "[B]Data Remaining:[/B] %s"
 msgstr ""
 
 msgctxt "#32495"
-msgid ""
+msgid "[B]Current Subscription:[/B]"
 msgstr ""
 
 msgctxt "#32496"
-msgid ""
+msgid "[B]Resets On:[/B] %s"
 msgstr ""
 
 msgctxt "#32497"
-msgid ""
+msgid "[B]Renewal Needed On:[/B] %s"
 msgstr ""
 
 msgctxt "#32498"
@@ -4153,7 +4193,7 @@ msgid "PlayNext default action"
 msgstr ""
 
 msgctxt "#40066"
-msgid ""
+msgid "[B]Plan:[/B] %s"
 msgstr ""
 
 msgctxt "#40067"

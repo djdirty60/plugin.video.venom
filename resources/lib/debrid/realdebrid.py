@@ -195,7 +195,7 @@ class RealDebrid:
 					url = '%s?action=rd_BrowseUserTorrents&id=%s' % (sysaddon, item['id']) if isFolder else None
 					cm.append((deleteMenu % 'Torrent', 'RunPlugin(%s?action=rd_DeleteUserTorrent&id=%s&name=%s)' %
 							(sysaddon, item['id'], quote_plus(folder_name))))
-					item = control.item(label=label)
+					item = control.item(label=label, offscreen=True)
 					item.addContextMenuItems(cm)
 					item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
 					item.setInfo(type='video', infoLabels='')
@@ -241,7 +241,7 @@ class RealDebrid:
 							(sysaddon, quote_plus(name), quote_plus(rd_icon), url_link)))
 				cm.append((deleteMenu % 'Torrent', 'RunPlugin(%s?action=rd_DeleteUserTorrent&id=%s&name=%s)' %
 							(sysaddon, item['id'], quote_plus(name))))
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
 				item.setInfo(type='video', infoLabels='')
@@ -303,7 +303,7 @@ class RealDebrid:
 								(sysaddon, quote_plus(name), quote_plus(rd_icon), url_link)))
 				cm.append((deleteMenu % 'File', 'RunPlugin(%s?action=rd_DeleteDownload&id=%s&name=%s)' %
 								(sysaddon, item['id'], name)))
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
 				item.setInfo(type='video', infoLabels='')
@@ -320,7 +320,7 @@ class RealDebrid:
 				url = '%s?action=rd_MyDownloads&query=%s' % (sysaddon, page)
 				page = '  [I](%s)[/I]' % page
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
-				item = control.item(label=nextMenu)
+				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
 				item.setArt({'icon': rd_icon, 'poster': rd_icon, 'thumb': rd_icon, 'fanart': addonFanart, 'banner': rd_icon})
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)

@@ -895,6 +895,46 @@ msgid "Rescrape Item with [COLOR %s][B]Custom Query and All Providers[/B][/COLOR
 msgstr "Item opnieuw schrapen met [COLOR %s][B]Aangepaste zoekopdracht en alle providers[/B][/COLOR] - Bron selecteren"
 
 msgctxt "#32218"
+msgid "[B]Loyalty:[/B] %s"
+msgstr "[B]Loyaliteit:[/B] %s"
+
+msgctxt "#32219"
+msgid "[B]Data Used:[/B] %s"
+msgstr "[B]Gebruikte gegevens:[/B] %s"
+
+msgctxt "#32220"
+msgid "[B]Data Remaining:[/B] %s"
+msgstr "[B]Resterende gegevens:[/B] %s"
+
+msgctxt "#32221"
+msgid "Error retrieving EasyNews Account Info"
+msgstr "Fout bij ophalen van EasyNews-accountgegevens"
+
+msgctxt "#32222"
+msgid "Enter search Term"
+msgstr "Voer zoekterm in"
+
+msgctxt "#32223"
+msgid "Enable AllDebrid Menu"
+msgstr "AllDebrid-menu inschakelen"
+
+msgctxt "#32224"
+msgid "Enable EasyNews Menu"
+msgstr "EasyNews-menu inschakelen"
+
+msgctxt "#32225"
+msgid "Enable Premiumize.me Menu"
+msgstr "Premiumize.me-menu inschakelen"
+
+msgctxt "#32226"
+msgid "Enable Real-Debrid Menu"
+msgstr "Real-Debrid-menu inschakelen"
+
+msgctxt "#32227"
+msgid "Require Year in source for known Reboot shows"
+msgstr "Jaar in bron vereisen voor bekende reboot-shows"
+
+msgctxt "#32228"
 msgid ""
 msgstr ""
 
@@ -1010,7 +1050,7 @@ msgid "Episodes"
 msgstr "Afleveringen"
 
 msgctxt "#32327"
-msgid ""
+msgid "Easy News"
 msgstr ""
 
 msgctxt "#32328"
@@ -1658,40 +1698,40 @@ msgid "Optional"
 msgstr "Optioneel"
 
 msgctxt "#32489"
-msgid ""
-msgstr ""
+msgid "[B]Account:[/B] %s"
+msgstr "[B]Rekening:[/B] %s"
 
 msgctxt "#32490"
-msgid ""
-msgstr ""
+msgid "[B]Monthly Limit:[/B] %s GB"
+msgstr "[B]Maandelijkse limiet:[/B] %s GB"
 
 msgctxt "#32491"
-msgid ""
-msgstr ""
+msgid "[B]Current Month:[/B]"
+msgstr "[B]Deze maand:[/B]"
 
 msgctxt "#32492"
-msgid ""
-msgstr ""
+msgid "[B]Days Remaining:[/B] %s"
+msgstr "[B]Resterende dagen:[/B] %s"
 
 msgctxt "#32493"
-msgid ""
-msgstr ""
+msgid "[B]Data Used:[/B] %s"
+msgstr "[B]Gebruikte gegevens:[/B] %s"
 
 msgctxt "#32494"
-msgid ""
-msgstr ""
+msgid "[B]Data Remaining:[/B] %s"
+msgstr "[B]Resterende gegevens:[/B] %s"
 
 msgctxt "#32495"
-msgid ""
-msgstr ""
+msgid "[B]Current Subscription:[/B]"
+msgstr "[B]Huidig abonnement:[/B]"
 
 msgctxt "#32496"
-msgid ""
-msgstr ""
+msgid "[B]Resets On:[/B] %s"
+msgstr "[B]Reset Aan:[/B] %s"
 
 msgctxt "#32497"
-msgid ""
-msgstr ""
+msgid "[B]Renewal Needed On:[/B] %s"
+msgstr "[B]Verlenging nodig op:[/B] %s"
 
 msgctxt "#32498"
 msgid ""
@@ -4153,7 +4193,7 @@ msgid "PlayNext default action"
 msgstr "Standaard actie PlayNext"
 
 msgctxt "#40066"
-msgid ""
+msgid "[B]Plan:[/B] %s"
 msgstr ""
 
 msgctxt "#40067"

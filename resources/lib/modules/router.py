@@ -144,26 +144,6 @@ def router(params):
 			collections.Collections().get(url)
 
 	####################################################
-	#---Furk
-	####################################################
-	elif action and action.startswith('furk'):
-		if action == "furkNavigator":
-			from resources.lib.menus import navigator
-			navigator.Navigator().furk()
-		elif action == "furkUserFiles":
-			from resources.lib.menus import furk
-			furk.Furk().user_files()
-		elif action == "furkMetaSearch":
-			from resources.lib.menus import furk
-			furk.Furk().furk_meta_search(url)
-		elif action == "furkSearch":
-			from resources.lib.menus import furk
-			furk.Furk().search()
-		elif action == "furkSearchNew":
-			from resources.lib.menus import furk
-			furk.Furk().search_new()
-
-	####################################################
 	# TV Shows
 	####################################################
 	# if action and action.startswith('tv_'):
@@ -327,6 +307,75 @@ def router(params):
 		from resources.lib.menus import navigator
 		navigator.Navigator().premium_services()
 
+	elif action and action.startswith('ad_'):
+		if action == 'ad_ServiceNavigator':
+			from resources.lib.menus import navigator
+			navigator.Navigator().alldebrid_service()
+		elif action == 'ad_AccountInfo':
+			from resources.lib.debrid import alldebrid
+			alldebrid.AllDebrid().account_info_to_dialog()
+		# elif action == 'ad_Authorize':
+			# from resources.lib.debrid import alldebrid
+			# alldebrid.AllDebrid().auth()
+		elif action == 'ad_Transfers':
+			from resources.lib.debrid import alldebrid
+			alldebrid.AllDebrid().user_transfers_to_listItem()
+		elif action == 'ad_CloudStorage':
+			from resources.lib.debrid import alldebrid
+			alldebrid.AllDebrid().user_cloud_to_listItem()
+		elif action == 'ad_BrowseUserCloud':
+			from resources.lib.debrid import alldebrid
+			alldebrid.AllDebrid().browse_user_cloud(source)
+		elif action == 'ad_DeleteTransfer':
+			from resources.lib.debrid import alldebrid
+			alldebrid.AllDebrid().delete_transfer(id, name, silent=False)
+		elif action == 'ad_RestartTransfer':
+			from resources.lib.debrid import alldebrid
+			alldebrid.AllDebrid().restart_transfer(id, name, silent=False)
+
+	elif action and action.startswith('en_'):
+		if action == 'en_ServiceNavigator':
+			from resources.lib.menus import navigator
+			navigator.Navigator().easynews_service()
+		elif action == 'en_Search':
+			from resources.lib.debrid import easynews
+			easynews.EasyNews().search()
+		elif action == 'en_Searchnew':
+			from resources.lib.debrid import easynews
+			easynews.EasyNews().search_new()
+		elif action == 'en_searchResults':
+			from resources.lib.debrid import easynews
+			easynews.EasyNews().query_results_to_dialog(query)
+		elif action == 'en_resolve_forPlayback':
+			from resources.lib.debrid import easynews
+			easynews.EasyNews().resolve_forPlayback(url)
+		elif action == 'en_AccountInfo':
+			from resources.lib.debrid import easynews
+			easynews.EasyNews().account_info_to_dialog()
+
+	elif action and action.startswith('furk_'):
+		if action == "furk_ServiceNavigator":
+			from resources.lib.menus import navigator
+			navigator.Navigator().furk_service()
+		elif action == "furk_Search":
+			from resources.lib.debrid import furk
+			furk.Furk().search()
+		elif action == "furk_SearchNew":
+			from resources.lib.debrid import furk
+			furk.Furk().search_new()
+		elif action == "furk_searchResults":
+			from resources.lib.debrid import furk
+			furk.Furk().query_results_to_dialog(query)
+		elif action == 'furk_resolve_forPlayback':
+			from resources.lib.debrid import furk
+			furk.Furk().resolve_forPlayback(url)
+		elif action == 'furk_AccountInfo':
+			from resources.lib.debrid import furk
+			furk.Furk().account_info_to_dialog()
+		elif action == "furk_UserFiles":
+			from resources.lib.debrid import furk
+			furk.Furk().user_files()
+
 	elif action and action.startswith('pm_'):
 		if action == 'pm_ServiceNavigator':
 			from resources.lib.menus import navigator
@@ -382,32 +431,6 @@ def router(params):
 			from resources.lib.debrid import realdebrid
 			realdebrid.RealDebrid().delete_download(id, name)
 
-	elif action and action.startswith('ad_'):
-		if action == 'ad_ServiceNavigator':
-			from resources.lib.menus import navigator
-			navigator.Navigator().alldebrid_service()
-		elif action == 'ad_AccountInfo':
-			from resources.lib.debrid import alldebrid
-			alldebrid.AllDebrid().account_info_to_dialog()
-		# elif action == 'ad_Authorize':
-			# from resources.lib.debrid import alldebrid
-			# alldebrid.AllDebrid().auth()
-		elif action == 'ad_Transfers':
-			from resources.lib.debrid import alldebrid
-			alldebrid.AllDebrid().user_transfers_to_listItem()
-		elif action == 'ad_CloudStorage':
-			from resources.lib.debrid import alldebrid
-			alldebrid.AllDebrid().user_cloud_to_listItem()
-		elif action == 'ad_BrowseUserCloud':
-			from resources.lib.debrid import alldebrid
-			alldebrid.AllDebrid().browse_user_cloud(source)
-		elif action == 'ad_DeleteTransfer':
-			from resources.lib.debrid import alldebrid
-			alldebrid.AllDebrid().delete_transfer(id, name, silent=False)
-		elif action == 'ad_RestartTransfer':
-			from resources.lib.debrid import alldebrid
-			alldebrid.AllDebrid().restart_transfer(id, name, silent=False)
-
 	####################################################
 	#---Anime
 	####################################################
@@ -453,6 +476,23 @@ def router(params):
 				except:
 					import traceback
 					traceback.print_exc()
+			if caller == 'alldebrid':
+				control.busy()
+				try:
+					from resources.lib.modules import downloader
+					from resources.lib.debrid import alldebrid
+					downloader.download(name, image, alldebrid.AllDebrid().unrestrict_link(url.replace(' ', '%20')))
+				except:
+					import traceback
+					traceback.print_exc()
+			if caller == 'easynews':
+				control.busy()
+				try:
+					from resources.lib.modules import downloader
+					downloader.download(name, image, url)
+				except:
+					import traceback
+					traceback.print_exc()
 			if caller == 'premiumize':
 				control.busy()
 				try:
@@ -474,15 +514,7 @@ def router(params):
 				except:
 					import traceback
 					traceback.print_exc()
-			if caller == 'alldebrid':
-				control.busy()
-				try:
-					from resources.lib.modules import downloader
-					from resources.lib.debrid import alldebrid
-					downloader.download(name, image, alldebrid.AllDebrid().unrestrict_link(url.replace(' ', '%20')))
-				except:
-					import traceback
-					traceback.print_exc()
+
 
 	####################################################
 	#---Tools

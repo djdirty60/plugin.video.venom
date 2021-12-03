@@ -285,7 +285,7 @@ class AllDebrid:
 				cm.append((deleteMenu % 'Transfer', 'RunPlugin(%s?action=ad_DeleteTransfer&id=%s&name=%s)' % (sysaddon, id, folder_name)))
 				if status_code in (6, 7, 9, 10):
 					cm.append((restartMenu, 'RunPlugin(%s?action=ad_RestartTransfer&id=%s&name=%s)' % (sysaddon, id, folder_name)))
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': ad_icon, 'poster': ad_icon, 'thumb': ad_icon, 'fanart': addonFanart, 'banner': ad_icon})
 				item.setInfo(type='video', infoLabels='')
@@ -311,7 +311,7 @@ class AllDebrid:
 				url = '%s?action=ad_BrowseUserCloud&source=%s' % (sysaddon, quote_plus(jsdumps(item)))
 				cm.append((deleteMenu % 'Transfer', 'RunPlugin(%s?action=ad_DeleteTransfer&id=%s&name=%s)' %
 					(sysaddon, id, folder_name)))
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': ad_icon, 'poster': ad_icon, 'thumb': ad_icon, 'fanart': addonFanart, 'banner': ad_icon})
 				item.setInfo(type='video', infoLabels='')
@@ -355,7 +355,7 @@ class AllDebrid:
 				else: url = ''
 				cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=alldebrid)' %
 								(sysaddon, quote_plus(name), quote_plus(ad_icon), url_link)))
-				item = control.item(label=label)
+				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': ad_icon, 'poster': ad_icon, 'thumb': ad_icon, 'fanart': addonFanart, 'banner': ad_icon})
 				item.setInfo(type='video', infoLabels='')
