@@ -9,7 +9,7 @@ import re
 import _strptime # import _strptime to workaround python 2 bug with threads
 from sys import exit as sysexit
 from threading import Thread
-from time import time, sleep
+from time import time
 from urllib.parse import unquote
 try: from sqlite3 import dbapi2 as database
 except ImportError: from pysqlite2 import dbapi2 as database
@@ -22,12 +22,14 @@ from resources.lib.modules.source_utils import supported_video_extensions, getFi
 from resources.lib.cloud_scrapers import cloudSources
 from fenomscrapers import sources as fs_sources
 
-
 homeWindow = control.homeWindow
-
 getLS = control.lang
 getSetting = control.setting
-
+sourceFile = control.providercacheFile
+single_expiry = timedelta(hours=6)
+season_expiry = timedelta(hours=48)
+show_expiry = timedelta(hours=48)
+video_extensions = supported_video_extensions()
 
 class Sources:
 	def __init__(self, all_providers=False, custom_query=False):
@@ -38,11 +40,7 @@ class Sources:
 		self.all_providers = all_providers
 		self.custom_query = custom_query
 		self.time = datetime.now()
-		self.single_expiry = timedelta(hours=6)
-		self.season_expiry = timedelta(hours=48)
-		self.show_expiry = timedelta(hours=48)
 		self.getConstants()
-		self.sourceFile = control.providercacheFile
 		self.enable_playnext = getSetting('enable.playnext') == 'true'
 		self.dev_mode = getSetting('dev.mode.enable') == 'true'
 		self.dev_disable_single = getSetting('dev.disable.single') == 'true'
@@ -51,7 +49,6 @@ class Sources:
 		self.dev_disable_season_filter = getSetting('dev.disable.season.filter') == 'true'
 		self.dev_disable_show_packs = getSetting('dev.disable.show.packs') == 'true'
 		self.dev_disable_show_filter = getSetting('dev.disable.show.filter') == 'true'
-		self.extensions = supported_video_extensions()
 		self.highlight_color = control.getHighlightColor()
 
 	def play(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape=None):
@@ -299,10 +296,10 @@ class Sources:
 								return
 						except: pass
 						if not w.is_alive(): break
-						sleep(0.5)
+						control.sleep(200)
 
 					if not self.url: continue
-					if not any(x in self.url.lower() for x in self.extensions):
+					if not any(x in self.url.lower() for x in video_extensions):
 						log_utils.log('Playback not supported for (playItem()): %s' % self.url, level=log_utils.LOGWARNING)
 						continue
 					log_utils.log('Playing url from playItem(): %s' % self.url, level=log_utils.LOGDEBUG)
@@ -591,7 +588,7 @@ class Sources:
 					if not url:
 						log_utils.log('preResolve failed for : next_sources[i]=%s' % str(next_sources[i]), level=log_utils.LOGWARNING)
 						continue
-					if not any(x in url.lower() for x in self.extensions):
+					if not any(x in url.lower() for x in video_extensions):
 						log_utils.log('preResolve Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
 						continue
 					if url:
@@ -606,7 +603,7 @@ class Sources:
 	def prepareSources(self):
 		try:
 			control.makeFile(control.dataPath)
-			dbcon = database.connect(self.sourceFile)
+			dbcon = database.connect(sourceFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS rel_src (source TEXT, imdb_id TEXT, season TEXT, episode TEXT, hosts TEXT, added TEXT, UNIQUE(source, imdb_id, season, episode));''')
 			dbcur.connection.commit()
@@ -617,7 +614,7 @@ class Sources:
 
 	def getMovieSource(self, imdb, data, source, call):
 		try:
-			dbcon = database.connect(self.sourceFile, timeout=60)
+			dbcon = database.connect(sourceFile, timeout=60)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''PRAGMA synchronous = OFF''')
 			dbcur.execute('''PRAGMA journal_mode = OFF''')
@@ -633,7 +630,7 @@ class Sources:
 			db_movie = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season='' AND episode='')''', (source, imdb)).fetchone()
 			if db_movie:
 				timestamp = control.datetime_workaround(str(db_movie[5]), '%Y-%m-%d %H:%M:%S.%f', False)
-				db_movie_valid = abs(self.time - timestamp) < self.single_expiry
+				db_movie_valid = abs(self.time - timestamp) < single_expiry
 				if db_movie_valid:
 					sources = eval(db_movie[4])
 					return self.scraper_sources.extend(sources)
@@ -651,7 +648,7 @@ class Sources:
 
 	def getEpisodeSource(self, imdb, season, episode, data, source, call, pack):
 		try:
-			dbcon = database.connect(self.sourceFile, timeout=60)
+			dbcon = database.connect(sourceFile, timeout=60)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''PRAGMA synchronous = OFF''')
 			dbcur.execute('''PRAGMA journal_mode = OFF''')
@@ -669,7 +666,7 @@ class Sources:
 				db_singleEpisodes = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season=? AND episode=?)''', (source, imdb, season, episode)).fetchone()
 				if db_singleEpisodes:
 					timestamp = control.datetime_workaround(str(db_singleEpisodes[5]), '%Y-%m-%d %H:%M:%S.%f', False)
-					db_singleEpisodes_valid = abs(self.time - timestamp) < self.single_expiry
+					db_singleEpisodes_valid = abs(self.time - timestamp) < single_expiry
 					if db_singleEpisodes_valid:
 						sources = eval(db_singleEpisodes[4])
 						return self.scraper_sources.extend(sources)
@@ -680,7 +677,7 @@ class Sources:
 				db_seasonPacks = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season=? AND episode='')''', (source, imdb, season)).fetchone()
 				if db_seasonPacks:
 					timestamp = control.datetime_workaround(str(db_seasonPacks[5]), '%Y-%m-%d %H:%M:%S.%f', False)
-					db_seasonPacks_valid = abs(self.time - timestamp) < self.season_expiry
+					db_seasonPacks_valid = abs(self.time - timestamp) < season_expiry
 					if db_seasonPacks_valid:
 						sources = eval(db_seasonPacks[4])
 						return self.scraper_sources.extend(sources)
@@ -691,7 +688,7 @@ class Sources:
 				db_showPacks = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season='' AND episode='')''', (source, imdb)).fetchone()
 				if db_showPacks:
 					timestamp = control.datetime_workaround(str(db_showPacks[5]), '%Y-%m-%d %H:%M:%S.%f', False)
-					db_showPacks_valid = abs(self.time - timestamp) < self.show_expiry
+					db_showPacks_valid = abs(self.time - timestamp) < show_expiry
 					if db_showPacks_valid:
 						sources = eval(db_showPacks[4])
 						sources = [i for i in sources if i.get('last_season') >= int(season)] #  filter out range items that do not apply to current season for return
@@ -776,7 +773,7 @@ class Sources:
 		if getSetting('remove.hdr') == 'true':
 			self.sources = [i for i in self.sources if ' HDR ' not in i.get('info', '')] # needs space before and aft because of "HDRIP"
 		if getSetting('remove.dolby.vision') == 'true':
-			self.sources = [i for i in self.sources if  'DOLBY-VISION' not in i.get('info', '')]
+			self.sources = [i for i in self.sources if ('DOLBY-VISION' not in i.get('info', '')) or ('DOLBY-VISION' in i.get('info', '') and ' HDR ' in i.get('info', ''))]
 		if getSetting('remove.cam.sources') == 'true':
 			self.sources = [i for i in self.sources if i['quality'] != 'CAM']
 		if getSetting('remove.sd.sources') == 'true':
@@ -925,7 +922,7 @@ class Sources:
 				try:
 					if control.monitor.abortRequested(): return sysexit()
 					url = self.sourcesResolve(items[i])
-					if not any(x in url.lower() for x in self.extensions):
+					if not any(x in url.lower() for x in video_extensions):
 						log_utils.log('Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
 						continue
 					if url:
@@ -1269,7 +1266,10 @@ class Sources:
 			return hex
 		try:
 			from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
-			hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
+			if getSetting('realdebrid.disableShowpacks') == 'true': # deals with RD show pack cache check bug
+				hashList = [i['hash'] for i in torrent_List if ('package' not in i) or ('package' in i and i['package'] != 'show')]
+				hashList = [i if len(i) == 40 else base32_to_hex(i) for i in hashList] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
+			else: hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List]
 			cached = debrid_function().check_cache_list(hashList)
 			if not cached: return None
 			for i in torrent_List:
@@ -1290,7 +1290,7 @@ class Sources:
 	def clr_item_providers(self, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered):
 		providerscache.remove(self.getSources, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered) # function cache removal of selected item ONLY
 		try:
-			dbcon = database.connect(self.sourceFile)
+			dbcon = database.connect(sourceFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='rel_src';''') # table exists so both will
 			if dbcur.fetchone()[0] == 1:

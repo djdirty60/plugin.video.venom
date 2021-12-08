@@ -13,11 +13,10 @@ from fenomscrapers.modules import source_utils as fs_utils
 
 
 class source:
-	priority = 0 # force cloud scraper to run first
+	priority = 0
 	pack_capable = False # to avoid being added to pack scrape threads
 	hasMovies = True
 	hasEpisodes = True
-
 	def __init__(self):
 		self.language = ['en']
 

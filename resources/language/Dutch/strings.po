@@ -935,6 +935,10 @@ msgid "Require Year in source for known Reboot shows"
 msgstr "Jaar in bron vereisen voor bekende reboot-shows"
 
 msgctxt "#32228"
+msgid "Remove show packs due to RD cache checking bug"
+msgstr "Showpacks verwijderen vanwege RD-cachecontrolefout"
+
+msgctxt "#32229"
 msgid ""
 msgstr ""
 
@@ -2138,8 +2142,8 @@ msgid ""
 msgstr ""
 
 msgctxt "#32603"
-msgid "New search..."
-msgstr "Nieuwe zoekopdracht..."
+msgid "[COLOR %s][I]New search...[/I][/COLOR]"
+msgstr "[COLOR %s][I]Nieuwe zoekopdracht...[/I][/COLOR]"
 
 msgctxt "#32604"
 msgid "[B]VENOM[/B] : Clear search history..."

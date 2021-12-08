@@ -324,7 +324,7 @@ class TVshows:
 
 	def search(self):
 		from resources.lib.menus import navigator
-		navigator.Navigator().addDirectoryItem(32603, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png', isFolder=False)
+		navigator.Navigator().addDirectoryItem(getLS(32603) % self.highlight_color, 'tvSearchnew', 'search.png', 'DefaultAddonsSearch.png', isFolder=False)
 		try: from sqlite3 import dbapi2 as database
 		except ImportError: from pysqlite2 import dbapi2 as database
 		try:

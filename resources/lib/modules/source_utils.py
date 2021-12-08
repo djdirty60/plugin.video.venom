@@ -12,6 +12,7 @@ DOLBY_VISION = ('dolby.vision', 'dolbyvision', '.dovi.', '.dv.')
 HDR = ('2160p.uhd.bluray', '2160p.uhd.blu.ray', '2160p.bluray.hevc.truehd', '2160p.blu.ray.hevc.truehd',
 			'2160p.bluray.hevc.dts.hd.ma', '2160p.blu.ray.hevc.dts.hd.ma', '.hdr.', 'hdr10', 'hdr.10',
 			'uhd.bluray.2160p', 'uhd.blu.ray.2160p')
+HDR_true = ('.hdr.', 'hdr10', 'hdr.10')
 
 CODEC_H264 = ('avc', 'h264', 'h.264', 'x264', 'x.264')
 CODEC_H265 = ('h265', 'h.265', 'hevc', 'x265', 'x.265')
@@ -24,8 +25,9 @@ REMUX = ('remux', 'bdremux')
 BLURAY = ('bluray', 'blu.ray', 'bdrip', 'bd.rip')
 DVD = ('dvdrip', 'dvd.rip')
 WEB = ('.web.', 'webdl', 'web.dl', 'webrip', 'web.rip')
-SCR = ('scr.', 'screener')
 HDRIP = ('.hdrip', '.hd.rip')
+SCR = ('scr.', 'screener')
+HC = ('.hc', 'korsub', 'kor.sub')
 
 DOLBY_TRUEHD = ('true.hd', 'truehd')
 DOLBY_DIGITALPLUS = ('dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3', '.e.ac3')
@@ -149,6 +151,8 @@ def getFileType(name_info=None, url=None):
 		elif any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
 		elif any(value in fmt for value in HDR): type += ' HDR /'
 		elif all(i in fmt for i in ('2160p', 'remux')): type += ' HDR /'
+		if ' DOLBY-VISION ' in type:
+			if any(value in fmt for value in HDR_true): type += ' HDR /' # starting to see some hybrid DV and HDR sources
 
 		if any(value in fmt for value in CODEC_H264): type += ' AVC /'
 		elif any(value in fmt for value in CODEC_H265): type += ' HEVC /'
@@ -190,7 +194,7 @@ def getFileType(name_info=None, url=None):
 		elif any(value in fmt for value in AUDIO_6CH): type += ' 6CH /'
 		elif any(value in fmt for value in AUDIO_2CH): type += ' 2CH /'
 
-		if any(value in fmt for value in ('.hc', 'korsub', 'kor.sub')): type += ' HC /'
+		if any(value in fmt for value in HC): type += ' HC /'
 		if any(value in fmt for value in MULTI_LANG): type += ' MULTI-LANG /'
 		if any(value in fmt for value in ADS): type += ' ADS /'
 		if any(value in fmt for value in SUBS):

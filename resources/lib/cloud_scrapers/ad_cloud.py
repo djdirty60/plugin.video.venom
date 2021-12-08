@@ -11,13 +11,13 @@ from resources.lib.modules.control import setting as getSetting
 from resources.lib.modules.source_utils import supported_video_extensions
 from fenomscrapers.modules import source_utils as fs_utils
 
+invalid_extensions = ('.bmp', '.gif', '.jpg', '.nfo', '.part', '.png', '.rar', '.sample.', '.srt', '.txt', '.zip')
 
 class source:
-	priority = 0 # force cloud scraper to run first
+	priority = 0
 	pack_capable = False # to avoid being added to pack scrape threads
 	hasMovies = True
 	hasEpisodes = True
-
 	def __init__(self):
 		self.language = ['en']
 
@@ -63,8 +63,7 @@ class source:
 			for file in files:
 				try:
 					name = file.get('filename', '')
-					invalids = ('.rar', '.zip', '.iso', '.part', '.png', '.jpg', '.bmp', '.gif', '.txt', '.srt', '.nfo')
-					if name.lower().endswith(invalids): continue
+					if name.lower().endswith(invalid_extensions): continue
 					path = folder.get('filename', '').lower()
 					rt = cloud_utils.release_title_format(name)
 					if any(value in rt for value in extras_filter): continue

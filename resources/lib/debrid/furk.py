@@ -30,6 +30,7 @@ class Furk:
 		self.user_feeds_link = "/api/feed/get?"
 		self.add_download_link = "/api/dl/add?"
 		self.api_key = control.setting('furk.api')
+		self.highlight_color = control.getHighlightColor()
 		self.files = []
 
 	def user_files(self):
@@ -48,8 +49,6 @@ class Furk:
 
 				if cached:
 					files_num_video = item['files_num_video']
-					# log_utils.log('files_num_video = %s' % files_num_video)
-
 					name = control.strip_non_ascii_and_unprintable(item['name'])
 					# log_utils.log('name = %s' % name)
 
@@ -108,7 +107,7 @@ class Furk:
 
 	def search(self):
 		from resources.lib.menus import navigator
-		navigator.Navigator().addDirectoryItem('New Search', 'furk_SearchNew', 'search.png', 'DefaultAddonsSearch.png', isFolder=False)
+		navigator.Navigator().addDirectoryItem(getLS(32603) % self.highlight_color, 'furk_SearchNew', 'search.png', 'DefaultAddonsSearch.png', isFolder=False)
 		try: from sqlite3 import dbapi2 as database
 		except: from pysqlite2 import dbapi2 as database
 		try:

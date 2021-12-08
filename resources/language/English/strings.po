@@ -935,6 +935,10 @@ msgid "Require Year in source for known Reboot shows"
 msgstr ""
 
 msgctxt "#32228"
+msgid "Remove show packs due to RD cache checking bug"
+msgstr ""
+
+msgctxt "#32229"
 msgid ""
 msgstr ""
 
@@ -2138,7 +2142,7 @@ msgid ""
 msgstr ""
 
 msgctxt "#32603"
-msgid "New search..."
+msgid "[COLOR %s][I]New search...[/I][/COLOR]"
 msgstr ""
 
 msgctxt "#32604"
