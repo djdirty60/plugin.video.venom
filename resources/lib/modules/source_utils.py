@@ -22,7 +22,7 @@ CODEC_MPEG = ('.mpg', '.mp2', '.mpeg', '.mpe', '.mpv', '.mp4', '.m4p', '.m4v', '
 CODEC_MKV = ('.mkv', 'matroska')
 REMUX = ('remux', 'bdremux')
 
-BLURAY = ('bluray', 'blu.ray', 'bdrip', 'bd.rip')
+BLURAY = ('bluray', 'blu.ray', 'bdrip', 'bd.rip', '.brrip.', 'br.rip')
 DVD = ('dvdrip', 'dvd.rip')
 WEB = ('.web.', 'webdl', 'web.dl', 'webrip', 'web.rip')
 HDRIP = ('.hdrip', '.hd.rip')
@@ -32,7 +32,7 @@ HC = ('.hc', 'korsub', 'kor.sub')
 DOLBY_TRUEHD = ('true.hd', 'truehd')
 DOLBY_DIGITALPLUS = ('dolby.digital.plus', 'dolbydigital.plus', 'dolbydigitalplus', 'dd.plus.', 'ddplus', '.ddp.', 'ddp2', 'ddp5', 'ddp7', 'eac3', '.e.ac3')
 DOLBY_DIGITALEX = ('.dd.ex.', 'ddex', 'dolby.ex.', 'dolby.digital.ex.', 'dolbydigital.ex.')
-DOLBYDIGITAL = ('dd2.', 'dd5', 'dd7', 'dolby.digital', 'dolbydigital', '.ac3', '.ac.3.', '.dd.')
+DOLBYDIGITAL = ('dd2.', 'dd5', 'dd7', 'dolbyd.', 'dolby.digital', 'dolbydigital', '.ac3', '.ac.3.', '.dd.')
 
 DTSX = ('dts.x.', 'dtsx')
 DTS_HDMA = ('hd.ma', 'hdma')
@@ -43,56 +43,45 @@ AUDIO_7CH = ('ch7.', '7ch.', '6.1ch', '6.1.')
 AUDIO_6CH = ('ch6.', '6ch.', '5.1ch', '5.1.')
 AUDIO_2CH = ('ch2', '2ch', '2.0ch', '2.0.', 'audio.2.0.', 'stereo')
 
-MULTI_LANG = ('hindi.eng', 'ara.eng', 'ces.eng', 'chi.eng', 'cze.eng', 'dan.eng', 'dut.eng', 'ell.eng', 'esl.eng', 'esp.eng', 'fin.eng', 'fra.eng', 'fre.eng',
-				'frn.eng', 'gai.eng', 'ger.eng', 'gle.eng', 'gre.eng', 'gtm.eng', 'heb.eng', 'hin.eng', 'hun.eng', 'ind.eng', 'iri.eng', 'ita.eng', 'jap.eng', 'jpn.eng',
-				'kor.eng', 'lat.eng', 'lebb.eng', 'lit.eng', 'nor.eng', 'pol.eng', 'por.eng', 'rus.eng', 'som.eng', 'spa.eng', 'sve.eng', 'swe.eng', 'tha.eng', 'tur.eng',
-				'uae.eng', 'ukr.eng', 'vie.eng', 'zho.eng', 'dual.audio', 'multi')
+MULTI_LANG = ('dual.audio', 'dual.yg', 'multi')
+LANG = ('arabic', 'bgaudio', 'castellano', 'chinese', 'dutch', 'finnish', 'french', 'german', 'greek', 'hebrew', 'italian', 'latino', 'polish',
+				'portuguese', 'russian', 'spanish', 'tamil', 'telugu', 'truefrench', 'truespanish', 'turkish')
+ABV_LANG = ('.ara.', '.ces.', '.chi.', '.chs.', '.cze.', '.dan.', '.de.', '.deu.', '.dut.', '.ell.', '.es.', '.esl.', '.esp.', '.fi.', '.fin.', '.fr.', '.fra.', '.fre.', '.frn.', '.gai.', '.ger.', '.gle.', '.gre.',
+						'.gtm.', '.he.', '.heb.', '.hi.', '.hin.', '.hun.', '.hindi.', '.ind.', '.iri.', '.it.', '.ita.', '.ja.', '.jap.', '.jpn.', '.ko.', '.kor.', '.lat.', '.nl.', '.lit.', '.nld.', '.nor.', '.pl.', '.pol.',
+						'.pt.', '.por.', '.ru.', '.rus.', '.som.', '.spa.', '.sv.', '.sve.', '.swe.', '.tha.', '.tr.', '.tur.', '.uae.', '.uk.', '.ukr.', '.vi.', '.vie.', '.zh.', '.zho.')
 SUBS = ('subita', 'subfrench', 'subspanish', 'subtitula', 'swesub', 'nl.subs')
 ADS = ('1xbet', 'betwin')
-
 
 def seas_ep_filter(season, episode, release_title, split=False):
 	try:
 		release_title = re.sub(r'[^A-Za-z0-9-]+', '.', unquote(release_title).replace('\'', '')).lower()
-		string1 = r'(s<<S>>e<<E>>)|' \
-				r'(s<<S>>\.e<<E>>)|' \
-				r'(s<<S>>ep<<E>>)|' \
-				r'(s<<S>>\.ep<<E>>)'
-		string2 = r'(season\.<<S>>\.episode\.<<E>>)|' \
-				r'(season<<S>>\.episode<<E>>)|' \
-				r'(season<<S>>episode<<E>>)|' \
-				r'(s<<S>>e\(<<E>>\))|' \
-				r'(s<<S>>\.e\(<<E>>\))|' \
-				r'(<<S>>x<<E>>\.)|' \
-				r'(<<S>>\.<<E>>\.)'
-		string3 = r'(<<S>><<E>>\.)'
-		string4 = r'(s<<S>>e<<E1>>e<<E2>>)|' \
-				r'(s<<S>>e<<E1>>-e<<E2>>)|' \
-				r'(s<<S>>e<<E1>>\.e<<E2>>)|' \
-				r'(s<<S>>e<<E1>>-<<E2>>-)|' \
-				r'(s<<S>>e<<E1>>\.<<E2>>\.)|' \
-				r'(s<<S>>e<<E1>><<E2>>)'
-		string5 = r'(?<![a-z])(ep<<E>>[.-])|' \
-				r'(?<![a-z])(e<<E>>[.-])|' \
-				r'(?<![a-z])(ep[.-]<<E>>[.-])'
+		season = str(season)
+		season_fill = str(season).zfill(2)
+		episode = str(episode)
+		episode_fill = str(episode).zfill(2)
 
-		# string1 = r'(s<<S>>[.-]?e[p]?<<E>>)'
-		# string4 = r'(s<<S>>e<<E1>>[.-]?e?<<E2>>[.-])'
-		# string5 = r'(?<![a-z])(ep[.-]?<<E>>[.-])'
+		string1 = r'(s<<S>>[.-]?e[p]?[.-]?<<E>>)'
+		string2 = r'(season[.-]?<<S>>[.-]?episode[.-]?<<E>>)|' \
+						r'([s]?<<S>>[x.]?<<E>>[.-])'
+		string3 = r'(s<<S>>e<<E1>>[.-]?e?<<E2>>[.-]?)'
+		string4 = r'(<<S>><<E>>\.)'
+		string5 = r'(?<![a-z])(e[p]?[.-]?<<E>>[.-])'
 
 		string_list = []
 		append = string_list.append
-		append(string1.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
-		append(string1.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
-		append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
-		append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
-		append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode)))
-		append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode)))
-		append(string3.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
-		append(string3.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
-		append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(int(episode)-1).zfill(2)).replace('<<E2>>', str(episode).zfill(2)))
-		append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(episode).zfill(2)).replace('<<E2>>', str(int(episode)+1).zfill(2)))
-		append(string5.replace('<<E>>', str(episode).zfill(2)))
+		append(string1.replace('<<S>>', season_fill).replace('<<E>>', episode_fill))
+		append(string1.replace('<<S>>', season).replace('<<E>>', episode_fill))
+		append(string1.replace('<<S>>', season_fill).replace('<<E>>', episode))
+		append(string1.replace('<<S>>', season).replace('<<E>>', episode))
+		append(string2.replace('<<S>>', season_fill).replace('<<E>>', episode_fill))
+		append(string2.replace('<<S>>', season).replace('<<E>>', episode_fill))
+		append(string2.replace('<<S>>', season_fill).replace('<<E>>', episode))
+		append(string2.replace('<<S>>', season).replace('<<E>>', episode))
+		append(string3.replace('<<S>>', season_fill).replace('<<E1>>', str(int(episode)-1).zfill(2)).replace('<<E2>>', str(episode).zfill(2)))
+		append(string3.replace('<<S>>', season_fill).replace('<<E1>>', episode_fill).replace('<<E2>>', str(int(episode)+1).zfill(2)))
+		append(string4.replace('<<S>>', season_fill).replace('<<E>>', episode_fill))
+		append(string4.replace('<<S>>', season).replace('<<E>>', episode_fill))
+		append(string5.replace('<<E>>', episode_fill))
 
 		final_string = '|'.join(string_list)
 		reg_pattern = re.compile(final_string)
@@ -104,27 +93,6 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
-
-# Needs work
-# def seas_ep_filter(season, episode, release_title, split=False):
-	# try:
-		# release_title = re.sub(r'[^A-Za-z0-9-]+', '.', unquote(release_title).replace('\'', '')).lower()
-		# episode_up = str(int(episode)+1) ; episode_dn = str(int(episode)-1)
-		# string1 = r'(?:s|season|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|x|)(?:e|ep|episode|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|)(?:e|ep|episode|)0{0,1}%s(?:\.|-|\)|$)' % (season, episode, episode_up)
-		# if int(episode) > 1:
-			# string2 = r'(?:s|season|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|x|)(?:e|ep|episode|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|)(?:e|ep|episode|)0{0,1}%s(?:\.|-|\)|$)' % (season, episode_dn, episode)
-		# string3 = r'(?:s|season|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|x|)(?:e|ep|episode|)(?:\.|-|\(|)0{0,1}%s(?:\.|-|\)|x|$)' % (season, episode)
-		# string_list = [string1, string2, string3]
-		# final_string = '|'.join(string_list)
-		# reg_pattern = re.compile(final_string)
-		# if split:
-			# return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]
-		# else:
-			# return bool(re.search(reg_pattern, release_title))
-	# except:
-		# from resources.lib.modules import log_utils
-		# log_utils.error()
-		# return None
 
 def extras_filter():
 	return ('sample', 'extra', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer')
@@ -195,7 +163,11 @@ def getFileType(name_info=None, url=None):
 		elif any(value in fmt for value in AUDIO_2CH): type += ' 2CH /'
 
 		if any(value in fmt for value in HC): type += ' HC /'
+
 		if any(value in fmt for value in MULTI_LANG): type += ' MULTI-LANG /'
+		elif any(value in fmt for value in LANG) and any(value in fmt for value in ('.eng.', '.en.', 'english')): type += ' MULTI-LANG /'
+		elif any(value in fmt for value in ABV_LANG) and any(value in fmt for value in ('.eng.', '.en.', 'english')):type += ' MULTI-LANG /'
+
 		if any(value in fmt for value in ADS): type += ' ADS /'
 		if any(value in fmt for value in SUBS):
 			if type != '': type += ' WITH SUBS'

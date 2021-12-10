@@ -476,7 +476,6 @@ class Sources:
 					if pack == 'season': name = '%s (season pack)' % name
 					elif pack == 'show': name = '%s (show pack)' % name
 					append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
-
 			[i.start() for i in threads]
 			sdc = control.getColor(getSetting('scraper.dialog.color'))
 			string1 = getLS(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
@@ -606,6 +605,7 @@ class Sources:
 			dbcon = database.connect(sourceFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS rel_src (source TEXT, imdb_id TEXT, season TEXT, episode TEXT, hosts TEXT, added TEXT, UNIQUE(source, imdb_id, season, episode));''')
+			dbcur.execute('''CREATE TABLE IF NOT EXISTS rel_aliases (title TEXT, aliases TEXT, UNIQUE(title));''')
 			dbcur.connection.commit()
 		except:
 			log_utils.error()
@@ -641,6 +641,7 @@ class Sources:
 			sources = call().sources(data, self.hostprDict)
 			if sources:
 				self.scraper_sources.extend(sources)
+				dbcur.execute('''INSERT OR REPLACE INTO rel_aliases Values (?, ?)''', (data.get('title', ''), repr(data.get('aliases', ''))))
 				dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, '', '', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 				dbcur.connection.commit()
 		except:
@@ -1038,11 +1039,11 @@ class Sources:
 			tvdb = meta['tvdb'] if 'tvdb' in meta else None
 			release_title = chosen_result['filename']
 			control.hide()
-			# if source_utils.seas_ep_filter(season, episode, release_title):
-				# return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta)
-			# else:
-				# return player.Player().play(self.url)
-			return player.Player().play(self.url)
+			from resources.lib.modules import source_utils
+			if source_utils.seas_ep_filter(season, episode, release_title):
+				return player.Player().play_source(title, year, season, episode, imdb, tmdb, tvdb, self.url, meta, debridPackCall=True) # hack fix for setResolvedUrl issue
+			else:
+				return player.Player().play(self.url)
 		except:
 			log_utils.error('Error debridPackDialog: ')
 			control.hide()

@@ -396,11 +396,9 @@ class RealDebrid:
 			torrent_id = None
 			rd_url = None
 			match = False
-			reason = ''
 			extensions = supported_video_extensions()
 			extras_filtering_list = extras_filter()
 			info_hash = info_hash.lower()
-			if not season: compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
 			torrent_files = self._get(check_cache_url + '/' + info_hash)
 			if not info_hash in torrent_files: return None
 			torrent_id = self.add_magnet(magnet_url) # add_magent() returns id
@@ -420,27 +418,43 @@ class RealDebrid:
 								continue
 							correct_file_check = seas_ep_filter(season, episode, value)
 							if correct_file_check: break
-						if not correct_file_check:
-							reason = value + '  :no matching video filename'
-							continue
+						if not correct_file_check: continue
 					elif not m2ts_check:
+						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
 						for value in item_values:
 							filename = re.sub(r'[^A-Za-z0-9]+', '.', value.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
 							filename_info = filename.replace(compare_title, '') 
 							if any(x in filename_info for x in extras_filtering_list): continue
+
+							log_utils.log('compare_title=%s' % compare_title)
+							log_utils.log('filename=%s' % filename)
+							log_utils.log('len(item_values)=%s' % len(item_values))
+							log_utils.log('title=%s' % title)
+
 							aliases = self.get_aliases(title)
+							log_utils.log('aliases=%s' % str(aliases))
+
 							correct_file_check = cloud_check_title(title, aliases, filename)
+							log_utils.log('correct_file_check=%s' % correct_file_check)
+
 							if correct_file_check: break
-						if not correct_file_check:
-							reason = filename + '  :no matching video filename'
-							continue
+						if not correct_file_check: continue
 					torrent_keys = item.keys()
+
+					log_utils.log('torrent_keys=%s' % torrent_keys)
+
 					if len(torrent_keys) == 0: continue
 					torrent_keys = ','.join(torrent_keys)
 					self.add_torrent_select(torrent_id, torrent_keys)
 					torrent_info = self.torrent_info(torrent_id)
+
+					log_utils.log('torrent_info=%s' % torrent_info)
+
 					if 'error' in torrent_info: continue
 					selected_files = [(idx, i) for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
+
+					log_utils.log('selected_files=%s' % selected_files)
+
 					if season:
 						correct_files = []
 						append = correct_files.append
@@ -466,27 +480,51 @@ class RealDebrid:
 						match, index = True, [i[0] for i in selected_files if i[1]['id'] == m2ts_key][0]
 					else:
 						match = False
+						compare_title = re.sub(r'[^A-Za-z0-9]+', '.', title.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
 						for value in selected_files:
+
+							log_utils.log('value=%s' % str(value))
+
 							filename = re.sub(r'[^A-Za-z0-9]+', '.', value[1]['path'].rsplit('/', 1)[1].replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
+							log_utils.log('filename=%s' % str(filename))
+
 							filename_info = filename.replace(compare_title, '') 
+							log_utils.log('filename_info=%s' % str(filename_info))
+
 							if any(x in filename_info for x in extras_filtering_list): continue
+
+							log_utils.log('compare_title=%s' % compare_title)
+							log_utils.log('filename=%s' % filename)
+							log_utils.log('len(selected_files)=%s' % len(selected_files))
+
+							# if len(selected_files) == 1: match = True
+							# else: match = re.search(compare_title, filename)
+
 							aliases = self.get_aliases(title)
+							log_utils.log('aliases=%s' % str(aliases))
+
 							match = cloud_check_title(title, aliases, filename)
+							log_utils.log('match=%s' % match)
+
 							if match:
 								index = value[0]
+								log_utils.log('index=%s' % index)
+
 								break
 						if match: break
 				except:
 					log_utils.error()
 			if match:
 				rd_link = torrent_info['links'][index]
+				log_utils.log('rd_link=%s' % rd_link)
+
 				file_url = self.unrestrict_link(rd_link)
 				if file_url.endswith('rar'): file_url = None
 				if not any(file_url.lower().endswith(x) for x in extensions): file_url = None
 				if not self.store_to_cloud: self.delete_torrent(torrent_id)
 				return file_url
 			else:
-				log_utils.log('Real-Debrid: FAILED TO RESOLVE MAGNET : "%s": %s' % (magnet_url, reason), __name__, log_utils.LOGWARNING)
+				log_utils.log('Real-Debrid: FAILED TO RESOLVE MAGNET : %s' % magnet_url, __name__, log_utils.LOGWARNING)
 			self.delete_torrent(torrent_id)
 		except:
 			log_utils.error('Real-Debrid: Error RESOLVE MAGNET %s : ' % magnet_url)

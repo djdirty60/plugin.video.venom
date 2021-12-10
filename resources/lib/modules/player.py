@@ -35,7 +35,7 @@ class Player(xbmc.Player):
 		self.playnext_time = int(control.setting('playnext.time')) or 60
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 
-	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta):
+	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta, debridPackCall=False):
 		try:
 			if not url: raise Exception
 			self.media_type = 'movie' if season is None or episode is None else 'episode'
@@ -86,7 +86,8 @@ class Player(xbmc.Player):
 			if 'castandart' in meta: item.setCast(meta.get('castandart', ''))
 			item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 			item.setProperty('IsPlayable', 'true')
-			control.resolve(int(argv[1]), True, item)
+			if debridPackCall: control.player.play(url, item) # seems this is only way browseDebrid pack files will play and have meta marked as watched
+			else: control.resolve(int(argv[1]), True, item)
 			control.homeWindow.setProperty('script.trakt.ids', jsdumps(self.ids))
 			self.keepAlive()
 			control.homeWindow.clearProperty('script.trakt.ids')

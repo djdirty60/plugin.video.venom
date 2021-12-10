@@ -1,8 +1,8 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.1">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.2">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
-		<import addon="script.module.myaccounts" version="2.0.0"/>
+		<import addon="script.module.myaccounts" version="2.0.0" />
 		<import addon="script.module.fenomscrapers" version="2.0.2" />
 		<import addon="script.module.requests" />
 		<import addon="script.module.beautifulsoup4" />
@@ -32,11 +32,11 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.4.1 - Dec. 08, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Increased RD timeout value due to apparent bug in cache checking show packs.[/I]
-[COLOR yellow]--[/COLOR][I] Due to the item above a new setting has been added to [B]"Accounts-Real Debrid"[/B] called [B]"Remove show packs due to RD cache checking bug"[/B].  Please read the [B]"help"[/B] file below this new setting for additional information and do not enable unless you have multiple debrid accounts.[/I]
-[COLOR yellow]--[/COLOR][I] There has been some recent discovered hybrid releases containing both Dolby-Vision and HDR.  Info detection has been improved for these hybrid sources.  If you've disable Dolby-Vision in settings these hybrid cases will now show up in the Source Select when HDR is left enabled in settings.  The proper stream should be auto selected for the supported hardware.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed a few small RD resolve issues with movies when filename does not match meta title.[/I]
+[B][COLOR red]Update - v6.4.2 - Dec. 10, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Expanded the list of "abreviated language" codes for better detection of Multi Language audio tracks.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue with playback from "browseDebridPack" not showing meta, or marking as watched.  Note this still only works for the current epsiode from the listItems displayed.[/I]
+[COLOR yellow]--[/COLOR][I] Expanded the list of "BLURAY" strings for better detection of "bluray" disks.[/I]
+[COLOR yellow]--[/COLOR][I] RD resolve method was completely re-written to now include aliases during the title check process.  The utilized aliases are now written to the db for further calls.[/I]
 		</news>
 	</extension>
 </addon>
