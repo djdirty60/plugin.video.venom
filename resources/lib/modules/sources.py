@@ -748,6 +748,7 @@ class Sources:
 					self.sources = [i for i in self.sources if (i.get('size', 0) >= movie_minSize and i.get('size', 0) <= movie_maxSize)]
 				except: log_utils.error()
 		else:
+			self.sources = [i for i in self.sources if 'movie.collection' not in i.get('name_info', '')] # rare but a few retuned from "complete" show pack scrape returned as "movie.collection"
 			if getSetting('source.checkReboots') == 'true':
 				try:
 					from resources.lib.modules.source_utils import tvshow_reboots

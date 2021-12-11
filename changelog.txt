@@ -1,7 +1,13 @@
 
+[B][COLOR red]Update - v6.4.3 - Dec. 11, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed typo in resolving selected episode from pack files.[/I]
+[COLOR yellow]--[/COLOR][I] Few additional resolve tweaks for pack files.[/I]
+[COLOR yellow]--[/COLOR][I] Removed "complete.movie.collections" from pack scrape query results for "complete" show packs query.[/I]
+
+
 [B][COLOR red]Update - v6.4.2 - Dec. 10, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Expanded the list of "abreviated language" codes for better detection of Multi Language audio tracks.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue with playback from "browseDebridPack" not showing meta, or marking as watched.  Note this still only works for the current epsiode from the listItems displayed.[/I]
+[COLOR yellow]--[/COLOR][I] Expanded the list of "abbreviated language" codes for better detection of Multi Language audio tracks.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue with playback from "browseDebridPack" not showing meta, or marking as watched.  Note this still only works for the current episode from the listItems displayed.[/I]
 [COLOR yellow]--[/COLOR][I] Expanded the list of "BLURAY" strings for better detection of "bluray" disks.[/I]
 [COLOR yellow]--[/COLOR][I] RD resolve method was completely re-written to now include aliases during the title check process.  The utilized aliases are now written to the db for further calls.[/I]
 

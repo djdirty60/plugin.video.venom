@@ -60,12 +60,13 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		episode = str(episode)
 		episode_fill = str(episode).zfill(2)
 
-		string1 = r'(s<<S>>[.-]?e[p]?[.-]?<<E>>)'
-		string2 = r'(season[.-]?<<S>>[.-]?episode[.-]?<<E>>)|' \
-						r'([s]?<<S>>[x.]?<<E>>[.-])'
-		string3 = r'(s<<S>>e<<E1>>[.-]?e?<<E2>>[.-]?)'
-		string4 = r'(<<S>><<E>>\.)'
-		string5 = r'(?<![a-z])(e[p]?[.-]?<<E>>[.-])'
+		string1 = r'(s<<S>>[.-]?e[p]?[.-]?<<E>>[.-])'
+		string2 = r'(season[.-]?<<S>>[.-]?episode[.-]?<<E>>[.-])|' \
+						r'([s]?<<S>>[x.]<<E>>[.-])'
+		string3 = r'(s<<S>>e<<E1>>[.-]?e?<<E2>>[.-])'
+		string4 = r'([.-]<<S>>[.-]?<<E>>[.-])'
+		string5 = r'(episode[.-]?<<E>>[.-])'
+		string6 = r'([.-]e[p]?[.-]?<<E>>[.-])'
 
 		string_list = []
 		append = string_list.append
@@ -82,6 +83,8 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		append(string4.replace('<<S>>', season_fill).replace('<<E>>', episode_fill))
 		append(string4.replace('<<S>>', season).replace('<<E>>', episode_fill))
 		append(string5.replace('<<E>>', episode_fill))
+		append(string5.replace('<<E>>', episode))
+		append(string6.replace('<<E>>', episode_fill))
 
 		final_string = '|'.join(string_list)
 		reg_pattern = re.compile(final_string)
@@ -93,6 +96,66 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		from resources.lib.modules import log_utils
 		log_utils.error()
 		return None
+
+
+# def seas_ep_filter(season, episode, release_title, split=False):
+	# try:
+		# release_title = re.sub(r'[^A-Za-z0-9-]+', '.', unquote(release_title).replace('\'', '')).lower()
+# # [2021-12-08 17:14:20] [COLOR red][ Venom: INFO ][/COLOR]: release_title=the.big.bang.theory.s01e.1.mkv
+		# # from resources.lib.modules import log_utils
+		# # log_utils.log('release_title=%s' % release_title)
+
+		# string1 = r'(s<<S>>e<<E>>)|' \
+				# r'(s<<S>>\.e<<E>>)|' \
+				# r'(s<<S>>ep<<E>>)|' \
+				# r'(s<<S>>\.ep<<E>>)'
+		# string2 = r'(season\.<<S>>\.episode\.<<E>>)|' \
+				# r'(season<<S>>\.episode<<E>>)|' \
+				# r'(season<<S>>episode<<E>>)|' \
+				# r'(s<<S>>e\.<<E>>)|' \
+				# r'(s<<S>>e\(<<E>>\))|' \
+				# r'(s<<S>>\.e\(<<E>>\))|' \
+				# r'(<<S>>x<<E>>\.)|' \
+				# r'(<<S>>\.<<E>>\.)'
+		# string3 = r'(<<S>><<E>>\.)'
+		# string4 = r'(s<<S>>e<<E1>>e<<E2>>)|' \
+				# r'(s<<S>>e<<E1>>-e<<E2>>)|' \
+				# r'(s<<S>>e<<E1>>\.e<<E2>>)|' \
+				# r'(s<<S>>e<<E1>>-<<E2>>-)|' \
+				# r'(s<<S>>e<<E1>>\.<<E2>>\.)|' \
+				# r'(s<<S>>e<<E1>><<E2>>)'
+		# string5 = r'([.-]e[p]?[.-]?<<E>>[.-])'
+
+		# # string1 = r'(s<<S>>[.-]?e[p]?<<E>>)'
+		# # string4 = r'(s<<S>>e<<E1>>[.-]?e?<<E2>>[.-])'
+
+		# string_list = []
+		# append = string_list.append
+		# append(string1.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
+		# append(string1.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
+		# append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
+		# append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
+		# append(string2.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode)))
+		# append(string2.replace('<<S>>', str(season)).replace('<<E>>', str(episode)))
+		# append(string3.replace('<<S>>', str(season).zfill(2)).replace('<<E>>', str(episode).zfill(2)))
+		# append(string3.replace('<<S>>', str(season)).replace('<<E>>', str(episode).zfill(2)))
+		# append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(int(episode)-1).zfill(2)).replace('<<E2>>', str(episode).zfill(2)))
+		# append(string4.replace('<<S>>', str(season).zfill(2)).replace('<<E1>>', str(episode).zfill(2)).replace('<<E2>>', str(int(episode)+1).zfill(2)))
+		# append(string5.replace('<<E>>', str(episode).zfill(2)))
+
+		# # log_utils.log('string_list=%s' % string_list)
+
+		# final_string = '|'.join(string_list)
+		# reg_pattern = re.compile(final_string)
+		# if split:
+			# return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]
+		# else:
+			# return bool(re.search(reg_pattern, release_title))
+	# except:
+		# from resources.lib.modules import log_utils
+		# log_utils.error()
+		# return None
+
 
 def extras_filter():
 	return ('sample', 'extra', 'deleted', 'unused', 'footage', 'inside', 'blooper', 'making.of', 'feature', 'featurette', 'behind.the.scenes', 'trailer')

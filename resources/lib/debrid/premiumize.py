@@ -199,6 +199,7 @@ class Premiumize:
 				episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', ep_title.replace('\'', '')).lower()
 				for item in valid_results:
 					if seas_ep_filter(season, episode, item['path'].split('/')[-1]):
+						# log_utils.log('item[path].split(/)[-1]=%s' %  item['path'].split('/')[-1])
 						append(item)
 					if len(correct_files) == 0: continue
 					for i in correct_files:

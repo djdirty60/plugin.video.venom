@@ -1,4 +1,11 @@
 
+[B][COLOR red]December 10, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] There is an apparent bug in FenomScrapers v2.0.6 handling of the [B]"undesirables"[/B]
+    list because of the new additions added "castudio.tv" and "pa.web.dl".  As a temporary solution
+    please open FenScrapers settings and then open [B]"Manage Default Undesirables"[/B] and
+    just hit save.[/I]
+
+
 [B][COLOR red]July 05, 2021[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] The new repo is now live and Matrix and Leia have separate install paths.
     The version seen will be Kodi version dependent.  The good new for you
