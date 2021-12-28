@@ -156,19 +156,14 @@ def getShowCount(indicators, imdb, tvdb):
 		log_utils.error()
 		return None
 
-def getSeasonCount(imdb, season=None, season_special=False):
+def getSeasonCount(imdb, season=None):
 	if not imdb.startswith('tt'): return None
 	try:
 		if not traktIndicators: return None
 		result = trakt.seasonCount(imdb=imdb)
 		if not result: return None
 		if not season: return result
-		else:
-			if getSetting('tv.specials') == 'true' and season_special: result = result[int(season)]
-			else:
-				if int(season) > len(result): return None
-				result = result[int(season) - 1]
-			return result
+		else: return result.get(int(season))
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -232,10 +227,8 @@ def episodes(name, imdb, tvdb, season, episode, watched):
 		else:
 			from metahandler import metahandlers
 
-
 			from resources.lib.modules import log_utils
 			log_utils.log('name=%s' % name)
-
 
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
 			show_meta = metaget.get_meta('tvshow', name=name, imdb_id=imdb)

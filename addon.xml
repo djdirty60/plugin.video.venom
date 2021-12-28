@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.3">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.4">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,10 +32,11 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.4.3 - Dec. 11, 2021[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed typo in resolving selected episode from pack files.[/I]
-[COLOR yellow]--[/COLOR][I] Few additional resolve tweaks for pack files.[/I]
-[COLOR yellow]--[/COLOR][I] Removed "complete.movie.collections" from pack scrape query results for "complete" show packs query.[/I]
+[B][COLOR red]Update - v6.4.4 - Dec. 28, 2021[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed some obscure shows with missing id's that failed to mark as watched and prevented being added to Trakt Progress.[/I]
+[COLOR yellow]--[/COLOR][I] Cache duration has been lowered to 24hrs for seasons that are still airing.  This allows the episode watched and unwatched counts to be more up to date.[/I]
+[COLOR yellow]--[/COLOR][I] The Download context menu option was still showing in the Source Select window if the setting was disabled.  Once again it will only show if the setting is enabled and the folders are setup.[/I]
+
 		</news>
 	</extension>
 </addon>

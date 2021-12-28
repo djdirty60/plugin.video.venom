@@ -3534,12 +3534,12 @@ msgid "%s Marked As Unwatched On Trakt"
 msgstr "%s oznaczono jako nieobserwowane w Trakt"
 
 msgctxt "#35504"
-msgid ""
-msgstr ""
+msgid "%s Failed to Mark As Watched On Trakt"
+msgstr "%s Nie udało się oznaczyć jako obejrzany w Trakt"
 
 msgctxt "#35505"
-msgid ""
-msgstr ""
+msgid "%s Failed to Mark As Unwatched On Trakt"
+msgstr "%s Nie udało się oznaczyć jako nieobserwowanych w Trakt"
 
 msgctxt "#35506"
 msgid "Movie Information"

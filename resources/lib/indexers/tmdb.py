@@ -273,6 +273,7 @@ class Movies:
 			meta['original_language'] = result.get('original_language', '')
 			meta['originaltitle'] = result.get('original_title', '')
 			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
+			if self.lang != 'en' and meta['plot'] in ('', None, 'None'): meta['plot'] = self.get_en_overview(tmdb)
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			# try: meta['studio'] = result.get('production_companies', {})[0]['name'] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
@@ -352,6 +353,19 @@ class Movies:
 			log_utils.error()
 			return None
 		return ret_img
+
+	def get_en_overview(self, tmdb): # fallback for when self.lang != 'en'
+		if not tmdb: return None
+		overview = None
+		try:
+			url = '%s%s' % (base_link, 'movie/%s?api_key=%s&language=en,en-US' % (tmdb, API_key))
+			result = get_request(url)
+			overview = result.get('overview')
+			if overview: overview = 'Translation Not Available:\n' + overview
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+		return overview
 
 	def get_credits(self, tmdb):
 		if not tmdb: return None
@@ -580,6 +594,7 @@ class TVshows:
 			meta['original_language'] = result.get('original_language')
 			meta['originaltitle'] = result.get('original_name')
 			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
+			if self.lang != 'en' and meta['plot'] in ('', None, 'None'): meta['plot'] = self.get_en_overview(tmdb)
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
 			meta['tvshow_poster'] = meta['poster'] # check that this new dict key is used throughout
@@ -634,7 +649,7 @@ class TVshows:
 		if not tmdb: return None
 		try:
 			result = None
-			url = '%s%s' % (base_link, 'tv/%s/season/%s?api_key=%s&language=%s,en-US&append_to_response=credits' % (tmdb, season, API_key, self.lang))
+			url = '%s%s' % (base_link, 'tv/%s/season/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, API_key, self.lang))
 			result = get_request(url)
 		except:
 			from resources.lib.modules import log_utils
@@ -676,9 +691,10 @@ class TVshows:
 				except: episode_meta['writer'] = ''
 				episode_meta['tmdb_epID'] = episode['id']
 				episode_meta['title'] = episode['name']
-				episode_meta['plot'] = episode.get('overview', '') if episode.get('overview') else ''
-				episode_meta['code'] = episode['production_code']
 				episode_meta['season'] = episode['season_number']
+				episode_meta['plot'] = episode.get('overview', '') if episode.get('overview') else ''
+				if self.lang != 'en' and episode_meta['plot'] in ('', None, 'None'): episode_meta['plot'] = self.get_en_overview(tmdb, episode_meta['season'], episode_meta['episode'], 'episode')
+				episode_meta['code'] = episode['production_code']
 				episode_meta['thumb'] = '%s%s' % (still_path, episode['still_path']) if episode.get('still_path') else ''
 				episode_meta['rating'] = episode['vote_average']
 				episode_meta['votes'] = episode['vote_count']
@@ -707,7 +723,7 @@ class TVshows:
 		if not tmdb and not season and not episode: return None
 		try:
 			result = None
-			url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=%s,en-US&append_to_response=credits' % (tmdb, season, episode, API_key, self.lang))
+			url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, episode, API_key, self.lang))
 			result = get_request(url)
 		except:
 			from resources.lib.modules import log_utils
@@ -744,6 +760,22 @@ class TVshows:
 			log_utils.error()
 			return None
 		return ret_img
+
+	def get_en_overview(self, tmdb, season=None, episode=None, level_type='show'): # fallback for when self.lang != 'en'
+		if not tmdb: return None
+		overview = None
+		try:
+			if level_type == 'show':
+				url = '%s%s' % (base_link, 'tv/%s?api_key=%s&language=en,en-US' % (tmdb, API_key))
+			else:
+				url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=en,en-US' % (tmdb, season, episode, API_key))
+			result = get_request(url)
+			overview = result.get('overview')
+			if overview: overview = 'Translation Not Available:\n' + overview
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+		return overview
 
 	def get_credits(self, tmdb):
 		if not tmdb: return None

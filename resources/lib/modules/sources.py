@@ -1272,6 +1272,9 @@ class Sources:
 				hashList = [i['hash'] for i in torrent_List if ('package' not in i) or ('package' in i and i['package'] != 'show')]
 				hashList = [i if len(i) == 40 else base32_to_hex(i) for i in hashList] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
 			else: hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List]
+
+			# hashList = ['838df72e305d1b3276612c8259803bf84ca00861'] # This showmakes RD have massive delay
+
 			cached = debrid_function().check_cache_list(hashList)
 			if not cached: return None
 			for i in torrent_List:

@@ -231,20 +231,21 @@ def getTraktAddonEpisodeInfo():
 
 def watch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	control.busy()
+	success = False
 	if not tvdb:
-		markMovieAsWatched(imdb)
+		success = markMovieAsWatched(imdb)
 		cachesyncMovies()
 	elif episode:
-		markEpisodeAsWatched(imdb, tvdb, season, episode)
+		success = markEpisodeAsWatched(imdb, tvdb, season, episode)
 		cachesyncTV(imdb)
 	elif season:
-		markSeasonAsWatched(imdb, tvdb, season)
+		success = markSeasonAsWatched(imdb, tvdb, season)
 		cachesyncTV(imdb)
 	elif tvdb:
-		markTVShowAsWatched(imdb, tvdb)
+		success = markTVShowAsWatched(imdb, tvdb)
 		cachesyncTV(imdb)
 	else:
-		markMovieAsWatched(imdb)
+		success = markMovieAsWatched(imdb)
 		cachesyncMovies()
 	control.hide()
 	if refresh: control.refresh()
@@ -252,24 +253,26 @@ def watch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	if getSetting('trakt.general.notifications') == 'true':
 		if season and not episode: name = '%s-Season%s...' % (name, season)
 		if season and episode: name = '%s-S%sxE%02d...' % (name, season, int(episode))
-		control.notification(title=32315, message=getLS(35502) % name)
+		if success is True: control.notification(title=32315, message=getLS(35502) % name)
+		else: control.notification(title=32315, message=getLS(35504) % name)
 
 def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	control.busy()
+	success = False
 	if not tvdb:
-		markMovieAsNotWatched(imdb)
+		success = markMovieAsNotWatched(imdb)
 		cachesyncMovies()
 	elif episode:
-		markEpisodeAsNotWatched(imdb, tvdb, season, episode)
+		success = markEpisodeAsNotWatched(imdb, tvdb, season, episode)
 		cachesyncTV(imdb)
 	elif season:
-		markSeasonAsNotWatched(imdb, tvdb, season)
+		success = markSeasonAsNotWatched(imdb, tvdb, season)
 		cachesyncTV(imdb)
 	elif tvdb:
-		markTVShowAsNotWatched(imdb, tvdb)
+		success = markTVShowAsNotWatched(imdb, tvdb)
 		cachesyncTV(imdb)
 	else:
-		markMovieAsNotWatched(imdb)
+		success = markMovieAsNotWatched(imdb)
 		cachesyncMovies()
 	control.hide()
 	if refresh: control.refresh()
@@ -277,7 +280,8 @@ def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 	if getSetting('trakt.general.notifications') == 'true':
 		if season and not episode: name = '%s-Season%s...' % (name, season)
 		if season and episode: name = '%s-S%sxE%02d...' % (name, season, int(episode))
-		control.notification(title=32315, message=getLS(35503) % name)
+		if success is True: control.notification(title=32315, message=getLS(35503) % name)
+		else: control.notification(title=32315, message=getLS(35505) % name)
 
 def like_list(list_owner, list_name, list_id):
 	try:
@@ -904,10 +908,10 @@ def showCount(imdb, refresh=True, wait=False):
 		result = {'total': 0, 'watched': 0, 'unwatched': 0}
 		indicators = seasonCount(imdb=imdb, refresh=refresh, wait=wait)
 		if not indicators: return None
-		for indicator in indicators:
-			result['total'] += indicator['total']
-			result['watched'] += indicator['watched']
-			result['unwatched'] += indicator['unwatched']
+		for key, value in iter(indicators.items()):
+			result['total'] += value['total']
+			result['watched'] += value['watched']
+			result['unwatched'] += value['unwatched']
 		return result
 	except:
 		log_utils.error()
@@ -942,39 +946,54 @@ def _seasonCountRetrieve(imdb):
 			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % imdb)
 		if not indicators: return None
 		seasons = indicators['seasons']
-		return [{'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons]
-		# return {season['number']: {'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons}
+
+		# return [{'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons]
+		return {season['number']: {'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons}
 	except:
 		log_utils.error()
 		return None
 
 def markMovieAsWatched(imdb):
-	if not imdb.startswith('tt'): imdb = 'tt' + imdb
-	return getTrakt('/sync/history', {"movies": [{"ids": {"imdb": imdb}}]})
+	try:
+		if not imdb.startswith('tt'): imdb = 'tt' + imdb
+		result = getTraktAsJson('/sync/history', {"movies": [{"ids": {"imdb": imdb}}]})
+		return result['added']['movies'] != 0
+	except:
+		log_utils.error()
 
 def markMovieAsNotWatched(imdb):
-	if not imdb.startswith('tt'): imdb = 'tt' + imdb
-	return getTrakt('/sync/history/remove', {"movies": [{"ids": {"imdb": imdb}}]})
+	try:
+		if not imdb.startswith('tt'): imdb = 'tt' + imdb
+		result = getTraktAsJson('/sync/history/remove', {"movies": [{"ids": {"imdb": imdb}}]})
+		return result['deleted']['movies'] != 0
+	except:
+		log_utils.error()
 
 def markTVShowAsWatched(imdb, tvdb):
-	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
-	result = getTrakt('/sync/history', {"shows": [{"ids": {"tvdb": tvdb}}]})
-	seasonCount(imdb)
-	return result
+	try:
+		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
+		result = getTraktAsJson('/sync/history', {"shows": [{"ids": {"tvdb": tvdb}}]})
+		seasonCount(imdb)
+		return result['added']['episodes'] != 0
+	except:
+		log_utils.error()
 
 def markTVShowAsNotWatched(imdb, tvdb):
-	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
-	result = getTrakt('/sync/history/remove', {"shows": [{"ids": {"tvdb": tvdb}}]})
-	seasonCount(imdb)
-	return result
+	try:
+		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
+		result = getTraktAsJson('/sync/history/remove', {"shows": [{"ids": {"tvdb": tvdb}}]})
+		seasonCount(imdb)
+		return result['deleted']['episodes'] != 0
+	except:
+		log_utils.error()
 
 def markSeasonAsWatched(imdb, tvdb, season):
 	try:
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season = int('%01d' % int(season))
-		result = getTrakt('/sync/history', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
+		result = getTraktAsJson('/sync/history', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
 		seasonCount(imdb)
-		return result
+		return result['added']['episodes'] != 0
 	except:
 		log_utils.error()
 
@@ -982,25 +1001,31 @@ def markSeasonAsNotWatched(imdb, tvdb, season):
 	try:
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season = int('%01d' % int(season))
-		result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
+		result = getTraktAsJson('/sync/history/remove', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
 		seasonCount(imdb)
-		return result
+		return result['deleted']['episodes'] != 0
 	except:
 		log_utils.error()
 
 def markEpisodeAsWatched(imdb, tvdb, season, episode):
-	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
-	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
-	result = getTrakt('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
-	seasonCount(imdb)
-	return result
+	try:
+		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
+		season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
+		result = getTraktAsJson('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
+		seasonCount(imdb)
+		return result['added']['episodes'] != 0
+	except:
+		log_utils.error()
 
 def markEpisodeAsNotWatched(imdb, tvdb, season, episode):
-	if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
-	season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
-	result = getTrakt('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
-	seasonCount(imdb)
-	return result
+	try:
+		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
+		season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
+		result = getTraktAsJson('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
+		seasonCount(imdb)
+		return result['deleted']['episodes'] != 0
+	except:
+		log_utils.error()
 
 def getMovieTranslation(id, lang, full=False):
 	url = '/movies/%s/translations/%s' % (id, lang)

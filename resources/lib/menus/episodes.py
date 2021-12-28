@@ -57,6 +57,9 @@ class Episodes:
 			if season is None and episode is None: # for "flatten" setting
 				def get_episodes(tvshowtitle, imdb, tmdb, tvdb, meta, season):
 					episodes = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+					if not episodes: pass
+					elif episodes[0]['season_isAiring']:
+						episodes = cache.get(self.tmdb_list, 24, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 					all_episodes.extend(episodes)
 				all_episodes = []
 				threads = []
@@ -75,10 +78,16 @@ class Episodes:
 					log_utils.error()
 			elif season and episode: # for "trakt progress-non direct progress scrape" setting
 				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+				if not self.list: pass
+				elif self.list[0]['season_isAiring']:
+					self.list = cache.get(self.tmdb_list, 24, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 				num = [x for x, y in enumerate(self.list) if y['season'] == int(season) and y['episode'] == int(episode)][-1]
 				self.list = [y for x, y in enumerate(self.list) if x >= num]
 			else: # normal full episode list
 				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+				if not self.list: pass
+				elif self.list[0]['season_isAiring']:
+					self.list = cache.get(self.tmdb_list, 24, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 			if self.list is None: self.list = []
 			if create_directory: self.episodeDirectory(self.list)
 			return self.list
@@ -274,7 +283,7 @@ class Episodes:
 				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-		seasonEpisodes = cache.get(tmdb_indexer.TVshows().get_seasonEpisodes_meta, 96, tmdb, season)
+		seasonEpisodes = tmdb_indexer.TVshows().get_seasonEpisodes_meta(tmdb, season)
 		if not seasonEpisodes: return
 		if not isinstance(meta, dict): showSeasons = jsloads(meta)
 		else: showSeasons = meta

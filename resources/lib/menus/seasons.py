@@ -25,7 +25,6 @@ class Seasons:
 		self.lang = control.apiLanguage()['tmdb']
 		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = getSetting('prefer.tmdbArt') == 'true'
-		self.season_special = False
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
 		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w342'
@@ -49,6 +48,14 @@ class Seasons:
 			return self.list
 
 	def tmdb_list(self, tvshowtitle, imdb, tmdb, tvdb, art):
+#### -- Missing id's lookup -- ####
+		trakt_ids = None
+		if (not tmdb or not tvdb) and imdb: trakt_ids = trakt.IdLookup('imdb', imdb, 'show')
+		elif (not tmdb or not imdb) and tvdb: trakt_ids = trakt.IdLookup('tvdb', tvdb, 'show')
+		if trakt_ids:
+			if not imdb: imdb = str(trakt_ids.get('imdb', '')) if trakt_ids.get('imdb') else ''
+			if not tmdb: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
+			if not tvdb: tvdb = str(trakt_ids.get('tvdb', '')) if trakt_ids.get('tvdb') else ''
 		if not tmdb and (imdb or tvdb):
 			try:
 				result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
@@ -57,8 +64,12 @@ class Seasons:
 				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
+#################################
+
 		showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
 		if not showSeasons: return
+		if not showSeasons.get('imdb'): showSeasons['imdb'] = imdb # use value passed from tvshows super_info() due to extensive ID lookups
+		if not showSeasons.get('tvdb'): showSeasons['tvdb'] = tvdb
 		if art: art = jsloads(art) # prob better off leaving this as it's own dict so seasonDirectory list builder can just pull that out and pass to .setArt()
 		for item in showSeasons['seasons']: # seasons not parsed in tmdb module so ['seasons'] here is direct json response
 			try:
@@ -132,8 +143,6 @@ class Seasons:
 			try:
 				title, imdb, tmdb, tvdb, year, season = i.get('tvshowtitle'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('season')
 				label = '%s %s' % (labelMenu, season)
-				if not self.season_special and self.showspecials:
-					self.season_special = True if int(season) == 0 else False
 				try:
 					if i['unaired'] == 'true': label = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, label)
 				except: pass
@@ -184,7 +193,7 @@ class Seasons:
 				item.setArt(art)
 				if unwatchedEnabled:
 					try:
-						count = getSeasonCount(imdb, season, self.season_special) # self.season_special is just a flag to set if a season special exists and we are set to show it
+						count = getSeasonCount(imdb, season)
 						if count:
 							item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 						else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('counts', {}).get(str(season), ''))}) # temp use TMDb's season-episode count for threads not finished....next load counts will update with trakt data

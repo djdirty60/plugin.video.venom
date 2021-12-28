@@ -5,7 +5,7 @@
 
 from json import dumps as jsdumps
 from urllib.parse import quote_plus
-from resources.lib.modules.control import joinPath, transPath, dialog, getSourceHighlightColor, notification
+from resources.lib.modules.control import joinPath, transPath, dialog, getSourceHighlightColor, notification, setting as getSetting
 from resources.lib.modules.source_utils import getFileType
 from resources.lib.modules import tools
 from resources.lib.windows.base import BaseDialog
@@ -23,6 +23,7 @@ class SourceResultsXML(BaseDialog):
 		self.cm = None
 		self.make_items()
 		self.set_properties()
+		self.dnlds_enabled = True if getSetting('downloads') == 'true' and (getSetting('movie.download.path') != '' or getSetting('tv.download.path') != '') else False
 
 	def onInit(self):
 		super(SourceResultsXML, self).onInit()
@@ -77,7 +78,7 @@ class SourceResultsXML(BaseDialog):
 				if 'cached (pack)' in source_dict:
 					cm_list += [('[B]Browse Debrid Pack[/B]', 'showDebridPack')]
 				source = chosen_source.getProperty('venom.source')
-				if not 'UNCACHED' in source:
+				if not 'UNCACHED' in source and self.dnlds_enabled:
 					cm_list += [('[B]Download[/B]', 'download')]
 				if re_match(r'^CACHED.*TORRENT', source):
 					debrid = chosen_source.getProperty('venom.debrid')

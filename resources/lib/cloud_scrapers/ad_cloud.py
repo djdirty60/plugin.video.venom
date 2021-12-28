@@ -8,7 +8,7 @@ import re
 from resources.lib.cloud_scrapers import cloud_utils
 from resources.lib.debrid import alldebrid
 from resources.lib.modules.control import setting as getSetting
-from resources.lib.modules.source_utils import supported_video_extensions
+# from resources.lib.modules.source_utils import supported_video_extensions
 from fenomscrapers.modules import source_utils as fs_utils
 
 invalid_extensions = ('.bmp', '.gif', '.jpg', '.nfo', '.part', '.png', '.rar', '.sample.', '.srt', '.txt', '.zip')
