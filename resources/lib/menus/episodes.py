@@ -18,14 +18,13 @@ from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverl
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
-
 getLS = control.lang
 getSetting = control.setting
+
 
 class Episodes:
 	def __init__(self, notifications=True):
 		self.list = []
-		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.count = getSetting('page.item.limit')
 		self.lang = control.apiLanguage()['tmdb']
 		self.notifications = notifications
@@ -199,6 +198,7 @@ class Episodes:
 				elif url == self.mycalendarRecent_link:
 					if self.list:
 						self.list = [i for i in self.list if int(re.sub(r'[^0-9]', '', str(i['premiered']).split('T')[0])) <= int(re.sub(r'[^0-9]', '', str(self.today_date)))]
+						for i in range(len(self.list)): self.list[i]['calendar_recent'] = True
 						self.list = sorted(self.list, key=lambda k: k['premiered'], reverse=True)
 			elif isTraktHistory:
 				if trakt.getActivity() > cache.timeout(self.trakt_episodes_list, url, self.trakt_user, self.lang):
@@ -511,7 +511,7 @@ class Episodes:
 				tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
 				tvdb = str(ids.get('tvdb', '')) if ids.get('tvdb') else ''
 				episodeIDS = item.get('episode').get('ids', {}) # not used anymore
-				premiered = item.get('episode').get('first_aired') #leave timestamp for better sort of the day
+				premiered = item.get('episode').get('first_aired') #leave timestamp for better sort of same day items
 				added = item['episode']['updated_at'] or item.get('show').get('updated_at', '')
 				try: lastplayed = item.get('watched_at', '')
 				except: lastplayed = ''
@@ -676,6 +676,7 @@ class Episodes:
 		return items
 
 	def episodeDirectory(self, items, unfinished=False, next=True):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32326, message=33049)
 		from resources.lib.modules.player import Bookmarks
@@ -738,25 +739,30 @@ class Episodes:
 				try:
 					if i['unaired'] == 'true': labelProgress = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, labelProgress)
 				except: pass
-
-				if i.get('traktHistory') is True: # uses Trakt lastplayed
+				if i.get('traktHistory') is True: # uses Trakt lastplayed in utc
 					try:
-						air_datetime = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
-						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', ''))
+						air_datetime = tools.convert_time(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p', remove_zeroes=True)
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
 					except: pass
-				if upcoming_prependDate and (i.get('traktUpcomingProgress') is True):
+				if upcoming_prependDate and (i.get('traktUpcomingProgress') is True): # uses TMDb premiered
 					try:
-						if premiered and i.get('airtime'): combined='%sT%s' % (premiered, i.get('airtime', '')) # uses TMDb premiered
+						if premiered and i.get('airtime'): combined='%sT%s' % (premiered, i.get('airtime', ''))
 						else: raise Exception()
-						air_datetime = tools.Time.convert(stringTime=combined, zoneFrom=i.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%b %d %I:%M %p')
-						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', ''))
+						air_datetime = tools.convert_time(stringTime=combined, zoneFrom=i.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%b %d %I:%M %p', remove_zeroes=True)
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
 					except: pass
-				if i.get('calendar_unaired') is True: # uses Trakt premiered
+				if i.get('calendar_unaired') is True: # uses Trakt premiered in utc
 					try:
-						air_datetime = tools.Time.convert(stringTime=premiered, zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %I:%M %p')
-						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', ''))
+						air_datetime = tools.convert_time(stringTime=premiered, zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %I:%M %p', remove_zeroes=True)
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
+						new_date = tools.convert_time(stringTime=premiered, zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%Y-%m-%d')
+						i.update({'premiered': new_date}) # adjust for Trakt utc
 					except: pass
-
+				if i.get('calendar_recent') is True: # uses Trakt premiered in utc
+					try:
+						new_date = tools.convert_time(stringTime=premiered, zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%Y-%m-%d')
+						i.update({'premiered': new_date}) # adjust for Trakt utc
+					except: pass
 				systitle, systvshowtitle, syspremiered = quote_plus(title), quote_plus(tvshowtitle), quote_plus(premiered)
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'episode', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
@@ -778,7 +784,7 @@ class Episodes:
 							elif airFormatTime == '2': formatOutput = '%I:%M %p'
 							else: formatOutput = '%H:%M'
 							abbreviate = airFormatDay == '1'
-							airtime = tools.Time.convert(stringTime=airtime, stringDay=airday, zoneFrom=meta['airzone'], zoneTo=zoneTo, abbreviate=abbreviate, formatOutput=formatOutput)
+							airtime = tools.convert_time(stringTime=airtime, stringDay=airday, zoneFrom=meta['airzone'], zoneTo=zoneTo, abbreviate=abbreviate, formatOutput=formatOutput)
 							if airday: airday, airtime = airtime[1], airtime[0]
 					if airday: air.append(airday)
 					if airtime: air.append(airtime)
@@ -898,8 +904,8 @@ class Episodes:
 					try:
 						if premiered and meta.get('airtime'): combined='%sT%s' % (premiered, meta.get('airtime', ''))
 						else: raise Exception()
-						air_datetime = tools.Time.convert(stringTime=combined, zoneFrom=meta.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%b %d %I:%M %p')
-						new_title = '[COLOR %s][%s]  [/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', '')) + title
+						air_datetime = tools.convert_time(stringTime=combined, zoneFrom=meta.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%b %d %I:%M %p', remove_zeroes=True)
+						new_title = '[COLOR %s][%s]  [/COLOR]' % (self.highlight_color, air_datetime) + title
 						meta.update({'title': new_title})
 					except: pass
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))

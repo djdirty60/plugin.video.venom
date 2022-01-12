@@ -301,10 +301,10 @@ class TVshows:
 		sort = int(getSetting('sort.%s.type' % type))
 		imdb_sort = 'list_order' if type == 'shows.watchlist' else 'moviemeter'
 		if sort == 1: imdb_sort = 'alpha'
-		if sort == 2: imdb_sort = 'user_rating'
-		if sort == 3: imdb_sort = 'num_votes'
-		if sort == 4: imdb_sort = 'release_date'
-		if sort in (5, 6): imdb_sort = 'date_added'
+		elif sort == 2: imdb_sort = 'user_rating'
+		elif sort == 3: imdb_sort = 'num_votes'
+		elif sort == 4: imdb_sort = 'release_date'
+		elif sort in (5, 6): imdb_sort = 'date_added'
 		imdb_sort_order = ',asc' if (int(getSetting('sort.%s.order' % type)) == 0 or sort == 0) else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
@@ -312,11 +312,10 @@ class TVshows:
 	def tmdb_DiscoverSort(self):
 		sort = int(getSetting('sort.shows.type'))
 		tmdb_sort = 'popularity' # default sort=0
-		# if sort == 1: tmdb_sort = 'original_title'
 		if sort == 1: tmdb_sort = 'title'
-		if sort == 2: tmdb_sort = 'vote_average'
-		if sort == 3: tmdb_sort = 'vote_count'
-		if sort in (4, 5, 6): tmdb_sort = 'primary_release_date'
+		elif sort == 2: tmdb_sort = 'vote_average'
+		elif sort == 3: tmdb_sort = 'vote_count'
+		elif sort in (4, 5, 6): tmdb_sort = 'primary_release_date'
 		tmdb_sort_order = '.asc' if (int(getSetting('sort.movies.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
 		if sort == 2: sort_string = sort_string + '&vote_count.gte=500'

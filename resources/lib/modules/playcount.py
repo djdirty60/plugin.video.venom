@@ -254,8 +254,6 @@ def episodes(name, imdb, tvdb, season, episode, watched):
 			log_utils.log('watched_episodes=%s' % watched_episodes)
 
 			# tvshowsUpdate(imdb=imdb, tvdb=tvdb) # control.refresh() done in this function
-
-
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()
@@ -283,7 +281,6 @@ def tvshows(tvshowtitle, imdb, tvdb, season, watched):
 			metaget.get_meta('tvshow', name='', imdb_id=imdb)
 
 			items = episodes.Episodes().get(tvshowtitle, '0', imdb, tvdb, {}, create_directory=False)
-
 
 			for i in range(len(items)):
 				items[i]['season'] = int(items[i]['season'])

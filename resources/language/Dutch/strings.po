@@ -91,8 +91,8 @@ msgid "Browse Progress"
 msgstr "Blader door voortgang"
 
 msgctxt "#32017"
-msgid "check IMDb year for Movies"
-msgstr "controleer IMDb jaar voor films"
+msgid "check IMDb meta"
+msgstr "controleer IMDb-meta"
 
 msgctxt "#32018"
 msgid "Most Popular"
@@ -935,11 +935,15 @@ msgid "Require Year in source for known Reboot shows"
 msgstr "Jaar in bron vereisen voor bekende reboot-shows"
 
 msgctxt "#32228"
-msgid "Remove show packs due to RD cache checking bug"
-msgstr "Showpacks verwijderen vanwege RD-cachecontrolefout"
+msgid ""
+msgstr ""
 
 msgctxt "#32229"
-msgid ""
+msgid "Prioritize HEVC to top"
+msgstr ""
+
+msgctxt "#32230"
+msgid "Geef prioriteit aan HEVC naar boven"
 msgstr ""
 
 

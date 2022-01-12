@@ -24,7 +24,6 @@ getSetting = control.setting
 class Collections:
 	def __init__(self):
 		self.list = []
-		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.page_limit = getSetting('page.item.limit')
 		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = getSetting('prefer.tmdbArt') == 'true'
@@ -699,8 +698,8 @@ class Collections:
 		sort = int(getSetting('sort.collections.type'))
 		imdb_sort = 'alpha'
 		if sort == 1: imdb_sort = 'alpha'
-		if sort == 2: imdb_sort = 'user_rating'
-		if sort == 3: imdb_sort = 'release_date'
+		elif sort == 2: imdb_sort = 'user_rating'
+		elif sort == 3: imdb_sort = 'release_date'
 		imdb_sort_order = ',asc' if (int(getSetting('sort.collections.order')) == 0) else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
@@ -709,8 +708,8 @@ class Collections:
 		sort = int(getSetting('sort.collections.type'))
 		tmdb_sort = 'title'
 		if sort == 1: tmdb_sort = 'title'
-		if sort == 2: tmdb_sort = 'vote_average'
-		if sort == 3: tmdb_sort = 'primary_release_date'
+		elif sort == 2: tmdb_sort = 'vote_average'
+		elif sort == 3: tmdb_sort = 'primary_release_date'
 		tmdb_sort_order = '.asc' if (int(getSetting('sort.collections.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
 		return sort_string

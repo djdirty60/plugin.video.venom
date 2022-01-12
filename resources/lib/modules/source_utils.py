@@ -206,6 +206,8 @@ def aliases_check(title, aliases):
 			for i in aliases:
 				if i.get('title') not in bad_aliases.get(title): fixed_aliases.append(i)
 			aliases = fixed_aliases
+		if title == 'Gomorrah': aliases.append({'title': 'Gomorra', 'country': ''})
+		if title == 'Daredevil': aliases.append({'title': "Marvel's Daredevil", 'country': 'us'})
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()

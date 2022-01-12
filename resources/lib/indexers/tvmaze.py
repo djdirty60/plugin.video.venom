@@ -9,7 +9,6 @@ from threading import Thread
 from urllib.parse import quote_plus
 from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
-from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules.control import notification, sleep, apiLanguage, setting as getSetting
 from resources.lib.modules import log_utils

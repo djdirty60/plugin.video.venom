@@ -182,18 +182,13 @@ class SourceResultsXML(BaseDialog):
 	def set_properties(self):
 		if self.meta is None: return
 		try:
-			# self.setProperty('venom.mediatype', self.meta.get('mediatype', ''))
 			self.setProperty('venom.season', str(self.meta.get('season', '')))
 			if self.meta.get('season_poster'):	self.setProperty('venom.poster', self.meta.get('season_poster', ''))
 			else: self.setProperty('venom.poster', self.meta.get('poster', ''))
-			# self.setProperty('venom.fanart', self.meta.get('fanart', ''))
-			# self.setProperty('venom.clearart', self.meta.get('clearart', ''))
 			self.setProperty('venom.clearlogo', self.meta.get('clearlogo', ''))
-			# title = self.meta.get('tvshowtitle') if self.meta.get('tvshowtitle') else self.meta.get('title')
-			# self.setProperty('venom.title', title) # was going to use this for missing clearlogo
 			self.setProperty('venom.plot', self.meta.get('plot', ''))
 			self.setProperty('venom.year', str(self.meta.get('year', '')))
-			new_date = tools.Time.convert(stringTime=str(self.meta.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')
+			new_date = tools.convert_time(stringTime=str(self.meta.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')
 			self.setProperty('venom.premiered', new_date)
 			if self.meta.get('mpaa'): self.setProperty('venom.mpaa', self.meta.get('mpaa'))
 			else: self.setProperty('venom.mpaa', 'NA ')

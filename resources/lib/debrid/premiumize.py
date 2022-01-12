@@ -10,6 +10,7 @@ from urllib.parse import quote_plus, urlencode
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
+from resources.lib.modules import string_tools
 from resources.lib.modules.source_utils import supported_video_extensions
 
 getLS = control.lang
@@ -409,7 +410,7 @@ class Premiumize:
 			try:
 				cm = []
 				type = item['type']
-				name = control.strip_non_ascii_and_unprintable(item['name'])
+				name = string_tools.strip_non_ascii_and_unprintable(item['name'])
 				if type == 'folder':
 					isFolder = True
 					size = 0
@@ -464,7 +465,7 @@ class Premiumize:
 			try:
 				cm = []
 				type = 'folder' if item['file_id'] is None else 'file'
-				name = control.strip_non_ascii_and_unprintable(item['name'])
+				name = string_tools.strip_non_ascii_and_unprintable(item['name'])
 				status = item['status']
 				progress = item['progress']
 				if status == 'finished': progress = 100

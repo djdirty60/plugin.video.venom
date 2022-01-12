@@ -131,17 +131,16 @@ def doDownload(url, dest, title, image, headers):
 	resume = 0
 	sleep = 0
 	control.hide()
-	if control.yesnoDialog('File Size: %sGB' % gb, 'Path: %s' % dest, 'Continue with download?', '[B]Confirm Download[/B]', 'Confirm',  'Cancel') == 1: return
+	if control.yesnoDialog('File Size: %sGB' % gb, 'Path: %s' % dest, 'Continue with download?', '[B]Confirm Download[/B]', 'Confirm', 'Cancel') == 1: return
 	f = control.openFile(dest, 'w')
-	chunk  = None
+	chunk = None
 	chunks = []
-	import xbmcgui
 	while True:
 		downloaded = total
 		for c in chunks: downloaded += len(c)
 		percent = min(100 * downloaded / content, 100)
 		if percent >= notify:
-			control.notification(title=title + ' - Download Progress - ' + str(int(percent)) + '%', message='', icon=image, time=3000) #xbmcgui.Dialog().notification() auto scroll time to complete supercedes allowed "time=" to run in Silvo, removed dest
+			control.notification(title=str(int(percent)) + '%', message=title, icon=image, time=3000) #xbmcgui.Dialog().notification() auto scroll time to complete supercedes allowed "time=" to run in Silvo, removed dest
 			notify += 20
 		chunk = None
 		error = False

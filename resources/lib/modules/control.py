@@ -3,12 +3,8 @@
 	Venom Add-on
 """
 
-from datetime import datetime
 from json import dumps as jsdumps, loads as jsloads
 import os.path
-from string import printable
-from sys import version_info
-import time
 import xbmc
 import xbmcaddon
 import xbmcgui
@@ -16,7 +12,6 @@ import xbmcplugin
 import xbmcvfs
 import xml.etree.ElementTree as ET
 
-pythonVersion = '{}.{}.{}'.format(version_info[0], version_info[1], version_info[2])
 addon = xbmcaddon.Addon
 AddonID = xbmcaddon.Addon().getAddonInfo('id')
 addonInfo = xbmcaddon.Addon().getAddonInfo
@@ -29,6 +24,7 @@ numeric_input = xbmcgui.INPUT_NUMERIC
 getCurrentDialogId = xbmcgui.getCurrentWindowDialogId()
 getCurrentWindowId = xbmcgui.getCurrentWindowId()
 homeWindow = xbmcgui.Window(10000)
+playerWindow = xbmcgui.Window(12005)
 item = xbmcgui.ListItem
 progressDialog = xbmcgui.DialogProgress()
 progressDialogBG = xbmcgui.DialogProgressBG()
@@ -45,7 +41,6 @@ execute = xbmc.executebuiltin
 infoLabel = xbmc.getInfoLabel
 jsonrpc = xbmc.executeJSONRPC
 keyboard = xbmc.Keyboard
-legalFilename = xbmcvfs.makeLegalFilename
 log = xbmc.log
 monitor_class = xbmc.Monitor
 monitor = monitor_class()
@@ -53,15 +48,16 @@ player = xbmc.Player()
 player2 = xbmc.Player
 playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 skin = xbmc.getSkinDir()
-transPath = xbmcvfs.translatePath
 
 deleteDir = xbmcvfs.rmdir
 deleteFile = xbmcvfs.delete
 existsPath = xbmcvfs.exists
+legalFilename = xbmcvfs.makeLegalFilename
 listDir = xbmcvfs.listdir
 makeFile = xbmcvfs.mkdir
 makeDirs = xbmcvfs.mkdirs
 openFile = xbmcvfs.File
+transPath = xbmcvfs.translatePath
 
 joinPath = os.path.join
 isfilePath = os.path.isfile
@@ -132,8 +128,7 @@ def openSettings(query=None, id=addonInfo('id')):
 		log_utils.error()
 
 def lang(language_id):
-	text = getLangString(language_id)
-	return str(text)
+	return str(getLangString(language_id))
 
 def sleep(time):  # Modified `sleep`(in milli secs) that honors a user exit request
 	while time > 0 and not monitor.abortRequested():
@@ -259,7 +254,6 @@ def context(items=None, labels=None):
 		else: return False
 	else: return dialog.contextmenu(labels)
 
-
 ####################################################
 # --- Built-in
 ####################################################
@@ -287,30 +281,26 @@ def refreshRepos():
 ########################
 
 def cancelPlayback():
-	try:
-		from sys import argv
-		playlist.clear()
-		resolve(int(argv[1]), False, item(offscreen=True))
-		closeOk()
-	except:
-		from resources.lib.modules import log_utils
-		log_utils.error()
+	from sys import argv
+	playlist.clear()
+	resolve(int(argv[1]), False, item(offscreen=True))
+	closeOk()
 
 def apiLanguage(ret_name=None):
 	langDict = {'Bulgarian': 'bg', 'Chinese': 'zh', 'Croatian': 'hr', 'Czech': 'cs', 'Danish': 'da', 'Dutch': 'nl', 'English': 'en', 'Finnish': 'fi',
 					'French': 'fr', 'German': 'de', 'Greek': 'el', 'Hebrew': 'he', 'Hungarian': 'hu', 'Italian': 'it', 'Japanese': 'ja', 'Korean': 'ko',
 					'Norwegian': 'no', 'Polish': 'pl', 'Portuguese': 'pt', 'Romanian': 'ro', 'Russian': 'ru', 'Serbian': 'sr', 'Slovak': 'sk',
 						'Slovenian': 'sl', 'Spanish': 'es', 'Swedish': 'sv', 'Thai': 'th', 'Turkish': 'tr', 'Ukrainian': 'uk'}
-	trakt = ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'zh']
-	tvdb = ['en', 'sv', 'no', 'da', 'fi', 'nl', 'de', 'it', 'es', 'fr', 'pl', 'hu', 'el', 'tr', 'ru', 'he', 'ja', 'pt', 'zh', 'cs', 'sl', 'hr', 'ko']
-	youtube = ['gv', 'gu', 'gd', 'ga', 'gn', 'gl', 'ty', 'tw', 'tt', 'tr', 'ts', 'tn', 'to', 'tl', 'tk', 'th', 'ti', 'tg', 'te', 'ta', 'de', 'da', 'dz', 'dv', 'qu', 'zh', 'za', 'zu',
+	trakt = ('bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'zh')
+	tvdb = ('en', 'sv', 'no', 'da', 'fi', 'nl', 'de', 'it', 'es', 'fr', 'pl', 'hu', 'el', 'tr', 'ru', 'he', 'ja', 'pt', 'zh', 'cs', 'sl', 'hr', 'ko')
+	youtube = ('gv', 'gu', 'gd', 'ga', 'gn', 'gl', 'ty', 'tw', 'tt', 'tr', 'ts', 'tn', 'to', 'tl', 'tk', 'th', 'ti', 'tg', 'te', 'ta', 'de', 'da', 'dz', 'dv', 'qu', 'zh', 'za', 'zu',
 					'wa', 'wo', 'jv', 'ja', 'ch', 'co', 'ca', 'ce', 'cy', 'cs', 'cr', 'cv', 'cu', 'ps', 'pt', 'pa', 'pi', 'pl', 'mg', 'ml', 'mn', 'mi', 'mh', 'mk', 'mt', 'ms',
 					'mr', 'my', 've', 'vi', 'is', 'iu', 'it', 'vo', 'ii', 'ik', 'io', 'ia', 'ie', 'id', 'ig', 'fr', 'fy', 'fa', 'ff', 'fi', 'fj', 'fo', 'ss', 'sr', 'sq', 'sw', 'sv', 'su', 'st', 'sk',
 					'si', 'so', 'sn', 'sm', 'sl', 'sc', 'sa', 'sg', 'se', 'sd', 'lg', 'lb', 'la', 'ln', 'lo', 'li', 'lv', 'lt', 'lu', 'yi', 'yo', 'el', 'eo', 'en', 'ee', 'eu', 'et', 'es', 'ru',
 					'rw', 'rm', 'rn', 'ro', 'be', 'bg', 'ba', 'bm', 'bn', 'bo', 'bh', 'bi', 'br', 'bs', 'om', 'oj', 'oc', 'os', 'or', 'xh', 'hz', 'hy', 'hr', 'ht', 'hu', 'hi', 'ho',
 					'ha', 'he', 'uz', 'ur', 'uk', 'ug', 'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'as', 'ar', 'av', 'ay', 'az', 'nl', 'nn', 'no', 'na', 'nb', 'nd', 'ne', 'ng',
-					'ny', 'nr', 'nv', 'ka', 'kg', 'kk', 'kj', 'ki', 'ko', 'kn', 'km', 'kl', 'ks', 'kr', 'kw', 'kv', 'ku', 'ky']
-	tmdb = ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'zh']
+					'ny', 'nr', 'nv', 'ka', 'kg', 'kk', 'kj', 'ki', 'ko', 'kn', 'km', 'kl', 'ks', 'kr', 'kw', 'kv', 'ku', 'ky')
+	tmdb = ('bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'zh')
 	name = None
 	name = setting('api.language')
 	if not name: name = 'AUTO'
@@ -335,27 +325,17 @@ def autoTraktSubscription(tvshowtitle, year, imdb, tvdb): #---start adding TMDb 
 	library.libtvshows().add(tvshowtitle, year, imdb, tvdb)
 
 def getColor(n):
-	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
-						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor']
+	colorChart = ('blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
+						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor')
 	if not n: n = '8'
 	color = colorChart[int(n)]
 	return color
 
 def getHighlightColor():
-	n = setting('highlight.color')
-	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
-						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor']
-	if not n: n = '8'
-	color = colorChart[int(n)]
-	return color
+	return getColor(setting('highlight.color'))
 
 def getSourceHighlightColor():
-	n = setting('sources.highlight.color')
-	colorChart = ['blue', 'red', 'yellow', 'deeppink', 'cyan', 'lawngreen', 'gold', 'magenta', 'yellowgreen',
-						'skyblue', 'lime', 'limegreen', 'deepskyblue', 'white', 'whitesmoke', 'nocolor']
-	if not n: n = '8'
-	color = colorChart[int(n)]
-	return color
+	return getColor(setting('sources.highlight.color'))
 
 def getMenuEnabled(menu_title):
 	is_enabled = setting(menu_title).strip()
@@ -371,8 +351,7 @@ def trigger_widget_refresh():
 	# execute('UpdateLibrary(video,/fake/path/to/force/refresh/on/home)') # make sure this is ok coupled with above
 
 def refresh_playAction(): # for venom global CM play actions
-	play_mode = setting('play.mode')
-	autoPlay = 'true' if play_mode == '1' else ''
+	autoPlay = 'true' if setting('play.mode') == '1' else ''
 	homeWindow.setProperty('venom.autoPlay.enabled', autoPlay)
 
 def refresh_libPath(): # for venom global CM library actions
@@ -384,35 +363,11 @@ def refresh_debugReversed(): # called from service "onSettingsChanged" to clear 
 		homeWindow.setProperty('venom.debug.reversed', setting('debug.reversed'))
 		execute('RunPlugin(plugin://plugin.video.venom/?action=tools_clearLogFile)')
 
-def datetime_workaround(string_date, format="%Y-%m-%d", date_only=True):
-	sleep(200)
-	try:
-		if string_date == '': return None
-		try:
-			if date_only: res = datetime.strptime(string_date, format).date()
-			else: res = datetime.strptime(string_date, format)
-		except TypeError:
-			if date_only: res = datetime(*(time.strptime(string_date, format)[0:6])).date()
-			else: res = datetime(*(time.strptime(string_date, format)[0:6]))
-		return res
-	except:
-		from resources.lib.modules import log_utils
-		log_utils.error()
-
 def metadataClean(metadata):
 	if not metadata: return metadata
-	allowed = ['genre', 'country', 'year', 'episode', 'season', 'sortepisode', 'sortseason', 'episodeguide', 'showlink',
+	allowed = ('genre', 'country', 'year', 'episode', 'season', 'sortepisode', 'sortseason', 'episodeguide', 'showlink',
 					'top250', 'setid', 'tracknumber', 'rating', 'userrating', 'watched', 'playcount', 'overlay', 'cast', 'castandrole',
 					'director', 'mpaa', 'plot', 'plotoutline', 'title', 'originaltitle', 'sorttitle', 'duration', 'studio', 'tagline', 'writer',
 					'tvshowtitle', 'premiered', 'status', 'set', 'setoverview', 'tag', 'imdbnumber', 'code', 'aired', 'credits', 'lastplayed',
-					'album', 'artist', 'votes', 'path', 'trailer', 'dateadded', 'mediatype', 'dbid']
+					'album', 'artist', 'votes', 'path', 'trailer', 'dateadded', 'mediatype', 'dbid')
 	return {k: v for k, v in iter(metadata.items()) if k in allowed}
-
-def strip_non_ascii_and_unprintable(text):
-	try:
-		result = ''.join(char for char in text if char in printable)
-		return result.encode('ascii', errors='ignore').decode('ascii', errors='ignore')
-	except:
-		from resources.lib.modules import log_utils
-		log_utils.error()
-		return text

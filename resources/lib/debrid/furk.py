@@ -7,6 +7,7 @@ from sys import argv
 import requests
 from urllib.parse import quote_plus
 from resources.lib.modules import control
+from resources.lib.modules import string_tools
 from resources.lib.modules.source_utils import supported_video_extensions
 
 accepted_extensions = tuple(supported_video_extensions())
@@ -49,8 +50,7 @@ class Furk:
 
 				if cached:
 					files_num_video = item['files_num_video']
-					name = control.strip_non_ascii_and_unprintable(item['name'])
-					# log_utils.log('name = %s' % name)
+					name = string_tools.strip_non_ascii_and_unprintable(item['name'])
 
 					item_id = item['id'] if cached else item['info_hash']
 					url_dl = item['url_dl'] if cached else item['info_hash']
@@ -174,7 +174,7 @@ class Furk:
 			try:
 				if item['is_ready'] == '1' and item['type'] == 'video':
 					cm = []
-					name = control.strip_non_ascii_and_unprintable(item['name'])
+					name = string_tools.strip_non_ascii_and_unprintable(item['name'])
 					file_id = item['id']
 					url_dl = item['url_dl']
 					if url_dl == '': continue

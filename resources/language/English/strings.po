@@ -91,7 +91,7 @@ msgid "Browse Progress"
 msgstr ""
 
 msgctxt "#32017"
-msgid "check IMDb Movie meta"
+msgid "check IMDb meta"
 msgstr ""
 
 msgctxt "#32018"
@@ -935,10 +935,14 @@ msgid "Require Year in source for known Reboot shows"
 msgstr ""
 
 msgctxt "#32228"
-msgid "Remove show packs due to RD cache checking bug"
+msgid ""
 msgstr ""
 
 msgctxt "#32229"
+msgid "Prioritize HEVC to top"
+msgstr ""
+
+msgctxt "#32230"
 msgid ""
 msgstr ""
 

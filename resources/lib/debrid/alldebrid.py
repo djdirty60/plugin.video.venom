@@ -11,6 +11,7 @@ from urllib.parse import quote_plus
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
+from resources.lib.modules import string_tools
 from resources.lib.modules.source_utils import supported_video_extensions
 
 getLS = control.lang
@@ -37,7 +38,6 @@ class AllDebrid:
 			if self.token == '': return None
 			url = base_url + url + '?agent=%s&apikey=%s' % (user_agent, self.token) + url_append
 			response = requests.get(url, timeout=self.timeout)
-			# log_utils.log('response.status_code =%s' % response.status_code)
 			if 'Response [500]' in str(response):
 				log_utils.log('AllDebrid: Status code 500 – Internal Server Error', __name__, log_utils.LOGWARNING)
 				return None
@@ -273,7 +273,7 @@ class AllDebrid:
 					try: percent = str(round(float(downloaded) / size * 100, 1))
 					except: percent = '0'
 				else: active = False
-				folder_name = control.strip_non_ascii_and_unprintable(item['filename'])
+				folder_name = string_tools.strip_non_ascii_and_unprintable(item['filename'])
 				id = item['id']
 				status_str = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), item['status'].capitalize())
 				if active: label = '%02d | [B]%s[/B] - %s | [B]%s[/B]' % (count, status_str, str(percent) + '%', folder_name)
@@ -307,7 +307,7 @@ class AllDebrid:
 		for count, item in enumerate(cloud_dict, 1):
 			try:
 				cm = []
-				folder_name = control.strip_non_ascii_and_unprintable(item['filename'])
+				folder_name = string_tools.strip_non_ascii_and_unprintable(item['filename'])
 				id = item['id']
 				status_str = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), item['status'].capitalize())
 				label = '%02d | [B]%s[/B] | [B]%s[/B] | [I]%s [/I]' % (count, status_str, folder_str, folder_name)
@@ -336,7 +336,7 @@ class AllDebrid:
 			try:
 				cm = []
 				url_link = item['link']
-				name = control.strip_non_ascii_and_unprintable(item['filename'])
+				name = string_tools.strip_non_ascii_and_unprintable(item['filename'])
 				if name.lower().endswith(invalid_extensions): continue
 
 				if not name.lower().endswith(tuple(extensions)):
@@ -348,7 +348,7 @@ class AllDebrid:
 						name = entry[0].get('n') if isinstance(entry, list) else entry.get('n')
 						if not name.lower().endswith(tuple(extensions)):
 							return entry_loop(entry)
-						else: return control.strip_non_ascii_and_unprintable(name)
+						else: return string_tools.strip_non_ascii_and_unprintable(name)
 					if not name.lower().endswith(tuple(extensions)):
 						name = entry_loop(entry)
 				size = item['size']

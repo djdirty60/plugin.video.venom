@@ -12,10 +12,11 @@ try: from sqlite3 import dbapi2 as database
 except: from pysqlite2 import dbapi2 as database
 from urllib.parse import parse_qsl, quote_plus
 from resources.lib.modules import control
+from resources.lib.modules import cleandate
 from resources.lib.modules import cleantitle
 from resources.lib.modules import library_sources
 from resources.lib.modules import log_utils
-
+from resources.lib.modules import string_tools
 folder_setup = False
 service_update = control.setting('library.service.update') == 'true'
 service_notification = control.setting('library.service.notification') == 'true'
@@ -189,7 +190,7 @@ class lib_tools:
 			try:
 				last_service = control.homeWindow.getProperty(self.property)
 				t1 = timedelta(hours=6)
-				t2 = control.datetime_workaround(str(last_service), '%Y-%m-%d %H:%M:%S.%f', False)
+				t2 = cleandate.datetime_from_string(str(last_service), '%Y-%m-%d %H:%M:%S.%f', False)
 				t3 = datetime.now()
 				check = abs(t3 - t2) >= t1
 				if not check: continue
@@ -404,7 +405,7 @@ class libmovies:
 			systitle = quote_plus(title)
 			try: transtitle = title.translate(None, '\/:*?"<>|')
 			except: transtitle = title.translate(title.maketrans('', '', '\/:*?"<>|'))
-			transtitle = cleantitle.normalize(transtitle)
+			transtitle = string_tools.normalize(transtitle)
 			if control.setting('library.strm.use_tmdbhelper') == 'true':
 				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=movie&islocal=True&tmdb_id=%s' % tmdb
 			else:
@@ -643,7 +644,7 @@ class libtvshows:
 			systvshowtitle, syspremiered = quote_plus(tvshowtitle), quote_plus(premiered)
 			try: transtitle = tvshowtitle.translate(None, '\/:*?"<>|')
 			except: transtitle = tvshowtitle.translate(tvshowtitle.maketrans('', '', '\/:*?"<>|'))
-			transtitle = cleantitle.normalize(transtitle)
+			transtitle = string_tools.normalize(transtitle)
 			if control.setting('library.strm.use_tmdbhelper') == 'true':
 				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&islocal=True&tmdb_id=%s&season=%s&episode=%s&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&tvshowtitle=%s&premiered=%s' % (
 							tmdb, season, episode, systitle, year, imdb, tmdb, tvdb, systvshowtitle, syspremiered)

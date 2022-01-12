@@ -10,6 +10,7 @@ import re
 import requests
 from urllib.parse import quote, quote_plus
 from resources.lib.modules import control
+from resources.lib.modules import string_tools
 
 getLS = control.lang
 getSetting = control.setting
@@ -125,7 +126,7 @@ class EasyNews:
 		for count, item in enumerate(files, 1):
 			try:
 				cm = []
-				name = control.strip_non_ascii_and_unprintable(item['name'])
+				name = string_tools.strip_non_ascii_and_unprintable(item['name'])
 				url_dl = item['url_dl']
 				sysurl_dl = quote_plus(url_dl)
 				size = str(round(float(int(item['rawSize'])) / 1048576000, 1))

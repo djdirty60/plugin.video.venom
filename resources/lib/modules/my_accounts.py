@@ -80,9 +80,9 @@ def syncMyAccounts(silent=False):
 		if getSetting('tmdb.session_id') != tmdb_acct.get('session_id'):
 			setSetting('tmdb.session_id', tmdb_acct.get('session_id'))
 
-		tvdb_acct = all_acct.get('tvdb')
-		if getSetting('tvdb.api.key') != tvdb_acct.get('api_key'):
-			setSetting('tvdb.api.key', tvdb_acct.get('api_key'))
+		# tvdb_acct = all_acct.get('tvdb') # no longer used in Venom
+		# if getSetting('tvdb.api.key') != tvdb_acct.get('api_key'):
+			# setSetting('tvdb.api.key', tvdb_acct.get('api_key'))
 
 		imdb_acct = all_acct.get('imdb')
 		if getSetting('imdb.user') != imdb_acct.get('user'):

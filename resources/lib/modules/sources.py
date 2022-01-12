@@ -14,15 +14,17 @@ from urllib.parse import unquote
 try: from sqlite3 import dbapi2 as database
 except ImportError: from pysqlite2 import dbapi2 as database
 from resources.lib.database import metacache, providerscache
-from resources.lib.modules import cleantitle
+from resources.lib.modules import cleandate
 from resources.lib.modules import control
 from resources.lib.modules import debrid
 from resources.lib.modules import log_utils
+from resources.lib.modules import string_tools
 from resources.lib.modules.source_utils import supported_video_extensions, getFileType, aliases_check
 from resources.lib.cloud_scrapers import cloudSources
 from fenomscrapers import sources as fs_sources
 
 homeWindow = control.homeWindow
+playerWindow = control.playerWindow
 getLS = control.lang
 getSetting = control.setting
 sourceFile = control.providercacheFile
@@ -56,10 +58,12 @@ class Sources:
 			control.sleep(200) ; control.hide()
 			return control.notification(message=33034)
 		try:
-			preResolved_nextUrl = homeWindow.getProperty('venom.preResolved_nextUrl')
+			control.sleep(200)
+			preResolved_nextUrl = playerWindow.getProperty('venom.preResolved_nextUrl')
 			if preResolved_nextUrl != '':
+				control.sleep(500)
 				log_utils.log('Playing preResolved_nextUrl = %s' % preResolved_nextUrl, level=log_utils.LOGDEBUG)
-				homeWindow.clearProperty('venom.preResolved_nextUrl')
+				playerWindow.clearProperty('venom.preResolved_nextUrl')
 				try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
 				except: pass
 				from resources.lib.modules import player
@@ -85,16 +89,16 @@ class Sources:
 			homeWindow.clearProperty(self.labelProperty)
 			homeWindow.setProperty(self.labelProperty, p_label)
 			url = None
-			self.mediatype = 'movie'
+			self.mediatype = 'movie' if tvshowtitle is None else 'episode'
 			try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
 			except: pass
 			self.meta = meta
-			if tvshowtitle is None and getSetting('imdb.meta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
-				title, year = self.movie_chk_imdb(imdb, title, year)
+			if self.mediatype == 'movie' and getSetting('imdb.meta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
+				title, year = self.imdb_meta_chk(imdb, title, year)
 				if title == 'The F**k-It List': title = 'The Fuck-It List'
-			if tvshowtitle is not None: # get "total_seasons" and "season_isAiring" for Pack scrapers. 1st=passed meta, 2nd=matacache check, 3rd=request
+			if self.mediatype == 'episode' and getSetting('imdb.meta.check') == 'true':
+				tvshowtitle, year = self.imdb_meta_chk(imdb, tvshowtitle, year)
 				if tvshowtitle == 'The End of the F***ing World': tvshowtitle = 'The End of the Fucking World'
-				self.mediatype = 'episode'
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
 			if rescrape: self.clr_item_providers(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
 			items = providerscache.get(self.getSources, 48, title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
@@ -571,16 +575,18 @@ class Sources:
 
 	def preResolve(self, next_sources, next_meta):
 		try:
+			if not next_sources: raise Exception()
 			homeWindow.setProperty(self.metaProperty, jsdumps(next_meta))
 			if getSetting('autoplay.sd') == 'true': next_sources = [i for i in next_sources if not i['quality'] in ('4K', '1080p', '720p')]
 			uncached_filter = [i for i in next_sources if re.match(r'^uncached.*torrent', i['source'])]
 			next_sources = [i for i in next_sources if i not in uncached_filter]
 		except:
 			log_utils.error()
-			return homeWindow.clearProperty('venom.preResolved_nextUrl')
+			return playerWindow.clearProperty('venom.preResolved_nextUrl')
+
 		for i in range(len(next_sources)):
 			try:
-				control.sleep(200)
+				control.sleep(1000)
 				try:
 					if control.monitor.abortRequested(): return sysexit()
 					url = self.sourcesResolve(next_sources[i])
@@ -591,8 +597,13 @@ class Sources:
 						log_utils.log('preResolve Playback not supported for (sourcesAutoPlay()): %s' % url, level=log_utils.LOGWARNING)
 						continue
 					if url:
-						homeWindow.setProperty('venom.preResolved_nextUrl', url)
-						log_utils.log('preResolved_nextUrl : %s' % url, level=log_utils.LOGDEBUG)
+						control.sleep(500)
+						player_hasVideo = control.condVisibility('Player.HasVideo')
+						if player_hasVideo: # do not setPropery if user stops playback quickly because "onPlayBackStopped" is already called and won't be able to clear it.
+							playerWindow.setProperty('venom.preResolved_nextUrl', url)
+							log_utils.log('preResolved_nextUrl : %s' % url, level=log_utils.LOGDEBUG)
+						else:
+							log_utils.log('player_hasVideo = %s : skipping setting preResolved_nextUrl' % player_hasVideo, level=log_utils.LOGWARNING)
 						break
 				except: pass
 			except:
@@ -629,7 +640,7 @@ class Sources:
 			sources = []
 			db_movie = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season='' AND episode='')''', (source, imdb)).fetchone()
 			if db_movie:
-				timestamp = control.datetime_workaround(str(db_movie[5]), '%Y-%m-%d %H:%M:%S.%f', False)
+				timestamp = cleandate.datetime_from_string(str(db_movie[5]), '%Y-%m-%d %H:%M:%S.%f', False)
 				db_movie_valid = abs(self.time - timestamp) < single_expiry
 				if db_movie_valid:
 					sources = eval(db_movie[4])
@@ -666,7 +677,7 @@ class Sources:
 			try:
 				db_singleEpisodes = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season=? AND episode=?)''', (source, imdb, season, episode)).fetchone()
 				if db_singleEpisodes:
-					timestamp = control.datetime_workaround(str(db_singleEpisodes[5]), '%Y-%m-%d %H:%M:%S.%f', False)
+					timestamp = cleandate.datetime_from_string(str(db_singleEpisodes[5]), '%Y-%m-%d %H:%M:%S.%f', False)
 					db_singleEpisodes_valid = abs(self.time - timestamp) < single_expiry
 					if db_singleEpisodes_valid:
 						sources = eval(db_singleEpisodes[4])
@@ -677,7 +688,7 @@ class Sources:
 			try:
 				db_seasonPacks = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season=? AND episode='')''', (source, imdb, season)).fetchone()
 				if db_seasonPacks:
-					timestamp = control.datetime_workaround(str(db_seasonPacks[5]), '%Y-%m-%d %H:%M:%S.%f', False)
+					timestamp = cleandate.datetime_from_string(str(db_seasonPacks[5]), '%Y-%m-%d %H:%M:%S.%f', False)
 					db_seasonPacks_valid = abs(self.time - timestamp) < season_expiry
 					if db_seasonPacks_valid:
 						sources = eval(db_seasonPacks[4])
@@ -688,7 +699,7 @@ class Sources:
 			try:
 				db_showPacks = dbcur.execute('''SELECT * FROM rel_src WHERE (source=? AND imdb_id=? AND season='' AND episode='')''', (source, imdb)).fetchone()
 				if db_showPacks:
-					timestamp = control.datetime_workaround(str(db_showPacks[5]), '%Y-%m-%d %H:%M:%S.%f', False)
+					timestamp = cleandate.datetime_from_string(str(db_showPacks[5]), '%Y-%m-%d %H:%M:%S.%f', False)
 					db_showPacks_valid = abs(self.time - timestamp) < show_expiry
 					if db_showPacks_valid:
 						sources = eval(db_showPacks[4])
@@ -853,6 +864,12 @@ class Sources:
 			reverse_sort = True if getSetting('sources.sizeSort.reverse') == 'false' else False
 			self.sources.sort(key=lambda k: round(k.get('size', 0), 2), reverse=reverse_sort)
 
+		if getSetting('source.prioritize.hevc') == 'true': # filter to place HEVC sources first
+			filter = []
+			filter += [i for i in self.sources if 'HEVC' in i.get('info', '')]
+			filter += [i for i in self.sources if i not in filter]
+			self.sources = filter
+
 		if getSetting('source.prioritize.hdrdv') == 'true': # filter to place HDR and DOLBY-VISION sources first
 			filter = []
 			filter += [i for i in self.sources if any(value in i.get('info', '') for value in (' HDR ', 'DOLBY-VISION'))]
@@ -973,7 +990,7 @@ class Sources:
 			try:
 				direct = item['direct']
 				if direct:
-					direct_sources = ['furk', 'ad_cloud', 'pm_cloud', 'rd_cloud']
+					direct_sources = ('furk', 'ad_cloud', 'pm_cloud', 'rd_cloud')
 					if item['provider'] in direct_sources:
 						try:
 							call = [i[1] for i in self.sourceDict if i[0] == item['provider']][0]
@@ -1105,7 +1122,7 @@ class Sources:
 			return []
 
 	def getTitle(self, title):
-		title = cleantitle.normalize(title)
+		title = string_tools.normalize(title)
 		return title
 
 	def getConstants(self):
@@ -1268,14 +1285,8 @@ class Sources:
 			return hex
 		try:
 			from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
-			if getSetting('realdebrid.disableShowpacks') == 'true': # deals with RD show pack cache check bug
-				hashList = [i['hash'] for i in torrent_List if ('package' not in i) or ('package' in i and i['package'] != 'show')]
-				hashList = [i if len(i) == 40 else base32_to_hex(i) for i in hashList] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
-			else: hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List]
-
-			# hashList = ['838df72e305d1b3276612c8259803bf84ca00861'] # This showmakes RD have massive delay
-
-			cached = debrid_function().check_cache_list(hashList)
+			hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
+			cached = debrid_function().check_cache(hashList)
 			if not cached: return None
 			for i in torrent_List:
 				if 'rd' not in cached.get(i['hash'].lower(), {}):
@@ -1306,7 +1317,7 @@ class Sources:
 		finally:
 			dbcur.close() ; dbcon.close()
 
-	def movie_chk_imdb(self, imdb, title, year):
+	def imdb_meta_chk(self, imdb, title, year):
 		try:
 			if not imdb or imdb == '0': return title, year
 			from resources.lib.modules.client import _basic_request

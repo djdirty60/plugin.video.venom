@@ -25,7 +25,6 @@ getSetting = control.setting
 class Movies:
 	def __init__(self, notifications=True):
 		self.list = []
-		control.homeWindow.clearProperty('venom.preResolved_nextUrl') # helps solve issue where "onPlaybackStopped()" callback fails to happen
 		self.page_limit = getSetting('page.item.limit')
 		self.search_page_limit = getSetting('search.page.limit')
 		self.notifications = notifications
@@ -316,10 +315,10 @@ class Movies:
 		sort = int(getSetting('sort.%s.type' % type))
 		imdb_sort = 'list_order' if type == 'movies.watchlist' else 'moviemeter'
 		if sort == 1: imdb_sort = 'alpha'
-		if sort == 2: imdb_sort = 'user_rating'
-		if sort == 3: imdb_sort = 'num_votes'
-		if sort == 4: imdb_sort = 'release_date'
-		if sort in (5, 6): imdb_sort = 'date_added'
+		elif sort == 2: imdb_sort = 'user_rating'
+		elif sort == 3: imdb_sort = 'num_votes'
+		elif sort == 4: imdb_sort = 'release_date'
+		elif sort in (5, 6): imdb_sort = 'date_added'
 		imdb_sort_order = ',asc' if (int(getSetting('sort.%s.order' % type)) == 0 or sort == 0) else ',desc'
 		sort_string = imdb_sort + imdb_sort_order
 		return sort_string
@@ -327,11 +326,10 @@ class Movies:
 	def tmdb_DiscoverSort(self):
 		sort = int(getSetting('sort.movies.type'))
 		tmdb_sort = 'popularity' # default sort=0
-		# if sort == 1: tmdb_sort = 'original_title'
 		if sort == 1: tmdb_sort = 'title'
-		if sort == 2: tmdb_sort = 'vote_average'
-		if sort == 3: tmdb_sort = 'vote_count'
-		if sort in (4, 5, 6): tmdb_sort = 'primary_release_date'
+		elif sort == 2: tmdb_sort = 'vote_average'
+		elif sort == 3: tmdb_sort = 'vote_count'
+		elif sort in (4, 5, 6): tmdb_sort = 'primary_release_date'
 		tmdb_sort_order = '.asc' if (int(getSetting('sort.movies.order')) == 0) else '.desc'
 		sort_string = tmdb_sort + tmdb_sort_order
 		if sort == 2: sort_string = sort_string + '&vote_count.gte=500'
@@ -984,8 +982,8 @@ class Movies:
 				except: pass
 				if i.get('traktHistory') is True: # uses Trakt lastplayed
 					try:
-						air_datetime = tools.Time.convert(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p')
-						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime.replace(' 0', ' ').replace(':00 ', ''))
+						air_datetime = tools.convert_time(stringTime=i.get('lastplayed', ''), zoneFrom='utc', zoneTo='local', formatInput='%Y-%m-%dT%H:%M:%S.000Z', formatOutput='%b %d %Y %I:%M %p', remove_zeroes=True)
+						labelProgress = labelProgress + '[COLOR %s]  [%s][/COLOR]' % (self.highlight_color, air_datetime)
 					except: pass
 				sysname, systitle = quote_plus(label), quote_plus(title)
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')

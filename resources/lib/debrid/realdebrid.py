@@ -11,6 +11,7 @@ from urllib.parse import quote_plus
 from resources.lib.database import cache
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
+from resources.lib.modules import string_tools
 from resources.lib.modules.source_utils import supported_video_extensions
 
 getLS = control.lang
@@ -192,7 +193,7 @@ class RealDebrid:
 					cm = []
 					isFolder = True if item['status'] == 'downloaded' else False
 					status = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), item['status'].capitalize())
-					folder_name = control.strip_non_ascii_and_unprintable(item['filename'])
+					folder_name = string_tools.strip_non_ascii_and_unprintable(item['filename'])
 					label = '%02d | [B]%s[/B] - %s | [B]%s[/B] | [I]%s [/I]' % (count, status, str(item['progress']) + '%', folder_str, folder_name)
 					url = '%s?action=rd_BrowseUserTorrents&id=%s' % (sysaddon, item['id']) if isFolder else None
 					cm.append((deleteMenu % 'Torrent', 'RunPlugin(%s?action=rd_DeleteUserTorrent&id=%s&name=%s)' %
@@ -296,7 +297,7 @@ class RealDebrid:
 				cm = []
 				try: datetime_object = datetime.strptime(item['generated'], FormatDateTime).date()
 				except TypeError: datetime_object = datetime(*(time.strptime(item['generated'], FormatDateTime)[0:6])).date()
-				name = control.strip_non_ascii_and_unprintable(item['filename'])
+				name = string_tools.strip_non_ascii_and_unprintable(item['filename'])
 				size = float(int(item['filesize'])) / 1073741824
 				label = '%02d | %.2f GB | %s  | [I]%s [/I]' % (count, size, datetime_object, name)
 				url_link = item['download']
@@ -345,49 +346,15 @@ class RealDebrid:
 		except:
 			log_utils.error('Real-Debrid Error: DELETE DOWNLOAD %s : ' % name)
 
-	# def check_cache_list(self, hashList):
-		# log_utils.log('len() of hashList method received=%s' % len(hashList))
-		# if isinstance(hashList, list):
-			# hashList = [hashList[x : x + 100] for x in range(0, len(hashList), 100)]
-			# log_utils.log('number of chunks sent=%s' % len(hashList))
-			# ck_token = self._get('user', token_ck=True) # check token, and refresh if needed, before blasting threads at it
-			# threads = []
-			# append = threads.append
-			# for section in hashList:
-				# log_utils.log('len() of hashList chunk size=%s' % len(section))
-				# append(Thread(target=self.check_hash_thread, args=(section,)))
-			# [i.start() for i in threads]
-			# [i.join() for i in threads]
-			# log_utils.log('len() of self.cache_check_results=%s' % len(self.cache_check_results))
-			# return self.cache_check_results
-		# else:
-			# hashString = "/" + hashList
-			# return self._get("torrents/instantAvailability" + hashString)
-
-	def check_cache_list(self, hashList): # this method avoids the user call and uses the last hash list item
+	def check_cache(self, hashList):
+		# log_utils.log('len() of hashList sent=%s' % len(hashList))
 		if isinstance(hashList, list):
-			hashList = [hashList[x : x + 100] for x in range(0, len(hashList), 100)]
-			lastHash = hashList.pop(-1)
-			self.check_hash_thread(lastHash) # check lastHash list, and refresh if needed, before blasting threads at it
-			threads = []
-			append = threads.append
-			for section in hashList:
-				append(Thread(target=self.check_hash_thread, args=(section,)))
-			[i.start() for i in threads]
-			[i.join() for i in threads]
-			return self.cache_check_results
+			hashString = '/' + '/'.join(hashList)
 		else:
 			hashString = "/" + hashList
-			return self._get("torrents/instantAvailability" + hashString)
-
-	def check_hash_thread(self, hashes):
-		try:
-			hashString = '/' + '/'.join(hashes)
-			response = self._get("torrents/instantAvailability" + hashString)
-			if not response: return
-			self.cache_check_results.update(response)
-		except:
-			log_utils.error()
+		response = self._get("torrents/instantAvailability" + hashString)
+		# log_utils.log('len() of hashList received=%s' % len(response))
+		return response
 
 	def resolve_magnet(self, magnet_url, info_hash, season, episode, title):
 		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter

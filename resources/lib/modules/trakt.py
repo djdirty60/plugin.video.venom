@@ -56,7 +56,6 @@ def getTrakt(url, post=None, extended=False, silent=False):
 			if (not silent) and server_notification: control.notification(title=32315, message=33675)
 			return None
 		elif result and code == '404':
-			# log_utils.log('Request Not Found: url=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
 			log_utils.log('getTrakt() (404:NOT FOUND): URL=(%s): %s' % (url, str(result[0])), level=log_utils.LOGWARNING)
 			return None # change to (return '404:NOT FOUND') to cache only 404's but not server response failures
 		elif result and code == '429':
@@ -120,7 +119,7 @@ def re_auth(headers):
 			return False
 
 		if result and code not in ('401', '405'):
-			try: result = jsloads(result) # result = utils.json_loads_as_str(result) # which json method here?
+			try: result = jsloads(result) # result = utils.json_loads_as_str(result) # which json method here? JSONDecodeError -> Expecting value: line 1 column 1 (char 0)
 			except:
 				log_utils.error()
 				return False
@@ -946,8 +945,6 @@ def _seasonCountRetrieve(imdb):
 			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % imdb)
 		if not indicators: return None
 		seasons = indicators['seasons']
-
-		# return [{'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons]
 		return {season['number']: {'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons}
 	except:
 		log_utils.error()

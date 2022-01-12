@@ -198,6 +198,7 @@
 		<setting id="source.checkReboots" type="bool" label="32227" default="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=checkReboots)" />
 		<setting id="source.prioritize.hdrdv" type="bool" label="32195" default="false" />
+		<setting id="source.prioritize.hevc" type="bool" label="32229" default="false" />
 		<setting id="source.enable.msizelimit" type="bool" label="32165" default="false" />
 		<setting id="source.min.moviesize" type="slider" label="32155" subsetting="true" option="float" range="0.0,0.1,10.0" default="0" visible="eq(-1,true)" />
 		<setting id="source.max.moviesize" type="slider" label="32156" subsetting="true" option="float" range="0.5,0.3,200" default="10" visible="eq(-2,true)" />
@@ -303,10 +304,8 @@
 		<setting id="rd_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-7,) + eq(-8,true)" />
 		<setting id="rd_cloud.ignore.m2ts" type="bool" label="32052" subsetting="true" default="true" visible="!eq(-8,) + eq(-9,true) + eq(-1,true)" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=ignoreM2ts)" visible="!eq(-9,) + eq(-10,true) + eq(-2,true)" />
-		<setting id="realdebrid.disableShowpacks" type="bool" label="32228" default="false" visible="!eq(-10,) +eq(-11,true)" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=disableShowpacks)" visible="!eq(-11,) + eq(-12,true)" />
-		<setting id="realdebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-12,) + eq(-13,true)" />
-		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_rdAcctMyAccounts)" visible="!eq(-13,) + eq(-14,true)" />
+		<setting id="realdebrid.server.notifications" type="bool" label="33051" default="true" visible="!eq(-10,) + eq(-11,true)" />
+		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_rdAcctMyAccounts)" visible="!eq(-11,) + eq(-12,true)" />
 		<setting type="lsep" label="Easy News" />
 		<setting type="action" label="32151" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=3.2&amp;opensettings=true&amp;query2=7.43)" visible="eq(1,)" />
 		<setting id="easynews.username" type="text" label="40006" default="" enable="false" />

@@ -4,10 +4,12 @@
 """
 
 from resources.lib.modules import control, log_utils, my_accounts
-
+from sys import version_info
 window = control.homeWindow
+pythonVersion = '{}.{}.{}'.format(version_info[0], version_info[1], version_info[2])
 plugin = 'plugin://plugin.video.venom/'
-LOGINFO = 1
+LOGINFO = log_utils.LOGINFO
+
 
 class CheckSettingsFile:
 	def run(self):
@@ -168,16 +170,16 @@ try:
 	repoVersion = control.addon('repository.venom').getAddonInfo('version')
 	fsVersion = control.addon('script.module.fenomscrapers').getAddonInfo('version')
 	maVersion = control.addon('script.module.myaccounts').getAddonInfo('version')
-	log_utils.log('########   CURRENT VENOM VERSIONS REPORT   ########', level=log_utils.LOGINFO)
-	log_utils.log('##   Kodi Version: %s' % str(kodiVersion), level=log_utils.LOGINFO)
-	log_utils.log('##   python Version: %s' % str(control.pythonVersion), level=log_utils.LOGINFO)
-	log_utils.log('##   plugin.video.venom Version: %s' % str(addonVersion), level=log_utils.LOGINFO)
-	log_utils.log('##   repository.venom Version: %s' % str(repoVersion), level=log_utils.LOGINFO)
-	log_utils.log('##   script.module.fenomscrapers Version: %s' % str(fsVersion), level=log_utils.LOGINFO)
-	log_utils.log('##   script.module.myaccounts Version: %s' % str(maVersion), level=log_utils.LOGINFO)
-	log_utils.log('######   VENOM SERVICE ENTERERING KEEP ALIVE   #####', level=log_utils.LOGINFO)
+	log_utils.log('########   CURRENT VENOM VERSIONS REPORT   ########', level=LOGINFO)
+	log_utils.log('##   Kodi Version: %s' % str(kodiVersion), level=LOGINFO)
+	log_utils.log('##   python Version: %s' % pythonVersion, level=LOGINFO)
+	log_utils.log('##   plugin.video.venom Version: %s' % str(addonVersion), level=LOGINFO)
+	log_utils.log('##   repository.venom Version: %s' % str(repoVersion), level=LOGINFO)
+	log_utils.log('##   script.module.fenomscrapers Version: %s' % str(fsVersion), level=LOGINFO)
+	log_utils.log('##   script.module.myaccounts Version: %s' % str(maVersion), level=LOGINFO)
+	log_utils.log('######   VENOM SERVICE ENTERERING KEEP ALIVE   #####', level=LOGINFO)
 except:
-	log_utils.log('## ERROR GETTING Venom VERSION - Missing Repo or failed Install ', level=log_utils.LOGINFO)
+	log_utils.log('## ERROR GETTING Venom VERSION - Missing Repo or failed Install ', level=LOGINFO)
 
 def getTraktCredentialsInfo():
 	username = control.setting('trakt.username').strip()
@@ -206,8 +208,8 @@ def main():
 				SyncTraktCollection().run()
 			if int(control.setting('schedTraktTime')) > 0:
 				import threading
-				log_utils.log('#################### STARTING TRAKT SCHEDULING ################', level=log_utils.LOGINFO)
-				log_utils.log('#################### SCHEDULED TIME FRAME '+ control.setting('schedTraktTime')  + ' HOURS ###############', level=log_utils.LOGINFO)
+				log_utils.log('#################### STARTING TRAKT SCHEDULING ################', level=LOGINFO)
+				log_utils.log('#################### SCHEDULED TIME FRAME '+ control.setting('schedTraktTime')  + ' HOURS ###############', level=LOGINFO)
 				timeout = 3600 * int(control.setting('schedTraktTime'))
 				schedTrakt = threading.Timer(timeout, SyncTraktCollection().run) # this only runs once at the designated interval time to wait...not repeating
 				schedTrakt.start()
