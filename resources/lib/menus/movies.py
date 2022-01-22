@@ -959,7 +959,7 @@ class Movies:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		indicators = getMovieIndicators(refresh=True)
+		indicators = getMovieIndicators() # refresh not needed now due to service sync
 		if play_mode == '1': playbackMenu = getLS(32063)
 		else: playbackMenu = getLS(32064)
 		if trakt.getTraktIndicatorsInfo(): watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)

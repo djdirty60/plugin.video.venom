@@ -10,6 +10,8 @@
 		<setting id="indicators" type="enum" label="32313" lvalues="32314" default="0" visible="eq(-2,)" />
 		<setting id="highlight.color" type="select" label="40039" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="2" />
 		<setting id="api.language" type="select" label="32316" values="AUTO|English|Bulgarian|Chinese|Croatian|Czech|Danish|Dutch|Finnish|French|German|Greek|Hebrew|Hungarian|Italian|Japanese|Korean|Norwegian|Polish|Portuguese|Romanian|Russian|Serbian|Slovak|Slovenian|Spanish|Swedish|Thai|Turkish|Ukrainian" default="English" />
+		<setting id="mpa.country" type="select" label="32391" values="Australia|Austria|Brazil|Bulgaria|Canada|China|Denmark|Estonia|Finland|France|Germany|Greece|Hungary|Hong Kong SAR China|India|Indonesia|Ireland|Italy|Japan|Kazakhstan|Latvia|Lithuania|Malaysia|Mexico|Netherlands|New Zealand|Norway|Philippines|Poland|Portugal|Romania|Russia|Saudi Arabia|Singapore|Slovakia|South Africa|South Korea|Spain|Sweden|Switzerland|Taiwan|Thailand|Turkey|Ukraine|United Arab Emirates|United Kingdom|United States|Vietnam" default="United States" />
+		<setting id="mpa.prefix" type="text" label="32392" subsetting="true" default="" />
 		<setting id="page.item.limit" type="slider" label="32011" default="20" range="10,60" option="int" />
 		<setting id="search.page.limit" type="slider" label="32167" default="20" range="10,100" option="int" />
 		<setting id="fanart" type="bool" label="32318" default="true" />
@@ -115,11 +117,9 @@
 		<setting id="tv.specials" type="bool" label="32649" default="false" />
 		<setting id="showunaired" type="bool" label="32570" default="false" />
 		<setting id="unaired.identify" type="select" label="32608" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" enable="eq(-1,true)" />
-		<setting id="tvshows.unwatched.enabled" type="bool" label="33891" default="false" />
-		<setting id="multi.unwatched.enabled" type="bool" label="32163" subsetting="true" default="false" visible="eq(-1,true)" />
-		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=multi.unwatched)" visible="eq(-2,true)" />
+		<setting id="multi.unwatched.enabled" type="bool" label="32163" default="false" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=multi.unwatched)" visible="eq(-1,true)" />
 		<setting id="tvshows.calendar.extended" type="bool" label="32023" default="false" />
-
 		<setting type="lsep" label="40027" />
 		<setting id="enable.playnext" type="bool" label="40028" default="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=playnext)" />

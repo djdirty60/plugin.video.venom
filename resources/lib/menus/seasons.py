@@ -125,9 +125,8 @@ class Seasons:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		try: indicators = getSeasonIndicators(items[0]['imdb'], refresh=True)
+		try: indicators = getSeasonIndicators(items[0]['imdb']) # refresh not needed now due to service sync
 		except: indicators = None
-		unwatchedEnabled = getSetting('tvshows.unwatched.enabled') == 'true'
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
 		else:
@@ -191,14 +190,22 @@ class Seasons:
 				item = control.item(label=label, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
-				if unwatchedEnabled:
-					try:
-						count = getSeasonCount(imdb, season)
-						if count:
-							item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
-						else: item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('counts', {}).get(str(season), ''))}) # temp use TMDb's season-episode count for threads not finished....next load counts will update with trakt data
-					except: pass
-				try: item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+				try:
+					count = getSeasonCount(imdb, season)
+					if count:
+						item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
+						item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
+					else:
+						if meta.get('status') != 'Returning Series' or (meta.get('status') == 'Returning Series' and meta.get('last_episode_to_air', {}).get('season_number') > int(season)):
+							item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('counts', {}).get(str(season), ''))})
+							item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_episodes', ''))})
+						else:
+							if meta.get('last_episode_to_air', {}).get('season_number') == int(season):
+								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('last_episode_to_air', {}).get('episode_number'))})
+								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('last_episode_to_air', {}).get('episode_number'))})
+							else:
+								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': '0'})
+								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': '0'})
 				except: pass
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				try: # Year is the shows year, not the seasons year. Extract year from premier date for InfoLabels to have "season_year".
@@ -216,5 +223,5 @@ class Seasons:
 		try: control.property(syshandle, 'showplot', items[0]['plot'])
 		except: pass
 		control.content(syshandle, 'seasons')
-		control.directory(syshandle, cacheToDisc=True)
+		control.directory(syshandle, cacheToDisc=False) # disable cacheToDisc so unwatched counts loads fresh data counts if changes made
 		views.setView('seasons', {'skin.estuary': 55, 'skin.confluence': 500})

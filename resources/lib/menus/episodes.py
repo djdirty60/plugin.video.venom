@@ -14,10 +14,12 @@ from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
-from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverlay, getShowCount
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
+from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverlay, getShowCount
+from resources.lib.modules.player import Bookmarks
+
 getLS = control.lang
 getSetting = control.setting
 
@@ -49,6 +51,17 @@ class Episodes:
 		self.tvmaze_link = 'https://api.tvmaze.com'
 		self.added_link = 'https://api.tvmaze.com/schedule'
 		self.calendar_link = 'https://api.tvmaze.com/schedule?date=%s'
+
+	def timeIt(func):
+		import time
+		from resources.lib.modules import log_utils
+		fnc_name = func.__name__
+		def wrap(*args, **kwargs):
+			started_at = time.time()
+			result = func(*args, **kwargs)
+			log_utils.log('%s.%s = %s' % (__name__ , fnc_name, time.time() - started_at), __name__)
+			return result
+		return wrap
 
 	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, create_directory=True):
 		self.list = []
@@ -675,11 +688,11 @@ class Episodes:
 				log_utils.error()
 		return items
 
+	# @timeIt
 	def episodeDirectory(self, items, unfinished=False, next=True):
 		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32326, message=33049)
-		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		if not is_widget: control.playlist.clear()
@@ -700,7 +713,6 @@ class Episodes:
 		upcoming_prependDate = getSetting('trakt.UpcomingProgress.prependDate') == 'true'
 		try: sysaction = items[0]['action']
 		except: sysaction = ''
-		unwatchedEnabled = getSetting('tvshows.unwatched.enabled') == 'true'
 		multi_unwatchedEnabled = getSetting('multi.unwatched.enabled') == 'true'
 		try: airEnabled = getSetting('tvshows.air.enabled') if 'ForceAirEnabled' not in items[0] else 'true'
 		except: airEnabled = 'false'
@@ -708,7 +720,7 @@ class Episodes:
 		rescrape_useDefault = getSetting('rescrape.default') == 'true'
 		rescrape_method = getSetting('rescrape.default2')
 		enable_playnext = getSetting('enable.playnext') == 'true'
-		indicators = getTVShowIndicators(refresh=True)
+		indicators = getTVShowIndicators() # refresh not needed now due to service sync
 		isFolder = False if sysaction != 'episodes' else True
 		if airEnabled == 'true':
 			airZone, airLocation = getSetting('tvshows.air.zone'), getSetting('tvshows.air.location')
@@ -853,16 +865,16 @@ class Episodes:
 											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 					else:
 						if rescrape_method == '0':
-							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true&select=1)' % (
 											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 						if rescrape_method == '1':
-							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true&select=0)' % (
 											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 						if rescrape_method == '2':
-							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true&all_providers=true&select=1)' % (
 											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 						if rescrape_method == '3':
-							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true)' % (
+							cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s&meta=%s&rescrape=true&all_providers=true&select=0)' % (
 											sysaddon, systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered, sysmeta)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
@@ -872,10 +884,10 @@ class Episodes:
 				item = control.item(label=labelProgress, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
-				if isMultiList and (unwatchedEnabled and multi_unwatchedEnabled):
+				if isMultiList and multi_unwatchedEnabled:
 					if 'ForceAirEnabled' not in i:
 						try:
-							count = getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
+							count = getShowCount(indicators, imdb, tvdb) # if indicators has no value trakt.seasonCount() called and is threaded without .join() so not all results are immediately seen
 							if count:
 								item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
@@ -883,7 +895,6 @@ class Episodes:
 								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 						except: pass
-
 				item.setProperty('IsPlayable', 'true')
 				item.setProperty('tvshow.tmdb_id', tmdb)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
@@ -936,13 +947,13 @@ class Episodes:
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 			except: pass
-		if isMultiList and (unwatchedEnabled and multi_unwatchedEnabled): # Show multi episodes as show, in order to display unwatched count if enabled.
+		if isMultiList and multi_unwatchedEnabled: # Show multi episodes as show, in order to display unwatched count if enabled.
 			control.content(syshandle, 'tvshows')
-			control.directory(syshandle, cacheToDisc=True)
+			control.directory(syshandle, cacheToDisc=False) # disable cacheToDisc so unwatched counts loads fresh data counts if changes made
 			views.setView('tvshows', {'skin.estuary': 55, 'skin.confluence': 500})
 		else:
 			control.content(syshandle, 'episodes')
-			control.directory(syshandle, cacheToDisc=True)
+			control.directory(syshandle, cacheToDisc=False) # disable cacheToDisc so unwatched counts loads fresh data counts if changes made
 			views.setView('episodes', {'skin.estuary': 55, 'skin.confluence': 504})
 
 	def addDirectory(self, items, queue=False):

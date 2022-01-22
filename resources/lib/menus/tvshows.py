@@ -957,8 +957,7 @@ class TVshows:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		indicators = getTVShowIndicators(refresh=True)
-		unwatchedEnabled = getSetting('tvshows.unwatched.enabled') == 'true'
+		indicators = getTVShowIndicators() # refresh not needed now due to service sync
 		flatten = getSetting('flatten.tvshows') == 'true'
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
@@ -976,7 +975,6 @@ class TVshows:
 				systitle = quote_plus(title)
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
-				if unwatchedEnabled: trakt.seasonCount(imdb) # pre-cache season counts for the listed shows
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				try:
@@ -1027,16 +1025,14 @@ class TVshows:
 				item = control.item(label=title, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
-				if unwatchedEnabled:
-					try: 
-						count = getShowCount(indicators, imdb, tvdb) # this is threaded without .join() so not all results are immediately seen
-						if count:
-							item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
-							item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
-						else:
-							item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
-							item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
-					except: pass
+				try: 
+					count = getShowCount(indicators, imdb, tvdb) # if indicators and no matching imdb_id in watched status then return None and use TMDb meta to avoid Trakt request
+					if count:
+						item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
+					else:
+						item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))})
+				except: pass
+				item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 				item.setProperty('IsPlayable', 'false')
 				item.setProperty('tmdb_id', str(tmdb))
 				if is_widget: item.setProperty('isVenom_widget', 'true')
@@ -1074,7 +1070,7 @@ class TVshows:
 				from resources.lib.modules import log_utils
 				log_utils.error()
 		control.content(syshandle, 'tvshows')
-		control.directory(syshandle, cacheToDisc=True)
+		control.directory(syshandle, cacheToDisc=False) # disable cacheToDisc so unwatched counts loads fresh data counts if changes made
 		views.setView('tvshows', {'skin.estuary': 55, 'skin.confluence': 500})
 
 	def addDirectory(self, items, queue=False):

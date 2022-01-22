@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.5">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.6">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,16 +32,11 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.4.5 - Jan. 11, 2022[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] tvdb.api.key will not longer be sync'd from the My Accounts addon.  This caused the settings cleaner in Venom to always remove it since it's no longer required.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where randomly the pre-resolved next url to play would not clear.  Sometimes stopping playback would cause the next episode to play when this url did not clear.[/I]
-[COLOR yellow]--[/COLOR][I] Pre-resolving randomly failed in the background causing the resolving dialog to be shown between episodes when in continual playback mode.  This has now been fixed and the pre-resolved url should be readily available to skip resolving during continual playback.[/I]
-[COLOR yellow]--[/COLOR][I] The IMDb movie meta check has been expanded to now also cover shows.[/I]
-[COLOR yellow]--[/COLOR][I] The download progress notification will now indicate the percentage downloaded as a header so it becomes fixed and will no longer autoscroll with the title.[/I]
-[COLOR yellow]--[/COLOR][I] Added setting to prioritize HEVC sources to top of the Source Select list.[/I]
-[COLOR yellow]--[/COLOR][I] RD has fixed the [B]"instantAvailability"[/B] endpoint bug when cache checking pack files.  The setting to remove show packs from RD source results has been removed and is no longer needed.[/I]
-[COLOR yellow]--[/COLOR][I] RD has removed the 100 hashes limitation per request in the [B]"instantAvailability"[/B] endpoint.  The code has been adjusted for a single request of all hashes.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed premiered dates shown in utc for [B]"Trakt-Recent Episodes, "Trakt-Upcoming Episodes"[/B] and [B]"Trakt-Season Premiered"[/B]. The highlight label was correct.[/I]
+[B][COLOR red]Update - v6.4.6 - Jan. 22, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Trakt status indicators and watched/unwatched show counts are now part of the [B]"traktsync.db"[/B] and run with the existing background sync service.  This significantly speeds up menu load times.  Clearing cache will no longer wipe out this data.  If user needs this data rebuild please use the [B]"Tools - Trakt Management Tools - Force Trakt Sync to local database"[[/B] function.[/I]
+[COLOR yellow]--[/COLOR][I] Due to the significant speed increase of watched/unwatched counts from above the setting to disable counts has been removed.  The setting to add counts to multi episode lists remains.[/I]
+[COLOR yellow]--[/COLOR][I] All show and season level counts now only consider aired episodes in the count collection process.[/I]
+[COLOR yellow]--[/COLOR][I] A new setting has been added to the "General" category to allow changing the "Certification Country (MPAA)" used.  You can also add a prefix to the certification if desired.[/I]
 		</news>
 	</extension>
 </addon>

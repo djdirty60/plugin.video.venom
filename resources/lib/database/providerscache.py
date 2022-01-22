@@ -113,13 +113,16 @@ def cache_clear_providers():
 def get_connection():
 	if not existsPath(dataPath): makeFile(dataPath)
 	dbcon = db.connect(providercacheFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
+	dbcon.execute('''PRAGMA page_size = 32768''')
+	dbcon.execute('''PRAGMA journal_mode = WAL''')
+	dbcon.execute('''PRAGMA synchronous = OFF''')
+	dbcon.execute('''PRAGMA temp_store = memory''')
+	dbcon.execute('''PRAGMA mmap_size = 30000000000''')
 	dbcon.row_factory = _dict_factory
 	return dbcon
 
 def get_connection_cursor(dbcon):
 	dbcur = dbcon.cursor()
-	dbcur.execute('''PRAGMA synchronous = OFF''')
-	dbcur.execute('''PRAGMA journal_mode = OFF''')
 	return dbcur
 
 def _dict_factory(cursor, row):
@@ -132,8 +135,6 @@ def _hash_function(function_instance, *args):
 
 def _get_function_name(function_instance):
 	return re_sub(r'.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', repr(function_instance))
-# function=<function Sources.getConstants.<locals>.cache_prDict at 0x000001AE601D0AF0>
-# function=<bound method Sources.getSources of <resources.lib.modules.sources.Sources object at 0x000001AE66533670>>
 
 def _generate_md5(*args):
 	md5_hash = md5()

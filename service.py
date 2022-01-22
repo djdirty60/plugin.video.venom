@@ -124,14 +124,14 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				window.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.4.4' # set to desired version to force any db clearing needed
+				clearDB_version = '6.4.6' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					clr_fanarttv = False
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
 					from resources.lib.database import traktsync
 					clr_traktSync = {'bookmarks': False, 'hiddenProgress': False, 'liked_lists': False, 'movies_collection': False, 'movies_watchlist': False, 'public_lists': False,
-											'popular_lists': False, 'service': False, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': False, 'user_lists': False}
+											'popular_lists': False, 'service': False, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': False, 'user_lists': False, 'watched': False}
 					cleared = traktsync.delete_tables(clr_traktSync)
 					if cleared:
 						control.notification(message='Forced traktsync clear for version update complete.')

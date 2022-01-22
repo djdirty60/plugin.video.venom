@@ -11,7 +11,7 @@ from threading import Thread
 from urllib3.util.retry import Retry
 from resources.lib.database import cache, metacache, fanarttv_cache
 from resources.lib.indexers import fanarttv
-from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, trailer as control_trailer, yesnoDialog
+from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, mpaCountry, trailer as control_trailer, yesnoDialog
 
 API_key = getSetting('tmdb.api.key')
 if not API_key: API_key = '3320855e65a9758297fec4f7c9717698'
@@ -24,7 +24,6 @@ profile_path = 'https://image.tmdb.org/t/p/w185'
 session = requests.Session()
 retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
 session.mount('https://', HTTPAdapter(max_retries=retries))
-
 
 def get_request(url):
 	try:
@@ -103,8 +102,9 @@ class Movies:
 		self.meta = []
 		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
+		self.mpa_country = mpaCountry()
 		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
-		###  other "append_to_response" options external_ids,images,content_ratings, translations
+		###  other "append_to_response" options external_ids,images,translations
 		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', API_key)
 		self.external_ids = base_link + 'movie/%s/external_ids?api_key=%s' % ('%s', API_key)
 		# self.user = str(self.imdb_user) + str(API_key)
@@ -276,8 +276,11 @@ class Movies:
 			if self.lang != 'en' and meta['plot'] in ('', None, 'None'): meta['plot'] = self.get_en_overview(tmdb)
 			# meta['?'] = result.get('popularity', '')
 			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
-			# try: meta['studio'] = result.get('production_companies', {})[0]['name'] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
-			# except: meta['studio'] = ''
+			# production_companies = result.get('production_companies', {})
+			# try: meta['studio'] = [x['name'] for x in production_companies if x['logo_path']][0] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
+			# except:
+				# try: meta['studio'] = production_companies[0].get('name')
+				# except: meta['studio'] = ''
 			try: meta['country_codes'] = [i['iso_3166_1'] for i in result['production_countries']]
 			except: meta['country_codes'] = ''
 			meta['premiered'] = str(result.get('release_date', '')) if result.get('release_date') else ''
@@ -301,16 +304,20 @@ class Movies:
 				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
-			try:
-				meta['mpaa'] = ''
-				rel_info = [x for x in result['release_dates']['results'] if x['iso_3166_1'] == 'US'][0]
+			meta['mpaa'] = ''
+			def parse_mpaa(rel_info):
 				for cert in rel_info.get('release_dates', {}): # loop thru all keys
 					if cert['certification']:
-						if cert['note']: continue # limited release adds region note here, use official full release that will be null
+						if cert['type'] not in (3, 4, 5, 6): continue # 1 and 2 are limited releases, ignore
 						meta['mpaa'] = cert['certification']
-						meta['premiered'] = cert['release_date'].split('T')[0] or meta['premiered'] # use US premiered date
+						meta['premiered'] = cert['release_date'].split('T')[0] or meta['premiered'] # use Countries premiered date
 						break
-			except: meta['mpaa'] = ''
+			try: parse_mpaa([x for x in result['release_dates']['results'] if x['iso_3166_1'] == self.mpa_country][0])
+			except: pass
+			if not meta['mpaa'] and self.mpa_country != 'US':
+				try: parse_mpaa([x for x in result['release_dates']['results'] if x['iso_3166_1'] == 'US'][0])
+				except: pass
+			if meta['mpaa']: meta['mpaa'] = getSetting('mpa.prefix') + meta['mpaa']
 			try:
 				trailer = [x for x in result['videos']['results'] if x['site'] == 'YouTube' and x['type'] in ('Trailer', 'Teaser')][0]['key']
 				meta['trailer'] = control_trailer % trailer
@@ -413,6 +420,7 @@ class TVshows:
 		self.meta = []
 		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 		self.lang = apiLanguage()['tmdb']
+		self.mpa_country = mpaCountry()
 		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
 		# 'append_to_response=translations, aggregate_credits' (DO NOT USE, response data way to massive and bogs the response time)
 		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
@@ -584,10 +592,12 @@ class TVshows:
 			meta['last_air_date'] = result.get('last_air_date', '')
 			meta['last_episode_to_air'] = result.get('last_episode_to_air', '')
 			meta['tvshowtitle'] = result.get('name')
-			# meta['next_episode_to_air'] = results.get('next_episode_to_air', '')
-			try: meta['studio'] = result.get('networks', {})[0].get('name')
-			except: meta['studio'] = ''
-			meta['total_episodes'] = result.get('number_of_episodes') # counts aired eps
+			networks = result.get('networks', {})
+			try: meta['studio'] = [x['name'] for x in networks if x['logo_path']][0] # use single studio name that has a logo in hopes skin also has logo 
+			except:
+				try: meta['studio'] = networks[0].get('name')
+				except: meta['studio'] = ''
+			meta['total_episodes'] = result.get('number_of_episodes') # count includes both aired and unaired eps
 			meta['total_seasons'] = result.get('number_of_seasons')
 			try: meta['origin_country'] = result.get('origin_country')[0]
 			except: meta['origin_country'] = ''
@@ -624,10 +634,14 @@ class TVshows:
 				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
-			try: meta['mpaa'] = [x['rating'] for x in result['content_ratings']['results'] if x['iso_3166_1'] == 'US'][0]
+			mpaa = []
+			mpaa += [x['rating'] for x in result['content_ratings']['results'] if x['iso_3166_1'] == self.mpa_country]
+			mpaa += [x['rating'] for x in result['content_ratings']['results'] if x['iso_3166_1'] == 'US']
+			try: meta['mpaa'] = mpaa[0]
 			except: 
 				try: meta['mpaa'] = result['content_ratings'][0]['rating']
 				except: meta['mpaa'] = ''
+			if meta['mpaa']: meta['mpaa'] = getSetting('mpa.prefix') + meta['mpaa']
 			ids = result.get('external_ids', {})
 			meta['imdb'] = str(ids.get('imdb_id', '')) if ids.get('imdb_id') else ''
 			meta['imdbnumber'] = meta['imdb']
@@ -701,6 +715,11 @@ class TVshows:
 				episodes.append(episode_meta)
 			meta['season_isAiring'] = 'true' if unaired_count > 0 else 'false' # I think this should be in episodes module where it has access to "showSeasons" meta for "status"
 			meta['seasoncount'] = len(result.get('episodes')) #seasoncount = number of episodes for given season
+
+			# aired_episodes = int(meta['seasoncount']) - unaired_count
+			# from resources.lib.modules import log_utils
+			# log_utils.log('aired_episodes=%s: tmdb_id=%s' % (str(aired_episodes), tmdb))
+
 			# meta['tvseasontitle'] = result['name'] # seasontitle ?
 			meta['plot'] = result.get('overview', '') if result.get('overview') else '' # Kodi season level Information seems no longer available in 19
 			meta['tmdb'] = tmdb

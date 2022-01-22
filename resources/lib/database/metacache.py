@@ -95,11 +95,14 @@ def cache_clear_meta():
 def get_connection():
 	if not existsPath(dataPath): makeFile(dataPath)
 	dbcon = db.connect(metacacheFile, timeout=60) # added timeout 3/23/21 for concurrency with threads
-	# dbcon.row_factory = _dict_factory
+	dbcon.execute('''PRAGMA page_size = 32768''')
+	dbcon.execute('''PRAGMA journal_mode = OFF''')
+	dbcon.execute('''PRAGMA synchronous = OFF''')
+	dbcon.execute('''PRAGMA temp_store = memory''')
+	dbcon.execute('''PRAGMA mmap_size = 30000000000''')
+	# dbcon.row_factory = _dict_factory # not needed for metacache
 	return dbcon
 
 def get_connection_cursor(dbcon):
 	dbcur = dbcon.cursor()
-	dbcur.execute('''PRAGMA synchronous = OFF''')
-	dbcur.execute('''PRAGMA journal_mode = OFF''')
 	return dbcur

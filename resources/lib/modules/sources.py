@@ -626,9 +626,12 @@ class Sources:
 	def getMovieSource(self, imdb, data, source, call):
 		try:
 			dbcon = database.connect(sourceFile, timeout=60)
+			dbcon.execute('''PRAGMA page_size = 32768''')
+			dbcon.execute('''PRAGMA journal_mode = WAL''')
+			dbcon.execute('''PRAGMA synchronous = OFF''')
+			dbcon.execute('''PRAGMA temp_store = memory''')
+			dbcon.execute('''PRAGMA mmap_size = 30000000000''')
 			dbcur = dbcon.cursor()
-			dbcur.execute('''PRAGMA synchronous = OFF''')
-			dbcur.execute('''PRAGMA journal_mode = OFF''')
 		except: pass
 		if not imdb: # Fix to stop items passed with null IMDB_id pulling old unrelated sources from the database
 			try:
@@ -661,9 +664,12 @@ class Sources:
 	def getEpisodeSource(self, imdb, season, episode, data, source, call, pack):
 		try:
 			dbcon = database.connect(sourceFile, timeout=60)
+			dbcon.execute('''PRAGMA page_size = 32768''')
+			dbcon.execute('''PRAGMA journal_mode = WAL''')
+			dbcon.execute('''PRAGMA synchronous = OFF''')
+			dbcon.execute('''PRAGMA temp_store = memory''')
+			dbcon.execute('''PRAGMA mmap_size = 30000000000''')
 			dbcur = dbcon.cursor()
-			dbcur.execute('''PRAGMA synchronous = OFF''')
-			dbcur.execute('''PRAGMA journal_mode = OFF''')
 		except: pass
 		if not imdb: # Fix to stop items passed with null IMDB_id pulling old unrelated sources from the database
 			try:
@@ -830,7 +836,6 @@ class Sources:
 					valid_hoster = [i for i in valid_hosters if d.valid_url(i)]
 					threads.append(Thread(target=checkStatus, args=(self.ad_cache_chk_list, d.name, valid_hoster)))
 				except: log_utils.error()
-
 		if threads:
 			[i.start() for i in threads]
 			[i.join() for i in threads]

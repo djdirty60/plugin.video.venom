@@ -1314,12 +1314,12 @@ msgid "Accounts(Meta)"
 msgstr "Konta (meta)"
 
 msgctxt "#32391"
-msgid ""
-msgstr ""
+msgid "Certification Country (MPAA)"
+msgstr "Kraj certyfikacji (MPAA)"
 
 msgctxt "#32392"
-msgid ""
-msgstr ""
+msgid "Certification prefix"
+msgstr "Prefiks certyfikacji"
 
 msgctxt "#32393"
 msgid ""
