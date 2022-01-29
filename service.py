@@ -4,7 +4,7 @@
 """
 
 from resources.lib.modules import control, log_utils, my_accounts
-from sys import version_info
+from sys import version_info, platform as sys_platform
 window = control.homeWindow
 pythonVersion = '{}.{}.{}'.format(version_info[0], version_info[1], version_info[2])
 plugin = 'plugin://plugin.video.venom/'
@@ -124,14 +124,14 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				window.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.4.6' # set to desired version to force any db clearing needed
+				clearDB_version = '6.4.7' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					clr_fanarttv = False
 					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
 					from resources.lib.database import traktsync
 					clr_traktSync = {'bookmarks': False, 'hiddenProgress': False, 'liked_lists': False, 'movies_collection': False, 'movies_watchlist': False, 'public_lists': False,
-											'popular_lists': False, 'service': False, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': False, 'user_lists': False, 'watched': False}
+											'popular_lists': False, 'service': True, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': False, 'user_lists': False, 'watched': True}
 					cleared = traktsync.delete_tables(clr_traktSync)
 					if cleared:
 						control.notification(message='Forced traktsync clear for version update complete.')
@@ -171,6 +171,7 @@ try:
 	fsVersion = control.addon('script.module.fenomscrapers').getAddonInfo('version')
 	maVersion = control.addon('script.module.myaccounts').getAddonInfo('version')
 	log_utils.log('########   CURRENT VENOM VERSIONS REPORT   ########', level=LOGINFO)
+	log_utils.log('##   Platform: %s' % str(sys_platform), level=LOGINFO)
 	log_utils.log('##   Kodi Version: %s' % str(kodiVersion), level=LOGINFO)
 	log_utils.log('##   python Version: %s' % pythonVersion, level=LOGINFO)
 	log_utils.log('##   plugin.video.venom Version: %s' % str(addonVersion), level=LOGINFO)
@@ -202,7 +203,7 @@ def main():
 		if control.setting('general.checkAddonUpdates') == 'true':
 			AddonCheckUpdate().run()
 		VersionIsUpdateCheck().run()
-		SyncTraktService().run() # run service in case user auth's trakt later
+		SyncTraktService().run() # run service in case user auth's trakt later, sync will loop and do nothing without valid auth'd account.
 		if getTraktCredentialsInfo():
 			if control.setting('autoTraktOnStart') == 'true':
 				SyncTraktCollection().run()

@@ -344,10 +344,12 @@ class Collections:
 		self.batman_link = self.tmdb_link % '33129'
 		self.captainamerica_link =self.tmdb_link % '33130'
 		self.darkknight_link = self.tmdb_link % '33132'
+		self.deadpool_link = self.tmdb_link % '8176455'
+		# self.deadpool_link = self.tmdbCollection_link % '448150'
 		self.fantasticfour_link = self.tmdb_link % '33133'
 		self.hulk_link = self.tmdb_link % '33134'
 		self.ironman_link = self.tmdb_link % '33135'
-		self.spiderman_link = self.tmdb_link % '33126'
+		self.spiderman_link = self.tmdb_link % '8176456'
 		self.superman_link = self.tmdb_link % '33136'
 		self.thor_link = self.imdb_link % ('Thor', 'feature')
 		self.xmen_link = self.tmdb_link % '33137'
@@ -665,10 +667,11 @@ class Collections:
 		self.addDirectoryItem('Batman (1989-2016)', 'collections&url=batman', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Captain America (2011-2016)', 'collections&url=captainamerica', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Dark Knight Trilogy (2005-2013)', 'collections&url=darkknight', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Deadpool (2016-2023)', 'collections&url=deadpool', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Fantastic Four (2005-2015)', 'collections&url=fantasticfour', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Hulk (2003-2008)', 'collections&url=hulk', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Iron Man (2008-2013)', 'collections&url=ironman', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
-		self.addDirectoryItem('Spider-Man (2002-2017)', 'collections&url=spiderman', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Spider-Man (2002-2021)', 'collections&url=spiderman', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Thor (2011-2017)', 'collections&url=thor', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Superman (1978-2016)', 'collections&url=superman', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('X-Men (2000-2016)', 'collections&url=xmen', 'collectionsuperhero.png', 'DefaultVideoPlaylists.png')
@@ -898,8 +901,7 @@ class Collections:
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
-					overlay = int(getMovieOverlay(indicators, imdb))
-					watched = (overlay == 5)
+					watched = getMovieOverlay(indicators, imdb) == '5'
 					if self.traktCredentials:
 						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&watched=%s)' % (sysaddon, sysname, imdb, watched)))
 					if watched:

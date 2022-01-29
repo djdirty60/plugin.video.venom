@@ -1009,8 +1009,7 @@ class Movies:
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
-					overlay = int(getMovieOverlay(indicators, imdb))
-					watched = (overlay == 5)
+					watched = getMovieOverlay(indicators, imdb) == '5'
 					if self.traktCredentials:
 						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&watched=%s&unfinished=%s)' % (sysaddon, sysname, imdb, watched, unfinished)))
 					if watched:

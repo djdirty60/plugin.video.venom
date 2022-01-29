@@ -125,7 +125,7 @@ class Seasons:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		try: indicators = getSeasonIndicators(items[0]['imdb']) # refresh not needed now due to service sync
+		try: indicators = getSeasonIndicators(items[0]['imdb'])
 		except: indicators = None
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
@@ -151,7 +151,6 @@ class Seasons:
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
-
 				poster = meta.get('tvshow.poster') or addonPoster # tvshow.poster
 				if self.prefer_tmdbArt: season_poster = meta.get('season_poster') or meta.get('season_poster2') or poster
 				else: season_poster = meta.get('season_poster2') or meta.get('season_poster') or poster
@@ -167,8 +166,7 @@ class Seasons:
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
-					overlay = int(getSeasonOverlay(indicators, imdb, tvdb, season))
-					watched = (overlay == 5)
+					watched = getSeasonOverlay(indicators, imdb, tvdb, season) == '5'
 					if self.traktCredentials:
 						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&watched=%s)' % (sysaddon, systitle, imdb, tvdb, season, watched)))
 					if watched:

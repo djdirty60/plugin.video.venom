@@ -52,17 +52,6 @@ class Episodes:
 		self.added_link = 'https://api.tvmaze.com/schedule'
 		self.calendar_link = 'https://api.tvmaze.com/schedule?date=%s'
 
-	def timeIt(func):
-		import time
-		from resources.lib.modules import log_utils
-		fnc_name = func.__name__
-		def wrap(*args, **kwargs):
-			started_at = time.time()
-			result = func(*args, **kwargs)
-			log_utils.log('%s.%s = %s' % (__name__ , fnc_name, time.time() - started_at), __name__)
-			return result
-		return wrap
-
 	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, meta, season=None, episode=None, create_directory=True):
 		self.list = []
 		try:
@@ -688,7 +677,6 @@ class Episodes:
 				log_utils.error()
 		return items
 
-	# @timeIt
 	def episodeDirectory(self, items, unfinished=False, next=True):
 		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
@@ -720,7 +708,7 @@ class Episodes:
 		rescrape_useDefault = getSetting('rescrape.default') == 'true'
 		rescrape_method = getSetting('rescrape.default2')
 		enable_playnext = getSetting('enable.playnext') == 'true'
-		indicators = getTVShowIndicators() # refresh not needed now due to service sync
+		indicators = getTVShowIndicators()
 		isFolder = False if sysaction != 'episodes' else True
 		if airEnabled == 'true':
 			airZone, airLocation = getSetting('tvshows.air.zone'), getSetting('tvshows.air.location')
@@ -830,8 +818,7 @@ class Episodes:
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
-					overlay = int(getEpisodeOverlay(indicators, imdb, tvdb, season, episode))
-					watched = (overlay == 5)
+					watched = getEpisodeOverlay(indicators, imdb, tvdb, season, episode) == '5'
 					if self.traktCredentials:
 						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&watched=%s&unfinished=%s)' % (sysaddon, systvshowtitle, imdb, tvdb, season, episode, watched, unfinished)))
 					if watched:
@@ -887,12 +874,12 @@ class Episodes:
 				if isMultiList and multi_unwatchedEnabled:
 					if 'ForceAirEnabled' not in i:
 						try:
-							count = getShowCount(indicators, imdb, tvdb) # if indicators has no value trakt.seasonCount() called and is threaded without .join() so not all results are immediately seen
+							count = getShowCount(indicators, imdb, tvdb) # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
 							if count:
 								item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
 							else:
-								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # temp use TMDb's "total_aired_episodes" for threads not finished....next load counts will update with trakt data
+								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # for shows never watched
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 						except: pass
 				item.setProperty('IsPlayable', 'true')

@@ -61,7 +61,8 @@ def getTrakt(url, post=None, extended=False, silent=False):
 		elif result and code == '429':
 			if 'Retry-After' in result[2]: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (1000 calls every 5 minutes, doubt we'll ever hit that)
 				throttleTime = result[2]['Retry-After']
-				if (not silent) and server_notification: control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message lang code 33674
+				if not silent and server_notification and not control.condVisibility('Player.HasVideo'):
+					control.notification(title=32315, message='Trakt Throttling Applied, Sleeping for %s seconds' % throttleTime) # message lang code 33674
 				control.sleep((int(throttleTime) + 1) * 1000)
 				return getTrakt(url, post=post, extended=extended, silent=silent)
 		elif result and code == '401': # Re-Auth token
@@ -88,16 +89,6 @@ def getTraktAsJson(url, post=None, silent=False):
 		return r
 	except:
 		log_utils.error()
-
-def timeIt(func):
-	import time
-	fnc_name = func.__name__
-	def wrap(*args, **kwargs):
-		started_at = time.time()
-		result = func(*args, **kwargs)
-		log_utils.log('%s.%s = %s' % (__name__ , fnc_name, time.time() - started_at), __name__)
-		return result
-	return wrap
 
 def re_auth(headers):
 	try:
@@ -863,11 +854,12 @@ def watchedShowsTime(tvdb, season, episode):
 		log_utils.error()
 
 def cachesyncTV(imdb): # sync full watched shows then sync imdb_id "season indicators" and "season counts"
-	threads = [Thread(target=cachesyncTVShows), Thread(target=cachesyncSeason, args=(imdb,))] # cachesyncSeason() re-write
+	threads = [Thread(target=cachesyncTVShows), Thread(target=cachesyncSeasons, args=(imdb,))]
 	[i.start() for i in threads]
 	[i.join() for i in threads]
+	traktsync.insert_syncSeasons_at()
 
-def cachesyncTVShows(timeout=0): # cache sync all watched shows ex. [('tt9319770', 9, [(1, 1), (1, 2), (1, 3), (1, 4)]), ('tt13991232', 5, [(1, 1), (1, 2)])]
+def cachesyncTVShows(timeout=0):
 	indicators = traktsync.get(syncTVShows, timeout)
 	return indicators
 
@@ -882,32 +874,36 @@ def syncTVShows(): # sync all watched shows ex. [('tt9319770', 9, [(1, 1), (1, 2
 	except:
 		log_utils.error()
 
-def cachesyncSeason(imdb, timeout=0): # season indicators for fully watched seasons ex. ['1', '2', '3']
-	indicators = traktsync.get(syncSeason, timeout, imdb)
+def cachesyncSeasons(imdb, timeout=0):
+	indicators = traktsync.get(syncSeasons, timeout, imdb)
 	return indicators
 
-def syncSeason(imdb): # season indicators for fully watched seasons ex. ['1', '2', '3']
+def syncSeasons(imdb): # season indicators and counts for watched shows ex. [['1', '2', '3'], {1: {'total': 8, 'watched': 8, 'unwatched': 0}, 2: {'total': 10, 'watched': 10, 'unwatched': 0}}]
+	if not imdb: return
+	indicators_and_counts = []
 	try:
 		if not getTraktCredentialsInfo(): return
 		if getSetting('tv.specials') == 'true':
-			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=true&hidden=false&count_specials=true' % imdb)
+			results = getTraktAsJson('/shows/%s/progress/watched?specials=true&hidden=false&count_specials=true' % imdb, silent=True)
 		else:
-			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % imdb)
-		if not indicators: return None
-		indicators = indicators['seasons']
-		indicators = [(i['number'], [x['completed'] for x in i['episodes']]) for i in indicators]
+			results = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % imdb, silent=True)
+		if not results: return
+		seasons = results['seasons']
+		indicators = [(i['number'], [x['completed'] for x in i['episodes']]) for i in seasons]
 		indicators = ['%01d' % int(i[0]) for i in indicators if False not in i[1]]
-		return indicators
+		indicators_and_counts.append(indicators)
+		counts = {season['number']: {'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons}
+		indicators_and_counts.append(counts)
+		return indicators_and_counts
 	except:
 		log_utils.error()
 		return None
 
-def showCount(imdb, refresh=True, wait=False):
+def showCount(imdb):
+	if not imdb: return
 	try:
-		if not imdb: return None
-		if not imdb.startswith('tt'): return None
 		result = {'total': 0, 'watched': 0, 'unwatched': 0}
-		indicators = seasonCount(imdb=imdb, refresh=refresh, wait=wait) # counts for all seasons of a show
+		indicators = seasonCount(imdb) # counts for all seasons of a show
 		if not indicators: return None
 		for key, value in iter(indicators.items()):
 			result['total'] += value['total']
@@ -918,35 +914,12 @@ def showCount(imdb, refresh=True, wait=False):
 		log_utils.error()
 		return None
 
-def seasonCount(imdb, refresh=True, wait=False): # returns counts for all seasons of a show
+def seasonCount(imdb): # return counts for all seasons of a show from traktsync.db
+	if not imdb: return
 	try:
-		if not imdb: return None
-		if not imdb.startswith('tt'): return None
-		indicators = traktsync.cache_existing(_seasonCountRetrieve, imdb) # get existing result while thread fetches new
-		if refresh:
-			thread = Thread(target=_seasonCountCache, args=(imdb,))
-			thread.start()
-			if wait: # Do not wait to retrieve a fresh count, otherwise loading show/season menus are slow.
-				thread.join()
-				indicators = traktsync.cache_existing(_seasonCountRetrieve, imdb)
-		return indicators
-	except:
-		log_utils.error()
-		return None
-
-def _seasonCountCache(imdb):
-	return traktsync.get(_seasonCountRetrieve, 0, imdb)
-
-def _seasonCountRetrieve(imdb):
-	try:
-		if not getTraktCredentialsInfo(): return
-		if getSetting('tv.specials') == 'true':
-			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=true&hidden=false&count_specials=true' % imdb)
-		else:
-			indicators = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % imdb)
-		if not indicators: return None
-		seasons = indicators['seasons']
-		return {season['number']: {'total': season['aired'], 'watched': season['completed'], 'unwatched': season['aired'] - season['completed']} for season in seasons}
+		counts = traktsync.cache_existing(syncSeasons, imdb)
+		if not counts: return
+		return counts[1]
 	except:
 		log_utils.error()
 		return None
@@ -955,18 +928,17 @@ def timeoutsyncTVShows():
 	timeout = traktsync.timeout(syncTVShows)
 	return timeout
 
-def timeoutsyncSeason(imdb):
-	timeout = traktsync.timeout(syncSeason, imdb, returnNone=True) # returnNone must be named arg or will end up considered part of "*args"
+def timeoutsyncSeasons(imdb):
+	timeout = traktsync.timeout(syncSeasons, imdb, returnNone=True) # returnNone must be named arg or will end up considered part of "*args"
 	return timeout
 
-def service_syncSeasons(indicators=None): # service sync only run for season level indicators and counts
+def service_syncSeasons(): # season indicators and counts for watched shows ex. [['1', '2', '3'], {1: {'total': 8, 'watched': 8, 'unwatched': 0}, 2: {'total': 10, 'watched': 10, 'unwatched': 0}}]
 	try:
-		if not indicators: indicators = traktsync.get(syncTVShows, 0)
+		indicators = traktsync.cache_existing(syncTVShows) # use cached data from service cachesyncTVShows() just written fresh
 		threads = []
 		for indicator in indicators:
 			imdb = indicator[0]
-			threads.append(Thread(target=_seasonCountCache, args=(imdb,))) # season counts for all seasons of a show
-			threads.append(Thread(target=cachesyncSeason, args=(imdb,))) # season indicators for fully watched seasons ex. ['1', '2', '3']
+			threads.append(Thread(target=cachesyncSeasons, args=(imdb,))) # season indicators and counts for an entire show
 		[i.start() for i in threads]
 		[i.join() for i in threads]
 	except:
@@ -992,7 +964,6 @@ def markTVShowAsWatched(imdb, tvdb):
 	try:
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		result = getTraktAsJson('/sync/history', {"shows": [{"ids": {"tvdb": tvdb}}]})
-		seasonCount(imdb)
 		return result['added']['episodes'] != 0
 	except:
 		log_utils.error()
@@ -1001,7 +972,6 @@ def markTVShowAsNotWatched(imdb, tvdb):
 	try:
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		result = getTraktAsJson('/sync/history/remove', {"shows": [{"ids": {"tvdb": tvdb}}]})
-		seasonCount(imdb)
 		return result['deleted']['episodes'] != 0
 	except:
 		log_utils.error()
@@ -1011,7 +981,6 @@ def markSeasonAsWatched(imdb, tvdb, season):
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season = int('%01d' % int(season))
 		result = getTraktAsJson('/sync/history', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
-		seasonCount(imdb)
 		return result['added']['episodes'] != 0
 	except:
 		log_utils.error()
@@ -1021,7 +990,6 @@ def markSeasonAsNotWatched(imdb, tvdb, season):
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season = int('%01d' % int(season))
 		result = getTraktAsJson('/sync/history/remove', {"shows": [{"seasons": [{"number": season}], "ids": {"tvdb": tvdb}}]})
-		seasonCount(imdb)
 		return result['deleted']['episodes'] != 0
 	except:
 		log_utils.error()
@@ -1031,7 +999,6 @@ def markEpisodeAsWatched(imdb, tvdb, season, episode):
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
 		result = getTraktAsJson('/sync/history', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
-		seasonCount(imdb)
 		return result['added']['episodes'] != 0
 	except:
 		log_utils.error()
@@ -1041,7 +1008,6 @@ def markEpisodeAsNotWatched(imdb, tvdb, season, episode):
 		if imdb and not imdb.startswith('tt'): imdb = 'tt' + imdb
 		season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
 		result = getTraktAsJson('/sync/history/remove', {"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
-		seasonCount(imdb)
 		return result['deleted']['episodes'] != 0
 	except:
 		log_utils.error()
@@ -1305,7 +1271,8 @@ def scrobbleResetItems(imdb_ids, tvdb_dicts=None, refresh=True, widgetRefresh=Fa
 #############    SERVICE SYNC    ######################
 def trakt_service_sync():
 	while not control.monitor.abortRequested():
-		if getTraktCredentialsInfo: # run service in case user auth's trakt later
+		control.sleep(5000) # wait 5sec in case of device wake from sleep
+		if control.condVisibility('System.InternetState') and getTraktCredentialsInfo(): # run service in case user auth's trakt later
 			activities = getTraktAsJson('/sync/last_activities', silent=True)
 			if getSetting('bookmarks') == 'true' and getSetting('resume.source') == '1':
 				sync_playbackProgress(activities)
@@ -1343,6 +1310,7 @@ def sync_playbackProgress(activities=None, forced=False):
 		if forced:
 			items = getTraktAsJson(link, silent=True)
 			if items: traktsync.insert_bookmarks(items)
+			log_utils.log('Forced - Trakt Playback Progress Sync Complete', __name__, log_utils.LOGDEBUG)
 		else:
 			db_last_paused = traktsync.last_sync('last_paused_at')
 			activity = getPausedActivity(activities)
@@ -1361,9 +1329,13 @@ def sync_watchedProgress(activities=None, forced=False):
 		lang = control.apiLanguage()['tmdb']
 		direct = getSetting('trakt.directProgress.scrape') == 'true'
 		url = 'https://api.trakt.tv/users/me/watched/shows'
-		if forced or (getProgressActivity(activities) > cache.timeout(episodes.Episodes().trakt_progress_list, url, trakt_user, lang, direct)):
+		progressActivity = getProgressActivity(activities)
+		local_listCache = cache.timeout(episodes.Episodes().trakt_progress_list, url, trakt_user, lang, direct)
+		if forced or (progressActivity > local_listCache):
 			cache.get(episodes.Episodes().trakt_progress_list, 0, url, trakt_user, lang, direct)
-		else: cache.get(episodes.Episodes().trakt_progress_list, 3, url, trakt_user, lang, direct)
+			if forced: log_utils.log('Forced - Trakt Progress List Sync Complete', __name__, log_utils.LOGDEBUG)
+			else: log_utils.log('Trakt Progress List Sync Update...(local db latest "list_cached_at" = %s, trakt api latest "progress_activity" = %s)' % \
+									(str(local_listCache), str(progressActivity)), __name__, log_utils.LOGDEBUG)
 	except:
 		log_utils.error()
 
@@ -1371,26 +1343,29 @@ def sync_watched(activities=None, forced=False): # writes to traktsync.db as of 
 	try:
 		if forced:
 			cachesyncMovies()
+			log_utils.log('Forced - Trakt Watched Movie Sync Complete', __name__, log_utils.LOGDEBUG)
 			cachesyncTVShows()
 			control.sleep(5000)
-			service_syncSeasons()
+			service_syncSeasons() # syncs all watched shows season indicators and counts
+			log_utils.log('Forced - Trakt Watched Shows Sync Complete', __name__, log_utils.LOGDEBUG)
+			traktsync.insert_syncSeasons_at()
 		else:
 			moviesWatchedActivity = getMoviesWatchedActivity(activities)
 			db_movies_last_watched = timeoutsyncMovies()
-			episodesWatchedActivity = getEpisodesWatchedActivity(activities)
-			db_episoodes_last_watched = timeoutsyncTVShows()
-			db_last_syncTVShows = traktsync.last_sync('last_TVShowsWatched_at')
 			if moviesWatchedActivity > db_movies_last_watched:
 				log_utils.log('Trakt Watched Movie Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
 								(str(db_movies_last_watched), str(moviesWatchedActivity)), __name__, log_utils.LOGDEBUG)
 				cachesyncMovies()
-			if any(episodesWatchedActivity > value for value in (db_episoodes_last_watched, db_last_syncTVShows)):
+			episodesWatchedActivity = getEpisodesWatchedActivity(activities)
+			db_last_syncTVShows = timeoutsyncTVShows()
+			db_last_syncSeasons = traktsync.last_sync('last_syncSeasons_at')
+			if any(episodesWatchedActivity > value for value in (db_last_syncTVShows, db_last_syncSeasons)):
 				log_utils.log('Trakt Watched Shows Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
-								(str(min(db_episoodes_last_watched, db_last_syncTVShows)), str(episodesWatchedActivity)), __name__, log_utils.LOGDEBUG)
+								(str(min(db_last_syncTVShows, db_last_syncSeasons)), str(episodesWatchedActivity)), __name__, log_utils.LOGDEBUG)
 				cachesyncTVShows()
 				control.sleep(5000)
-				service_syncSeasons()
-				traktsync.insert_TVShowsWatched_at()
+				service_syncSeasons() # syncs all watched shows season indicators and counts
+				traktsync.insert_syncSeasons_at()
 	except:
 		log_utils.error()
 
@@ -1412,6 +1387,7 @@ def sync_user_lists(activities=None, forced=False):
 				else: i['content_type'] = 'mixed' if i['content_type'] == 'movies' else 'shows'
 				control.sleep(200)
 			traktsync.insert_user_lists(items)
+			log_utils.log('Forced - Trakt User Lists Sync Complete', __name__, log_utils.LOGDEBUG)
 		else:
 			db_last_lists_updatedat = traktsync.last_sync('last_lists_updatedat')
 			user_listActivity = getUserListActivity(activities)
@@ -1441,7 +1417,7 @@ def sync_liked_lists(activities=None, forced=False):
 		db_last_liked = traktsync.last_sync('last_liked_at')
 		listActivity = getListActivity(activities)
 		if (listActivity > db_last_liked) or forced:
-			log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
+			if not forced: log_utils.log('Trakt Liked Lists Sync Update...(local db latest "liked_at" = %s, trakt api latest "liked_at" = %s)' % \
 								(str(db_last_liked), str(listActivity)), __name__, log_utils.LOGDEBUG)
 			items = getTraktAsJson(link, silent=True)
 			if not items: return
@@ -1465,6 +1441,7 @@ def sync_liked_lists(activities=None, forced=False):
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			traktsync.insert_liked_lists(thrd_items)
+			if forced: log_utils.log('Forced - Trakt Liked Lists Sync Complete', __name__, log_utils.LOGDEBUG)
 	except:
 		log_utils.error()
 
@@ -1474,6 +1451,7 @@ def sync_hidden_progress(activities=None, forced=False):
 		if forced:
 			items = getTraktAsJson(link, silent=True)
 			traktsync.insert_hidden_progress(items)
+			log_utils.log('Forced - Trakt Hidden Progress Sync Complete', __name__, log_utils.LOGDEBUG)
 		else:
 			db_last_hidden = traktsync.last_sync('last_hiddenProgress_at')
 			hiddenActivity = getHiddenActivity(activities)
@@ -1493,6 +1471,7 @@ def sync_collection(activities=None, forced=False):
 			traktsync.insert_collection(items, 'movies_collection')
 			items = getTraktAsJson(link % 'shows', silent=True)
 			traktsync.insert_collection(items, 'shows_collection')
+			log_utils.log('Forced - Trakt Collection Sync Complete', __name__, log_utils.LOGDEBUG)
 		else:
 			db_last_collected = traktsync.last_sync('last_collected_at')
 			collectedActivity = getCollectedActivity(activities)
@@ -1516,6 +1495,7 @@ def sync_watch_list(activities=None, forced=False):
 			traktsync.insert_watch_list(items, 'movies_watchlist')
 			items = getTraktAsJson(link % 'shows', silent=True)
 			traktsync.insert_watch_list(items, 'shows_watchlist')
+			log_utils.log('Forced - Trakt Watch List Sync Complete', __name__, log_utils.LOGDEBUG)
 		else:
 			db_last_watchList = traktsync.last_sync('last_watchlisted_at')
 			watchListActivity = getWatchListedActivity(activities)
@@ -1538,7 +1518,7 @@ def sync_popular_lists(forced=False):
 		cache_expiry = (datetime.utcnow() - timedelta(hours=168)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		cache_expiry = int(cleandate.iso_2_utc(cache_expiry))
 		if (cache_expiry > db_last_popularList) or forced:
-			log_utils.log('Trakt Popular Lists Sync Update...(local db latest "popularlist_at" = %s, cache expiry = %s)' % \
+			if not forced: log_utils.log('Trakt Popular Lists Sync Update...(local db latest "popularlist_at" = %s, cache expiry = %s)' % \
 								(str(db_last_popularList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
 			items = getTraktAsJson(link, silent=True)
 			if not items: return
@@ -1569,6 +1549,7 @@ def sync_popular_lists(forced=False):
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			traktsync.insert_public_lists(thrd_items, service_type='last_popularlist_at', new_sync=False)
+			if forced: log_utils.log('Forced - Trakt Popular Lists Sync Complete', __name__, log_utils.LOGDEBUG)
 	except:
 		log_utils.error()
 
@@ -1581,7 +1562,7 @@ def sync_trending_lists(forced=False):
 		cache_expiry = (datetime.utcnow() - timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		cache_expiry = int(cleandate.iso_2_utc(cache_expiry))
 		if (cache_expiry > db_last_trendingList) or forced:
-			log_utils.log('Trakt Trending Lists Sync Update...(local db latest "trendinglist_at" = %s, cache expiry = %s)' % \
+			if not forced: log_utils.log('Trakt Trending Lists Sync Update...(local db latest "trendinglist_at" = %s, cache expiry = %s)' % \
 								(str(db_last_trendingList), str(cache_expiry)), __name__, log_utils.LOGDEBUG)
 			items = getTraktAsJson(link, silent=True)
 			if not items: return
@@ -1612,5 +1593,6 @@ def sync_trending_lists(forced=False):
 			[i.start() for i in threads]
 			[i.join() for i in threads]
 			traktsync.insert_public_lists(thrd_items, service_type='last_trendinglist_at', new_sync=False)
+			if forced: log_utils.log('Forced - Trakt Trending Lists Sync Complete', __name__, log_utils.LOGDEBUG)
 	except:
 		log_utils.error()

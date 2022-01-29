@@ -200,7 +200,7 @@ class TVshows:
 			self.list = cache.get(self.trakt_list, 24, self.progress_link, self.trakt_user)
 		except:
 			self.list = cache.get(self.trakt_list, 0, self.progress_link, self.trakt_user)
-		indicators = getTVShowIndicators(refresh=True)
+		indicators = getTVShowIndicators()
 		for i in self.list:
 			count = getShowCount(indicators, imdb=i.get('imdb'), tvdb=i.get('tvdb'))
 			i.update({'watched_count': count})
@@ -957,7 +957,7 @@ class TVshows:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		indicators = getTVShowIndicators() # refresh not needed now due to service sync
+		indicators = getTVShowIndicators()
 		flatten = getSetting('flatten.tvshows') == 'true'
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
@@ -998,8 +998,7 @@ class TVshows:
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
-					overlay = int(getTVShowOverlay(indicators, imdb, tvdb))
-					watched = (overlay == 5)
+					watched = getTVShowOverlay(indicators, imdb, tvdb) == '5'
 					if self.traktCredentials:
 						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&watched=%s)' % (sysaddon, systitle, imdb, tvdb, watched)))
 					if watched:
@@ -1026,11 +1025,11 @@ class TVshows:
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				try: 
-					count = getShowCount(indicators, imdb, tvdb) # if indicators and no matching imdb_id in watched status then return None and use TMDb meta to avoid Trakt request
+					count = getShowCount(indicators, imdb, tvdb) # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
 					if count:
 						item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 					else:
-						item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))})
+						item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # for shows never watched
 				except: pass
 				item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 				item.setProperty('IsPlayable', 'false')

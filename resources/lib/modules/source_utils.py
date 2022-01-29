@@ -224,8 +224,7 @@ def tvshow_reboots():
 	return reboots
 
 def copy2clip(txt):
-	from sys import platform as sys_platform
-	platform = sys_platform
+	from sys import platform
 	if platform == "win32":
 		try:
 			from subprocess import check_call

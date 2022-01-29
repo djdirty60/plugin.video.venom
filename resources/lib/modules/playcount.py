@@ -5,16 +5,15 @@
 
 from resources.lib.modules.control import setting as getSetting, refresh as containerRefresh, addonInfo, progressDialogBG, monitor, condVisibility, execute
 from resources.lib.modules import trakt
-
 tmdb_api_key = '3320855e65a9758297fec4f7c9717698'
 omdb_api_key = 'd4daa2b'
-# tvdb_api_key = '7R8SZZX90UA9YMBU' # still valid key
 tvdb_api_key = '06cff30690f9b9622957044f2159ffae'
 traktIndicators = trakt.getTraktIndicatorsInfo()
 if not traktIndicators:
 	try:
-		if not condVisibility('System.HasAddon(script.module.metahandler)'): execute('InstallAddon(script.module.metahandler)')
+		if not condVisibility('System.HasAddon(script.module.metahandler)'): execute('InstallAddon(script.module.metahandler)', wait=True)
 	except: pass
+
 
 def getMovieIndicators(refresh=False):
 	try:
@@ -51,14 +50,12 @@ def getTVShowIndicators(refresh=False):
 def getSeasonIndicators(imdb, refresh=False):
 	try:
 		if traktIndicators:
-			timeoutsyncSeason = trakt.timeoutsyncSeason(imdb)
-			if timeoutsyncSeason is None: return # if no entry means no completed season watched so do not make needless requests 
-
+			timeoutsyncSeasons = trakt.timeoutsyncSeasons(imdb)
+			if timeoutsyncSeasons is None: return # if no entry means no completed season watched so do not make needless requests 
 			if not refresh: timeout = 720
-			elif trakt.getEpisodesWatchedActivity() < timeoutsyncSeason: timeout = 720
+			elif trakt.getEpisodesWatchedActivity() < timeoutsyncSeasons: timeout = 720
 			else: timeout = 0
-
-			indicators = trakt.cachesyncSeason(imdb=imdb, timeout=timeout)
+			indicators = trakt.cachesyncSeasons(imdb=imdb, timeout=timeout)[0]
 			return indicators
 		else:
 			from metahandler import metahandlers
@@ -143,10 +140,10 @@ def getShowCount(indicators, imdb, tvdb):
 						watched = len(indicator[2])
 						unwatched = total - watched
 						return {'total': total, 'watched': watched, 'unwatched': unwatched}
-			elif not indicators:
+			elif not indicators: # service sync provides so should always have value, leave for fallback
 				result = trakt.showCount(imdb)
 				return result
-			else: # TMDb has "total_episodes" now so return None and it will be used when indicators is populated but tvdb not found(shows never watched)
+			else: # TMDb has "total_aired_episodes" now so return None and it will be used when indicators is populated but imdb id not found(means show has never been watched)
 				return None
 		else:
 			return None # this code below for metahandler does not aply here nor does the addon offer a means to return such counts
@@ -165,8 +162,8 @@ def getShowCount(indicators, imdb, tvdb):
 def getSeasonCount(imdb, season=None):
 	if not imdb.startswith('tt'): return None
 	try:
-		if not traktIndicators: return None
-		result = trakt.seasonCount(imdb=imdb, refresh=False) # do not refresh for browsing
+		if not traktIndicators: return None # metahandler does not currently provide counts
+		result = trakt.seasonCount(imdb)
 		if not result: return None
 		if not season: return result
 		else: return result.get(int(season))
@@ -181,8 +178,6 @@ def markMovieDuringPlayback(imdb, watched):
 			if int(watched) == 5: trakt.markMovieAsWatched(imdb)
 			else: trakt.markMovieAsNotWatched(imdb)
 			trakt.cachesyncMovies()
-			# if trakt.getTraktAddonMovieInfo():
-				# trakt.markMovieAsNotWatched(imdb)
 		else:
 			from metahandler import metahandlers
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)
@@ -197,9 +192,7 @@ def markEpisodeDuringPlayback(imdb, tvdb, season, episode, watched):
 		if traktIndicators:
 			if int(watched) == 5: trakt.markEpisodeAsWatched(imdb, tvdb, season, episode)
 			else: trakt.markEpisodeAsNotWatched(imdb, tvdb, season, episode)
-			trakt.cachesyncTVShows()
-			# if trakt.getTraktAddonEpisodeInfo():
-				# trakt.markEpisodeAsNotWatched(imdb, tvdb, season, episode)
+			trakt.cachesyncTV(imdb) # updates all watched shows, as well as season indicators and counts for given imdb_id show
 		else:
 			from metahandler import metahandlers
 			metaget = metahandlers.MetaData(tmdb_api_key, omdb_api_key, tvdb_api_key)

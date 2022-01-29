@@ -625,7 +625,7 @@ def delete_tables(tables):
 			'shows_watchlist': 'last_watchlisted_at',
 			'trending_lists': 'last_trendinglist_at',
 			'user_lists': 'last_lists_updatedat',
-			'watched': 'last_TVShowsWatched_at'}
+			'watched': 'last_syncSeasons_at'}
 		for table,v in iter(tables.items()):
 			if v is True:
 				dbcur.execute('''DROP TABLE IF EXISTS {}'''.format(table))
@@ -790,13 +790,13 @@ def _generate_md5(*args):
 	except: [md5_hash.update(str(arg).encode('utf-8')) for arg in args]
 	return str(md5_hash.hexdigest())
 
-def insert_TVShowsWatched_at():
+def insert_syncSeasons_at():
 	try:
 		dbcon = get_connection()
 		dbcur = get_connection_cursor(dbcon)
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
-		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_TVShowsWatched_at', timestamp))
+		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_syncSeasons_at', timestamp))
 		dbcur.connection.commit()
 	except:
 		from resources.lib.modules import log_utils
