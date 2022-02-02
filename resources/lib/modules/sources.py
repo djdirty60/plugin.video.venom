@@ -566,7 +566,7 @@ class Sources:
 		try: progressDialog.close()
 		except: pass
 		del progressDialog
-		del threads[:] # Make sure any remaining providers are stopped.
+		del threads[:] # Make sure any remaining providers are stopped, only deletes threads not started yet.
 		self.sources.extend(self.scraper_sources)
 		self.tvshowtitle = tvshowtitle
 		self.year = year

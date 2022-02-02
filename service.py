@@ -5,6 +5,7 @@
 
 from resources.lib.modules import control, log_utils, my_accounts
 from sys import version_info, platform as sys_platform
+from threading import Thread
 window = control.homeWindow
 pythonVersion = '{}.{}.{}'.format(version_info[0], version_info[1], version_info[2])
 plugin = 'plugin://plugin.video.venom/'
@@ -124,14 +125,14 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				window.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.4.7' # set to desired version to force any db clearing needed
+				clearDB_version = '6.4.8' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					clr_fanarttv = False
-					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
+					cache.clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=False, clr_search=False, clr_bookmarks=False)
 					from resources.lib.database import traktsync
-					clr_traktSync = {'bookmarks': False, 'hiddenProgress': False, 'liked_lists': False, 'movies_collection': False, 'movies_watchlist': False, 'public_lists': False,
-											'popular_lists': False, 'service': True, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': False, 'user_lists': False, 'watched': True}
+					clr_traktSync = {'bookmarks': False, 'hiddenProgress': False, 'liked_lists': False, 'movies_collection': False, 'movies_watchlist': False, 'popular_lists': False,
+											'public_lists': False, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': False, 'user_lists': False, 'watched': True}
 					cleared = traktsync.delete_tables(clr_traktSync)
 					if cleared:
 						control.notification(message='Forced traktsync clear for version update complete.')
@@ -141,7 +142,7 @@ class VersionIsUpdateCheck:
 						cleared = fanarttv_cache.cache_clear()
 						control.notification(message='Forced fanarttv.db clear for version update complete.')
 						control.log('[ plugin.video.venom ]  Forced fanarttv.db clear for version update complete.', LOGINFO)
-				control.setSetting('trakt.message2', '') # force a settings write for any added settings may have been added in new version
+				control.setSetting('trakt.message2', '') # force a settings write for any added settings that may have been added in new version
 				control.log('[ plugin.video.venom ]  Forced new User Data settings.xml saved', LOGINFO)
 				control.log('[ plugin.video.venom ]  Plugin updated to v%s' % curVersion, LOGINFO)
 		except:
@@ -157,12 +158,15 @@ class SyncTraktCollection:
 class LibraryService:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Library Update Service Starting (Update check every 6hrs)...', LOGINFO)
-		control.execute('RunPlugin(%s?action=service_library)' % plugin) # service_library contains control.monitor().waitForAbort() while loop every 6hrs
+		from resources.lib.modules import library
+		library.lib_tools().service() # service_library contains control.monitor().waitForAbort() while loop every 6hrs
 
 class SyncTraktService:
 	def run(self):
-		control.log('[ plugin.video.venom ]  Trakt Sync Service Starting (sync check every 15min)...', LOGINFO)
-		control.execute('RunPlugin(%s?action=service_syncTrakt)' % plugin) # trakt.trakt_service_sync() contains control.monitor().waitForAbort() while loop every 15min
+		service_syncInterval = control.setting('trakt.service.syncInterval') or '15'
+		control.log('[ plugin.video.venom ]  Trakt Sync Service Starting (sync check every %sminutes)...' % service_syncInterval, LOGINFO)
+		from resources.lib.modules import trakt
+		trakt.trakt_service_sync() # trakt.trakt_service_sync() contains control.monitor().waitForAbort() while loop every "service_syncInterval" minutes
 
 try:
 	kodiVersion = control.getKodiVersion(full=True)
@@ -198,12 +202,15 @@ def main():
 		SyncMyAccounts().run()
 		ReuseLanguageInvokerCheck().run()
 		if control.setting('library.service.update') == 'true':
-			libraryService = True
-			LibraryService().run()
+			libraryService = Thread(target=LibraryService().run)
+			libraryService.start()
 		if control.setting('general.checkAddonUpdates') == 'true':
 			AddonCheckUpdate().run()
 		VersionIsUpdateCheck().run()
-		SyncTraktService().run() # run service in case user auth's trakt later, sync will loop and do nothing without valid auth'd account.
+
+		syncTraktService = Thread(target=SyncTraktService().run) # run service in case user auth's trakt later, sync will loop and do nothing without valid auth'd account
+		syncTraktService.start()
+
 		if getTraktCredentialsInfo():
 			if control.setting('autoTraktOnStart') == 'true':
 				SyncTraktCollection().run()
@@ -217,9 +224,10 @@ def main():
 		break
 	SettingsMonitor().waitForAbort()
 	control.log('[ plugin.video.venom ]  Settings Monitor Service Stopping...', LOGINFO)
+	del syncTraktService # prob does not kill a running thread
 	control.log('[ plugin.video.venom ]  Trakt Sync Service Stopping...', LOGINFO)
-
 	if libraryService:
+		del libraryService # prob does not kill a running thread
 		control.log('[ plugin.video.venom ]  Library Update Service Stopping...', LOGINFO)
 	if schedTrakt:
 		schedTrakt.cancel()

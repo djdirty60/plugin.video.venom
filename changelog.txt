@@ -1,4 +1,12 @@
 
+[B][COLOR red]Update - v6.4.8 - Feb. 02, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Increased PlayNext pop-up time to 120 seconds.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt sync service can now be set to a desired time interval from 5-60 minutes to check for db changes, 15 minutes is the default.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where manually marking as watched/unwatched would lose focus of listItem upon [B]"container.refresh"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Manually marking a movie as watched/unwatched is now considerably faster.  The local Trakt db is now updated without an endpoint request.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where Trakt service sync thread could spawn another instance to run.[/I]
+
+
 [B][COLOR red]Update - v6.4.7 - Jan. 29, 2022[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Fixed issue where playback marking of episode did not also update the watched season count.[/I]
 [COLOR yellow]--[/COLOR][I] Service sync of Trakt data will no longer display notifications if [B]"Player.HasVideo"[/B].[/I]

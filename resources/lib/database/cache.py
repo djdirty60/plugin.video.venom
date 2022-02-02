@@ -101,9 +101,7 @@ def cache_insert(key, value):
 		dbcur = get_connection_cursor(dbcon)
 		now = int(time())
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS cache (key TEXT, value TEXT, date INTEGER, UNIQUE(key));''')
-		update_result = dbcur.execute('''UPDATE cache SET value=?,date=? WHERE key=?''', (value, now, key))
-		if update_result.rowcount == 0:
-			dbcur.execute('''INSERT INTO cache Values (?, ?, ?)''', (key, value, now))
+		dbcur.execute('''INSERT OR REPLACE INTO cache Values (?, ?, ?)''', (key, value, now))
 		dbcur.connection.commit()
 	except:
 		from resources.lib.modules import log_utils

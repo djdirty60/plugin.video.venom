@@ -28,9 +28,16 @@ V2_API_KEY = '1ff09b52d009f286be2d9bdfc0314c688319cbf931040d5f8847e7694a01de42'
 CLIENT_SECRET = '0c5134e5d15b57653fefed29d813bfbd58d73d51fb9bcd6442b5065f30c4d4dc'
 headers = {'Content-Type': 'application/json', 'trakt-api-key': V2_API_KEY, 'trakt-api-version': '2'}
 REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
+
 highlight_color = control.getHighlightColor()
 server_notification = getSetting('trakt.server.notifications') == 'true'
+service_syncInterval = int(getSetting('trakt.service.syncInterval')) if getSetting('trakt.service.syncInterval') else 15
 
+# class Trakt: # coming soon..lol
+	# def __init__(self):
+		# self.highlight_color = control.getHighlightColor()
+		# self.server_notification = getSetting('trakt.server.notifications') == 'true'
+		# self.service_syncInterval = int(getSetting('trakt.service.syncInterval')) if getSetting('trakt.service.syncInterval') else 15
 
 def getTrakt(url, post=None, extended=False, silent=False):
 	try:
@@ -234,7 +241,7 @@ def watch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 	success = False
 	if not tvdb:
 		success = markMovieAsWatched(imdb)
-		cachesyncMovies()
+		update_syncMovies(imdb)
 	elif episode:
 		success = markEpisodeAsWatched(imdb, tvdb, season, episode)
 		cachesyncTV(imdb)
@@ -246,7 +253,7 @@ def watch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True):
 		cachesyncTV(imdb)
 	else:
 		success = markMovieAsWatched(imdb)
-		cachesyncMovies()
+		update_syncMovies(imdb)
 	control.hide()
 	if refresh: control.refresh()
 	control.trigger_widget_refresh()
@@ -261,7 +268,7 @@ def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 	success = False
 	if not tvdb:
 		success = markMovieAsNotWatched(imdb)
-		cachesyncMovies()
+		update_syncMovies(imdb, remove_id=True)
 	elif episode:
 		success = markEpisodeAsNotWatched(imdb, tvdb, season, episode)
 		cachesyncTV(imdb)
@@ -273,7 +280,7 @@ def unwatch(name, imdb=None, tvdb=None, season=None, episode=None, refresh=True)
 		cachesyncTV(imdb)
 	else:
 		success = markMovieAsNotWatched(imdb)
-		cachesyncMovies()
+		update_syncMovies(imdb, remove_id=True)
 	control.hide()
 	if refresh: control.refresh()
 	control.trigger_widget_refresh()
@@ -932,6 +939,16 @@ def timeoutsyncSeasons(imdb):
 	timeout = traktsync.timeout(syncSeasons, imdb, returnNone=True) # returnNone must be named arg or will end up considered part of "*args"
 	return timeout
 
+def update_syncMovies(imdb, remove_id=False):
+	try:
+		indicators = traktsync.cache_existing(syncMovies)
+		if remove_id: indicators.remove(imdb)
+		else: indicators.append(imdb)
+		key = traktsync._hash_function(syncMovies, ())
+		traktsync.cache_insert(key, repr(indicators))
+	except:
+		log_utils.error()
+
 def service_syncSeasons(): # season indicators and counts for watched shows ex. [['1', '2', '3'], {1: {'total': 8, 'watched': 8, 'unwatched': 0}, 2: {'total': 10, 'watched': 10, 'unwatched': 0}}]
 	try:
 		indicators = traktsync.cache_existing(syncTVShows) # use cached data from service cachesyncTVShows() just written fresh
@@ -1286,7 +1303,7 @@ def trakt_service_sync():
 			sync_watch_list(activities)
 			sync_popular_lists()
 			sync_trending_lists()
-		if control.monitor.waitForAbort(60*15): break
+		if control.monitor.waitForAbort(60*service_syncInterval): break
 
 def force_traktSync():
 	if not control.yesnoDialog(getLS(32056), '', ''): return
@@ -1352,7 +1369,8 @@ def sync_watched(activities=None, forced=False): # writes to traktsync.db as of 
 		else:
 			moviesWatchedActivity = getMoviesWatchedActivity(activities)
 			db_movies_last_watched = timeoutsyncMovies()
-			if moviesWatchedActivity > db_movies_last_watched:
+			# if moviesWatchedActivity > db_movies_last_watched:
+			if moviesWatchedActivity - db_movies_last_watched >= 30: # do not sync unless 30secs more to allow for variation between trakt post and local db update.
 				log_utils.log('Trakt Watched Movie Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
 								(str(db_movies_last_watched), str(moviesWatchedActivity)), __name__, log_utils.LOGDEBUG)
 				cachesyncMovies()
