@@ -1219,8 +1219,7 @@ def scrobbleEpisode(imdb, tmdb, tvdb, season, episode, watched_percent):
 			if getSetting('trakt.scrobble.notify') == 'true': control.notification(message=32088)
 			control.sleep(1000)
 			sync_playbackProgress(forced=True)
-		else:
-			control.notification(message=32130)
+		else: control.notification(message=32130)
 	except:
 		log_utils.error()
 
@@ -1369,7 +1368,6 @@ def sync_watched(activities=None, forced=False): # writes to traktsync.db as of 
 		else:
 			moviesWatchedActivity = getMoviesWatchedActivity(activities)
 			db_movies_last_watched = timeoutsyncMovies()
-			# if moviesWatchedActivity > db_movies_last_watched:
 			if moviesWatchedActivity - db_movies_last_watched >= 30: # do not sync unless 30secs more to allow for variation between trakt post and local db update.
 				log_utils.log('Trakt Watched Movie Sync Update...(local db latest "watched_at" = %s, trakt api latest "watched_at" = %s)' % \
 								(str(db_movies_last_watched), str(moviesWatchedActivity)), __name__, log_utils.LOGDEBUG)

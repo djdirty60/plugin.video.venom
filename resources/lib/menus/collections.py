@@ -200,6 +200,7 @@ class Collections:
 		self.missinginaction_link = self.tmdb_link % '33347'
 		self.missionimpossible_link = self.tmdb_link % '113187'
 		self.themummy_link = self.imdb_link % ('mummy', 'feature')
+		self.musketeers_link = self.tmdb_link % '8191200'
 		self.nakedgun_link = self.tmdb_link % '33349'
 		self.nationallampoon_link = self.tmdb_link % '33350'
 		self.nationallampoonsvacation_link = self.tmdb_link % '33351'
@@ -486,6 +487,7 @@ class Collections:
 		self.addDirectoryItem('Missing in Action (1984-1988)', 'collections&url=missinginaction', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Mission Impossible (1996-2021)', 'collections&url=missionimpossible', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('The Mummy (1999-2017)', 'collections&url=themummy', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
+		self.addDirectoryItem('Musketeers (1921-2018)', 'collections&url=musketeers', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('Naked Gun (1988-1994)', 'collections&url=nakedgun', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('National Lampoon (1978-2006)', 'collections&url=nationallampoon', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
 		self.addDirectoryItem('National Lampoons Vacation (1983-2015)', 'collections&url=nationallampoonsvacation', 'collectionboxset.png', 'DefaultVideoPlaylists.png')
@@ -685,7 +687,7 @@ class Collections:
 			try: u = urlparse(url).netloc.lower()
 			except: pass
 			if u in self.tmdb_link and any(value in url for value in ('/list/', '/collection/')):
-				self.list = cache.get(tmdb_indexer.Movies().tmdb_collections_list, 168, url)
+				self.list = tmdb_indexer.Movies().tmdb_collections_list(url) # caching handled in list indexer
 				if '/collection/' in url: self.sort() # TMDb "/collections/" does not support request sort
 			elif u in self.imdb_link:
 				self.list = cache.get(self.imdb_list, 168, url)
@@ -809,11 +811,11 @@ class Collections:
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not tmdb and imdb:
-				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
+				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie') # "trakt.IDLookup()" caches item
 				if trakt_ids: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
 			if not tmdb and not imdb:
 				try:
-					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
+					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False) # "trakt.SearchMovie()" caches item
 					if results[0]['movie']['title'] != self.list[i]['title'] or results[0]['movie']['year'] != self.list[i]['year']: return
 					ids = results[0].get('movie', {}).get('ids', {})
 					if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
@@ -821,7 +823,7 @@ class Collections:
 				except: pass
 #################################
 			if not tmdb: return
-			movie_meta = cache.get(tmdb_indexer.Movies().get_movie_meta, 96, tmdb)
+			movie_meta = tmdb_indexer.Movies().get_movie_meta(tmdb)
 			if not movie_meta: return
 			values = {}
 			values.update(movie_meta)
@@ -856,6 +858,8 @@ class Collections:
 		from resources.lib.modules.player import Bookmarks
 		sysaddon, syshandle = argv[0], int(argv[1])
 		play_mode = getSetting('play.mode') 
+		rescrape_useDefault = getSetting('rescrape.default') == 'true'
+		rescrape_method = getSetting('rescrape.default2')
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
@@ -901,7 +905,6 @@ class Collections:
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				url = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)
 				sysurl = quote_plus(url)
-
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
@@ -918,11 +921,20 @@ class Collections:
 				except: pass
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
-				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-				cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
-				cm.append((rescrapeAllMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&all_providers=true)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
 				cm.append((findSimilarMenu, 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
+				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
+				if not rescrape_useDefault:
+					cm.append(('Rescrape Options ------>', 'PlayMedia(%s?action=rescrapeMenu&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+				else:
+					if rescrape_method == '0':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&select=1)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+					if rescrape_method == '1':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&select=0)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+					if rescrape_method == '2':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&all_providers=true&select=1)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
+					if rescrape_method == '3':
+						cm.append((rescrapeMenu, 'PlayMedia(%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s&rescrape=true&all_providers=true&select=0)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
 				cm.append((clearSourcesMenu, 'RunPlugin(%s?action=cache_clearSources)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################
@@ -961,7 +973,6 @@ class Collections:
 				url = '%s?action=collections&url=%s' % (sysaddon, quote_plus(url))
 				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
-				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -973,7 +984,7 @@ class Collections:
 		control.sleep(100)
 		views.setView('movies', {'skin.estuary': 55, 'skin.confluence': 500})
 
-	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True):
+	def addDirectoryItem(self, name, action, poster, icon, context=None, queue=False):
 		try:
 			from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 			if isinstance(name, int): name = getLS(name)
@@ -982,17 +993,16 @@ class Collections:
 			if not icon.startswith('Default'): icon = control.joinPath(artPath, icon)
 			if poster.startswith('http'): poster = poster
 			else: poster = control.joinPath(artPath, poster) if artPath else icon
-			url = '%s?action=%s' % (sysaddon, query) if isAction else query
+			url = '%s?action=%s' % (sysaddon, action)
 			cm = []
-			if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 			if context: cm.append((getLS(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
+			if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 			item = control.item(label=name, offscreen=True)
-			item.setProperty('IsPlayable', 'false')
 			item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 			item.setInfo(type='video', infoLabels={'plot': name})
 			item.addContextMenuItems(cm)
-			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=isFolder)
+			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

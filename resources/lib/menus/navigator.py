@@ -364,7 +364,7 @@ class Navigator:
 		if getSetting('realdebrid.token'):
 			self.addDirectoryItem('Real-Debrid: Torrent Transfers', 'rd_UserTorrentsToListItem', 'realdebrid.png', 'DefaultAddonService.png')
 			self.addDirectoryItem('Real-Debrid: My Downloads', 'rd_MyDownloads&query=1', 'realdebrid.png', 'DefaultAddonService.png')
-			self.addDirectoryItem('Real-Debrid: Account Info', 'rd_AccountInfo', 'realdebrid.png', 'DefaultAddonService.png',isFolder=False )
+			self.addDirectoryItem('Real-Debrid: Account Info', 'rd_AccountInfo', 'realdebrid.png', 'DefaultAddonService.png', isFolder=False )
 		else:
 			self.addDirectoryItem('[I]Please visit My Accounts for setup[/I]', 'tools_openMyAccount&amp;query=1.18', 'realdebrid.png', 'DefaultAddonService.png', isFolder=False)
 		self.endDirectory()
@@ -390,7 +390,7 @@ class Navigator:
 			item = control.item(label=title, offscreen=True)
 			item.setInfo(type='video', infoLabels = {'title': title})
 			item.setArt({'icon': poster, 'thumb': poster, 'poster': poster, 'fanart': fanart, 'banner': banner})
-			item.setProperty('IsPlayable', 'false')
+			# item.setProperty('IsPlayable', 'false')
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			control.content(syshandle, content)
 			control.directory(syshandle, cacheToDisc=True)
@@ -475,8 +475,7 @@ class Navigator:
 				except:
 					from resources.lib.modules import log_utils
 					log_utils.error()
-			if cache_clear_both():
-				control.notification(message=35532)
+			if cache_clear_both(): control.notification(message=35532)
 			else: control.notification(message=33586)
 		except:
 			from resources.lib.modules import log_utils
@@ -542,7 +541,6 @@ class Navigator:
 			item = control.item(label=name, offscreen=True)
 			item.addContextMenuItems(cm)
 			if isPlayable: item.setProperty('IsPlayable', 'true')
-			else: item.setProperty('IsPlayable', 'false')
 			item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 			item.setInfo(type='video', infoLabels={'plot': name})
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder= isFolder)

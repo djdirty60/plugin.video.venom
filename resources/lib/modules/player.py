@@ -27,7 +27,6 @@ class Player(xbmc.Player):
 		self.preScrape_triggered = False
 		self.playbackStopped_triggered = False
 		self.playback_resumed = False
-		self.onPlayBackStarted_called = False
 		self.onPlayBackStopped_ran = False
 		self.media_type = None
 		self.DBID = None
@@ -226,15 +225,29 @@ class Player(xbmc.Player):
 				control.closeAll()
 				break
 			xbmc.sleep(200)
-		while self.isPlayingVideo():
+
+		xbmc.sleep(5000)
+		playlist_skip = False
+		try: running_path = self.getPlayingFile() # original video that playlist playback started with
+		except: running_path = ''
+
+		if playerWindow.getProperty('venom.playlistStart_position'): pass
+		else:
+			if control.playlist.size() > 1: playerWindow.setProperty('venom.playlistStart_position', str(control.playlist.getposition()))
+
+		while self.isPlayingVideo() and not control.monitor.abortRequested():
 			try:
-				if control.monitor.abortRequested(): return sysexit()
+				if running_path != self.getPlayingFile(): # will not match if user hits "Next" so break from keepAlive()
+					playlist_skip = True
+					break
+
 				try:
 					self.current_time = self.getTime()
 					self.media_length = self.getTotalTime()
 				except: pass
 				watcher = (self.getWatchedPercent() >= 85)
 				property = homeWindow.getProperty(pname)
+
 				if self.media_type == 'movie':
 					try:
 						if watcher and property != '5':
@@ -242,6 +255,7 @@ class Player(xbmc.Player):
 							playcount.markMovieDuringPlayback(self.imdb, '5')
 					except: pass
 					xbmc.sleep(2000)
+
 				elif self.media_type == 'episode':
 					try:
 						if watcher and property != '5':
@@ -258,16 +272,27 @@ class Player(xbmc.Player):
 									self.play_next_triggered = True
 					except:
 						log_utils.error()
-						pass
 					xbmc.sleep(1000)
+
 			except:
 				log_utils.error()
 				xbmc.sleep(1000)
 		homeWindow.clearProperty(pname)
-		# self.onPlayBackEnded() # check, kodi may at times not issue "onPlayBackEnded" callback
-		if self.media_length - self.current_time > 60: # kodi may at times not issue "onPlayBackStopped" callback
-			self.playbackStopped_triggered = True
-			self.onPlayBackStopped()
+		if playlist_skip: pass
+		else:
+			# # self.onPlayBackEnded() # check, kodi may at times not issue "onPlayBackEnded" callback
+			# if self.media_length - self.current_time > 60: # kodi may at times not issue "onPlayBackStopped" callback
+			if (int(self.current_time) > 180 and (self.getWatchedPercent() < 85)): # kodi may at times not issue "onPlayBackStopped" callback
+				self.playbackStopped_triggered = True
+				self.onPlayBackStopped()
+
+	def isPlayingFile(self):
+		if self._running_path is None or self._running_path.startswith("plugin://"):
+			return False
+
+	def isPlayback(self):
+		# Kodi often starts playback where isPlaying() is true and isPlayingVideo() is false, since the video loading is still in progress, whereas the play is already started.
+		return self.isPlaying() and self.isPlayingVideo() and self.getTime() >= 0
 
 	def libForPlayback(self):
 		if self.DBID is None: return
@@ -280,21 +305,8 @@ class Player(xbmc.Player):
 		except:
 			log_utils.error()
 
-	def isPlayback(self):
-		# Kodi often starts playback where isPlaying() is true and isPlayingVideo() is false, since the video loading is still in progress, whereas the play is already started.
-		return self.isPlaying() and self.isPlayingVideo() and self.getTime() >= 0
-
-	def onPlayBackSeek(self, time, seekOffset):
-		seekOffset /= 1000
-
-	def onAVStarted(self):
-		if self.onPlayBackStarted_called:
-			xbmc.log('[ plugin.video.venom ] onAVStarted callback, onPlayBackStarted already called', LOGINFO)
-			return log_utils.log('[ plugin.video.venom ] onAVStarted callback, onPlayBackStarted already called', level=log_utils.LOGDEBUG)
-		self.onPlayBackStarted()
-
-	def onPlayBackStarted(self): # gets called before onAVStarted()
-		self.onPlayBackStarted_called = True
+### Kodi player callback methods ###
+	def onAVStarted(self): # Kodi docs suggests "Use onAVStarted() instead of onPlayBackStarted() as of v18"
 		for i in range(0, 500):
 			if self.isPlayback():
 				control.closeAll()
@@ -306,12 +318,26 @@ class Player(xbmc.Player):
 			self.playback_resumed = True
 		if control.setting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
-		xbmc.log('[ plugin.video.venom ] onPlayBackStarted callback', LOGINFO)
-		log_utils.log('[ plugin.video.venom ] onPlayBackStarted callback', level=log_utils.LOGDEBUG)
+		xbmc.log('[ plugin.video.venom ] onAVStarted callback', LOGINFO)
+		log_utils.log('[ plugin.video.venom ] onAVStarted callback', level=log_utils.LOGDEBUG)
+
+	def onPlayBackSeek(self, time, seekOffset):
+		seekOffset /= 1000
+
+	def onPlayBackSeekChapter(self, chapter):
+		log_utils.log('[ plugin.video.venom ] onPlayBackSeekChapter callback', level=log_utils.LOGDEBUG)
+
+	def onQueueNextItem(self):
+		log_utils.log('[ plugin.video.venom ] onQueueNextItem callback', level=log_utils.LOGDEBUG)
 
 	def onPlayBackStopped(self):
 		try:
 			playerWindow.clearProperty('venom.preResolved_nextUrl')
+			playerWindow.clearProperty('venom.playlistStart_position')
+
+			from resources.lib.database import cache
+			cache.clear_local_bookmarks() # clear all venom bookmarks from kodi database
+
 			if not self.onPlayBackStopped_ran or (self.playbackStopped_triggered and not self.onPlayBackStopped_ran): # Kodi callback unreliable and often not issued
 				self.onPlayBackStopped_ran = True
 				self.playbackStopped_triggered = False
@@ -341,12 +367,14 @@ class Player(xbmc.Player):
 
 	def onPlayBackError(self):
 		playerWindow.clearProperty('venom.preResolved_nextUrl')
+		playerWindow.clearProperty('venom.playlistStart_position')
+
 		Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
 		log_utils.error()
 		xbmc.log('[ plugin.video.venom ] onPlayBackError callback', LOGINFO)
 		log_utils.log('[ plugin.video.venom ] onPlayBackError callback', level=log_utils.LOGDEBUG)
 		sysexit(1)
-
+##############################
 
 class PlayNext(xbmc.Player):
 	def __init__(self):
@@ -371,7 +399,10 @@ class PlayNext(xbmc.Player):
 			target()
 
 	def isStill_watching(self):
-		still_watching = float(control.playlist.getposition() + 1) / self.stillwatching_count
+		# still_watching = float(control.playlist.getposition() + 1) / self.stillwatching_count # this does not work if you start playback on a divisible position with "stillwatching_count"
+		playlistStart_position = int(playerWindow.getProperty('venom.playlistStart_position'))
+		if playlistStart_position: still_watching = float(control.playlist.getposition() - playlistStart_position + 1) / self.stillwatching_count
+		else: still_watching = float(control.playlist.getposition() + 1) / self.stillwatching_count # this does not work if you start playback on a divisible position with "stillwatching_count"
 		if still_watching == 0: return False
 		return still_watching.is_integer()
 
@@ -433,8 +464,6 @@ class PlayNext(xbmc.Player):
 				next_sources = providerscache.get(sources.Sources().getSources, 48, title, year, imdb, tmdb, tvdb, str(season), str(episode), tvshowtitle, premiered, next_meta, True)
 				if not self.isPlayingVideo():
 					return playerWindow.clearProperty('venom.preResolved_nextUrl')
-
-
 				sources.Sources().preResolve(next_sources, next_meta)
 			else:
 				playerWindow.clearProperty('venom.preResolved_nextUrl')
@@ -585,7 +614,7 @@ class Bookmarks:
 	def reset(self, current_time, media_length, name, year='0'):
 		try:
 			from resources.lib.database import cache
-			cache.clear_local_bookmarks()
+			cache.clear_local_bookmarks() # clear all venom bookmarks from kodi database
 			if control.setting('bookmarks') != 'true' or media_length == 0 or current_time == 0: return
 			timeInSeconds = str(current_time)
 			seekable = (int(current_time) > 180 and (current_time / media_length) < .85)

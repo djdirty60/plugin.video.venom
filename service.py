@@ -125,11 +125,11 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				window.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.4.8' # set to desired version to force any db clearing needed
+				clearDB_version = '6.4.9' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					clr_fanarttv = False
-					cache.clrCache_version_update(clr_providers=False, clr_metacache=False, clr_cache=False, clr_search=False, clr_bookmarks=False)
+					cache.clrCache_version_update(clr_providers=False, clr_metacache=True, clr_cache=True, clr_search=False, clr_bookmarks=False)
 					from resources.lib.database import traktsync
 					clr_traktSync = {'bookmarks': False, 'hiddenProgress': False, 'liked_lists': False, 'movies_collection': False, 'movies_watchlist': False, 'popular_lists': False,
 											'public_lists': False, 'shows_collection': False, 'shows_watchlist': False, 'trending_lists': False, 'user_lists': False, 'watched': True}
@@ -159,14 +159,14 @@ class LibraryService:
 	def run(self):
 		control.log('[ plugin.video.venom ]  Library Update Service Starting (Update check every 6hrs)...', LOGINFO)
 		from resources.lib.modules import library
-		library.lib_tools().service() # service_library contains control.monitor().waitForAbort() while loop every 6hrs
+		library.lib_tools().service() # method contains control.monitor().waitForAbort() while loop every 6hrs
 
 class SyncTraktService:
 	def run(self):
 		service_syncInterval = control.setting('trakt.service.syncInterval') or '15'
-		control.log('[ plugin.video.venom ]  Trakt Sync Service Starting (sync check every %sminutes)...' % service_syncInterval, LOGINFO)
+		control.log('[ plugin.video.venom ]  Trakt Sync Service Starting (sync check every %s minutes)...' % service_syncInterval, LOGINFO)
 		from resources.lib.modules import trakt
-		trakt.trakt_service_sync() # trakt.trakt_service_sync() contains control.monitor().waitForAbort() while loop every "service_syncInterval" minutes
+		trakt.trakt_service_sync() # method contains "control.monitor().waitForAbort()" while loop every "service_syncInterval" minutes
 
 try:
 	kodiVersion = control.getKodiVersion(full=True)
@@ -182,7 +182,7 @@ try:
 	log_utils.log('##   repository.venom Version: %s' % str(repoVersion), level=LOGINFO)
 	log_utils.log('##   script.module.fenomscrapers Version: %s' % str(fsVersion), level=LOGINFO)
 	log_utils.log('##   script.module.myaccounts Version: %s' % str(maVersion), level=LOGINFO)
-	log_utils.log('######   VENOM SERVICE ENTERERING KEEP ALIVE   #####', level=LOGINFO)
+	log_utils.log('######   VENOM SERVICE ENTERING KEEP ALIVE   #####', level=LOGINFO)
 except:
 	log_utils.log('## ERROR GETTING Venom VERSION - Missing Repo or failed Install ', level=LOGINFO)
 

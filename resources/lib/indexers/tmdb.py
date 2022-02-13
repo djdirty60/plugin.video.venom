@@ -112,7 +112,9 @@ class Movies:
 
 	def tmdb_list(self, url):
 		try:
-			result = get_request(url % API_key)
+			# result = get_request(url % API_key)
+			result = cache.get(get_request, 96, url % API_key)
+
 			if '404:NOT FOUND' in result: return result
 			items = result['results']
 		except: return
@@ -143,7 +145,9 @@ class Movies:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
+				# movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
+				movie_meta = self.get_movie_meta(tmdb)
+
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if self.enable_fanarttv:
@@ -175,7 +179,9 @@ class Movies:
 
 	def tmdb_collections_list(self, url):
 		try:
-			result = get_request(url)
+			# result = get_request(url)
+			result = cache.get(get_request, 168, url)
+
 			if '404:NOT FOUND' in result: return result
 			if '/collection/' in url: items = result['parts']
 			elif '/3/' in url: items = result['items']
@@ -209,7 +215,10 @@ class Movies:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
+
+				# movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
+				movie_meta = self.get_movie_meta(tmdb)
+
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if self.enable_fanarttv:
@@ -433,7 +442,7 @@ class TVshows:
 	def tmdb_list(self, url):
 		if not url: return
 		try:
-			result = get_request(url % API_key)
+			result = cache.get(get_request, 96, url % API_key)
 			if '404:NOT FOUND' in result: return result
 			items = result['results']
 		except: return
@@ -462,7 +471,7 @@ class TVshows:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				showSeasons_meta = cache.get(self.get_showSeasons_meta, 96, tmdb)
+				showSeasons_meta = self.get_showSeasons_meta(tmdb)
 				values.update(showSeasons_meta)
 				imdb = values['imdb']
 				tvdb = values['tvdb']
@@ -591,6 +600,7 @@ class TVshows:
 			meta['in_production'] = result.get('in_production') # do not use for "season_isAiring", this is show wide and "season_isAiring" is season specific for season pack scraping.
 			meta['last_air_date'] = result.get('last_air_date', '')
 			meta['last_episode_to_air'] = result.get('last_episode_to_air', '')
+			meta['next_episode_to_air'] = result.get('next_episode_to_air', '')
 			meta['tvshowtitle'] = result.get('name')
 			networks = result.get('networks', {})
 			try: meta['studio'] = [x['name'] for x in networks if x['logo_path']][0] # use single studio name that has a logo in hopes skin also has logo 

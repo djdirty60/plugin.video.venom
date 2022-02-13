@@ -719,12 +719,12 @@ msgid "Continue watching"
 msgstr "Weiter schauen"
 
 msgctxt "#32174"
-msgid "Default Play Next Action in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] seconds"
-msgstr "Standard-Wiedergabe nächste Aktion in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] Sekunden"
+msgid "Default Play Next Action in...."
+msgstr "Standard-Wiedergabe nächste Aktion in...."
 
 msgctxt "#32175"
-msgid "Still Watching in [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] seconds"
-msgstr "Schaue immer noch rein [COLOR FFFF4081][B]$INFO[Player.TimeRemaining(ss),,][/B][/COLOR] Sekunden"
+msgid "Still Watching in...."
+msgstr "Schaue immer noch rein...."
 
 msgctxt "#32176"
 msgid "Play"

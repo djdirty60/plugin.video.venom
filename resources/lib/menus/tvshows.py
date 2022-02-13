@@ -13,7 +13,7 @@ from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
-from resources.lib.modules.playcount import getTVShowIndicators, getTVShowOverlay, getShowCount
+from resources.lib.modules.playcount import getTVShowOverlay, getShowCount, getSeasonIndicators
 from resources.lib.modules import trakt
 from resources.lib.modules import views
 
@@ -112,7 +112,7 @@ class TVshows:
 				if idx: self.worker()
 				self.sort()
 			elif u in self.trakt_link and self.search_link in url:
-				self.list = cache.get(self.trakt_list, 6, url, self.trakt_user)
+				self.list = cache.get(self.trakt_list, 0, url, self.trakt_user)
 				if idx: self.worker()
 			elif u in self.trakt_link:
 				self.list = cache.get(self.trakt_list, 24, url, self.trakt_user)
@@ -135,7 +135,7 @@ class TVshows:
 				control.hide()
 				if self.notifications: control.notification(title=32002, message=33049)
 
-	def getTMDb(self, url, idx=True, cached=True):
+	def getTMDb(self, url, create_directory=True):
 		self.list = []
 		try:
 			try: url = getattr(self, url + '_link')
@@ -145,10 +145,9 @@ class TVshows:
 			if u in self.tmdb_link and '/list/' in url:
 				self.list = cache.get(tmdb_indexer.TVshows().tmdb_collections_list, 0, url)
 			elif u in self.tmdb_link and not '/list/' in url:
-				duration = 168 if cached else 0
-				self.list = cache.get(tmdb_indexer.TVshows().tmdb_list, duration, url)
+				self.list = tmdb_indexer.TVshows().tmdb_list(url) # caching handled in list indexer
 			if self.list is None: self.list = []
-			if idx: self.tvshowDirectory(self.list)
+			if create_directory: self.tvshowDirectory(self.list)
 			return self.list
 		except:
 			from resources.lib.modules import log_utils
@@ -200,9 +199,12 @@ class TVshows:
 			self.list = cache.get(self.trakt_list, 24, self.progress_link, self.trakt_user)
 		except:
 			self.list = cache.get(self.trakt_list, 0, self.progress_link, self.trakt_user)
-		indicators = getTVShowIndicators()
+
 		for i in self.list:
-			count = getShowCount(indicators, imdb=i.get('imdb'), tvdb=i.get('tvdb'))
+			imdb = i.get('imdb')
+			try: indicators = getSeasonIndicators(imdb)
+			except: indicators = None
+			count = getShowCount(indicators[1], imdb, tvdb=i.get('tvdb')) if indicators else None
 			i.update({'watched_count': count})
 		try:
 			hidden = traktsync.fetch_hidden_progress()
@@ -886,7 +888,7 @@ class TVshows:
 	def super_info(self, i):
 		try:
 			if self.list[i]['metacache']: return
-			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '') ; tvdb = self.list[i].get('tvdb', '')
+			imdb, tmdb, tvdb = self.list[i].get('imdb', ''), self.list[i].get('tmdb', ''), self.list[i].get('tvdb', '')
 #### -- Missing id's lookup -- ####
 			trakt_ids = None
 			if (not tmdb or not tvdb) and imdb: trakt_ids = trakt.IdLookup('imdb', imdb, 'show')
@@ -914,7 +916,8 @@ class TVshows:
 				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (self.list[i]['title'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-			showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
+
+			showSeasons = tmdb_indexer.TVshows().get_showSeasons_meta(tmdb)
 			if not showSeasons: return
 			values = {}
 			values.update(showSeasons)
@@ -957,12 +960,9 @@ class TVshows:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		indicators = getTVShowIndicators()
 		flatten = getSetting('flatten.tvshows') == 'true'
-		if trakt.getTraktIndicatorsInfo():
-			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
-		else:
-			watchedMenu, unwatchedMenu = getLS(32066), getLS(32067)
+		if trakt.getTraktIndicatorsInfo(): watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
+		else: watchedMenu, unwatchedMenu = getLS(32066), getLS(32067)
 		traktManagerMenu, queueMenu = getLS(32070), getLS(32065)
 		showPlaylistMenu, clearPlaylistMenu = getLS(35517), getLS(35516)
 		playRandom, addToLibrary = getLS(32535), getLS(32551)
@@ -973,6 +973,8 @@ class TVshows:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
 				title = i.get('tvshowtitle') or i.get('title')
 				systitle = quote_plus(title)
+				try: indicators = getSeasonIndicators(imdb)
+				except: indicators = None
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
@@ -1001,7 +1003,7 @@ class TVshows:
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
-					watched = getTVShowOverlay(indicators, imdb, tvdb) == '5'
+					watched = (getTVShowOverlay(indicators[1], imdb, tvdb) == '5') if indicators else False
 					if self.traktCredentials:
 						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&watched=%s)' % (sysaddon, systitle, imdb, tvdb, watched)))
 					if watched:
@@ -1025,14 +1027,14 @@ class TVshows:
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				try: 
-					count = getShowCount(indicators, imdb, tvdb) # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
+					count = getShowCount(indicators[1], imdb, tvdb) if indicators else None # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
 					if count:
 						item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
+						item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
 					else:
 						item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # for shows never watched
+						item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
 				except: pass
-				item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
-				item.setProperty('IsPlayable', 'false')
 				item.setProperty('tmdb_id', str(tmdb))
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb})
@@ -1061,7 +1063,6 @@ class TVshows:
 					url = '%s?action=tvmazeTvshowPage&url=%s' % (sysaddon, quote_plus(url))
 				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
-				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -1114,9 +1115,7 @@ class TVshows:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowsToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-
 				item = control.item(label=name, offscreen=True)
-				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 				item.setInfo(type='video', infoLabels={'plot': name})
 				item.addContextMenuItems(cm)
@@ -1135,7 +1134,6 @@ class TVshows:
 			icon = control.addonNext()
 			url = '%s?action=tv_PublicLists&url=%s' % (sysaddon, quote_plus(url))
 			item = control.item(label=nextMenu, offscreen=True)
-			item.setProperty('IsPlayable', 'false')
 			item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 			item.setProperty ('SpecialSort', 'bottom')
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)

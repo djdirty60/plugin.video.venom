@@ -8,7 +8,6 @@ from resources.lib.modules import control
 
 def router(params):
 	action = params.get('action')
-	id = params.get('id')
 	name = params.get('name')
 	title = params.get('title')
 	tvshowtitle = params.get('tvshowtitle')
@@ -328,9 +327,11 @@ def router(params):
 			alldebrid.AllDebrid().browse_user_cloud(source)
 		elif action == 'ad_DeleteTransfer':
 			from resources.lib.debrid import alldebrid
+			id = params.get('id')
 			alldebrid.AllDebrid().delete_transfer(id, name, silent=False)
 		elif action == 'ad_RestartTransfer':
 			from resources.lib.debrid import alldebrid
+			id = params.get('id')
 			alldebrid.AllDebrid().restart_transfer(id, name, silent=False)
 
 	elif action and action.startswith('en_'):
@@ -388,18 +389,22 @@ def router(params):
 			# premiumize.Premiumize().auth()
 		elif action == 'pm_MyFiles':
 			from resources.lib.debrid import premiumize
+			id = params.get('id')
 			premiumize.Premiumize().my_files_to_listItem(id, name)
 		elif action == 'pm_Transfers':
 			from resources.lib.debrid import premiumize
 			premiumize.Premiumize().user_transfers_to_listItem()
 		elif action == 'pm_Rename':
 			from resources.lib.debrid import premiumize
+			id = params.get('id')
 			premiumize.Premiumize().rename(type, id, name)
 		elif action == 'pm_Delete':
 			from resources.lib.debrid import premiumize
+			id = params.get('id')
 			premiumize.Premiumize().delete(type, id, name)
 		elif action == 'pm_DeleteTransfer':
 			from resources.lib.debrid import premiumize
+			id = params.get('id')
 			premiumize.Premiumize().delete_transfer(id, name)
 		elif action == 'pm_ClearFinishedTransfers': # disabled for now till PM fixes
 			from resources.lib.debrid import premiumize
@@ -423,12 +428,15 @@ def router(params):
 			realdebrid.RealDebrid().my_downloads_to_listItem(int(query))
 		elif action == 'rd_BrowseUserTorrents':
 			from resources.lib.debrid import realdebrid
+			id = params.get('id')
 			realdebrid.RealDebrid().browse_user_torrents(id)
 		elif action == 'rd_DeleteUserTorrent':
 			from resources.lib.debrid import realdebrid
+			id = params.get('id')
 			realdebrid.RealDebrid().delete_user_torrent(id, name)
 		elif action == 'rd_DeleteDownload':
 			from resources.lib.debrid import realdebrid
+			id = params.get('id')
 			realdebrid.RealDebrid().delete_download(id, name)
 
 	####################################################
@@ -450,6 +458,7 @@ def router(params):
 	####################################################
 	elif action == 'youtube':
 		from resources.lib.menus import youtube
+		id = params.get('id')
 		if id is None: youtube.yt_index().root(action)
 		else: youtube.yt_index().get(action, id)
 
@@ -514,7 +523,6 @@ def router(params):
 				except:
 					import traceback
 					traceback.print_exc()
-
 
 	####################################################
 	#---Tools
@@ -618,17 +626,6 @@ def router(params):
 		elif action == 'tools_traktLikedListManager':
 			from resources.lib.menus import movies
 			movies.Movies().likedListsManager()
-
-	####################################################
-	#---Service
-	####################################################
-	elif action and action.startswith('service_'):
-		if action == 'service_syncTrakt':
-			from resources.lib.modules import trakt
-			trakt.trakt_service_sync()
-		elif action == 'service_library':
-			from resources.lib.modules import library
-			library.lib_tools().service()
 
 	####################################################
 	#---Play

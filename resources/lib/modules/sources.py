@@ -59,6 +59,7 @@ class Sources:
 			return control.notification(message=33034)
 		try:
 			control.sleep(200)
+			if control.playlist.getposition() == 0 or control.playlist.size() == 1: playerWindow.clearProperty('venom.preResolved_nextUrl')
 			preResolved_nextUrl = playerWindow.getProperty('venom.preResolved_nextUrl')
 			if preResolved_nextUrl != '':
 				control.sleep(500)

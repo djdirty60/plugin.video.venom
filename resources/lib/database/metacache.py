@@ -42,9 +42,29 @@ def fetch(items, lang='en', user=''):
 						t1 = int(match[6])
 					except: pass
 			if match:
-				update = (abs(t2 - t1) / 3600) >= 720
+				update = (abs(t2 - t1) / 3600) >= 720 # 30 days? for airing shows this is to much.
 				if update: continue
 				item = eval(match[5])
+
+				if item['mediatype'] == 'tvshow':
+					status = item['status'].lower()
+					if not any(value in status for value in ('ended', 'canceled')):
+						from resources.lib.modules.cleandate import timestamp_from_string
+						next_episode_to_air = timestamp_from_string(item.get('next_episode_to_air', {}).get('air_date', ''))
+						if not next_episode_to_air:
+							update = (abs(t2 - t1) / 3600) >= 168 # 7 days for returning shows with None for next_episode_to_air
+							if update: continue
+						else:
+							if next_episode_to_air+(18*3600) <= t2 and (abs(t2 - t1) / 3600) >= 1: # refresh meta when next_episode_to_air is less than or equal to system date, every 1hr starting at 6pm till it flips
+								from resources.lib.database.traktsync import cache_existing
+								from resources.lib.modules.trakt import syncTVShows
+								imdb = item.get('imdb', '')
+								indicators = cache_existing(syncTVShows)
+								watching = [i[0] for i in indicators if i[0] == imdb]
+								if watching:
+									from resources.lib.modules.trakt import cachesyncSeasons
+									cachesyncSeasons(imdb) # refreshes only shows you are "watching"
+								continue
 				item = dict((k, v) for k, v in iter(item.items()) if v is not None and v != '')
 				items[i].update(item)
 				items[i].update({'metacache': True})

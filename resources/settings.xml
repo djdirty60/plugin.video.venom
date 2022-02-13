@@ -123,7 +123,7 @@
 		<setting type="lsep" label="40027" />
 		<setting id="enable.playnext" type="bool" label="40028" default="false" />
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=playnext)" />
-		<setting id="playnext.time" type="slider" label="40029" subsetting="true" visible="eq(-2,true)" default="60" option="int" range="10,120" />
+		<setting id="playnext.time" type="slider" label="40029" subsetting="true" visible="eq(-2,true)" default="60" option="int" range="10,300" />
 		<setting id="playnext.default.action" type="select" label="40065" subsetting="true" visible="eq(-3,true)" lvalues="32176|32177|32178" default="0" />
 		<setting id="stillwatching.count" type="slider" label="40026" subsetting="true" visible="eq(-4,true)" default="3" option="int" range="2,10" />
 		<setting id="stillwatching.default.action" type="select" label="40025" subsetting="true" visible="eq(-5,true)" lvalues="32176|32177|32178" default="2" />

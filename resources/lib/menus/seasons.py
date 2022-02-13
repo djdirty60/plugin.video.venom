@@ -30,8 +30,6 @@ class Seasons:
 		self.tmdb_poster_path = 'https://image.tmdb.org/t/p/w342'
 		self.trakt_user = getSetting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
-		# self.traktwatchlist_link = 'https://api.trakt.tv/users/me/watchlist/seasons'
-		# self.traktlists_link = 'https://api.trakt.tv/users/me/lists'
 		self.showunaired = getSetting('showunaired') == 'true'
 		self.unairedcolor = control.getColor(getSetting('unaired.identify'))
 		self.showspecials = getSetting('tv.specials') == 'true'
@@ -39,7 +37,10 @@ class Seasons:
 	def get(self, tvshowtitle, year, imdb, tmdb, tvdb, art, idx=True, create_directory=True): # may need to add a cache duration over-ride param to pass
 		self.list = []
 		if idx:
-			self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, art)
+			self.list = cache.get(self.tmdb_list, 720, tvshowtitle, imdb, tmdb, tvdb, art)
+			status = self.list[0]['status'].lower()
+			if not any(value in status for value in ('ended', 'canceled')):
+				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, art)
 			if self.list is None: self.list = []
 			if create_directory: self.seasonDirectory(self.list)
 			return self.list
@@ -66,7 +67,8 @@ class Seasons:
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 #################################
 
-		showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
+		list = []
+		showSeasons = tmdb_indexer.TVshows().get_showSeasons_meta(tmdb)
 		if not showSeasons: return
 		if not showSeasons.get('imdb'): showSeasons['imdb'] = imdb # use value passed from tvshows super_info() due to extensive ID lookups
 		if not showSeasons.get('tvdb'): showSeasons['tvdb'] = tvdb
@@ -111,11 +113,11 @@ class Seasons:
 					values['landscape'] = art['landscape']
 					values['tvshow.poster'] = art['tvshow.poster'] # not used in seasonDirectory() atm
 				for k in ('seasons',): values.pop(k, None) # pop() keys from showSeasons that are not needed anymore
-				self.list.append(values)
+				list.append(values)
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-		return self.list
+		return list
 
 	def seasonDirectory(self, items):
 		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
@@ -168,7 +170,7 @@ class Seasons:
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
-					watched = getSeasonOverlay(indicators, imdb, tvdb, season) == '5'
+					watched = getSeasonOverlay(indicators[0], imdb, tvdb, season) == '5' if indicators else False
 					if self.traktCredentials:
 						cm.append((traktManagerMenu, 'RunPlugin(%s?action=tools_traktManager&name=%s&imdb=%s&tvdb=%s&season=%s&watched=%s)' % (sysaddon, systitle, imdb, tvdb, season, watched)))
 					if watched:
@@ -211,7 +213,6 @@ class Seasons:
 					meta.update({'year': season_year})
 				except: pass
 				item.setUniqueIDs({'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb})
-				item.setProperty('IsPlayable', 'false')
 				item.setInfo(type='video', infoLabels=control.metadataClean(meta))
 				item.addContextMenuItems(cm)
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)

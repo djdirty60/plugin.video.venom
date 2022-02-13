@@ -96,15 +96,15 @@
 					<left>270</left>
 					<right>10</right>
 					<control type="label">
-						<description>Default Action in xx seconds label</description>
+						<description>Default Action in x:xx label</description>
 						<width>auto</width>
 						<height>35</height>
 						<aligny>center</aligny>
 						<font>font25_title</font>
 						<textcolor>eeffffff</textcolor>
 						<shadowcolor>ff000000</shadowcolor>
-						<label>$ADDON[plugin.video.venom 32174]</label>
-						<visible>!Integer.IsGreater(Player.TimeRemaining,59)</visible>
+						<label>$ADDON[plugin.video.venom 32174][COLOR FFFF4081][B]$INFO[Player.TimeRemaining(m:ss)][/B][/COLOR]</label>
+						<visible>!Integer.IsGreater(Player.TimeRemaining,290)</visible>
 					</control>
 					<control type="label">
 						<description>Play Next label</description>
@@ -115,7 +115,7 @@
 						<textcolor>eeffffff</textcolor>
 						<shadowcolor>ff000000</shadowcolor>
 						<label>$ADDON[plugin.video.venom 32168]</label>
-						<visible>Integer.IsGreater(Player.TimeRemaining,59)</visible>
+						<visible>Integer.IsGreater(Player.TimeRemaining,290)</visible>
 					</control>
 					<!-- Labels line2, Episode Details -->
 					<control type="grouplist">

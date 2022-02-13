@@ -17,7 +17,7 @@ from resources.lib.modules import control
 from resources.lib.modules import tools
 from resources.lib.modules import trakt
 from resources.lib.modules import views
-from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverlay, getShowCount
+from resources.lib.modules.playcount import getTVShowIndicators, getEpisodeOverlay, getShowCount, getSeasonIndicators
 from resources.lib.modules.player import Bookmarks
 
 getLS = control.lang
@@ -57,10 +57,11 @@ class Episodes:
 		try:
 			if season is None and episode is None: # for "flatten" setting
 				def get_episodes(tvshowtitle, imdb, tmdb, tvdb, meta, season):
-					episodes = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+					episodes = cache.get(self.tmdb_list, 168, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 					if not episodes: pass
-					elif episodes[0]['season_isAiring']:
-						episodes = cache.get(self.tmdb_list, 24, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+					elif episodes[0]['season_isAiring'] == 'true':
+						if int(re.sub(r'[^0-9]', '', str(episodes[0]['next_episode_to_air']['air_date']))) <= int(re.sub(r'[^0-9]', '', str(self.today_date))):
+							episodes = cache.get(self.tmdb_list, 3, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 					all_episodes.extend(episodes)
 				all_episodes = []
 				threads = []
@@ -78,17 +79,19 @@ class Episodes:
 					from resources.lib.modules import log_utils
 					log_utils.error()
 			elif season and episode: # for "trakt progress-non direct progress scrape" setting
-				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+				self.list = cache.get(self.tmdb_list, 168, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 				if not self.list: pass
-				elif self.list[0]['season_isAiring']:
-					self.list = cache.get(self.tmdb_list, 24, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+				elif self.list[0]['season_isAiring'] == 'true':
+					if int(re.sub(r'[^0-9]', '', str(self.list[0]['next_episode_to_air']['air_date']))) <= int(re.sub(r'[^0-9]', '', str(self.today_date))):
+						self.list = cache.get(self.tmdb_list, 3, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 				num = [x for x, y in enumerate(self.list) if y['season'] == int(season) and y['episode'] == int(episode)][-1]
 				self.list = [y for x, y in enumerate(self.list) if x >= num]
 			else: # normal full episode list
-				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+				self.list = cache.get(self.tmdb_list, 168, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 				if not self.list: pass
-				elif self.list[0]['season_isAiring']:
-					self.list = cache.get(self.tmdb_list, 24, tvshowtitle, imdb, tmdb, tvdb, meta, season)
+				elif self.list[0]['season_isAiring'] == 'true':
+					if int(re.sub(r'[^0-9]', '', str(self.list[0]['next_episode_to_air']['air_date']))) <= int(re.sub(r'[^0-9]', '', str(self.today_date))):
+						self.list = cache.get(self.tmdb_list, 3, tvshowtitle, imdb, tmdb, tvdb, meta, season)
 			if self.list is None: self.list = []
 			if create_directory: self.episodeDirectory(self.list)
 			return self.list
@@ -341,6 +344,8 @@ class Episodes:
 				from resources.lib.modules import log_utils
 				log_utils.error()
 		for i in range(0, len(list)): list[i].update({'season_isAiring': 'true' if unaired_count >0 else 'false'}) # update for if "season_isAiring", needed for season pack scraping
+		if unaired_count >0:
+			for i in range(0, len(list)): list[i].update({'next_episode_to_air': {'air_date': '2022-02-10', 'episode_number': 7}})
 		return list
 
 	def trakt_progress_list(self, url, user, lang, direct=False, upcoming=False):
@@ -708,7 +713,7 @@ class Episodes:
 		rescrape_useDefault = getSetting('rescrape.default') == 'true'
 		rescrape_method = getSetting('rescrape.default2')
 		enable_playnext = getSetting('enable.playnext') == 'true'
-		indicators = getTVShowIndicators()
+		indicators = getTVShowIndicators() # gives breakdown of (season, ep) watched
 		isFolder = False if sysaction != 'episodes' else True
 		if airEnabled == 'true':
 			airZone, airLocation = getSetting('tvshows.air.zone'), getSetting('tvshows.air.location')
@@ -875,14 +880,18 @@ class Episodes:
 				if isMultiList and multi_unwatchedEnabled:
 					if 'ForceAirEnabled' not in i:
 						try:
-							count = getShowCount(indicators, imdb, tvdb) # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
+							try: count = getShowCount(getSeasonIndicators(imdb)[1], imdb, tvdb) # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
+							except: count = None
 							if count:
 								item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
 							else:
 								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': str(meta.get('total_aired_episodes', ''))}) # for shows never watched
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(meta.get('total_aired_episodes', ''))})
-						except: pass
+						except:
+							from resources.lib.modules import log_utils
+							log_utils.error()
+							pass
 				item.setProperty('IsPlayable', 'true')
 				item.setProperty('tvshow.tmdb_id', tmdb)
 				if is_widget: item.setProperty('isVenom_widget', 'true')
@@ -930,7 +939,6 @@ class Episodes:
 				if '/users/me/history/' in url: url = '%s?action=calendar&url=%s' % (sysaddon, quote_plus(url))
 				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
-				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -966,7 +974,6 @@ class Episodes:
 				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 				item = control.item(label=name, offscreen=True)
-				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 				item.setInfo(type='video', infoLabels={'plot': name})
 				item.addContextMenuItems(cm)

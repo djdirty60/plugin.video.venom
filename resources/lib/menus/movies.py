@@ -157,7 +157,7 @@ class Movies:
 				control.hide()
 				if self.notifications: control.notification(title=32001, message=33049)
 
-	def getTMDb(self, url, idx=True, cached=True):
+	def getTMDb(self, url, create_directory=True):
 		self.list = []
 		try:
 			try: url = getattr(self, url + '_link')
@@ -165,13 +165,12 @@ class Movies:
 			try: u = urlparse(url).netloc.lower()
 			except: pass
 			if u in self.tmdb_link and '/list/' in url:
-				self.list = cache.get(tmdb_indexer.Movies().tmdb_collections_list, 0, url)
+				self.list = tmdb_indexer.Movies().tmdb_collections_list(url) # caching handled in list indexer
 				self.sort()
 			elif u in self.tmdb_link and '/list/' not in url:
-				duration = 168 if cached else 0
-				self.list = cache.get(tmdb_indexer.Movies().tmdb_list, duration, url)
+				self.list = tmdb_indexer.Movies().tmdb_list(url) # caching handled in list indexer
 			if self.list is None: self.list = []
-			if idx: self.movieDirectory(self.list)
+			if create_directory: self.movieDirectory(self.list)
 			return self.list
 		except:
 			from resources.lib.modules import log_utils
@@ -896,7 +895,7 @@ class Movies:
 	def super_info(self, i):
 		try:
 			if self.list[i]['metacache']: return
-			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '')
+			imdb, tmdb = self.list[i].get('imdb', ''), self.list[i].get('tmdb', '')
 #### -- Missing id's lookup -- ####
 			if not tmdb and imdb:
 				try:
@@ -904,11 +903,11 @@ class Movies:
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not tmdb and imdb:
-				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie')
+				trakt_ids = trakt.IdLookup('imdb', imdb, 'movie') # "trakt.IDLookup()" caches item
 				if trakt_ids: tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
 			if not tmdb and not imdb:
 				try:
-					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False)
+					results = trakt.SearchMovie(title=quote_plus(self.list[i]['title']), year=self.list[i]['year'], fields='title', full=False) # "trakt.SearchMovie()" caches item
 					if results[0]['movie']['title'] != self.list[i]['title'] or results[0]['movie']['year'] != self.list[i]['year']: return
 					ids = results[0].get('movie', {}).get('ids', {})
 					if not tmdb: tmdb = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
@@ -916,7 +915,7 @@ class Movies:
 				except: pass
 #################################
 			if not tmdb: return
-			movie_meta = cache.get(tmdb_indexer.Movies().get_movie_meta, 96, tmdb)
+			movie_meta = tmdb_indexer.Movies().get_movie_meta(tmdb)
 			if not movie_meta: return
 			values = {}
 			values.update(movie_meta)
@@ -1063,7 +1062,6 @@ class Movies:
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error()
-
 		if next:
 			try:
 				if not items: raise Exception()
@@ -1082,7 +1080,6 @@ class Movies:
 					url = '%s?action=tmdbmoviePage&url=%s' % (sysaddon, quote_plus(url))
 				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
-				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 				item.setProperty ('SpecialSort', 'bottom')
 				control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
@@ -1135,9 +1132,7 @@ class Movies:
 						cm.append((addToLibrary, 'RunPlugin(%s?action=library_moviesToLibrary&url=%s&name=%s)' % (sysaddon, quote_plus(i['context']), name)))
 				except: pass
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
-
 				item = control.item(label=name, offscreen=True)
-				item.setProperty('IsPlayable', 'false')
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 				item.setInfo(type='video', infoLabels={'plot': name})
 				item.addContextMenuItems(cm)
@@ -1156,7 +1151,6 @@ class Movies:
 			icon = control.addonNext()
 			url = '%s?action=movies_PublicLists&url=%s' % (sysaddon, quote_plus(url))
 			item = control.item(label=nextMenu, offscreen=True)
-			item.setProperty('IsPlayable', 'false')
 			item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
 			item.setProperty ('SpecialSort', 'bottom')
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)

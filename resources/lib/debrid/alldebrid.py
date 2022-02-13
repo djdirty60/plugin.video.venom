@@ -182,13 +182,15 @@ class AllDebrid:
 			log_utils.error()
 			return None
 
-	def unrestrict_link(self, link):
+	def unrestrict_link(self, link, returnAll=False):
 		try:
 			url = 'link/unlock'
 			url_append = '&link=%s' % link
 			response = self._get(url, url_append)
-			try: return response['link']
-			except: return None
+			if returnAll: return response
+			else:
+				try: return response['link']
+				except: return None
 		except:
 			log_utils.error()
 			return None
@@ -341,16 +343,24 @@ class AllDebrid:
 
 				if not name.lower().endswith(tuple(extensions)):
 					files = item['files']
-					entry = files[0].get('e')
-					name = entry[0].get('n') if isinstance(entry, list) else entry.get('n')
-					def entry_loop(entry):
-						entry = entry.get('e')
+					if not files:
+						link = cache.get(self.unrestrict_link, 168, item.get('link'), True)
+						name = string_tools.strip_non_ascii_and_unprintable(link['filename'])
+						if name.lower().endswith(invalid_extensions): continue
+						item.update({'filename': name})
+						item.update({'size': link['filesize']})
+					else:
+						entry = files[0].get('e')
 						name = entry[0].get('n') if isinstance(entry, list) else entry.get('n')
+						def entry_loop(entry):
+							entry = entry.get('e')
+							name = entry[0].get('n') if isinstance(entry, list) else entry.get('n')
+							if not name.lower().endswith(tuple(extensions)):
+								return entry_loop(entry)
+							else: return string_tools.strip_non_ascii_and_unprintable(name)
 						if not name.lower().endswith(tuple(extensions)):
-							return entry_loop(entry)
-						else: return string_tools.strip_non_ascii_and_unprintable(name)
-					if not name.lower().endswith(tuple(extensions)):
-						name = entry_loop(entry)
+							name = entry_loop(entry)
+
 				size = item['size']
 				display_size = float(int(size)) / 1073741824
 				label = '%02d | [B]%s[/B] | %.2f GB | [I]%s [/I]' % (count, file_str, display_size, name)
@@ -380,10 +390,9 @@ class AllDebrid:
 			extras_filtering_list = extras_filter()
 			transfer_id = self.create_transfer(magnet_url)
 			transfer_info = self.list_transfer(transfer_id)
-			# log_utils.log('transfer_info=%s' % str(transfer_info))
-
 			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == ''] #.m2ts file extension is not in "filename" so this fails
 			valid_results = [i for i in transfer_info.get('links') if not any(i.get('filename').lower().endswith(x) for x in invalid_extensions) and not i.get('link', '') == '']
+			# log_utils.log('valid_results=%s' % valid_results, __name__)
 
 			if len(valid_results) == 0:
 				failed_reason = 'No valid video extension found'
@@ -395,18 +404,31 @@ class AllDebrid:
 						log_utils.log('AllDebrid: Can not resolve .m2ts season disk episode', level=log_utils.LOGDEBUG)
 						failed_reason = '.m2ts season disk incapable of determining episode'
 						continue
+
+					if not item.get('files'):
+						link = self.unrestrict_link(item.get('link'), returnAll=True)
+						# log_utils.log('link=%s' % link, __name__)
+						if seas_ep_filter(season, episode, link['filename']):
+							item.update({'filename': link['filename']})
+							append(item)
+							# log_utils.log('revised_item=%s' % item, __name__)
+
 					if seas_ep_filter(season, episode, item['filename']):
 						append(item)
+
 					if len(correct_files) == 0:
 						failed_reason = 'no matching episode found'
 						continue
 					episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', ep_title.replace('\'', '')).lower()
 					for i in correct_files:
-						compare_link = seas_ep_filter(season, episode, i['filename'], split=True)
-						compare_link = re.sub(episode_title, '', compare_link)
-						if not any(x in compare_link for x in extras_filtering_list):
-							media_id = i['link']
-							break
+						try:
+							compare_link = seas_ep_filter(season, episode, i['filename'], split=True)
+							compare_link = re.sub(episode_title, '', compare_link)
+							if not any(x in compare_link for x in extras_filtering_list):
+								media_id = i['link']
+								break
+						except:
+							log_utils.error()
 			else:
 				media_id = max(valid_results, key=lambda x: x.get('size')).get('link', None)
 			if not self.store_to_cloud: self.delete_transfer(transfer_id)
