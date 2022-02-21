@@ -66,7 +66,6 @@ class Seasons:
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 #################################
-
 		list = []
 		showSeasons = tmdb_indexer.TVshows().get_showSeasons_meta(tmdb)
 		if not showSeasons: return
@@ -123,12 +122,12 @@ class Seasons:
 		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32054, message=33049)
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		try: indicators = getSeasonIndicators(items[0]['imdb'])
-		except: indicators = None
+		# try: indicators = getSeasonIndicators(items[0]['imdb'], items[0]['tvdb'])
+		# except: indicators = None
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
 		else:
@@ -140,17 +139,23 @@ class Seasons:
 		try: multi = [i['tvshowtitle'] for i in items]
 		except: multi = []
 		multi = True if len([x for y,x in enumerate(multi) if x not in multi[:y]]) > 1 else False
+
+		imdb, tmdb, tvdb = items[0]['imdb'], items[0]['tmdb'], items[0]['tvdb']
+		try: indicators = getSeasonIndicators(imdb, tvdb)
+		except: indicators = None
+
 		for i in items:
 			try:
-				title, imdb, tmdb, tvdb, year, season = i.get('tvshowtitle'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('season')
+				# title, imdb, tmdb, tvdb, year, season = i.get('tvshowtitle'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('season')
+				title, year, season = i.get('tvshowtitle'), i.get('year', ''), i.get('season')
 				label = '%s %s' % (labelMenu, season)
 				try:
 					if i['unaired'] == 'true': label = '[COLOR %s][I]%s[/I][/COLOR]' % (self.unairedcolor, label)
 				except: pass
 				systitle = quote_plus(title)
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
-				# setting mediatype to "season" causes "Infomation" and "play trailer" to not be available in some skins
-				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
+				# setting mediatype to "season" causes CM "Infomation" and "play trailer" to not be available in some skins
+				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'season', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
 				try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
 				except: pass
 				poster = meta.get('tvshow.poster') or addonPoster # tvshow.poster
@@ -191,7 +196,7 @@ class Seasons:
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				try:
-					count = getSeasonCount(imdb, season)
+					count = getSeasonCount(imdb, tvdb, season)
 					if count:
 						item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
 						item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': str(count['total'])})
@@ -206,7 +211,11 @@ class Seasons:
 							else:
 								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': '0'})
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': '0'})
-				except: pass
+				except:
+					from resources.lib.modules import log_utils
+					log_utils.error()
+					pass
+
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				try: # Year is the shows year, not the seasons year. Extract year from premier date for InfoLabels to have "season_year".
 					season_year = re.findall(r'(\d{4})', i.get('premiered', ''))[0]

@@ -258,7 +258,7 @@ class AllDebrid:
 		return self._get(url)
 
 	def user_transfers_to_listItem(self):
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		transfer_files = self.user_cloud()['magnets']
 		if not transfer_files:
 			if self.server_notifications: control.notification(message='Request Failure-Empty Content', icon=ad_icon)
@@ -301,7 +301,7 @@ class AllDebrid:
 		control.directory(syshandle, cacheToDisc=True)
 
 	def user_cloud_to_listItem(self, folder_id=None):
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		folder_str, deleteMenu = getLS(40046).upper(), getLS(40050)
 		cloud_dict = self.user_cloud()['magnets']
 		cloud_dict = [i for i in cloud_dict if i['statusCode'] == 4]
@@ -327,7 +327,7 @@ class AllDebrid:
 		control.directory(syshandle, cacheToDisc=True)
 
 	def browse_user_cloud(self, folder):
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		extensions = supported_video_extensions()
 		torrent_folder = jsloads(folder)
 		links = torrent_folder['links']
@@ -406,7 +406,9 @@ class AllDebrid:
 						continue
 
 					if not item.get('files'):
-						link = self.unrestrict_link(item.get('link'), returnAll=True)
+						# link = self.unrestrict_link(item.get('link'), returnAll=True)
+						link = cache.get(self.unrestrict_link, 168, item.get('link'), True)
+
 						# log_utils.log('link=%s' % link, __name__)
 						if seas_ep_filter(season, episode, link['filename']):
 							item.update({'filename': link['filename']})
@@ -455,7 +457,11 @@ class AllDebrid:
 			for item in transfer_info.get('links'):
 				if any(item.get('filename').lower().endswith(x) for x in extensions) and not item.get('link', '') == '':
 					append({'link': item['link'], 'filename': item['filename'], 'size': float(item['size']) / 1073741824})
-			self.delete_transfer(transfer_id)
+				else:
+					link = cache.get(self.unrestrict_link, 168, item.get('link'), True)
+					if any(link.get('filename').lower().endswith(x) for x in extensions) and not link.get('link', '') == '':
+						append({'link': item['link'], 'filename': link['filename'], 'size': float(link['filesize']) / 1073741824})
+			if not self.store_to_cloud: self.delete_transfer(transfer_id) # this will keep all browsed items, should add check to see if item was already in cloud and keep it.
 			return end_results
 		except:
 			log_utils.error()

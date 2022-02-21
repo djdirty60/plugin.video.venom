@@ -155,7 +155,8 @@ class TraktHiddenManagerXML(BaseDialog):
 					listitem.setProperty('venom.tmdb', str(item.get('tmdb')))
 					listitem.setProperty('venom.tvdb', str(item.get('tvdb')))
 					listitem.setProperty('venom.status', item.get('status'))
-					listitem.setProperty('venom.watched_count', '(watched ' + str(item.get('watched_count').get('watched')) + ' of ' + str(item.get('watched_count').get('total')) + ')')
+					try: listitem.setProperty('venom.watched_count', '(watched ' + str(item.get('watched_count').get('watched')) + ' of ' + str(item.get('watched_count').get('total')) + ')')
+					except: pass
 					listitem.setProperty('venom.rating', str(round(float(item.get('rating')), 1)))
 					listitem.setProperty('venom.trailer', item.get('trailer'))
 					listitem.setProperty('venom.studio', item.get('studio'))

@@ -951,7 +951,7 @@ class Movies:
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32001, message=33049)
 		from resources.lib.modules.player import Bookmarks
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		play_mode = getSetting('play.mode')
 		rescrape_useDefault = getSetting('rescrape.default') == 'true'
 		rescrape_method = getSetting('rescrape.default2')
@@ -1074,10 +1074,8 @@ class Movies:
 				if 'None' in page: page = page.split('  [I]')[0]
 				nextMenu = '[COLOR skyblue]' + nextMenu + page + '[/COLOR]'
 				u = urlparse(url).netloc.lower()
-				if u not in self.tmdb_link:
-					url = '%s?action=moviePage&url=%s' % (sysaddon, quote_plus(url))
-				elif u in self.tmdb_link:
-					url = '%s?action=tmdbmoviePage&url=%s' % (sysaddon, quote_plus(url))
+				if u not in self.tmdb_link: url = '%s?action=moviePage&url=%s' % (sysaddon, quote_plus(url))
+				elif u in self.tmdb_link: url = '%s?action=tmdbmoviePage&url=%s' % (sysaddon, quote_plus(url))
 				item = control.item(label=nextMenu, offscreen=True)
 				icon = control.addonNext()
 				item.setArt({'icon': icon, 'thumb': icon, 'poster': icon, 'banner': icon})
@@ -1095,7 +1093,7 @@ class Movies:
 		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			content = '' ; control.hide() ; control.notification(title=32001, message=33049)
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
 		queueMenu, playRandom, addToLibrary = getLS(32065), getLS(32535), getLS(32551)

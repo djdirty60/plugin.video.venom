@@ -392,7 +392,7 @@ class Premiumize:
 
 	def my_files_to_listItem(self, folder_id=None, folder_name=None):
 		try:
-			sysaddon, syshandle = argv[0], int(argv[1])
+			sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 			extensions = supported_video_extensions()
 			cloud_files = self.my_files(folder_id)
 			if not cloud_files:
@@ -409,9 +409,9 @@ class Premiumize:
 		for count, item in enumerate(cloud_files, 1):
 			try:
 				cm = []
-				type = item['type']
+				content_type = item['type']
 				name = string_tools.strip_non_ascii_and_unprintable(item['name'])
-				if type == 'folder':
+				if content_type == 'folder':
 					isFolder = True
 					size = 0
 					label = '%02d | [B]%s[/B] | [I]%s [/I]' % (count, folder_str, name)
@@ -426,10 +426,10 @@ class Premiumize:
 					url = '%s?action=play_URL&url=%s' % (sysaddon, url_link)
 					cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=premiumize)' %
 								(sysaddon, quote_plus(name), quote_plus(pm_icon), url_link)))
-				cm.append((renameMenu % type.capitalize(), 'RunPlugin(%s?action=pm_Rename&type=%s&id=%s&name=%s)' %
-								(sysaddon, type, item['id'], quote_plus(name))))
-				cm.append((deleteMenu % type.capitalize(), 'RunPlugin(%s?action=pm_Delete&type=%s&id=%s&name=%s)' %
-								(sysaddon, type, item['id'], quote_plus(name))))
+				cm.append((renameMenu % content_type.capitalize(), 'RunPlugin(%s?action=pm_Rename&type=%s&id=%s&name=%s)' %
+								(sysaddon, content_type, item['id'], quote_plus(name))))
+				cm.append((deleteMenu % content_type.capitalize(), 'RunPlugin(%s?action=pm_Delete&type=%s&id=%s&name=%s)' %
+								(sysaddon, content_type, item['id'], quote_plus(name))))
 				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': pm_icon, 'poster': pm_icon, 'thumb': pm_icon, 'fanart': addonFanart, 'banner': pm_icon})
@@ -450,7 +450,7 @@ class Premiumize:
 
 	def user_transfers_to_listItem(self):
 		try:
-			sysaddon, syshandle = argv[0], int(argv[1])
+			sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 			extensions = supported_video_extensions()
 			transfer_files = self.user_transfers()
 			if not transfer_files:
@@ -464,7 +464,7 @@ class Premiumize:
 		for count, item in enumerate(transfer_files, 1):
 			try:
 				cm = []
-				type = 'folder' if item['file_id'] is None else 'file'
+				content_type = 'folder' if item['file_id'] is None else 'file'
 				name = string_tools.strip_non_ascii_and_unprintable(item['name'])
 				status = item['status']
 				progress = item['progress']
@@ -472,7 +472,7 @@ class Premiumize:
 				else:
 					try: progress = re.findall(r'(?:\d{0,1}\.{0,1})(\d+)', str(progress))[0][:2]
 					except: progress = 'UNKNOWN'
-				if type == 'folder':
+				if content_type == 'folder':
 					isFolder = True if status == 'finished' else False
 					status_str = '[COLOR %s]%s[/COLOR]' % (control.getHighlightColor(), status.capitalize())
 					label = '%02d | [B]%s[/B] - %s | [B]%s[/B] | [I]%s [/I]' % (count, status_str, str(progress) + '%', folder_str, name)

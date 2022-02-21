@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.4.9">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.5.0">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,13 +32,14 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.4.9 - Feb. 13, 2022[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed rare AD resolve issue.[/I]
-[COLOR yellow]--[/COLOR][I] Caching mechanics has been changed to now account for shows that are still airing and refresh the data on a new episodes air date.[/I]
-[COLOR yellow]--[/COLOR][I] Using "Next" in OSD player controls, while in episode continual playback mode, would cause the keepAlive() instance to not terminate.  This caused a number of unexpected results to resume points and marking of episode indicators.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where "Still Watching?" pop up would occur on first played episode in playlist if the episode was not the first listItem and it happen to match the number of episode for pop up to occur.[/I]
-[COLOR yellow]--[/COLOR][I] Increased PlayNext pop-up time to 300 seconds, 5 minute max.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed PlayNext ticker timer count down.  Previously it would not begin until the 60 seconds remained.[/I]
+[B][COLOR red]Update - v6.5.0 - Feb. 21, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] [B]"Force Trakt Sync to local database"[/B] will now [B]"DROP"[/B] existing table vs. simply re-writing new table data.  This now assures a safe guard against any database issues that may have previously occurred and re-creates the table and data from scratch.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed AD [B]"Browse debrid pack"[/B] not working on items noted from previous release with resolve issue.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed AD [B]"Browse debrid pack"[/B] would remove cloud item regardless of setting to [B]"Store resolved items in cloud"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] Fixes to AD cloud scraper failing to return episode for some random cases.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where tvdb ID could be missing from meta providers for shows and would fail to mark as watched/unwatched.  Now both imdb and tvdb ID's are checked to better assurance of proper marking of watched/unwatched.[/I]
+[COLOR yellow]--[/COLOR][I] A new fallback method is in place to better handle missing ID's and will utilize trakt ID's when needed.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where "argv[0]" would randomly fail to add plugin path to created .strm files.  The plugin path is now hardcoded.[/I]
 		</news>
 	</extension>
 </addon>

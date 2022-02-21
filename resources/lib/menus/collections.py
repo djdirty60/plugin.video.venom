@@ -750,7 +750,6 @@ class Collections:
 			items = client.parseDOM(result, 'div', attrs = {'class': '.+? lister-item'}) + client.parseDOM(result, 'div', attrs = {'class': 'lister-item .+?'})
 			items += client.parseDOM(result, 'div', attrs = {'class': 'list_item.+?'})
 		except: return
-
 		next = ''
 		try:
 			# HTML syntax error, " directly followed by attribute name. Insert space in between. parseDOM can otherwise not handle it.
@@ -856,7 +855,7 @@ class Collections:
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32000, message=33049)
 		from resources.lib.modules.player import Bookmarks
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		play_mode = getSetting('play.mode') 
 		rescrape_useDefault = getSetting('rescrape.default') == 'true'
 		rescrape_method = getSetting('rescrape.default2')
@@ -914,7 +913,7 @@ class Collections:
 					if watched:
 						cm.append((unwatchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=4)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 1, 'overlay': 5})
-						# meta.update({'lastplayed': trakt.watchedMoviesTime(imdb)})
+						# meta.update({'lastplayed': trakt.watchedMoviesTime(imdb)}) # no skin support
 					else:
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_Movie&name=%s&imdb=%s&query=5)' % (sysaddon, sysname, imdb)))
 						meta.update({'playcount': 0, 'overlay': 4})
@@ -988,21 +987,20 @@ class Collections:
 		try:
 			from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 			if isinstance(name, int): name = getLS(name)
-			sysaddon, syshandle = argv[0], int(argv[1])
 			artPath = control.artPath()
 			if not icon.startswith('Default'): icon = control.joinPath(artPath, icon)
 			if poster.startswith('http'): poster = poster
 			else: poster = control.joinPath(artPath, poster) if artPath else icon
-			url = '%s?action=%s' % (sysaddon, action)
+			url = 'plugin://plugin.video.venom/?action=%s' % action
 			cm = []
-			if context: cm.append((getLS(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
-			if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
-			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
+			if context: cm.append((getLS(context[0]), 'RunPlugin(plugin://plugin.video.venom/?action=%s)' % context[1]))
+			if queue: cm.append((queueMenu, 'RunPlugin(plugin://plugin.video.venom/?action=playlist_QueueItem)'))
+			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(plugin://plugin.video.venom/?action=tools_openSettings)'))
 			item = control.item(label=name, offscreen=True)
 			item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 			item.setInfo(type='video', infoLabels={'plot': name})
 			item.addContextMenuItems(cm)
-			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
+			control.addItem(handle=int(argv[1]), url=url, listitem=item, isFolder=True)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

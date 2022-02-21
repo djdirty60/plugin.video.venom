@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-# created by Venom (updated 11-17-2021)
+# created by Venom (updated 2-15-2022)
 """
 	Venom Add-on
 """
 
 import re
 from resources.lib.cloud_scrapers import cloud_utils
+from resources.lib.database import cache
 from resources.lib.debrid import alldebrid
 from resources.lib.modules.control import setting as getSetting
 # from resources.lib.modules.source_utils import supported_video_extensions
@@ -54,7 +55,9 @@ class source:
 				if not cloud_utils.cloud_check_title(title, aliases, folder_name): continue
 				files = folder.get('links', '')
 				# files = [i for i in files if i['filename'].lower().endswith(tuple(supported_video_extensions()))]
+				files = [i for i in files if not i['filename'].lower().endswith(invalid_extensions)]
 				if not files: continue
+				path = folder_name.lower()
 			except:
 				from resources.lib.modules import log_utils
 				log_utils.error('AD_CLOUD: ')
@@ -64,7 +67,6 @@ class source:
 				try:
 					name = file.get('filename', '')
 					if name.lower().endswith(invalid_extensions): continue
-					path = folder.get('filename', '').lower()
 					rt = cloud_utils.release_title_format(name)
 					if any(value in rt for value in extras_filter): continue
 
@@ -81,9 +83,20 @@ class source:
 						if all(not bool(re.search(i, rt)) for i in query_list):
 							if 'tvshowtitle' in data:
 								season_folder_list = self.season_folder_list()
-								if all(not bool(re.search(i, path)) for i in season_folder_list): continue
-								episode_list = self.episode_list()
-								if all(not bool(re.search(i, rt)) for i in episode_list): continue
+								if any(bool(re.search(i, path)) for i in season_folder_list):
+									episode_list = self.episode_list()
+									if name != folder_name:
+										if all(not bool(re.search(i, rt)) for i in episode_list): continue
+									else:
+										link = cache.get(alldebrid.AllDebrid().unrestrict_link, 168, file['link'], True)
+										name = link.get('filename', '')
+										if name.lower().endswith(invalid_extensions): continue
+										rt = cloud_utils.release_title_format(name)
+										if any(value in rt for value in extras_filter): continue
+										if all(not bool(re.search(i, rt)) for i in query_list): continue
+										file.update({'size': link.get('filesize')})
+								else: continue
+
 							else:
 								if all(not bool(re.search(i, path)) for i in query_list): continue
 								name = folder.get('filename', '')
@@ -126,12 +139,12 @@ class source:
 
 	def season_folder_list(self):
 		return [
-				r'[.-]s\s?%d[/]' % int(self.season),
-				r'[.-]s\s?%02d[/]' % int(self.season),
-				r'season\s?%d[/]' % int(self.season),
-				r'season\s?%02d[/]' % int(self.season)]
+				r'[.-]s\s?%d[\s/.-]' % int(self.season),
+				r'[.-]s\s?%02d[\s/.-]' % int(self.season),
+				r'season\s?%d[\s/.-]' % int(self.season),
+				r'season\s?%02d[\s/.-]' % int(self.season)]
 
-	def episode_list(self):
+	def episode_list(self): # checks against formatted release_title with removed whitespace
 		return [
 				'[.-]e%d[.-]' % int(self.episode),
 				'[.-]e%02d[.-]' % int(self.episode),
@@ -142,7 +155,7 @@ class source:
 
 	def resolve(self, url):
 		try:
-			url = alldebrid.AllDebrid().unrestrict_link(url)
+			url = cache.get(alldebrid.AllDebrid().unrestrict_link, 48, url)
 			return url
 		except:
 			from resources.lib.modules import log_utils

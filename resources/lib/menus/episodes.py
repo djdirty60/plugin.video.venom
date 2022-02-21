@@ -6,7 +6,6 @@
 from datetime import datetime, timedelta
 from json import dumps as jsdumps, loads as jsloads
 import re
-from sys import argv
 from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, fanarttv_cache, traktsync
@@ -302,8 +301,8 @@ class Episodes:
 				values['tvshowtitle'] = tvshowtitle
 				values['year'] = showSeasons.get('year')
 				values['trailer'] = showSeasons.get('trailer')
-				values['imdb'] = imdb
-				values['tvdb'] = tvdb
+				values['imdb'] = imdb or ''
+				values['tvdb'] = tvdb or ''
 				values['aliases'] = showSeasons.get('aliases', [])
 				values['country_codes'] = showSeasons.get('country_codes', [])
 				values['total_seasons'] = showSeasons.get('total_seasons')
@@ -686,7 +685,7 @@ class Episodes:
 		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32326, message=33049)
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		if not is_widget: control.playlist.clear()
 		settingFanart = getSetting('fanart') == 'true'
@@ -722,7 +721,7 @@ class Episodes:
 			airLabel = getLS(35032)
 		if play_mode == '1' or enable_playnext: playbackMenu = getLS(32063)
 		else: playbackMenu = getLS(32064)
-		if trakt.getTraktIndicatorsInfo():
+		if trakt.getTraktIndicatorsInfo(): 
 			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
 		else:
 			watchedMenu, unwatchedMenu = getLS(32066), getLS(32067)
@@ -880,7 +879,7 @@ class Episodes:
 				if isMultiList and multi_unwatchedEnabled:
 					if 'ForceAirEnabled' not in i:
 						try:
-							try: count = getShowCount(getSeasonIndicators(imdb)[1], imdb, tvdb) # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
+							try: count = getShowCount(getSeasonIndicators(imdb, tvdb)[1], imdb, tvdb) # if indicators and no matching imdb_id in watched items then it returns None and we use TMDb meta to avoid Trakt request
 							except: count = None
 							if count:
 								item.setProperties({'WatchedEpisodes': str(count['watched']), 'UnWatchedEpisodes': str(count['unwatched'])})
@@ -953,9 +952,10 @@ class Episodes:
 			views.setView('episodes', {'skin.estuary': 55, 'skin.confluence': 504})
 
 	def addDirectory(self, items, queue=False):
+		from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32326, message=33049)
-		sysaddon, syshandle = argv[0], int(argv[1])
+		syshandle = int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
 		queueMenu = getLS(32065)
@@ -967,12 +967,12 @@ class Episodes:
 				else: poster = addonThumb
 				icon = i.get('icon', '') or 'DefaultFolder.png'
 				if not icon.startswith('Default'): icon = control.joinPath(self.artPath, icon)
-				url = '%s?action=%s' % (sysaddon, i['action'])
+				url = 'plugin://plugin.video.venom/?action=%s' % i['action']
 				try: url += '&url=%s' % quote_plus(i['url'])
 				except: pass
 				cm = []
-				if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
-				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
+				if queue: cm.append((queueMenu, 'RunPlugin(plugin://plugin.video.venom/?action=playlist_QueueItem)'))
+				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(plugin://plugin.video.venom/?action=tools_openSettings)'))
 				item = control.item(label=name, offscreen=True)
 				item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 				item.setInfo(type='video', infoLabels={'plot': name})

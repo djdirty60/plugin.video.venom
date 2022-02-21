@@ -25,7 +25,7 @@ def iso_2_utc(iso_ts):
 			tz = None
 		if ts.find('.') > -1: ts = ts[:ts.find('.')]
 		try: d = datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S')
-		except TypeError: d = datetime(*(time.strptime(ts, '%Y-%m-%dT%H:%M:%S')[0:6]))
+		except: d = datetime(*(time.strptime(ts, '%Y-%m-%dT%H:%M:%S')[0:6]))
 		dif = timedelta()
 		if tz:
 			hours, minutes = tz.split(':')
@@ -49,12 +49,12 @@ def datetime_from_string(string_date, format="%Y-%m-%d", date_only=True): # date
 	if not string_date: return None
 	try:
 		try:
-			if date_only: res = datetime.strptime(string_date, format).date()
-			else: res = datetime.strptime(string_date, format)
+			if date_only: result = datetime.strptime(string_date, format).date()
+			else: result = datetime.strptime(string_date, format)
 		except:
-			if date_only: res = datetime(*(time.strptime(string_date, format)[0:6])).date()
-			else: res = datetime(*(time.strptime(string_date, format)[0:6]))
-		return res
+			if date_only: result = datetime(*(time.strptime(string_date, format)[0:6])).date()
+			else: result = datetime(*(time.strptime(string_date, format)[0:6]))
+		return result
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()

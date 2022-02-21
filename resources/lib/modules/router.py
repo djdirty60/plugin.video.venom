@@ -17,7 +17,6 @@ def router(params):
 	tvdb = params.get('tvdb')
 	season = params.get('season')
 	episode = params.get('episode')
-	type = params.get('type')
 	url = params.get('url')
 	query = params.get('query')
 	source = params.get('source')
@@ -98,8 +97,7 @@ def router(params):
 		movies.Movies().getTraktPublicLists(url)
 	elif action == 'movies_SearchLists':
 		from resources.lib.menus import navigator
-		media_type = params.get('media_type')
-		navigator.Navigator().traktSearchLists(media_type)
+		navigator.Navigator().traktSearchLists(params.get('media_type'))
 	elif action == 'movies_LikedLists':
 		from resources.lib.menus import movies
 		movies.Movies().traktLlikedlists()
@@ -149,112 +147,84 @@ def router(params):
 	elif action == 'tvNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().tvshows()
-
 	elif action == 'tvliteNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().tvshows(lite=True)
-
 	elif action == 'mytvNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().mytvshows()
-
 	elif action == 'mytvliteNavigator':
 		from resources.lib.menus import navigator
 		navigator.Navigator().mytvshows(lite=True)
-
 	elif action == 'tvshows':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().get(url)
-
 	elif action == 'tvshowPage':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().get(url)
-
 	elif action == 'tmdbTvshows':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().getTMDb(url)
-
 	elif action == 'tmdbTvshowPage':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().getTMDb(url)
-
 	elif action == 'tvmazeTvshows':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().getTVmaze(url)
-
 	elif action == 'tvmazeTvshowPage':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().getTVmaze(url)
-
 	elif action == 'tvSearch':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().search()
-
 	elif action == 'tvSearchnew':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().search_new()
-
 	elif action == 'tvSearchterm':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().search_term(name)
-
 	elif action == 'tvPerson':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().person()
-
 	elif action == 'tvGenres':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().genres(url)
-
 	elif action == 'tvNetworks':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().networks()
-
 	elif action == 'tvLanguages':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().languages()
-
 	elif action == 'tvCertificates':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().certifications()
-
 	elif action == 'tvYears':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().years(url)
-
 	elif action == 'tvPersons':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().persons(url)
-
 	elif action == 'tvUserlists':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().userlists()
-
 	elif action == 'tvOriginals':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().originals()
-
 	elif action == 'tv_PublicLists':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().getTraktPublicLists(url)
-
 	elif action == 'tv_SearchLists':
 		from resources.lib.menus import navigator
-		media_type = params.get('media_type')
-		navigator.Navigator().traktSearchLists(media_type)
-
+		navigator.Navigator().traktSearchLists(params.get('media_type'))
 	elif action == 'shows_LikedLists':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().traktLlikedlists()
-
 	elif action == 'shows_traktHiddenManager':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().traktHiddenManager()
-
 	elif action == 'shows_traktCollectionManager':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().collectionManager()
-
 	elif action == 'shows_traktWatchListManager':
 		from resources.lib.menus import tvshows
 		tvshows.TVshows().watchlistManager()
@@ -264,37 +234,29 @@ def router(params):
 	####################################################
 	elif action == 'seasons':
 		from resources.lib.menus import seasons
-		art = params.get('art')
-		seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, art)
+		seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, params.get('art'))
 
 	####################################################
 	#---EPISODES
 	####################################################
 	elif action == 'episodes':
 		from resources.lib.menus import episodes
-		meta = params.get('meta')
-		episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode)
-
+		episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, params.get('meta'), season, episode)
 	elif action == 'calendar':
 		from resources.lib.menus import episodes
 		episodes.Episodes().calendar(url)
-
 	elif action == 'upcomingProgress':
 		from resources.lib.menus import episodes
 		episodes.Episodes().upcoming_progress(url)
-
 	elif action == 'episodes_clrProgressCache':
 		from resources.lib.menus import episodes
 		episodes.Episodes().clr_progress_cache(url)
-
 	elif action == 'calendars':
 		from resources.lib.menus import episodes
 		episodes.Episodes().calendars()
-
 	elif action == 'episodesUnfinished':
 		from resources.lib.menus import episodes
 		episodes.Episodes().unfinished(url)
-
 	elif action == 'episodes_traktUnfinishedManager':
 		from resources.lib.menus import episodes
 		episodes.Episodes().unfinishedManager()
@@ -327,12 +289,10 @@ def router(params):
 			alldebrid.AllDebrid().browse_user_cloud(source)
 		elif action == 'ad_DeleteTransfer':
 			from resources.lib.debrid import alldebrid
-			id = params.get('id')
-			alldebrid.AllDebrid().delete_transfer(id, name, silent=False)
+			alldebrid.AllDebrid().delete_transfer(params.get('id'), name, silent=False)
 		elif action == 'ad_RestartTransfer':
 			from resources.lib.debrid import alldebrid
-			id = params.get('id')
-			alldebrid.AllDebrid().restart_transfer(id, name, silent=False)
+			alldebrid.AllDebrid().restart_transfer(params.get('id'), name, silent=False)
 
 	elif action and action.startswith('en_'):
 		if action == 'en_ServiceNavigator':
@@ -389,23 +349,19 @@ def router(params):
 			# premiumize.Premiumize().auth()
 		elif action == 'pm_MyFiles':
 			from resources.lib.debrid import premiumize
-			id = params.get('id')
-			premiumize.Premiumize().my_files_to_listItem(id, name)
+			premiumize.Premiumize().my_files_to_listItem(params.get('id'), name)
 		elif action == 'pm_Transfers':
 			from resources.lib.debrid import premiumize
 			premiumize.Premiumize().user_transfers_to_listItem()
 		elif action == 'pm_Rename':
 			from resources.lib.debrid import premiumize
-			id = params.get('id')
-			premiumize.Premiumize().rename(type, id, name)
+			premiumize.Premiumize().rename(params.get('type'), params.get('id'), name)
 		elif action == 'pm_Delete':
 			from resources.lib.debrid import premiumize
-			id = params.get('id')
-			premiumize.Premiumize().delete(type, id, name)
+			premiumize.Premiumize().delete(params.get('type'), params.get('id'), name)
 		elif action == 'pm_DeleteTransfer':
 			from resources.lib.debrid import premiumize
-			id = params.get('id')
-			premiumize.Premiumize().delete_transfer(id, name)
+			premiumize.Premiumize().delete_transfer(params.get('id'), name)
 		elif action == 'pm_ClearFinishedTransfers': # disabled for now till PM fixes
 			from resources.lib.debrid import premiumize
 			premiumize.Premiumize().clear_finished_transfers()
@@ -428,16 +384,13 @@ def router(params):
 			realdebrid.RealDebrid().my_downloads_to_listItem(int(query))
 		elif action == 'rd_BrowseUserTorrents':
 			from resources.lib.debrid import realdebrid
-			id = params.get('id')
-			realdebrid.RealDebrid().browse_user_torrents(id)
+			realdebrid.RealDebrid().browse_user_torrents(params.get('id'))
 		elif action == 'rd_DeleteUserTorrent':
 			from resources.lib.debrid import realdebrid
-			id = params.get('id')
-			realdebrid.RealDebrid().delete_user_torrent(id, name)
+			realdebrid.RealDebrid().delete_user_torrent(params.get('id'), name)
 		elif action == 'rd_DeleteDownload':
 			from resources.lib.debrid import realdebrid
-			id = params.get('id')
-			realdebrid.RealDebrid().delete_download(id, name)
+			realdebrid.RealDebrid().delete_download(params.get('id'), name)
 
 	####################################################
 	#---Anime
@@ -461,7 +414,6 @@ def router(params):
 		id = params.get('id')
 		if id is None: youtube.yt_index().root(action)
 		else: youtube.yt_index().get(action, id)
-
 	elif action == 'sectionItem':
 		pass # Placeholder. This is a non-clickable menu item for notes, etc.
 
@@ -516,7 +468,7 @@ def router(params):
 				try:
 					from resources.lib.modules import downloader
 					from resources.lib.debrid import realdebrid
-					if type == 'unrestrict':
+					if params.get('type') == 'unrestrict':
 						downloader.download(name, image, realdebrid.RealDebrid().unrestrict_link(url.replace(' ', '%20')))
 					else:
 						downloader.download(name, image, url.replace(' ', '%20'))
@@ -557,8 +509,7 @@ def router(params):
 			navigator.Navigator().loggingNavigator()
 		elif action == 'tools_addView':
 			from resources.lib.modules import views
-			content = params.get('content')
-			views.addView(content)
+			views.addView(params.get('content'))
 		elif action == 'tools_resetViewTypes':
 			from resources.lib.modules import views
 			views.clearViews()
@@ -633,44 +584,32 @@ def router(params):
 	elif action and action.startswith('play_'):
 		if action == 'play_Item':
 			from resources.lib.modules import sources
-			premiered = params.get('premiered')
-			meta = params.get('meta')
-			select = params.get('select')
-			rescrape = params.get('rescrape')
-			# custom_query = params.get('custom_query')
-			all_providers = params.get('all_providers')
-			sources.Sources(all_providers).play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
-
+			sources.Sources(params.get('all_providers')).play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, params.get('premiered'), params.get('meta'), params.get('select'), params.get('rescrape'))
 		elif action == "play_preScrapeNext":
 			from resources.lib.modules.player import PlayNext
 			PlayNext().prescrapeNext()
-
 		elif action == "play_nextWindowXML":
 			from resources.lib.modules.player import PlayNext
 			play_next = PlayNext()
 			play_next.display_xml()
 			del play_next
-
 		elif action == 'play_All': # context menu works same as "Play from Here"
 			control.player2().play(control.playlist) 
-
 		elif action == 'play_URL':
 			caller = params.get('caller')
 			if caller == 'realdebrid':
 				from resources.lib.debrid import realdebrid
-				if type == 'unrestrict': control.player.play(realdebrid.RealDebrid().unrestrict_link(url.replace(' ', '%20')))
+				if params.get('type') == 'unrestrict': control.player.play(realdebrid.RealDebrid().unrestrict_link(url.replace(' ', '%20')))
 				else: control.player.play(url.replace(' ', '%20'))
 			elif caller == 'alldebrid':
 				from resources.lib.debrid import alldebrid
-				if type == 'unrestrict': control.player.play(alldebrid.AllDebrid().unrestrict_link(url.replace(' ', '%20')))
+				if params.get('type') == 'unrestrict': control.player.play(alldebrid.AllDebrid().unrestrict_link(url.replace(' ', '%20')))
 				else: control.player.play(url.replace(' ', '%20'))
 			else: control.player.play(url.replace(' ', '%20'))
-
 		elif action == 'play_EpisodesList': # global context option
 			from json import dumps as jsdumps
 			from resources.lib.menus import episodes
-			meta = params.get('meta')
-			items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, episode, create_directory=False)
+			items = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, params.get('meta'), season, episode, create_directory=False)
 			control.playlist.clear()
 			for i in items:
 				title = i['title']
@@ -695,8 +634,7 @@ def router(params):
 			from resources.lib.modules import trailer
 			windowedtrailer = params.get('windowedtrailer')
 			windowedtrailer = int(windowedtrailer) if windowedtrailer in ("0","1") else 0
-			trailer.Trailer().play(type, name, year, url, imdb, windowedtrailer)
-
+			trailer.Trailer().play(params.get('type'), name, year, url, imdb, windowedtrailer)
 		elif action == 'play_Random':
 			rtype = params.get('rtype')
 			if rtype == 'movie':
@@ -705,13 +643,11 @@ def router(params):
 				r = 'plugin://plugin.video.venom/?action=play_Item'
 			elif rtype == 'episode':
 				from resources.lib.menus import episodes
-				meta = params.get('meta')
-				rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, meta, season, create_directory=False)
+				rlist = episodes.Episodes().get(tvshowtitle, year, imdb, tmdb, tvdb, params.get('meta'), season, create_directory=False)
 				r = 'plugin://plugin.video.venom/?action=play_Item'
 			elif rtype == 'season':
 				from resources.lib.menus import seasons
-				art = params.get('art')
-				rlist = seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, art, create_directory=False)
+				rlist = seasons.Seasons().get(tvshowtitle, year, imdb, tmdb, tvdb, params.get('art'), create_directory=False)
 				r = 'plugin://plugin.video.venom/?action=play_Random&rtype=episode'
 			elif rtype == 'show':
 				from resources.lib.menus import tvshows
@@ -742,12 +678,7 @@ def router(params):
 
 	elif action == 'play': # for support of old style .strm library files
 		from resources.lib.modules import sources
-		premiered = params.get('premiered')
-		meta = params.get('meta')
-		select = params.get('select')
-		rescrape = params.get('rescrape')
-		all_providers = params.get('all_providers')
-		sources.Sources(all_providers).play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered, meta, select, rescrape)
+		sources.Sources(params.get('all_providers')).play(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, params.get('premiered'), params.get('meta'), params.get('select'), params.get('rescrape'))
 
 	####################################################
 	#---Playlist
@@ -755,9 +686,7 @@ def router(params):
 	elif action and action.startswith('playlist_'):
 		if action == 'playlist_Manager':
 			from resources.lib.modules import playlist
-			art = params.get('art')
-			meta = params.get('meta')
-			playlist.playlistManager(name, url, meta, art)
+			playlist.playlistManager(name, url, params.get('meta'), params.get('art'))
 		elif action == 'playlist_Show':
 			from resources.lib.modules import playlist
 			playlist.playlistShow()
@@ -788,21 +717,16 @@ def router(params):
 	####################################################
 	elif action == 'alterSources':
 		from resources.lib.modules import sources
-		meta = params.get('meta')
-		sources.Sources().alterSources(url, meta)
-
+		sources.Sources().alterSources(url, params.get('meta'))
 	elif action == 'showDebridPack':
 		from resources.lib.modules.sources import Sources
-		caller = params.get('caller')
-		Sources().debridPackDialog(caller, name, url, source)
-
+		Sources().debridPackDialog(params.get('caller'), name, url, source)
 	elif action == 'sourceInfo':
 		from resources.lib.modules.sources import Sources
 		Sources().sourceInfo(source)
-
 	elif action == 'cacheTorrent':
 		caller = params.get('caller')
-		pack = True if type == 'pack' else False
+		pack = True if params.get('type') == 'pack' else False
 		if caller == 'RD':
 			from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
 		elif caller == 'PM':
@@ -812,9 +736,7 @@ def router(params):
 		success = debrid_function().add_uncached_torrent(url, pack=pack)
 		if success:
 			from resources.lib.modules import sources
-			meta = params.get('meta')
-			items = params.get('items')
-			sources.Sources().playItem(title, items, source, meta)
+			sources.Sources().playItem(title, params.get('items'), source, params.get('meta'))
 
 	elif action == 'rescrapeMenu':
 		from resources.lib.modules import sources

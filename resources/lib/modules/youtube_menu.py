@@ -38,7 +38,7 @@ class youtube_menu(object):
 
 	def addMenuItem(self, name, action, subid, iconimage, fanart, description='', isFolder=True):
 		try:
-			url = '%s?action=%s&id=%s' % (argv[0], action, subid)
+			url = 'plugin://plugin.video.venom/?action=%s&id=%s' % (action, subid)
 			liz = ListItem(label=name, offscreen=True)
 			liz.setArt({'icon': 'DefaultFolder.png', 'thumb': iconimage, 'fanart': fanart})
 			liz.setInfo(type='video', infoLabels={'title': name, 'plot': description})
@@ -49,7 +49,7 @@ class youtube_menu(object):
 
 	def addSectionItem(self, name, iconimage, fanart):
 		try:
-			url = '%s?action=sectionItem' % argv[0]
+			url = 'plugin://plugin.video.venom/?action=sectionItem'
 			liz = ListItem(label=name, offscreen=True)
 			liz.setArt({'icon': 'DefaultFolder.png', 'thumb': iconimage, 'fanart': fanart})
 			liz.setInfo(type='video', infoLabels={'title': name, 'plot': description})

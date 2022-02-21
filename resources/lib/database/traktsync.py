@@ -68,7 +68,7 @@ def insert_bookmarks(items, new_scrobble=False):
 								studio TEXT, duration TEXT, percent_played TEXT, paused_at TEXT, UNIQUE(imdb, tmdb, tvdb, season, episode));''')
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 		if not new_scrobble:
-			dbcur.execute('''DELETE FROM bookmarks''')
+			dbcur.execute('''DELETE FROM bookmarks''') # this just wipes the data but if table is corrupt this won't allow write to work
 			dbcur.connection.commit() # added this for what looks like a 19 bug not found in 18, normal commit is at end
 			dbcur.execute('''VACUUM''')
 		for i in items:
@@ -663,11 +663,12 @@ def _dict_factory(cursor, row):
 
 
 ########  Here down for reading and writting watched indicators and counts  ############
-def get(function, duration, *args):
+def get(function, duration, *args, trakt=None):
 	"""
 	:param function: Function to be executed
 	:param duration: Duration of validity of cache in hours
 	:param args: Optional arguments for the provided function
+	:named var: Optional, used by trakt module and is not counted in md5 hash
 	"""
 	try:
 		key = _hash_function(function, args)
@@ -675,10 +676,10 @@ def get(function, duration, *args):
 		if cache_result:
 			try: result = literal_eval(cache_result['value'])
 			except: result = None
-			if _is_cache_valid(cache_result['date'], duration):
-				return result
-
-		fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
+			if _is_cache_valid(cache_result['date'], duration): return result
+		# fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
+		if trakt: fresh_result = repr(function(*args, trakt=trakt))
+		else: fresh_result = repr(function(*args))
 
 		if cache_result and (result and len(result) == 1) and fresh_result == '[]': # fix for syncSeason mark unwatched season when it's the last item remaining
 			if result[0].isdigit():
@@ -783,10 +784,17 @@ def _get_function_name(function_instance):
 	return re_sub(r'.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', repr(function_instance))
 
 def _generate_md5(*args):
-	md5_hash = md5()
-	try: [md5_hash.update(str(arg)) for arg in args]
-	except: [md5_hash.update(str(arg).encode('utf-8')) for arg in args]
-	return str(md5_hash.hexdigest())
+	try:
+		md5_hash = md5()
+		try: [md5_hash.update(str(arg)) for arg in args]
+		except: [md5_hash.update(str(arg).encode('utf-8')) for arg in args]
+		hash = str(md5_hash.hexdigest())
+		# from resources.lib.modules import log_utils
+		# log_utils.log('args=%s: hash=%s' % (args, hash), __name__)
+		return hash
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
 
 def insert_syncSeasons_at():
 	try:

@@ -132,12 +132,12 @@ class source:
 
 	def season_folder_list(self):
 		return [
-				r'[.-]s\s?%d[/]' % int(self.season),
-				r'[.-]s\s?%02d[/]' % int(self.season),
-				r'season\s?%d[/]' % int(self.season),
-				r'season\s?%02d[/]' % int(self.season)]
+				r'[.-]s\s?%d[\s/.-]' % int(self.season),
+				r'[.-]s\s?%02d[\s/.-]' % int(self.season),
+				r'season\s?%d[\s/.-]' % int(self.season),
+				r'season\s?%02d[\s/.-]' % int(self.season)]
 
-	def episode_list(self):
+	def episode_list(self): # checks against formatted release_title with removed whitespace
 		return [
 				'[.-]e%d[.-]' % int(self.episode),
 				'[.-]e%02d[.-]' % int(self.episode),

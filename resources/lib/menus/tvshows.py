@@ -201,10 +201,10 @@ class TVshows:
 			self.list = cache.get(self.trakt_list, 0, self.progress_link, self.trakt_user)
 
 		for i in self.list:
-			imdb = i.get('imdb')
-			try: indicators = getSeasonIndicators(imdb)
+			imdb, tvdb = i.get('imdb'), i.get('tvdb')
+			try: indicators = getSeasonIndicators(imdb, tvdb)
 			except: indicators = None
-			count = getShowCount(indicators[1], imdb, tvdb=i.get('tvdb')) if indicators else None
+			count = getShowCount(indicators[1], imdb, tvdb) if indicators else None
 			i.update({'watched_count': count})
 		try:
 			hidden = traktsync.fetch_hidden_progress()
@@ -631,9 +631,9 @@ class TVshows:
 				values['tvshowtitle'] = values['title']
 				values['year'] = str(show.get('year')) if show.get('year') else ''
 				ids = show.get('ids', {})
-				values['imdb'] = str(ids.get('imdb', '')) if ids.get('imdb', '') else ''
-				values['tmdb'] = str(ids.get('tmdb')) if ids.get('tmdb', '') else ''
-				values['tvdb'] = str(ids.get('tvdb')) if ids.get('tvdb', '') else ''
+				values['imdb'] = str(ids.get('imdb', '')) if ids.get('imdb') else ''
+				values['tmdb'] = str(ids.get('tmdb', '')) if ids.get('tmdb') else ''
+				values['tvdb'] = str(ids.get('tvdb', '')) if ids.get('tvdb') else ''
 				self.list.append(values)
 			except:
 				from resources.lib.modules import log_utils
@@ -916,7 +916,6 @@ class TVshows:
 				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (self.list[i]['title'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-
 			showSeasons = tmdb_indexer.TVshows().get_showSeasons_meta(tmdb)
 			if not showSeasons: return
 			values = {}
@@ -956,7 +955,7 @@ class TVshows:
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			control.hide() ; control.notification(title=32002, message=33049)
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
@@ -973,7 +972,7 @@ class TVshows:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
 				title = i.get('tvshowtitle') or i.get('title')
 				systitle = quote_plus(title)
-				try: indicators = getSeasonIndicators(imdb)
+				try: indicators = getSeasonIndicators(imdb, tvdb)
 				except: indicators = None
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
 				meta.update({'code': imdb, 'imdbnumber': imdb, 'mediatype': 'tvshow', 'tag': [imdb, tmdb]}) # "tag" and "tagline" for movies only, but works in my skin mod so leave
@@ -1000,6 +999,7 @@ class TVshows:
 				sysmeta, sysart = quote_plus(jsdumps(meta)), quote_plus(jsdumps(art))
 				if flatten: url = '%s?action=episodes&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&meta=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysmeta)
 				else: url = '%s?action=seasons&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)
+
 ####-Context Menu and Overlays-####
 				cm = []
 				try:
@@ -1078,7 +1078,7 @@ class TVshows:
 		control.playlist.clear()
 		if not items: # with reuselanguageinvoker on an empty directory must be loaded, do not use sys.exit()
 			content = '' ; control.hide() ; control.notification(title=32002, message=33049)
-		sysaddon, syshandle = argv[0], int(argv[1])
+		sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 		addonThumb = control.addonThumb()
 		artPath = control.artPath()
 		queueMenu, playRandom, addToLibrary = getLS(32065), getLS(32535), getLS(32551)

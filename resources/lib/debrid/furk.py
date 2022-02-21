@@ -156,7 +156,6 @@ class Furk:
 	def query_results_to_dialog(self, query):
 		if not self.api_key: return
 		try:
-			sysaddon = argv[0]
 			downloadMenu = getLS(40048)
 			query = '@name+%s' % query
 			url = (self.base_link + self.search_link % (self.api_key, query, 'extended', 'no', '')).replace(' ', '+')
@@ -181,8 +180,8 @@ class Furk:
 					size = str(round(float(int(item['size'])) / 1048576000, 1))
 					label = '%02d | [B]%s GB[/B] | [I]%s [/I]' % (count, size, name)
 					url = 'furk_resolve_forPlayback&url=%s' % file_id
-					cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=furk)' %
-										(sysaddon, quote_plus(name), quote_plus(furk_icon), file_id)))
+					cm.append((downloadMenu, 'RunPlugin(plugin://plugin.video.venom/?action=download&name=%s&image=%s&url=%s&caller=furk)' %
+										(quote_plus(name), quote_plus(furk_icon), file_id)))
 					self.addDirectoryItem(label, url, furk_icon, '', cm)
 			except:
 				from resources.lib.modules import log_utils
@@ -191,15 +190,14 @@ class Furk:
 
 	def addDirectoryItem(self, name, query, thumb, icon, context=None, isAction=True):
 		from sys import argv
-		sysaddon, syshandle = argv[0], int(argv[1])
 		try:
 			if isinstance(name, int): name = getLS(name)
-			url = '%s?action=%s' % (sysaddon, query) if isAction else query
+			url = 'plugin://plugin.video.venom/?action=%s' % query if isAction else query
 			item = control.item(label=name, offscreen=True)
 			if context: item.addContextMenuItems(context)
 			item.setArt({'icon': thumb, 'poster': thumb, 'thumb': thumb, 'fanart': addonFanart, 'banner': thumb})
 			item.setInfo(type='video', infoLabels={'plot': name})
-			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
+			control.addItem(handle=in(argv[1]), url=url, listitem=item, isFolder=False)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()

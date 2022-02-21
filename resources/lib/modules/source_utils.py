@@ -111,72 +111,72 @@ def supported_video_extensions():
 
 def getFileType(name_info=None, url=None):
 	try:
-		type = ''
+		file_type = ''
 		if name_info: fmt = name_info
 		elif url: fmt = url_strip(url)
-		if not fmt: return type
+		if not fmt: return file_type
 
-		if any(value in fmt for value in VIDEO_3D):  type += ' 3D /'
+		if any(value in fmt for value in VIDEO_3D):  file_type += ' 3D /'
 
-		if '.sdr' in fmt: type += ' SDR /'
-		elif any(value in fmt for value in DOLBY_VISION): type += ' DOLBY-VISION /'
-		elif any(value in fmt for value in HDR): type += ' HDR /'
-		elif all(i in fmt for i in ('2160p', 'remux')): type += ' HDR /'
-		if ' DOLBY-VISION ' in type:
-			if any(value in fmt for value in HDR_true): type += ' HDR /' # starting to see some hybrid DV and HDR sources
+		if '.sdr' in fmt: file_type += ' SDR /'
+		elif any(value in fmt for value in DOLBY_VISION): file_type += ' DOLBY-VISION /'
+		elif any(value in fmt for value in HDR): file_type += ' HDR /'
+		elif all(i in fmt for i in ('2160p', 'remux')): file_type += ' HDR /'
+		if ' DOLBY-VISION ' in file_type:
+			if any(value in fmt for value in HDR_true): file_type += ' HDR /' # starting to see some hybrid DV and HDR sources
 
-		if any(value in fmt for value in CODEC_H264): type += ' AVC /'
-		elif any(value in fmt for value in CODEC_H265): type += ' HEVC /'
-		elif any(i in type for i in (' HDR ', ' DOLBY-VISION ')): type += ' HEVC /'
-		elif any(value in fmt for value in CODEC_XVID): type += ' XVID /'
-		elif any(value in fmt for value in CODEC_DIVX): type += ' DIVX /'
+		if any(value in fmt for value in CODEC_H264): file_type += ' AVC /'
+		elif any(value in fmt for value in CODEC_H265): file_type += ' HEVC /'
+		elif any(i in file_type for i in (' HDR ', ' DOLBY-VISION ')): file_type += ' HEVC /'
+		elif any(value in fmt for value in CODEC_XVID): file_type += ' XVID /'
+		elif any(value in fmt for value in CODEC_DIVX): file_type += ' DIVX /'
 
-		if '.wmv' in fmt: type += ' WMV /'
-		elif any(value in fmt for value in CODEC_MPEG): type += ' MPEG /'
-		elif '.avi' in fmt: type += ' AVI /'
-		elif any(value in fmt for value in CODEC_MKV): type += ' MKV /'
+		if '.wmv' in fmt: file_type += ' WMV /'
+		elif any(value in fmt for value in CODEC_MPEG): file_type += ' MPEG /'
+		elif '.avi' in fmt: file_type += ' AVI /'
+		elif any(value in fmt for value in CODEC_MKV): file_type += ' MKV /'
 
-		if any(value in fmt for value in REMUX): type += ' REMUX /'
+		if any(value in fmt for value in REMUX): file_type += ' REMUX /'
 
-		if any(value in fmt for value in BLURAY): type += ' BLURAY /'
-		elif any(i in fmt for i in DVD): type += ' DVD /'
-		elif any(value in fmt for value in WEB): type += ' WEB /'
-		elif 'hdtv' in fmt: type += ' HDTV /'
-		elif 'pdtv' in fmt: type += ' PDTV /'
-		elif any(value in fmt for value in SCR): type += ' SCR /'
-		elif any(value in fmt for value in HDRIP): type += ' HDRIP /'
+		if any(value in fmt for value in BLURAY): file_type += ' BLURAY /'
+		elif any(i in fmt for i in DVD): file_type += ' DVD /'
+		elif any(value in fmt for value in WEB): file_type += ' WEB /'
+		elif 'hdtv' in fmt: file_type += ' HDTV /'
+		elif 'pdtv' in fmt: file_type += ' PDTV /'
+		elif any(value in fmt for value in SCR): file_type += ' SCR /'
+		elif any(value in fmt for value in HDRIP): file_type += ' HDRIP /'
 
-		if 'atmos' in fmt: type += ' ATMOS /'
-		if any(value in fmt for value in DOLBY_TRUEHD): type += ' DOLBY-TRUEHD /'
-		if any(value in fmt for value in DOLBY_DIGITALPLUS): type += ' DD+ /'
-		elif any(value in fmt for value in DOLBY_DIGITALEX): type += ' DD-EX /'
-		elif any(value in fmt for value in DOLBYDIGITAL): type += ' DOLBYDIGITAL /'
+		if 'atmos' in fmt: file_type += ' ATMOS /'
+		if any(value in fmt for value in DOLBY_TRUEHD): file_type += ' DOLBY-TRUEHD /'
+		if any(value in fmt for value in DOLBY_DIGITALPLUS): file_type += ' DD+ /'
+		elif any(value in fmt for value in DOLBY_DIGITALEX): file_type += ' DD-EX /'
+		elif any(value in fmt for value in DOLBYDIGITAL): file_type += ' DOLBYDIGITAL /'
 
-		if 'aac' in fmt: type += ' AAC /'
-		elif 'mp3' in fmt: type += ' MP3 /'
+		if 'aac' in fmt: file_type += ' AAC /'
+		elif 'mp3' in fmt: file_type += ' MP3 /'
 
-		if any(value in fmt for value in DTSX): type += ' DTS-X /'
-		elif any(value in fmt for value in DTS_HDMA): type += ' DTS-HD MA /'
-		elif any(value in fmt for value in DTS_HD): type += ' DTS-HD /'
-		elif '.dts' in fmt: type += ' DTS /'
+		if any(value in fmt for value in DTSX): file_type += ' DTS-X /'
+		elif any(value in fmt for value in DTS_HDMA): file_type += ' DTS-HD MA /'
+		elif any(value in fmt for value in DTS_HD): file_type += ' DTS-HD /'
+		elif '.dts' in fmt: file_type += ' DTS /'
 
-		if any(value in fmt for value in AUDIO_8CH): type += ' 8CH /'
-		elif any(value in fmt for value in AUDIO_7CH): type += ' 7CH /'
-		elif any(value in fmt for value in AUDIO_6CH): type += ' 6CH /'
-		elif any(value in fmt for value in AUDIO_2CH): type += ' 2CH /'
+		if any(value in fmt for value in AUDIO_8CH): file_type += ' 8CH /'
+		elif any(value in fmt for value in AUDIO_7CH): file_type += ' 7CH /'
+		elif any(value in fmt for value in AUDIO_6CH): file_type += ' 6CH /'
+		elif any(value in fmt for value in AUDIO_2CH): file_type += ' 2CH /'
 
-		if any(value in fmt for value in HC): type += ' HC /'
+		if any(value in fmt for value in HC): file_type += ' HC /'
 
-		if any(value in fmt for value in MULTI_LANG): type += ' MULTI-LANG /'
-		elif any(value in fmt for value in LANG) and any(value in fmt for value in ('.eng.', '.en.', 'english')): type += ' MULTI-LANG /'
-		elif any(value in fmt for value in ABV_LANG) and any(value in fmt for value in ('.eng.', '.en.', 'english')):type += ' MULTI-LANG /'
+		if any(value in fmt for value in MULTI_LANG): file_type += ' MULTI-LANG /'
+		elif any(value in fmt for value in LANG) and any(value in fmt for value in ('.eng.', '.en.', 'english')): file_type += ' MULTI-LANG /'
+		elif any(value in fmt for value in ABV_LANG) and any(value in fmt for value in ('.eng.', '.en.', 'english')):file_type += ' MULTI-LANG /'
 
-		if any(value in fmt for value in ADS): type += ' ADS /'
+		if any(value in fmt for value in ADS): file_type += ' ADS /'
 		if any(value in fmt for value in SUBS):
-			if type != '': type += ' WITH SUBS'
-			else: type = 'SUBS'
-		type = type.rstrip('/') # leave trailing space for cases like " HDR " vs. " HDRIP "
-		return type
+			if file_type != '': file_type += ' WITH SUBS'
+			else: file_type = 'SUBS'
+		file_type = file_type.rstrip('/') # leave trailing space for cases like " HDR " vs. " HDRIP "
+		return file_type
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()

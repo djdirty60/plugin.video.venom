@@ -155,11 +155,10 @@ class RealDebrid:
 
 	def account_info_to_dialog(self):
 		from datetime import datetime
-		import time
+		from resources.lib.modules import cleandate
 		try:
 			userInfo = self.account_info()
-			try: expires = datetime.strptime(userInfo['expiration'], FormatDateTime)
-			except: expires = datetime(*(time.strptime(userInfo['expiration'], FormatDateTime)[0:6]))
+			expires = cleandate.datetime_from_string(userInfo['expiration'], FormatDateTime, date_only=False)
 			days_remaining = (expires - datetime.today()).days
 			expires = expires.strftime("%A, %B %d, %Y")
 			items = []
@@ -183,7 +182,7 @@ class RealDebrid:
 
 	def user_torrents_to_listItem(self):
 		try:
-			sysaddon, syshandle = argv[0], int(argv[1])
+			sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 			torrent_files = self.user_torrents()
 			if not torrent_files: return
 			# torrent_files = [i for i in torrent_files if i['status'] == 'downloaded']
@@ -212,7 +211,7 @@ class RealDebrid:
 
 	def browse_user_torrents(self, folder_id):
 		try:
-			sysaddon, syshandle = argv[0], int(argv[1])
+			sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 			torrent_files = self.torrent_info(folder_id)
 		except: return
 		extensions = supported_video_extensions()
@@ -282,9 +281,8 @@ class RealDebrid:
 
 	def my_downloads_to_listItem(self, page):
 		try:
-			from datetime import datetime
-			import time
-			sysaddon, syshandle = argv[0], int(argv[1])
+			from resources.lib.modules import cleandate
+			sysaddon, syshandle = 'plugin://plugin.video.venom/', int(argv[1])
 			my_downloads, pages = self.downloads(page)
 		except: my_downloads = None
 		if not my_downloads: return
@@ -295,8 +293,7 @@ class RealDebrid:
 			if page > 1: count += (page-1) * 50
 			try: 
 				cm = []
-				try: datetime_object = datetime.strptime(item['generated'], FormatDateTime).date()
-				except TypeError: datetime_object = datetime(*(time.strptime(item['generated'], FormatDateTime)[0:6])).date()
+				datetime_object = cleandate.datetime_from_string(item['generated'], FormatDateTime)
 				name = string_tools.strip_non_ascii_and_unprintable(item['filename'])
 				size = float(int(item['filesize'])) / 1073741824
 				label = '%02d | %.2f GB | %s  | [I]%s [/I]' % (count, size, datetime_object, name)
@@ -485,7 +482,7 @@ class RealDebrid:
 			torrent_info = self.torrent_info(torrent_id)
 			list_file_items = [dict(i, **{'link':torrent_info['links'][idx]}) for idx, i in enumerate([i for i in torrent_info['files'] if i['selected'] == 1])]
 			list_file_items = [{'link': i['link'], 'filename': i['path'].replace('/', ''), 'size': float(i['bytes']) / 1073741824} for i in list_file_items]
-			self.delete_torrent(torrent_id)
+			if not self.store_to_cloud: self.delete_torrent(torrent_id) # this will keep all browsed items, should add check to see if item was already in cloud and keep it.
 			return list_file_items
 		except:
 			log_utils.error('Real-Debrid Error: DISPLAY MAGNET PACK %s : ' % magnet_url)

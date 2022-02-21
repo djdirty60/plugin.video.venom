@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from json import loads as jsloads
 import re
 import _strptime # import _strptime to workaround python 2 bug with threads
-from sys import argv, exit as sysexit
+from sys import exit as sysexit
 try: from sqlite3 import dbapi2 as database
 except: from pysqlite2 import dbapi2 as database
 from urllib.parse import parse_qsl, quote_plus
@@ -72,7 +72,7 @@ class lib_tools:
 			filename = re.sub(r'(?!%s)[^\w\-_\.]', '.', filename)
 			filename = re.sub(r'\.+', '.', filename)
 			filename = re.sub(re.compile(r'(CON|PRN|AUX|NUL|COM\d|LPT\d)\.', re.I), '\\1_', filename)
-			control.legalFilename(filename)
+			# control.legalFilename(filename) # without a var assingment this does jack shit but all exo forks doing it..lol...logs the same but breaks using below an adds trailing "/"
 			# filename = control.legalFilename(filename)
 			return filename
 		except:
@@ -373,12 +373,12 @@ class libmovies:
 			except:
 				log_utils.error()
 		try:
-			type = 'movies'
+			content_type = 'movies'
 			control.makeFile(control.dataPath)
 			dbcon = database.connect(control.libcacheFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS lists (type TEXT, list_name TEXT, url TEXT, UNIQUE(type, list_name, url));''')
-			dbcur.execute('''INSERT OR REPLACE INTO lists Values (?, ?, ?)''', (type, list_name, url))
+			dbcur.execute('''INSERT OR REPLACE INTO lists Values (?, ?, ?)''', (content_type, list_name, url))
 			dbcur.connection.commit()
 		except:
 			log_utils.error()
@@ -400,7 +400,7 @@ class libmovies:
 			if control.setting('library.strm.use_tmdbhelper') == 'true':
 				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=movie&islocal=True&tmdb_id=%s' % tmdb
 			else:
-				content = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s' % (argv[0], systitle, year, imdb, tmdb)
+				content = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s' % (systitle, year, imdb, tmdb)
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			lib_tools.create_folder(folder)
 			lib_tools.write_file(control.joinPath(folder, lib_tools.legal_filename(transtitle) + '.' + year + '.strm'), content)
@@ -610,12 +610,12 @@ class libtvshows:
 			except:
 				log_utils.error()
 		try:
-			type = 'tvshows'
+			content_type = 'tvshows'
 			control.makeFile(control.dataPath)
 			dbcon = database.connect(control.libcacheFile)
 			dbcur = dbcon.cursor()
 			dbcur.execute('''CREATE TABLE IF NOT EXISTS lists (type TEXT, list_name TEXT, url TEXT, UNIQUE(type, list_name, url));''')
-			dbcur.execute('''INSERT OR REPLACE INTO lists Values (?, ?, ?)''', (type, list_name, url))
+			dbcur.execute('''INSERT OR REPLACE INTO lists Values (?, ?, ?)''', (content_type, list_name, url))
 			dbcur.connection.commit()
 		except:
 			log_utils.error()
@@ -640,8 +640,9 @@ class libtvshows:
 				content = 'plugin://plugin.video.themoviedb.helper/?info=play&tmdb_type=tv&islocal=True&tmdb_id=%s&season=%s&episode=%s&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&tvshowtitle=%s&premiered=%s' % (
 							tmdb, season, episode, systitle, year, imdb, tmdb, tvdb, systvshowtitle, syspremiered)
 			else:
-				content = '%s?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
-							argv[0], systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered)
+				content = 'plugin://plugin.video.venom/?action=play_Item&title=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&season=%s&episode=%s&tvshowtitle=%s&premiered=%s' % (
+							systitle, year, imdb, tmdb, tvdb, season, episode, systvshowtitle, syspremiered)
+
 			folder = lib_tools.make_path(self.library_folder, transtitle, year)
 			if not control.isfilePath(control.joinPath(folder, 'tvshow.nfo')):
 				lib_tools.create_folder(folder)
@@ -683,7 +684,7 @@ class libepisodes:
 					file = control.openFile(file)
 					read = file.read()
 					file.close()
-					if not read.startswith('plugin://plugin.video.themoviedb.helper') and not read.startswith(argv[0]): continue
+					if not read.startswith(('plugin://plugin.video.themoviedb.helper', 'plugin://plugin.video.venom')): continue
 					params = dict(parse_qsl(read.replace('?','')))
 					try: tvshowtitle = params['tvshowtitle']
 					except:

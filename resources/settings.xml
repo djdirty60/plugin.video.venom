@@ -219,7 +219,7 @@
 		<!-- Sources Select -->
 		<setting type="lsep" label="32387" />
 		<setting id="sources.highlight.color" type="select" label="32132" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="5" />
-		<setting id="sources.group.sort" type="select" label="32133" lvalues="32021|32022" default="0" visible = "true" />
+		<setting id="sources.group.sort" type="select" label="32133" lvalues="32021|32022" default="0" visible="true" />
 		<setting id="sources.size.sort" type="bool" label="32134" default="true" />
 		<setting id="sources.sizeSort.reverse" type="bool" label="32212" subsetting="true" default="false" visible="eq(-1,true)" />
 		<setting id="uncached.seeder.sort" type="bool" label="32213" default="false" />
@@ -227,7 +227,7 @@
 	</category>
 
 	<!-- Trakt - 6 -->
-	<category label ="32315">
+	<category label="32315">
 		<setting type="lsep" label="32315" />
 		<setting type="action" label="32135" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_openMyAccount&amp;query=0.3&amp;opensettings=true&amp;query2=6.1)" />
 		<setting type="action" label="32136" option="close" action="RunPlugin(plugin://plugin.video.venom/?action=tools_syncMyAccount&amp;opensettings=true&amp;query=6.2)" />
@@ -300,8 +300,8 @@
 		<setting id="realdebrid.token" type="text" label="realdebrid token" default="" visible="false" />
 		<setting id="realdebrid.username" type="text" label="40006" default="" enable="false" visible="!eq(-1,) + eq(-2,true)" />
 		<setting id="realdebrid.client_id" type="text" label="realdebrid client_id" default="" visible="false" />
-		<setting id="realdebrid.refresh" type = "text" label="realdebrid refresh" default="" visible="false" />
-		<setting id="realdebrid.secret" type = "text" label="realdebrid secret" default="" visible="false" />
+		<setting id="realdebrid.refresh" type="text" label="realdebrid refresh" default="" visible="false" />
+		<setting id="realdebrid.secret" type="text" label="realdebrid secret" default="" visible="false" />
 		<setting id="realdebrid.priority" type="slider" label="40005" option="int" range="1,1,10" default="10" visible="!eq(-5,) + eq(-6,true)" />
 		<setting id="realdebrid.saveToCloud" type="bool" label="32684" default="false" visible="!eq(-6,) +eq(-7,true)" />
 		<setting id="rd_cloud.enabled" type="bool" label="32050" default="false" visible="!eq(-7,) + eq(-8,true)" />

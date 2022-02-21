@@ -402,7 +402,7 @@ class PlayNext(xbmc.Player):
 		# still_watching = float(control.playlist.getposition() + 1) / self.stillwatching_count # this does not work if you start playback on a divisible position with "stillwatching_count"
 		playlistStart_position = int(playerWindow.getProperty('venom.playlistStart_position'))
 		if playlistStart_position: still_watching = float(control.playlist.getposition() - playlistStart_position + 1) / self.stillwatching_count
-		else: still_watching = float(control.playlist.getposition() + 1) / self.stillwatching_count # this does not work if you start playback on a divisible position with "stillwatching_count"
+		else: still_watching = float(control.playlist.getposition() + 1) / self.stillwatching_count
 		if still_watching == 0: return False
 		return still_watching.is_integer()
 

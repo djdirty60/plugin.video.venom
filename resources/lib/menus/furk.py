@@ -3,7 +3,6 @@
 	Venom Add-on
 """
 
-from sys import argv
 import requests
 from urllib.parse import quote_plus
 from resources.lib.modules import control
@@ -20,7 +19,6 @@ class Furk:
 								"&sort=cached&type=video&offset=0&limit=200"
 		# self.search_link = "/api/plugins/metasearch?api_key=%s&q=%s&cached=all" \
 								# "&match=%s&moderated=%s%s&sort=relevance&type=video&offset=0&limit=200"
-
 		# self.get_user_files_link = "/api/file/get?api_key=%s"
 		self.get_user_files_link = "/api/file/get?api_key=%s&type=video"
 		self.file_info_link = "/api/file/info?api_key%s"
@@ -122,7 +120,7 @@ class Furk:
 			if control.getKodiVersion() >= 18:
 				self.furk_meta_search(url)
 			else:
-				url = '%s?action=furkMetaSearch&url=%s' % (argv[0], quote_plus(url))
+				url = 'plugin://plugin.video.venom/?action=furkMetaSearch&url=%s' % (quote_plus(url))
 				control.execute('Container.Update(%s)' % url)
 
 	def furk_meta_search(self, url):
@@ -164,13 +162,15 @@ class Furk:
 		return ''
 
 	def addDirectoryItem(self, name, query, thumb, icon, isAction=True):
+		from sys import argv # some functions throw invalid handle -1 unless this is imported here.
 		if isinstance(name, int): name = control.lang(name)
-		url = '%s?action=%s' % (argv[0], query) if isAction else query
+		url = 'plugin://plugin.video.venom/?action=%s' % query if isAction else query
 		item = control.item(label=name, offscreen=True)
 		item.setArt({'icon': thumb, 'poster': thumb, 'thumb': thumb})
-		control.addItem(handle=argv[1], url=url, listitem=item)
+		control.addItem(handle=int(argv[1]), url=url, listitem=item)
 
 	def endDirectory(self):
+		from sys import argv # some functions throw invalid handle -1 unless this is imported here.
 		syshandle = int(argv[1])
 		control.content(syshandle, 'addons')
 		control.directory(syshandle, cacheToDisc=True)

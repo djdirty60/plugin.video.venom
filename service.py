@@ -125,7 +125,7 @@ class VersionIsUpdateCheck:
 			if isUpdate:
 				window.setProperty('venom.updated', 'true')
 				curVersion = control.getVenomVersion()
-				clearDB_version = '6.4.9' # set to desired version to force any db clearing needed
+				clearDB_version = '6.5.0' # set to desired version to force any db clearing needed
 				do_cacheClear = (int(oldVersion.replace('.', '')) < int(clearDB_version.replace('.', '')) <= int(curVersion.replace('.', '')))
 				if do_cacheClear:
 					clr_fanarttv = False

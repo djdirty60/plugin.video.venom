@@ -3,7 +3,6 @@
 	Venom Add-on
 """
 
-from sys import argv
 from resources.lib.modules.control import directory as endOfDirectory
 from resources.lib.modules import youtube_menu
 
@@ -82,4 +81,5 @@ class yt_index:  # initializes as musicvids, functions can override based on act
 			log_utils.error()
 
 	def endDirectory(self):
+		from sys import argv # some functions throw invalid handle -1 unless this is imported here.
 		endOfDirectory(int(argv[1]), cacheToDisc=True)

@@ -108,7 +108,7 @@ class EasyNews:
 	def query_results_to_dialog(self, query):
 		from sys import argv
 		try:
-			sysaddon, syshandle = argv[0], int(argv[1])
+			syshandle = int(argv[1])
 			downloadMenu = control.lang(40048)
 			url = '%s%s' % (self.base_link, self.search_link)
 			params = SEARCH_PARAMS
@@ -131,11 +131,9 @@ class EasyNews:
 				sysurl_dl = quote_plus(url_dl)
 				size = str(round(float(int(item['rawSize'])) / 1048576000, 1))
 				label = '%02d | [B]%s GB[/B] | [I]%s [/I]' % (count, size, name)
-
-				url = '%s?action=en_resolve_forPlayback&url=%s' % (sysaddon, sysurl_dl)
-
-				cm.append((downloadMenu, 'RunPlugin(%s?action=download&name=%s&image=%s&url=%s&caller=easynews)' %
-									(sysaddon, quote_plus(name), quote_plus(en_icon), sysurl_dl)))
+				url = 'plugin://plugin.video.venom/?action=en_resolve_forPlayback&url=%s' % sysurl_dl
+				cm.append((downloadMenu, 'RunPlugin(plugin://plugin.video.venom/?action=download&name=%s&image=%s&url=%s&caller=easynews)' %
+									(quote_plus(name), quote_plus(en_icon), sysurl_dl)))
 				item = control.item(label=label, offscreen=True)
 				item.addContextMenuItems(cm)
 				item.setArt({'icon': en_icon, 'poster': en_icon, 'thumb': en_icon, 'fanart': addonFanart, 'banner': en_icon})
@@ -205,7 +203,7 @@ class EasyNews:
 			if not account_info or not usage_info:
 				control.hide()
 				return control.notification(message=32221, icon=en_icon)
-			expires = datetime.fromtimestamp(time.mktime(time.strptime(account_info[2], '%Y-%m-%d')))
+			expires = datetime.fromtimestamp(time.mktime(time.strptime(account_info[2], '%Y-%m-%d'))) # could utilize a new cleandate method
 			days_remaining = (expires - datetime.today()).days
 			expires = expires.strftime('%Y-%m-%d')
 			body = []

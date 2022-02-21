@@ -3,7 +3,7 @@
 	Venom Add-on
 """
 
-from sys import argv, exit as sysexit
+from sys import exit as sysexit
 from urllib.parse import quote_plus
 from resources.lib.modules import control
 from resources.lib.modules.trakt import getTraktCredentialsInfo, getTraktIndicatorsInfo
@@ -218,10 +218,8 @@ class Navigator:
 		page_limit = getSetting('page.item.limit')
 		url = 'https://api.trakt.tv/search/list?limit=%s&page=1&query=' % page_limit + quote_plus(q)
 		control.closeAll()
-		if media_type == 'movies':
-			control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=movies_PublicLists&url=%s,return)' % (quote_plus(url)))
-		else:
-			control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=tv_PublicLists&url=%s,return)' % (quote_plus(url)))
+		if media_type == 'movies': control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=movies_PublicLists&url=%s,return)' % (quote_plus(url)))
+		else: control.execute('ActivateWindow(Videos,plugin://plugin.video.venom/?action=tv_PublicLists&url=%s,return)' % (quote_plus(url)))
 
 	def tools(self):
 		if self.traktCredentials: self.addDirectoryItem(35057, 'tools_traktToolsNavigator', 'tools.png', 'DefaultAddonService.png', isFolder=True)
@@ -283,8 +281,7 @@ class Navigator:
 		self.addDirectoryItem(32615, 'cache_clearBookmarks', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		self.endDirectory()
 
-	def library(self):
-	# -- Library - 9
+	def library(self): # -- Library - 9
 		self.addDirectoryItem(32557, 'tools_openSettings&query=9.0', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
 		self.addDirectoryItem(32558, 'library_update', 'library_update.png', 'DefaultAddonLibrary.png', isFolder=False)
 		self.addDirectoryItem(32676, 'library_clean', 'library_update.png', 'DefaultAddonLibrary.png', isFolder=False)
@@ -378,6 +375,7 @@ class Navigator:
 
 	def views(self):
 		try:
+			from sys import argv # some functions throw invalid handle -1 unless this is imported here.
 			syshandle = int(argv[1])
 			control.hide()
 			items = [(getLS(32001), 'movies'), (getLS(32002), 'tvshows'), (getLS(32054), 'seasons'), (getLS(32326), 'episodes') ]
@@ -385,12 +383,11 @@ class Navigator:
 			if select == -1: return
 			content = items[select][1]
 			title = getLS(32059)
-			url = '%s?action=tools_addView&content=%s' % (argv[0], content)
+			url = 'plugin://plugin.video.venom/?action=tools_addView&content=%s' % content
 			poster, banner, fanart = control.addonPoster(), control.addonBanner(), control.addonFanart()
 			item = control.item(label=title, offscreen=True)
 			item.setInfo(type='video', infoLabels = {'title': title})
 			item.setArt({'icon': poster, 'thumb': poster, 'poster': poster, 'fanart': fanart, 'banner': banner})
-			# item.setProperty('IsPlayable', 'false')
 			control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 			control.content(syshandle, content)
 			control.directory(syshandle, cacheToDisc=True)
@@ -527,28 +524,29 @@ class Navigator:
 
 	def addDirectoryItem(self, name, query, poster, icon, context=None, queue=False, isAction=True, isFolder=True, isPlayable=False, isSearch=False, table=''):
 		try:
-			sysaddon = argv[0] ; syshandle = int(argv[1])
+			from sys import argv # some functions like ActivateWindow() throw invalid handle less this is imported here.
 			if isinstance(name, int): name = getLS(name)
-			url = '%s?action=%s' % (sysaddon, query) if isAction else query
+			url = 'plugin://plugin.video.venom/?action=%s' % query if isAction else query
 			poster = control.joinPath(self.artPath, poster) if self.artPath else icon
 			if not icon.startswith('Default'): icon = control.joinPath(self.artPath, icon)
 			cm = []
 			queueMenu = getLS(32065)
-			if queue: cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem)' % sysaddon))
-			if context: cm.append((getLS(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
-			if isSearch: cm.append(('Clear Search Phrase', 'RunPlugin(%s?action=cache_clearSearchPhrase&source=%s&name=%s)' % (sysaddon, table, quote_plus(name))))
-			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
+			if queue: cm.append((queueMenu, 'RunPlugin(plugin://plugin.video.venom/?action=playlist_QueueItem)'))
+			if context: cm.append((getLS(context[0]), 'RunPlugin(plugin://plugin.video.venom/?action=%s)' % context[1]))
+			if isSearch: cm.append(('Clear Search Phrase', 'RunPlugin(plugin://plugin.video.venom/?action=cache_clearSearchPhrase&source=%s&name=%s)' % (table, quote_plus(name))))
+			cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(plugin://plugin.video.venom/?action=tools_openSettings)'))
 			item = control.item(label=name, offscreen=True)
 			item.addContextMenuItems(cm)
 			if isPlayable: item.setProperty('IsPlayable', 'true')
 			item.setArt({'icon': icon, 'poster': poster, 'thumb': poster, 'fanart': control.addonFanart(), 'banner': poster})
 			item.setInfo(type='video', infoLabels={'plot': name})
-			control.addItem(handle=syshandle, url=url, listitem=item, isFolder= isFolder)
+			control.addItem(handle=int(argv[1]), url=url, listitem=item, isFolder= isFolder)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
 
 	def endDirectory(self):
+		from sys import argv # some functions throw invalid handle -1 unless this is imported here.
 		syshandle = int(argv[1])
 		content = 'addons' if control.skin == 'skin.auramod' else ''
 		control.content(syshandle, content) # some skins use their own thumb for things like "genres" when content type is set here

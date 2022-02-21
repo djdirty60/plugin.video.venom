@@ -60,6 +60,7 @@ def get_request(url):
 def userlists(url):
 	try:
 		result = get_request(url % API_key)
+		if result is None: return
 		if '404:NOT FOUND' in result: return result
 		items = result['results']
 		next = '' ; list = []
@@ -112,9 +113,8 @@ class Movies:
 
 	def tmdb_list(self, url):
 		try:
-			# result = get_request(url % API_key)
 			result = cache.get(get_request, 96, url % API_key)
-
+			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			items = result['results']
 		except: return
@@ -145,9 +145,7 @@ class Movies:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-				# movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				movie_meta = self.get_movie_meta(tmdb)
-
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if self.enable_fanarttv:
@@ -179,9 +177,8 @@ class Movies:
 
 	def tmdb_collections_list(self, url):
 		try:
-			# result = get_request(url)
 			result = cache.get(get_request, 168, url)
-
+			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			if '/collection/' in url: items = result['parts']
 			elif '/3/' in url: items = result['items']
@@ -215,10 +212,7 @@ class Movies:
 			try:
 				values = {}
 				tmdb = self.list[i].get('tmdb', '')
-
-				# movie_meta = cache.get(self.get_movie_meta, 96, tmdb)
 				movie_meta = self.get_movie_meta(tmdb)
-
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if self.enable_fanarttv:
@@ -261,8 +255,8 @@ class Movies:
 		if not tmdb and not imdb: return
 		try:
 			result = self.get_movie_request(tmdb, imdb)
+			if result is None: return
 			if '404:NOT FOUND' in result: return result
-			if not result: return
 			meta = {}
 		except:
 			from resources.lib.modules import log_utils
@@ -340,11 +334,11 @@ class Movies:
 		return meta
 
 	def get_art(self, tmdb):
-		if not tmdb: return None
+		if not tmdb: return
 		url = self.art_link % tmdb
 		art3 = get_request(url)
+		if art3 is None: return
 		if '404:NOT FOUND' in art3: return art3
-		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
 			poster3 = '%s%s' % (poster_path, poster3) if poster3 else ''
@@ -414,6 +408,7 @@ class Movies:
 			if imdb and imdb.startswith('tt'): # trakt has some bad data with url's in ids
 				url = find_url % (imdb, API_key, 'imdb_id')
 				result = get_request(url)
+				if result is None: return
 				if '404:NOT FOUND' in result: return result
 				try: result = result['movie_results'][0]
 				except: return None
@@ -443,6 +438,7 @@ class TVshows:
 		if not url: return
 		try:
 			result = cache.get(get_request, 96, url % API_key)
+			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			items = result['results']
 		except: return
@@ -506,6 +502,7 @@ class TVshows:
 		if not url: return
 		try:
 			result = get_request(url)
+			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			if '/collection/' in url: items = result['parts']
 			elif '/3/' in url: items = result['items']
@@ -580,8 +577,8 @@ class TVshows:
 		if not tmdb: return None
 		try:
 			result = self.get_show_request(tmdb)
-			if '404:NOT FOUND' in result: return result
 			if not result: return
+			if '404:NOT FOUND' in result: return result
 			meta = {}
 		except:
 			from resources.lib.modules import log_utils
@@ -685,8 +682,8 @@ class TVshows:
 		try:
 			if not tmdb: return None
 			result = self.get_season_request(tmdb, season)
+			if result is None: return
 			if '404:NOT FOUND' in result: return result
-			if not result: return
 			meta = {}
 		except:
 			from resources.lib.modules import log_utils
@@ -763,8 +760,8 @@ class TVshows:
 		if not tmdb: return None
 		url = self.art_link % tmdb
 		art3 = get_request(url)
+		if art3 is None: return
 		if '404:NOT FOUND' in art3: return art3
-		if not art3: return None
 		try:
 			poster3 = self.parse_art(art3['posters'])
 			poster3 = '%s%s' % (poster_path, poster3) if poster3 else ''
@@ -840,6 +837,7 @@ class TVshows:
 			if tvdb and (not result or '404:NOT FOUND' in result):
 				url = find_url % (tvdb, API_key, 'tvdb_id')
 				result = get_request(url)
+				if result is None: return
 				if '404:NOT FOUND' in result: return result
 				try: result = result['tv_results'][0]
 				except: pass
