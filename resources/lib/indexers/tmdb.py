@@ -239,6 +239,37 @@ class Movies:
 		self.list = [i for i in self.list if i.get('tmdb')]
 		return self.list
 
+	def tmdb_collections_search(self, url):
+		try:
+			result = cache.get(get_request, 168, url)
+			if result is None: return
+			if '404:NOT FOUND' in result: return result
+			items = result['results']
+		except: return
+		self.list = []
+		try:
+			page = int(result['page'])
+			total = int(result['total_pages'])
+			if page >= total: raise Exception()
+			if 'page=' not in url: raise Exception()
+			next = '%s&page=%s' % (url.split('&page=', 1)[0], page+1)
+		except: next = ''
+		for item in items:
+			try:
+				values = {}
+				values['next'] = next 
+				values['media_type'] = 'collection'
+				values['fanart'] = '%s%s' % (fanart_path, item['backdrop_path']) if item.get('backdrop_path') else ''
+				values['tmdb'] = str(item.get('id', '')) if item.get('id') else ''
+				values['name'] = item.get('name')
+				values['plot'] = item.get('overview', '') if item.get('overview') else ''
+				values['poster'] = '%s%s' % (poster_path, item['poster_path']) if item.get('poster_path') else ''
+				self.list.append(values)
+			except:
+				from resources.lib.modules import log_utils
+				log_utils.error()
+		return self.list
+
 	def get_movie_request(self, tmdb, imdb=None): # api claims int rq'd.  But imdb_id works for movies but not looking like it does for shows
 		if not tmdb and not imdb: return
 		try:
@@ -264,12 +295,12 @@ class Movies:
 			return None
 		try:
 			meta['mediatype'] = 'movie'
-# adult
+# adult - not used
 			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
-# belongs_to_collection
-# budget
+			meta['belongs_to_collection'] = result.get('belongs_to_collection', '')
+# budget - not used
 			meta['genre'] = ' / '.join([x['name'] for x in result.get('genres', {})]) or 'NA'
-# homepage
+# homepage - not used
 			meta['tmdb'] = str(result.get('id', '')) if result.get('id') else ''
 			meta['imdb'] = str(result.get('imdb_id', '')) if result.get('imdb_id') else ''
 			meta['imdbnumber'] = meta['imdb']

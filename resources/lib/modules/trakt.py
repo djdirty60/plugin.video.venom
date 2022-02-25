@@ -869,13 +869,14 @@ def cachesyncTVShows(timeout=0):
 	indicators = traktsync.get(syncTVShows, timeout)
 	return indicators
 
-def syncTVShows(): # sync all watched shows ex. [('tt9319770', 9, [(1, 1), (1, 2), (1, 3), (1, 4)]), ('tt13991232', 5, [(1, 1), (1, 2)])]
+def syncTVShows(): # sync all watched shows ex. [({'imdb': 'tt12571834', 'tvdb': '384435', 'tmdb': '105161', 'trakt': '163639'}, 16, [(1, 16)]), ({'imdb': 'tt11761194', 'tvdb': '377593', 'tmdb': '119845', 'trakt': '158621'}, 2, [(1, 1), (1, 2)])]
 	try:
 		if not getTraktCredentialsInfo(): return
 		indicators = getTraktAsJson('/users/me/watched/shows?extended=full')
 		if not indicators: return None
-# /shows/ID/progress/watched  endpoint only accepts imdb or trakt ID so write multiple ID's
-		indicators = [({'imdb': i['show']['ids']['imdb'], 'tvdb': str(i['show']['ids']['tvdb']), 'trakt': str(i['show']['ids']['trakt'])}, i['show']['aired_episodes'], sum([[(s['number'], e['number']) for e in s['episodes']] for s in i['seasons']], [])) for i in indicators]
+# /shows/ID/progress/watched  endpoint only accepts imdb or trakt ID so write all ID's
+		indicators = [({'imdb': i['show']['ids']['imdb'], 'tvdb': str(i['show']['ids']['tvdb']), 'tmdb': str(i['show']['ids']['tmdb']), 'trakt': str(i['show']['ids']['trakt'])}, \
+							i['show']['aired_episodes'], sum([[(s['number'], e['number']) for e in s['episodes']] for s in i['seasons']], [])) for i in indicators]
 		indicators = [(i[0], int(i[1]), i[2]) for i in indicators]
 		return indicators
 	except:
@@ -885,7 +886,7 @@ def cachesyncSeasons(imdb, tvdb, trakt=None, timeout=0):
 	try:
 		imdb = imdb or ''
 		tvdb = tvdb or ''
-		indicators = traktsync.get(syncSeasons, timeout, imdb, tvdb, trakt=trakt) # named var not included in function md5_hash?
+		indicators = traktsync.get(syncSeasons, timeout, imdb, tvdb, trakt=trakt) # named var not included in function md5_hash
 		return indicators
 	except:
 		log_utils.error()
@@ -910,6 +911,17 @@ def syncSeasons(imdb, tvdb, trakt=None): # season indicators and counts for watc
 			results = getTraktAsJson('/shows/%s/progress/watched?specials=false&hidden=false' % id, silent=True)
 		if not results: return
 		seasons = results['seasons']
+
+###--- future-need tmdb_id passed now ---###
+		# next_episode = results['next_episode']
+		# # log_utils.log('next_episode=%s' % next_episode)
+		# db_watched = traktsync.cache_existing(syncTVShows)
+		# ids = [i[0] for i in db_watched if (i[0].get('imdb') == imdb or i[0].get('tvdb') == tvdb)]
+		# tmdb = str(ids[0].get('tmdb', '')) if ids[0].get('tmdb') else ''
+		# trakt = str(ids[0].get('trakt', '')) if ids[0].get('trakt') else ''
+		# traktsync.insert_nextEpisode(imdb, tvdb, tmdb, trakt, next_episode)
+#######
+
 		indicators = [(i['number'], [x['completed'] for x in i['episodes']]) for i in seasons]
 		indicators = ['%01d' % int(i[0]) for i in indicators if False not in i[1]]
 		indicators_and_counts.append(indicators)

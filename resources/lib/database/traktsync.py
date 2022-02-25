@@ -677,8 +677,7 @@ def get(function, duration, *args, trakt=None):
 			try: result = literal_eval(cache_result['value'])
 			except: result = None
 			if _is_cache_valid(cache_result['date'], duration): return result
-		# fresh_result = repr(function(*args)) # may need a try-except block for server timeouts
-		if trakt: fresh_result = repr(function(*args, trakt=trakt))
+		if trakt: fresh_result = repr(function(*args, trakt=trakt)) # may need a try-except block for server timeouts
 		else: fresh_result = repr(function(*args))
 
 		if cache_result and (result and len(result) == 1) and fresh_result == '[]': # fix for syncSeason mark unwatched season when it's the last item remaining
@@ -803,6 +802,21 @@ def insert_syncSeasons_at():
 		dbcur.execute('''CREATE TABLE IF NOT EXISTS service (setting TEXT, value TEXT, UNIQUE(setting));''')
 		timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 		dbcur.execute('''INSERT OR REPLACE INTO service Values (?, ?)''', ('last_syncSeasons_at', timestamp))
+		dbcur.connection.commit()
+	except:
+		from resources.lib.modules import log_utils
+		log_utils.error()
+	finally:
+		dbcur.close() ; dbcon.close()
+
+# future
+def insert_nextEpisode(imdb, tvdb, tmdb, trakt, next_episode):
+	try:
+		dbcon = get_connection(setRowFactory=True)
+		dbcur = get_connection_cursor(dbcon)
+		now = int(time())
+		dbcur.execute('''CREATE TABLE IF NOT EXISTS next_episodes (imdb TEXT, tvdb TEXT, tmdb TEXT, trakt TEXT, next_episode TEXT, date INTEGER, UNIQUE(imdb, tvdb, tmdb, trakt));''')
+		dbcur.execute('''INSERT OR REPLACE INTO next_episodes Values (?, ?, ?, ?, ?, ?)''', (imdb, tvdb, tmdb, trakt, repr(next_episode), now))
 		dbcur.connection.commit()
 	except:
 		from resources.lib.modules import log_utils

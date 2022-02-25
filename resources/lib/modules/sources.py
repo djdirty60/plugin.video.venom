@@ -94,11 +94,13 @@ class Sources:
 			try: meta = jsloads(unquote(meta.replace('%22', '\\"')))
 			except: pass
 			self.meta = meta
-			if self.mediatype == 'movie' and getSetting('imdb.meta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
-				title, year = self.imdb_meta_chk(imdb, title, year)
+			if self.mediatype == 'movie':
+				if getSetting('imdb.Moviemeta.check') == 'true': # check IMDB. TMDB and Trakt differ on a ratio of 1 in 20 and year is off by 1, some meta titles mismatch
+					title, year = self.imdb_meta_chk(imdb, title, year)
 				if title == 'The F**k-It List': title = 'The Fuck-It List'
-			if self.mediatype == 'episode' and getSetting('imdb.meta.check') == 'true':
-				tvshowtitle, year = self.imdb_meta_chk(imdb, tvshowtitle, year)
+			if self.mediatype == 'episode':
+				if getSetting('imdb.Showmeta.check') == 'true':
+					tvshowtitle, year = self.imdb_meta_chk(imdb, tvshowtitle, year)
 				if tvshowtitle == 'The End of the F***ing World': tvshowtitle = 'The End of the Fucking World'
 				self.total_seasons, self.season_isAiring = self.get_season_info(imdb, tmdb, tvdb, meta, season)
 			if rescrape: self.clr_item_providers(title, year, imdb, tmdb, tvdb, season, episode, tvshowtitle, premiered)
@@ -1333,12 +1335,20 @@ class Sources:
 			year_ck = str(result['y'])
 			title_ck = self.getTitle(result['l'])
 			if not year_ck or not title_ck: return title, year
-			if getSetting('imdb.title.check') == 'true' and (title != title_ck):
-				log_utils.log('IMDb title_ck: (%s) does not match meta title passed: (%s)' % (title_ck, title), __name__, level=log_utils.LOGDEBUG)
-				title = title_ck
-			if getSetting('imdb.year.check') == 'true' and (year != year_ck):
-				log_utils.log('IMDb year_ck: (%s) does not match meta year passed: (%s) for title: (%s)' % (year_ck, year, title), __name__, level=log_utils.LOGDEBUG)
-				year = year_ck
+			if self.mediatype == 'movie':
+				if getSetting('imdb.Movietitle.check') == 'true' and (title != title_ck):
+					log_utils.log('IMDb Movie title_ck: (%s) does not match meta Movie title passed: (%s)' % (title_ck, title), __name__, level=log_utils.LOGDEBUG)
+					title = title_ck
+				if getSetting('imdb.Movieyear.check') == 'true' and (year != year_ck):
+					log_utils.log('IMDb Movie year_ck: (%s) does not match meta Movie year passed: (%s) for title: (%s)' % (year_ck, year, title), __name__, level=log_utils.LOGDEBUG)
+					year = year_ck
+			else:
+				if getSetting('imdb.Showtitle.check') == 'true' and (title != title_ck):
+					log_utils.log('IMDb Show title_ck: (%s) does not match meta tvshowtitle title passed: (%s)' % (title_ck, title), __name__, level=log_utils.LOGDEBUG)
+					title = title_ck
+				if getSetting('imdb.Showyear.check') == 'true' and (year != year_ck):
+					log_utils.log('IMDb Show year_ck: (%s) does not match meta tvshowtitle year passed: (%s) for title: (%s)' % (year_ck, year, title), __name__, level=log_utils.LOGDEBUG)
+					year = year_ck
 			return title, year
 		except:
 			log_utils.error()

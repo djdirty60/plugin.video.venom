@@ -136,6 +136,15 @@ def router(params):
 		elif action == 'collections_MartialArtsActors':
 			from resources.lib.menus import collections
 			collections.Collections().collections_martial_arts_actors()
+		elif action == 'collections_Search':
+			from resources.lib.menus import collections
+			collections.Collections().search()
+		elif action == 'collections_Searchnew':
+			from resources.lib.menus import collections
+			collections.Collections().search_new()
+		elif action == 'collections_Searchterm':
+			from resources.lib.menus import collections
+			collections.Collections().search_term(name)
 		elif action == 'collections':
 			from resources.lib.menus import collections
 			collections.Collections().get(url)

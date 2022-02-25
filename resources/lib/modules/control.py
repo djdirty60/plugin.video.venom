@@ -274,7 +274,7 @@ def refresh():
 	return execute('Container.Refresh')
 
 def queueItem():
-	return execute('Action(Queue)')
+	return execute('Action(Queue)') # seems broken in 19 for show and season level, works fine in 18
 
 def refreshRepos():
 	return execute('UpdateAddonRepos')

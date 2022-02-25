@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.5.0">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.5.1">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,14 +32,14 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.5.0 - Feb. 21, 2022[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] [B]"Force Trakt Sync to local database"[/B] will now [B]"DROP"[/B] existing table vs. simply re-writing new table data.  This now assures a safe guard against any database issues that may have previously occurred and re-creates the table and data from scratch.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed AD [B]"Browse debrid pack"[/B] not working on items noted from previous release with resolve issue.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed AD [B]"Browse debrid pack"[/B] would remove cloud item regardless of setting to [B]"Store resolved items in cloud"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] Fixes to AD cloud scraper failing to return episode for some random cases.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where tvdb ID could be missing from meta providers for shows and would fail to mark as watched/unwatched.  Now both imdb and tvdb ID's are checked to better assurance of proper marking of watched/unwatched.[/I]
-[COLOR yellow]--[/COLOR][I] A new fallback method is in place to better handle missing ID's and will utilize trakt ID's when needed.[/I]
-[COLOR yellow]--[/COLOR][I] Fixed issue where "argv[0]" would randomly fail to add plugin path to created .strm files.  The plugin path is now hardcoded.[/I]
+[B][COLOR red]Update - v6.5.1 - Feb. 25, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Some updates to Collection sets that were missing some newer titles.[/I]
+[COLOR yellow]--[/COLOR][I] Collections gui now has a new menu item called [B]"Search TMDb Collections"[/B].[/I]
+[COLOR yellow]--[/COLOR][I] The IMDb meta check setting has been split into two.  You can now enable/disable for Movies and Shows.  Shows is off by default due to some titles IMDb causes issues with.[/I]
+[COLOR yellow]--[/COLOR][I] Movie lists now has a new Context Menu option called [B]"Browse Collection"[/B] that is visible IF the listItem belongs to a TMDb Collection.  The option, if visible, will then load the TMDb Collection listItems.[/I]
+[COLOR yellow]--[/COLOR][I] Using the Context Menu option [B]"Find Similar"[/B] will no longer return to Venom's main menu but instead return you to the list you left off at.[/I]
+[COLOR yellow]--[/COLOR][I] It's been noted that in Kodi Matrix "Action(Queue)" fails to add a complete shows episodes, or a single season episodes, at the given level to the Kodi playlist.  Adding to Kodi's playlist/Queue in Matrix seems to only work at the espisode level for a single item. I've confirmed this works as intended on Leaia(18) but no longer works on Materix(19).  Therefore until I settle on a solution these context menu items are removed at show and season level.[/I]
+
 		</news>
 	</extension>
 </addon>

@@ -91,8 +91,8 @@ msgid "Browse Progress"
 msgstr "Postęp przeglądania"
 
 msgctxt "#32017"
-msgid "check IMDb meta"
-msgstr "sprawdź meta IMDb"
+msgid ""
+msgstr ""
 
 msgctxt "#32018"
 msgid "Most Popular"
@@ -943,6 +943,14 @@ msgid "Prioritize HEVC to top"
 msgstr "Priorytet HEVC do góry"
 
 msgctxt "#32230"
+msgid "check IMDb Movie meta"
+msgstr "sprawdź meta meta filmu IMDb"
+
+msgctxt "#32231"
+msgid "check IMDb Show meta"
+msgstr "sprawdź IMDb Showmeta"
+
+msgctxt "#32232"
 msgid ""
 msgstr ""
 

@@ -606,7 +606,7 @@ class TVshows:
 
 	def trakt_list(self, url, user):
 		self.list = []
-		if '/related' in url: url = url + '?limit=20'
+		if ',return' in url: url = url.split(',return')[0]
 		items = trakt.getTraktAsJson(url)
 		if not items: return
 		try:
@@ -623,8 +623,9 @@ class TVshows:
 				values['added'] = item.get('listed_at', '')
 				values['paused_at'] = item.get('paused_at', '') # for unfinished
 				try: values['progress'] = item['progress']
-				except: values['progress'] = None
-				values['lastplayed'] = item.get('watched_at', '') # for history
+				except: values['progress'] = ''
+				try: values['lastplayed'] = item['watched_at'] # for history
+				except: values['lastplayed'] = ''
 				show = item.get('show') or item
 				values['title'] = show.get('title')
 				values['originaltitle'] = values['title']
@@ -966,7 +967,6 @@ class TVshows:
 		showPlaylistMenu, clearPlaylistMenu = getLS(35517), getLS(35516)
 		playRandom, addToLibrary = getLS(32535), getLS(32551)
 		nextMenu, findSimilarMenu = getLS(32053), getLS(32184)
-
 		for i in items:
 			try:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
@@ -1013,11 +1013,11 @@ class TVshows:
 						meta.update({'playcount': 0, 'overlay': 4})
 						cm.append((watchedMenu, 'RunPlugin(%s?action=playcount_TVShow&name=%s&imdb=%s&tvdb=%s&query=5)' % (sysaddon, systitle, imdb, tvdb)))
 				except: pass
-				cm.append((findSimilarMenu, 'ActivateWindow(10025,%s?action=tvshows&url=https://api.trakt.tv/shows/%s/related,return)' % (sysaddon, imdb)))
+				cm.append((findSimilarMenu, 'Container.Update(%s?action=tvshows&url=%s)' % (sysaddon, quote_plus('https://api.trakt.tv/shows/%s/related?limit=20&page=1,return' % imdb))))
 				cm.append((playRandom, 'RunPlugin(%s?action=play_Random&rtype=season&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s&art=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb, sysart)))
-				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, systitle)))
-				cm.append((showPlaylistMenu, 'RunPlugin(%s?action=playlist_Show)' % sysaddon))
-				cm.append((clearPlaylistMenu, 'RunPlugin(%s?action=playlist_Clear)' % sysaddon))
+				# cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, systitle)))
+				# cm.append((showPlaylistMenu, 'RunPlugin(%s?action=playlist_Show)' % sysaddon))
+				# cm.append((clearPlaylistMenu, 'RunPlugin(%s?action=playlist_Clear)' % sysaddon))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_tvshowToLibrary&tvshowtitle=%s&year=%s&imdb=%s&tmdb=%s&tvdb=%s)' % (sysaddon, systitle, year, imdb, tmdb, tvdb)))
 				cm.append(('[COLOR red]Venom Settings[/COLOR]', 'RunPlugin(%s?action=tools_openSettings)' % sysaddon))
 ####################################

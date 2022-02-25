@@ -54,13 +54,11 @@ def playlistShow():
 		videoplaylistID = 10028
 		control.execute('ActivateWindow(%d)' % videoplaylistID)
 	else:
-		if notification:
-			control.notification(title=35522, message=32119)
+		if notification: control.notification(title=35522, message=32119)
 
 def playlistClear():
 	playlist().clear()
-	if notification:
-		control.notification(title=35522, message=35521)
+	if notification: control.notification(title=35522, message=35521)
 
 def playListItems():
 	rpc = '{"jsonrpc": "2.0", "method": "Playlist.GetItems", "params": {"playlistid" : %s}, "id": 1 }' % Id
@@ -91,8 +89,7 @@ def playlistAdd(name, url, meta, art):
 	cm = []
 	item.addContextMenuItems(cm)
 	playlist().add(url=url, listitem=item)
-	if notification:
-		control.notification(title=35522, message=control.lang(32121) % str(name))
+	if notification: control.notification(title=35522, message=control.lang(32121) % str(name))
 
 def playlistRemove(name):
 	labelPosition = position(label=name)

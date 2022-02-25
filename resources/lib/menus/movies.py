@@ -36,8 +36,7 @@ class Movies:
 		self.lang = control.apiLanguage()['trakt']
 		self.imdb_user = getSetting('imdb.user').replace('ur', '')
 		self.tmdb_key = getSetting('tmdb.api.key')
-		if self.tmdb_key == '' or self.tmdb_key is None:
-			self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
+		if not self.tmdb_key: self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
 		self.tmdb_session_id = getSetting('tmdb.session_id')
 		# self.user = str(self.imdb_user) + str(self.tmdb_key)
 		self.user = str(self.tmdb_key)
@@ -48,7 +47,6 @@ class Movies:
 		self.tmdb_link = 'https://api.themoviedb.org'
 		self.tmdb_popular_link = 'https://api.themoviedb.org/3/movie/popular?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_toprated_link = 'https://api.themoviedb.org/3/movie/top_rated?api_key=%s&page=1'
-		# self.tmdb_upcoming_link = 'https://api.themoviedb.org/3/movie/upcoming?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_upcoming_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&primary_release_date.gte=%s&with_release_type=3|2|1&sort_by=popularity.desc&page=1' % ('%s', (self.date_time + timedelta(days=1)).strftime('%Y-%m-%d'))
 		self.tmdb_nowplaying_link = 'https://api.themoviedb.org/3/movie/now_playing?api_key=%s&language=en-US&region=US&page=1'
 		self.tmdb_boxoffice_link = 'https://api.themoviedb.org/3/discover/movie?api_key=%s&language=en-US&region=US&sort_by=revenue.desc&page=1'
@@ -606,7 +604,7 @@ class Movies:
 
 	def trakt_list(self, url, user):
 		self.list = []
-		if '/related' in url: url = url + '?limit=20'
+		if ',return' in url: url = url.split(',return')[0]
 		items = trakt.getTraktAsJson(url)
 		if not items: return
 		try:
@@ -622,11 +620,9 @@ class Movies:
 				values['next'] = next 
 				values['added'] = item.get('listed_at', '')
 				values['paused_at'] = item.get('paused_at', '') # for unfinished
-				# try: values['progress'] = max(0, min(1, item['progress'] / 100.0))
-				# except: values['progress'] = ''
 				try: values['progress'] = item['progress']
 				except: values['progress'] = ''
-				try: values['lastplayed'] = item.get('watched_at', '') # for history
+				try: values['lastplayed'] = item['watched_at'] # for history
 				except: values['lastplayed'] = ''
 				movie = item.get('movie') or item
 				values['title'] = movie.get('title')
@@ -967,7 +963,6 @@ class Movies:
 		traktManagerMenu, addToLibrary = getLS(32070), getLS(32551)
 		nextMenu, clearSourcesMenu = getLS(32053), getLS(32611)
 		rescrapeMenu, findSimilarMenu = getLS(32185), getLS(32184)
-
 		for i in items:
 			try:
 				imdb, tmdb, title, year = i.get('imdb', ''), i.get('tmdb', ''), i['title'], i.get('year', '')
@@ -1025,7 +1020,10 @@ class Movies:
 				cm.append((playlistManagerMenu, 'RunPlugin(%s?action=playlist_Manager&name=%s&url=%s&meta=%s&art=%s)' % (sysaddon, sysname, sysurl, sysmeta, sysart)))
 				cm.append((queueMenu, 'RunPlugin(%s?action=playlist_QueueItem&name=%s)' % (sysaddon, sysname)))
 				cm.append((addToLibrary, 'RunPlugin(%s?action=library_movieToLibrary&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s)' % (sysaddon, sysname, systitle, year, imdb, tmdb)))
-				cm.append((findSimilarMenu, 'ActivateWindow(10025,%s?action=movies&url=https://api.trakt.tv/movies/%s/related,return)' % (sysaddon, imdb)))
+				cm.append((findSimilarMenu, 'Container.Update(%s?action=movies&url=%s)' % (sysaddon, quote_plus('https://api.trakt.tv/movies/%s/related?limit=20&page=1,return' % imdb))))
+				if i.get('belongs_to_collection', ''):
+					cm.append(('Browse Collection', 'Container.Update(%s?action=collections&url=%s)' % (
+							sysaddon, quote_plus('https://api.themoviedb.org/3/collection/%s?api_key=%s&page=1,return' % (i['belongs_to_collection']['id'], self.tmdb_key)))))
 				cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
 				if not rescrape_useDefault:
 					cm.append(('Rescrape Options ------>', 'PlayMedia(%s?action=rescrapeMenu&title=%s&year=%s&imdb=%s&tmdb=%s&meta=%s)' % (sysaddon, systitle, year, imdb, tmdb, sysmeta)))
