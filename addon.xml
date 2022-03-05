@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.5.1">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.5.2">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,14 +32,11 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.5.1 - Feb. 25, 2022[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Some updates to Collection sets that were missing some newer titles.[/I]
-[COLOR yellow]--[/COLOR][I] Collections gui now has a new menu item called [B]"Search TMDb Collections"[/B].[/I]
-[COLOR yellow]--[/COLOR][I] The IMDb meta check setting has been split into two.  You can now enable/disable for Movies and Shows.  Shows is off by default due to some titles IMDb causes issues with.[/I]
-[COLOR yellow]--[/COLOR][I] Movie lists now has a new Context Menu option called [B]"Browse Collection"[/B] that is visible IF the listItem belongs to a TMDb Collection.  The option, if visible, will then load the TMDb Collection listItems.[/I]
-[COLOR yellow]--[/COLOR][I] Using the Context Menu option [B]"Find Similar"[/B] will no longer return to Venom's main menu but instead return you to the list you left off at.[/I]
-[COLOR yellow]--[/COLOR][I] It's been noted that in Kodi Matrix "Action(Queue)" fails to add a complete shows episodes, or a single season episodes, at the given level to the Kodi playlist.  Adding to Kodi's playlist/Queue in Matrix seems to only work at the espisode level for a single item. I've confirmed this works as intended on Leaia(18) but no longer works on Materix(19).  Therefore until I settle on a solution these context menu items are removed at show and season level.[/I]
-
+[B][COLOR red]Update - v6.5.2 - March 05, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Saved search terms are now sorted in alphabetic order before loading list.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed failing RD resolve condition.[/I]
+[COLOR yellow]--[/COLOR][I] Added new logging capture methods for failure to resolve for playback, please be sure to provide log when asking for help as this benefits both of us.[/I]
+[COLOR yellow]--[/COLOR][I] Season packs that are identifiable in the source title as a range of episodes are now properly handled and will only show up in the source select list for the episodes the range applies to. These range cases are often a full season pack but sometimes they are only a partial(aka an incomplete pack file).[/I]
 		</news>
 	</extension>
 </addon>

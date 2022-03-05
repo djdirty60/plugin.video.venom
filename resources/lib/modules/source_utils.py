@@ -54,11 +54,12 @@ ADS = ('1xbet', 'betwin')
 
 def seas_ep_filter(season, episode, release_title, split=False):
 	try:
-		release_title = re.sub(r'[^A-Za-z0-9-]+', '.', unquote(release_title).replace('\'', '')).lower()
+		release_title = re.sub(r'[^A-Za-z0-9-]+', '.', unquote(release_title).replace('\'', '')).replace('&', 'and').replace('%', '.percent').lower()
 		season = str(season)
-		season_fill = str(season).zfill(2)
+		season_fill = season.zfill(2)
 		episode = str(episode)
-		episode_fill = str(episode).zfill(2)
+		episode_fill = episode.zfill(2)
+		int_episode = int(episode)
 
 		string1 = r'(s<<S>>[.-]?e[p]?[.-]?<<E>>[.-])'
 		string2 = r'(season[.-]?<<S>>[.-]?episode[.-]?<<E>>[.-])|' \
@@ -78,8 +79,8 @@ def seas_ep_filter(season, episode, release_title, split=False):
 		append(string2.replace('<<S>>', season).replace('<<E>>', episode_fill))
 		append(string2.replace('<<S>>', season_fill).replace('<<E>>', episode))
 		append(string2.replace('<<S>>', season).replace('<<E>>', episode))
-		append(string3.replace('<<S>>', season_fill).replace('<<E1>>', str(int(episode)-1).zfill(2)).replace('<<E2>>', str(episode).zfill(2)))
-		append(string3.replace('<<S>>', season_fill).replace('<<E1>>', episode_fill).replace('<<E2>>', str(int(episode)+1).zfill(2)))
+		append(string3.replace('<<S>>', season_fill).replace('<<E1>>', str(int_episode-1).zfill(2)).replace('<<E2>>', episode_fill))
+		append(string3.replace('<<S>>', season_fill).replace('<<E1>>', episode_fill).replace('<<E2>>', str(int_episode+1).zfill(2)))
 		append(string4.replace('<<S>>', season_fill).replace('<<E>>', episode_fill))
 		append(string4.replace('<<S>>', season).replace('<<E>>', episode_fill))
 		append(string5.replace('<<E>>', episode_fill))
@@ -88,10 +89,8 @@ def seas_ep_filter(season, episode, release_title, split=False):
 
 		final_string = '|'.join(string_list)
 		reg_pattern = re.compile(final_string)
-		if split:
-			return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]
-		else:
-			return bool(re.search(reg_pattern, release_title))
+		if split: return release_title.split(re.search(reg_pattern, release_title).group(), 1)[1]
+		else: return bool(re.search(reg_pattern, release_title))
 	except:
 		from resources.lib.modules import log_utils
 		log_utils.error()

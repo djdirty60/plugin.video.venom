@@ -701,6 +701,7 @@ class Sources:
 					db_seasonPacks_valid = abs(self.time - timestamp) < season_expiry
 					if db_seasonPacks_valid:
 						sources = eval(db_seasonPacks[4])
+						sources = [i for i in sources if not 'episode_start' in i or i['episode_start'] <= int(episode) <= i['episode_end']] # filter out range items that do not apply to current episode for return
 						return self.scraper_sources.extend(sources)
 			except:
 				log_utils.error()
@@ -712,7 +713,7 @@ class Sources:
 					db_showPacks_valid = abs(self.time - timestamp) < show_expiry
 					if db_showPacks_valid:
 						sources = eval(db_showPacks[4])
-						sources = [i for i in sources if i.get('last_season') >= int(season)] #  filter out range items that do not apply to current season for return
+						sources = [i for i in sources if i.get('last_season') >= int(season)] # filter out range items that do not apply to current season for return
 						return self.scraper_sources.extend(sources)
 			except:
 				log_utils.error()
@@ -741,6 +742,7 @@ class Sources:
 				if sources:
 					dbcur.execute('''INSERT OR REPLACE INTO rel_src Values (?, ?, ?, ?, ?, ?)''', (source, imdb, season,'', repr(sources), datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")))
 					dbcur.connection.commit()
+					sources = [i for i in sources if not 'episode_start' in i or i['episode_start'] <= int(episode) <= i['episode_end']] # filter out range items that do not apply to current episode for return
 					return self.scraper_sources.extend(sources)
 				return
 			except:
@@ -905,12 +907,12 @@ class Sources:
 			a = i['url'].lower()
 			for sublist in filter:
 				try:
-					if i['source'] == 'cloud':
-						break
+					if i['source'] == 'cloud': break
 					b = sublist['url'].lower()
 					if 'magnet:' in a:
 						if i['hash'].lower() in b:
-							if len(sublist['name']) > len(i['name']): # keep matching hash with longer name, possible more file info.
+							# if len(sublist['name']) > len(i['name']):
+							if len(sublist['name']) > len(i['name']) or sublist['provider'] == 'torrentio': # keep matching hash with longer name, possible more file info or "torrentio".
 								larger = True
 								break
 							remove(sublist)
@@ -922,8 +924,7 @@ class Sources:
 						break
 				except:
 					log_utils.error('Error filter_dupes: ')
-			if not larger: #sublist['name'] len() was larger so do not append
-				append(i)
+			if not larger: append(i) # sublist['name'] len() was larger so do not append
 		header = homeWindow.getProperty(self.labelProperty)
 		if not self.enable_playnext:
 			control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
@@ -1287,17 +1288,17 @@ class Sources:
 		if len(torrent_List) == 0: return
 		def base32_to_hex(hash):
 			from base64 import b32decode
-			log_utils.log('RD base32 hash: %s' % hash, __name__, log_utils.LOGDEBUG)
 			hex = b32decode(hash).hex()
-			log_utils.log('RD base32_to_hex: %s' % hex, __name__, log_utils.LOGDEBUG)
+			log_utils.log('RD : base32 hash: %s converted to hex 40: %s' % (hash, hex), __name__, log_utils.LOGDEBUG)
 			return hex
 		try:
 			from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
-			hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
+			# hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
+			hashList = [i['hash'] for i in torrent_List] #eztv scraper now converts and is only site that returns base32 hashes
 			cached = debrid_function().check_cache(hashList)
 			if not cached: return None
 			for i in torrent_List:
-				if 'rd' not in cached.get(i['hash'].lower(), {}):
+				if 'rd' not in cached.get(i['hash'].lower(), {}): # i['hash'] could still be base32 here and not found due to conversion above
 					if 'package' in i: i.update({'source': 'uncached (pack) torrent'})
 					else: i.update({'source': 'uncached torrent'})
 					continue

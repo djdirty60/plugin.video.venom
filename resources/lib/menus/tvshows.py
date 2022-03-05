@@ -337,7 +337,7 @@ class TVshows:
 			dbcur.connection.commit()
 			lst = []
 			delete_option = False
-			for (id, term) in dbcur.fetchall():
+			for (id, term) in sorted(dbcur.fetchall(), key=lambda k: re.sub(r'(^the |^a |^an )', '', k[1].lower()), reverse=False):
 				if term not in str(lst):
 					delete_option = True
 					navigator.Navigator().addDirectoryItem(term, 'tvSearchterm&name=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='tvshow')
@@ -347,8 +347,7 @@ class TVshows:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-		if delete_option:
-			navigator.Navigator().addDirectoryItem(32605, 'cache_clearSearch', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		if delete_option: navigator.Navigator().addDirectoryItem(32605, 'cache_clearSearch', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		navigator.Navigator().endDirectory()
 
 	def search_new(self):
@@ -878,9 +877,7 @@ class TVshows:
 					if i < total: append(Thread(target=self.super_info, args=(i,)))
 				[i.start() for i in threads]
 				[i.join() for i in threads]
-			if self.meta:
-				self.meta = [i for i in self.meta if i.get('tmdb')] # without this "self.list=" below removes missing tmdb but here still writes these cases to metacache?
-				metacache.insert(self.meta)
+			if self.meta: metacache.insert(self.meta)
 			self.list = [i for i in self.list if i.get('tmdb')] # to rid missing tmdb_id's because season list can not load without
 		except:
 			from resources.lib.modules import log_utils
@@ -918,7 +915,7 @@ class TVshows:
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (self.list[i]['title'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 			showSeasons = tmdb_indexer.TVshows().get_showSeasons_meta(tmdb)
-			if not showSeasons: return
+			if not showSeasons or '404:NOT FOUND' in showSeasons: return # trakt search turns up alot of junk with wrong tmdb_id's
 			values = {}
 			values.update(showSeasons)
 			if 'rating' in self.list[i] and self.list[i]['rating']: values['rating'] = self.list[i]['rating'] # prefer imdb,trakt rating and votes if set

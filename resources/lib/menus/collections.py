@@ -419,7 +419,7 @@ class Collections:
 			dbcur.connection.commit()
 			lst = []
 			delete_option = False
-			for (id, term) in dbcur.fetchall():
+			for (id, term) in sorted(dbcur.fetchall(), key=lambda k: re.sub(r'(^the |^a |^an )', '', k[1].lower()), reverse=False):
 				if term not in str(lst):
 					delete_option = True
 					navigator.Navigator().addDirectoryItem(term, 'collections_Searchterm&name=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='collections')
@@ -429,8 +429,7 @@ class Collections:
 			log_utils.error()
 		finally:
 			dbcur.close() ; dbcon.close()
-		if delete_option:
-			navigator.Navigator().addDirectoryItem(32605, 'cache_clearSearch', 'tools.png', 'DefaultAddonService.png', isFolder=False)
+		if delete_option: navigator.Navigator().addDirectoryItem(32605, 'cache_clearSearch', 'tools.png', 'DefaultAddonService.png', isFolder=False)
 		navigator.Navigator().endDirectory()
 
 	def search_new(self):
@@ -550,9 +549,7 @@ class Collections:
 					if i < total: append(Thread(target=self.super_imdb_info, args=(i,)))
 				[i.start() for i in threads]
 				[i.join() for i in threads]
-			if self.meta:
-				self.meta = [i for i in self.meta if i.get('tmdb')] # without this "self.list=" below removes missing tmdb but here still writes these cases to metacache?
-				metacache.insert(self.meta)
+			if self.meta: metacache.insert(self.meta)
 			self.list = [i for i in self.list if i.get('tmdb')]
 		except:
 			from resources.lib.modules import log_utils
@@ -561,7 +558,7 @@ class Collections:
 	def super_imdb_info(self, i):
 		try:
 			if self.list[i]['metacache']: return
-			imdb = self.list[i].get('imdb', '') ; tmdb = self.list[i].get('tmdb', '')
+			imdb, tmdb = self.list[i].get('imdb', ''), self.list[i].get('tmdb', '')
 #### -- Missing id's lookup -- ####
 			if not tmdb and imdb:
 				try:
@@ -582,7 +579,7 @@ class Collections:
 #################################
 			if not tmdb: return
 			movie_meta = tmdb_indexer.Movies().get_movie_meta(tmdb)
-			if not movie_meta: return
+			if not movie_meta or '404:NOT FOUND' in movie_meta: return
 			values = {}
 			values.update(movie_meta)
 			if not imdb: imdb = values.get('imdb', '')

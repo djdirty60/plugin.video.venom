@@ -31,7 +31,6 @@ class Furk:
 		self.list = []
 		self.session = requests.Session()
 
-
 	def user_files(self):
 		if self.api_key == '': return ''
 		try:
@@ -83,7 +82,7 @@ class Furk:
 			dbcur.connection.commit()
 			lst = []
 			delete_option = False
-			for (id, term) in dbcur.fetchall():
+			for (id, term) in sorted(dbcur.fetchall(), key=lambda k: re.sub(r'(^the |^a |^an )', '', k[1].lower()), reverse=False):
 				if term not in str(lst):
 					delete_option = True
 					navigator.Navigator().addDirectoryItem(term, 'furkMetaSearch&url=%s' % term, 'search.png', 'DefaultAddonsSearch.png', isSearch=True, table='furk')
@@ -96,7 +95,6 @@ class Furk:
 		if delete_option:
 			navigator.Navigator().addDirectoryItem(32605, 'cache_clearSearch', 'tools.png', 'DefaultAddonProgram.png', isFolder=False)
 		navigator.Navigator().endDirectory()
-
 
 	def search_new(self):
 			control.hide()

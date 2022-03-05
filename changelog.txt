@@ -1,4 +1,11 @@
 
+[B][COLOR red]Update - v6.5.2 - March 05, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Saved search terms are now sorted in alphabetic order before loading list.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed failing RD resolve condition.[/I]
+[COLOR yellow]--[/COLOR][I] Added new logging capture methods for failure to resolve for playback, please be sure to provide log when asking for help as this benefits both of us.[/I]
+[COLOR yellow]--[/COLOR][I] Season packs that are identifiable in the source title as a range of episodes are now properly handled and will only show up in the source select list for the episodes the range applies to. These range cases are often a full season pack but sometimes they are only a partial(aka an incomplete pack file).[/I]
+
+
 [B][COLOR red]Update - v6.5.1 - Feb. 25, 2022[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Some updates to Collection sets that were missing some newer titles.[/I]
 [COLOR yellow]--[/COLOR][I] Collections gui now has a new menu item called [B]"Search TMDb Collections"[/B].[/I]
