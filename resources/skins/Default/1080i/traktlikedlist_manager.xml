@@ -3,6 +3,7 @@
 	<!-- <defaultcontrol>2050</defaultcontrol> -->
 	<controls>
 		<control type="image">
+			<description>background</description>
 			<left>0</left>
 			<top>0</top>
 			<width>1920</width>
@@ -49,11 +50,13 @@
 		</control>
 
 		<control type="group" id="1">
+			<description>List Header</description>
 			<left>25</left>
 			<top>0</top>
 			<height>80</height>
 			<width min="0" max="1920">auto</width>
 			<control type="textbox">
+				<description>Remove column Label</description>
 				<left>0</left>
 				<top>110</top>
 				<width>130</width>
@@ -66,6 +69,7 @@
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]Remove[/COLOR]</label>
 			</control>
 			<control type="textbox">
+				<description>Total LikedList Items Label</description>
 				<left>160</left>
 				<top>110</top>
 				<width>340</width>
@@ -75,7 +79,7 @@
 				<align>left</align>
 				<aligny>bottom</aligny>
 				<autoscroll>false</autoscroll>
-				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]$INFO[Window().Property(venom.total_results)] Total Items[/COLOR]</label>
+				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]$INFO[Window().Property(venom.total_results)] Total LikedList Items[/COLOR]</label>
 			</control>
 
 			<control type="list" id="2050">
@@ -85,7 +89,7 @@
 				<left>0</left>
 				<top>150</top>
 				<width>1350</width>
-				<height>1000</height>
+				<height>900</height>
 				<onright>2051</onright>
 				<onleft>2053</onleft>
 				<onup>2050</onup>
@@ -256,6 +260,7 @@
 
 			<control type="group">
 					<control type="image">
+						<description>clearlogo</description>
 						<aspectratio align="center" aligny="center">keep</aspectratio>
 						<left>400</left>
 						<top>0</top>

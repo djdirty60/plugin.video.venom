@@ -148,11 +148,13 @@ def getFileType(name_info=None, url=None):
 		if 'atmos' in fmt: file_type += ' ATMOS /'
 		if any(value in fmt for value in DOLBY_TRUEHD): file_type += ' DOLBY-TRUEHD /'
 		if any(value in fmt for value in DOLBY_DIGITALPLUS): file_type += ' DD+ /'
-		elif any(value in fmt for value in DOLBY_DIGITALEX): file_type += ' DD-EX /'
 		elif any(value in fmt for value in DOLBYDIGITAL): file_type += ' DOLBYDIGITAL /'
+		elif any(value in fmt for value in DOLBY_DIGITALEX): file_type += ' DD-EX /'
 
 		if 'aac' in fmt: file_type += ' AAC /'
 		elif 'mp3' in fmt: file_type += ' MP3 /'
+		elif 'flac' in fmt: file_type += ' FLAC /'
+		# elif 'opus' in fmt and not fmt.endswith('opus.'): file_type += ' OPUS /' #OPUS also a group titles endswith
 
 		if any(value in fmt for value in DTSX): file_type += ' DTS-X /'
 		elif any(value in fmt for value in DTS_HDMA): file_type += ' DTS-HD MA /'

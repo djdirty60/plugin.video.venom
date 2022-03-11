@@ -7,33 +7,28 @@ from json import dumps as jsdumps
 from urllib.parse import quote_plus
 from resources.lib.modules.control import joinPath, transPath, dialog
 from resources.lib.modules.source_utils import getFileType
+from resources.lib.modules import tools
 from resources.lib.windows.base import BaseDialog
 
 
 class UncachedResultsXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(UncachedResultsXML, self).__init__(self, args)
+		BaseDialog.__init__(self, args)
 		self.window_id = 2001
 		self.uncached = kwargs.get('uncached')
 		self.total_results = str(len(self.uncached))
 		self.meta = kwargs.get('meta')
-		self.info = None
-		self.cm = None
 		self.make_items()
 		self.set_properties()
 
 	def onInit(self):
-		super(UncachedResultsXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
 
 	def run(self):
 		self.doModal()
-		try: del self.info
-		except: pass
-		try: del self.cm
-		except: pass
+		self.clearProperties()
 		return self.selected
 
 	def onAction(self, action):
@@ -151,18 +146,17 @@ class UncachedResultsXML(BaseDialog):
 			log_utils.error()
 
 	def set_properties(self):
+		if self.meta is None: return
 		try:
-			if self.meta is None: return
-			# self.setProperty('venom.mediatype', self.meta.get('mediatype', ''))
 			self.setProperty('venom.season', str(self.meta.get('season', '')))
+			if 'tvshowtitle' in self.meta and 'season' in self.meta and 'episode' in self.meta: self.setProperty('venom.seas_ep', 'S%02dE%02d' % (int(self.meta['season']), int(self.meta['episode'])))
 			if self.meta.get('season_poster'):	self.setProperty('venom.poster', self.meta.get('season_poster', ''))
 			else: self.setProperty('venom.poster', self.meta.get('poster', ''))
-			# self.setProperty('venom.fanart', self.meta.get('fanart', ''))
-			# self.setProperty('venom.clearart', self.meta.get('clearart', ''))
 			self.setProperty('venom.clearlogo', self.meta.get('clearlogo', ''))
 			self.setProperty('venom.plot', self.meta.get('plot', ''))
 			self.setProperty('venom.year', str(self.meta.get('year', '')))
-			self.setProperty('venom.premiered', str(self.meta.get('premiered', '')))
+			new_date = tools.convert_time(stringTime=str(self.meta.get('premiered', '')), formatInput='%Y-%m-%d', formatOutput='%m-%d-%Y', zoneFrom='utc', zoneTo='utc')
+			self.setProperty('venom.premiered', new_date)
 			if self.meta.get('mpaa'): self.setProperty('venom.mpaa', self.meta.get('mpaa'))
 			else: self.setProperty('venom.mpaa', 'NA ')
 			if self.meta.get('duration'):

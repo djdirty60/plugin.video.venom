@@ -14,7 +14,7 @@ monitor = xbmc.Monitor()
 
 class StillWatchingXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(StillWatchingXML, self).__init__(self, args)
+		BaseDialog.__init__(self, args)
 		self.window_id = 3011
 		self.meta = kwargs.get('meta')
 		self.playing_file = self.getPlayingFile()
@@ -23,32 +23,32 @@ class StillWatchingXML(BaseDialog):
 		self.closed = False
 
 	def onInit(self):
-		super(StillWatchingXML, self).onInit()
 		self.set_properties()
 		self.background_tasks()
 
 	def run(self):
 		self.doModal()
+		self.clearProperties()
 
-	def close(self):
+	def doClose(self):
 		self.closed = True
-		super(StillWatchingXML, self).close()
+		self.close()
 
 	def onAction(self, action):
 		if action in self.closing_actions or action in self.selection_actions:
-			self.close()
+			self.doClose()
 
 	def onClick(self, control_id):
 		if control_id == 3011: # Play Now, skip to end of current
 			xbmc.executebuiltin('PlayerControl(BigSkipForward)')
-			self.close()
+			self.doClose()
 		if control_id == 3012: # Stop playback
 			xbmc.executebuiltin('PlayerControl(Playlist.Clear)')
 			xbmc.executebuiltin('PlayerControl(Stop)')
 			playerWindow.clearProperty('venom.preResolved_nextUrl')
-			self.close()
+			self.doClose()
 		if control_id == 3013: # Cancel/Close xml dialog
-			self.close()
+			self.doClose()
 
 	def getTotalTime(self):
 		if self.isPlaying():
@@ -96,7 +96,7 @@ class StillWatchingXML(BaseDialog):
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
-		self.close()
+		self.doClose()
 
 	def set_properties(self):
 		if self.meta is None: return

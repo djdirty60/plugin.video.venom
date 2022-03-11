@@ -951,6 +951,14 @@ msgid "check IMDb Show meta"
 msgstr "check IMDb Showmeta"
 
 msgctxt "#32232"
+msgid "Rescrape Item [COLOR %s][B]Filterless(FS)[/B][/COLOR] with [COLOR %s][B]All Providers[/B][/COLOR] - Source Select"
+msgstr "Rescrape item [COLOR %s][B]Filterless(FS)[/B][/COLOR] met [COLOR %s][B]Alle providers[/B][/COLOR] - Bron selecteren"
+
+msgctxt "#32233"
+msgid ""
+msgstr ""
+
+msgctxt "#32234"
 msgid ""
 msgstr ""
 

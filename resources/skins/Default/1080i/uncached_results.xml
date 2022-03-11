@@ -3,18 +3,22 @@
 	<!-- <defaultcontrol>2001</defaultcontrol> -->
 	<controls>
 		<control type="image">
+			<description>background</description>
 			<left>0</left>
 			<top>0</top>
 			<width>1920</width>
 			<height>1080</height>
 			<texture>common/black.png</texture>
 		</control>
+
 		<control type="group" id="1">
+			<description>List Header</description>
 			<left>25</left>
 			<top>0</top>
 			<height>80</height>
 			<width min="0" max="1920">auto</width>
 			<control type="textbox">
+				<description>Total Uncached Sources Label</description>
 				<left>50</left>
 				<top>110</top>
 				<width>425</width>
@@ -27,6 +31,7 @@
 				<label>[COLOR lightblue]$INFO[Window().Property(venom.total_results)] Total Uncached Sources[/COLOR]</label>
 			</control>
 			<control type="image">
+				<description>clearlogo</description>
 				<aspectratio align="center" aligny="center">keep</aspectratio>
 				<left>400</left>
 				<top>0</top>
@@ -35,7 +40,6 @@
 				<texture background="true">$INFO[Window().Property(venom.clearlogo)]</texture>
 				<!-- <visible>!String.IsEmpty(Window().Property(venom.clearlogo))</visible> -->
 			</control>
-
 			<!-- <control type="textbox"> -->
 				<!-- <description>Title when no clearlogo</description> -->
 				<!-- <left>200</left> -->
@@ -61,7 +65,8 @@
 				<align>center</align>
 				<aligny>bottom</aligny>
 				<autoscroll>false</autoscroll>
-				<label>$INFO[Window().Property(venom.mpaa)]   [COLOR lightblue]|[/COLOR]   $INFO[Window().Property(venom.premiered)]   [COLOR lightblue]|[/COLOR]   $INFO[Window().Property(venom.duration)]m</label>
+				<!-- <label>$INFO[Window().Property(venom.mpaa)]   [COLOR lightblue]|[/COLOR]   $INFO[Window().Property(venom.premiered)]   [COLOR lightblue]|[/COLOR]   $INFO[Window().Property(venom.duration)]m</label> -->
+				<label>$INFO[Window().Property(venom.seas_ep)]  [COLOR lightblue]|[/COLOR]  $INFO[Window().Property(venom.mpaa)]  [COLOR lightblue]|[/COLOR]  $INFO[Window().Property(venom.premiered)]  [COLOR lightblue]|[/COLOR]  $INFO[Window().Property(venom.duration)]m</label>
 				<visible>!String.IsEmpty(Window().Property(venom.season))</visible>
 			</control>
 			<control type="textbox">
@@ -79,6 +84,7 @@
 				<visible>String.IsEmpty(Window().Property(venom.season))</visible>
 			</control>
 			<control type="image">
+				<description>Poster</description>
 				<left>1350</left>
 				<top>150</top>
 				<width>486</width>
@@ -87,6 +93,7 @@
 				<texture background="true">$INFO[Window().Property(venom.poster)]</texture>
 			</control>
 			<control type="textbox">
+				<description>Plot</description>
 				<left>1350</left>
 				<top>879</top>
 				<width>486</width>
@@ -114,6 +121,7 @@
 				<orientation>Vertical</orientation>
 				<itemlayout height="100" width="1325">
 					<control type="image">
+						<description>Quality Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -158,6 +166,7 @@
 						<texture colordiffuse="">common/white.png</texture>
 					</control>
 					<control type="image">
+						<description>Quality Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -195,7 +204,7 @@
 				</focusedlayout>
 			</control>
 			<control type="grouplist" id="2002">
-				<description>Info icons group list control</description>
+				<description>Info icons</description>
 				<left>180</left>
 				<top>965</top>
 				<width>1250</width>
@@ -203,6 +212,7 @@
 				<itemgap>20</itemgap>
 				<orientation>horizontal</orientation>
 					<control type="image">
+						<description>Dolby Vision Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -213,6 +223,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBY-VISION)</visible>
 					</control>
 					<control type="image">
+						<description>HDR Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -223,6 +234,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDR) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDRIP)</visible>
 					</control>
 					<control type="image">
+						<description>3D Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -233,6 +245,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),3D)</visible>
 					</control>
 					<control type="image">
+						<description>HEVC/H.265 Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -243,6 +256,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),HEVC) | [String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBY-VISION) | String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDR)] + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDRIP) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),AVC)</visible>
 					</control>
 					<control type="image">
+						<description>AVC/H.264 Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -253,6 +267,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),AVC)</visible>
 					</control>
 					<control type="image">
+						<description>MPEG Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -263,6 +278,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MPEG)</visible>
 					</control>
 					<control type="image">
+						<description>WMV Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -273,6 +289,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),WMV)</visible>
 					</control>
 					<control type="image">
+						<description>AVI Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -283,6 +300,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),AVI)</visible>
 					</control>
 					<control type="image">
+						<description>MKV Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -293,6 +311,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MKV)</visible>
 					</control>
 					<control type="image">
+						<description>DIVX Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -303,6 +322,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DIVX)</visible>
 					</control>
 					<control type="image">
+						<description>XVID Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -313,6 +333,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),XVID)</visible>
 					</control>
 					<control type="image">
+						<description>BLURAY Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -323,6 +344,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),BLURAY)</visible>
 					</control>
 					<control type="image">
+						<description>M2TS Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -333,6 +355,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),M2TS)</visible>
 					</control>
 					<control type="image">
+						<description>HDTV Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -343,6 +366,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),HDTV)</visible>
 					</control>
 					<control type="image">
+						<description>WEB-DL Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -353,6 +377,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),WEB)</visible>
 					</control>
 					<control type="image">
+						<description>DVD Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -363,6 +388,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DVDRIP)</visible>
 					</control>
 					<control type="image">
+						<description>DOLBY-ATMOS Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -373,6 +399,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),ATMOS)</visible>
 					</control>
 					<control type="image">
+						<description>DOLBY-TRUEHD Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -383,6 +410,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBY-TRUEHD)</visible>
 					</control>
 					<control type="image">
+						<description>DOLBY-DIGITAL Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -393,6 +421,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DOLBYDIGITAL)</visible>
 					</control>
 					<control type="image">
+						<description>DOLBY-DIGITAL PLUS/EAC3 Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -403,36 +432,18 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DD) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DD-EX)</visible>
 					</control>
 					<control type="image">
+						<description>DOLBY-DIGITAL EX Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
 						<align>left</align>
 						<aligny>center</aligny>
 						<aspectratio>keep</aspectratio>
-						<texture>audio/dolbypro.png</texture>
+						<texture>audio/dolbydigital_ex.jpg</texture>
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DD-EX)</visible>
 					</control>
 					<control type="image">
-						<left>0</left>
-						<top>0</top>
-						<width>100</width>
-						<align>left</align>
-						<aligny>center</aligny>
-						<aspectratio>keep</aspectratio>
-						<texture>audio/dts2.png</texture>
-						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-X) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
-					</control>
-					<control type="image">
-						<left>0</left>
-						<top>0</top>
-						<width>100</width>
-						<align>left</align>
-						<aligny>center</aligny>
-						<aspectratio>keep</aspectratio>
-						<texture>audio/dts_x.png</texture>
-						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-X)</visible>
-					</control>
-					<control type="image">
+						<description>DTS-HD MA Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -443,6 +454,29 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
 					</control>
 					<control type="image">
+						<description>DTS-X Icon</description>
+						<left>0</left>
+						<top>0</top>
+						<width>100</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
+						<texture>audio/dts_x.png</texture>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-X)</visible>
+					</control>
+					<control type="image">
+						<description>DTS Icon</description>
+						<left>0</left>
+						<top>0</top>
+						<width>100</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
+						<texture>audio/dts2.png</texture>
+						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-X) + !String.Contains(Container(2001).ListItem.Property(venom.extra_info),DTS-HD MA)</visible>
+					</control>
+					<control type="image">
+						<description>AAC Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -453,6 +487,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),AAC)</visible>
 					</control>
 					<control type="image">
+						<description>MP3 Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -463,6 +498,18 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MP3)</visible>
 					</control>
 					<control type="image">
+						<description>FLAC Icon</description>
+						<left>0</left>
+						<top>0</top>
+						<width>100</width>
+						<align>left</align>
+						<aligny>center</aligny>
+						<aspectratio>keep</aspectratio>
+						<texture>audio/flac.png</texture>
+						<visible>String.Contains(Container(2000).ListItem.Property(venom.extra_info),FLAC)</visible>
+					</control>
+					<control type="image">
+						<description>MULTI-LANG Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -473,6 +520,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),MULTI-LANG)</visible>
 					</control>
 					<control type="image">
+						<description>2CH Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -483,6 +531,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),2CH)</visible>
 					</control>
 					<control type="image">
+						<description>6CH Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -493,6 +542,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),6CH)</visible>
 					</control>
 					<control type="image">
+						<description>7CH Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>
@@ -503,6 +553,7 @@
 						<visible>String.Contains(Container(2001).ListItem.Property(venom.extra_info),7CH)</visible>
 					</control>
 					<control type="image">
+						<description>8CH Icon</description>
 						<left>0</left>
 						<top>0</top>
 						<width>100</width>

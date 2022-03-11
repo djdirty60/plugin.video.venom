@@ -202,7 +202,7 @@ class AllDebrid:
 			result = self._get(url, url_append)
 			try: result = result['magnets'][0]
 			except: return None
-			log_utils.log('AllDebrid: Sending MAGNET URL %s to the AllDebrid cloud' % magnet, __name__, log_utils.LOGDEBUG)
+			log_utils.log('AllDebrid: Sending MAGNET to cloud: %s' % magnet, __name__, log_utils.LOGDEBUG)
 			try: return result.get('id', "")
 			except: return None
 		except:
@@ -381,40 +381,34 @@ class AllDebrid:
 	def resolve_magnet(self, magnet_url, info_hash, season, episode, ep_title):
 		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter
 		try:
-			file_url = None
-			media_id = None
-			failed_reason = 'Unknown'
+			failed_reason, media_id, file_url = 'Unknown', None, None
 			correct_files = []
 			append = correct_files.append
 			extensions = supported_video_extensions()
 			extras_filtering_list = extras_filter()
 			transfer_id = self.create_transfer(magnet_url)
 			transfer_info = self.list_transfer(transfer_id)
+			if not transfer_info: return log_utils.log('AllDebrid: Error RESOLVE MAGNET "%s" : (Server Failed to respond)' % magnet_url, __name__, log_utils.LOGWARNING)
+			filenames = [i.get('filename') for i in transfer_info.get('links')]
+			if all(i.lower().endswith('.rar') for i in filenames): failed_reason = 'AD returned unsupported .rar file'
 			# valid_results = [i for i in transfer_info.get('links') if any(i.get('filename').lower().endswith(x) for x in extensions) and not i.get('link', '') == ''] #.m2ts file extension is not in "filename" so this fails
 			valid_results = [i for i in transfer_info.get('links') if not any(i.get('filename').lower().endswith(x) for x in invalid_extensions) and not i.get('link', '') == '']
-			# log_utils.log('valid_results=%s' % valid_results, __name__)
-
-			if len(valid_results) == 0:
-				failed_reason = 'No valid video extension found'
-				raise Exception()
+			if len(valid_results) == 0 and failed_reason == 'Unknown': failed_reason = 'No valid video extension found'
 
 			if season:
 				for item in valid_results:
 					if '.m2ts' in str(item.get('files')):
-						log_utils.log('AllDebrid: Can not resolve .m2ts season disk episode', level=log_utils.LOGDEBUG)
-						failed_reason = '.m2ts season disk incapable of determining episode'
+						failed_reason = 'Can not resolve .m2ts season disk episode'
 						continue
 
 					if not item.get('files'):
 						# link = self.unrestrict_link(item.get('link'), returnAll=True)
 						link = cache.get(self.unrestrict_link, 168, item.get('link'), True)
-
 						# log_utils.log('link=%s' % link, __name__)
 						if seas_ep_filter(season, episode, link['filename']):
 							item.update({'filename': link['filename']})
 							append(item)
 							# log_utils.log('revised_item=%s' % item, __name__)
-
 					if seas_ep_filter(season, episode, item['filename']):
 						append(item)
 
@@ -435,14 +429,14 @@ class AllDebrid:
 				media_id = max(valid_results, key=lambda x: x.get('size')).get('link', None)
 			if not self.store_to_cloud: self.delete_transfer(transfer_id)
 			if not media_id:
-				log_utils.log('AllDebrid: FAILED TO RESOLVE MAGNET %s : (%s)' % (magnet_url, failed_reason), __name__, log_utils.LOGWARNING)
+				log_utils.log('AllDebrid: FAILED TO RESOLVE MAGNET "%s" : (%s)' % (magnet_url, failed_reason), __name__, log_utils.LOGWARNING)
 				return None
 			file_url = self.unrestrict_link(media_id)
 			if not file_url:
-				log_utils.log('AllDebrid: FAILED TO UNRESTRICT MAGNET %s : ' % magnet_url, __name__, log_utils.LOGWARNING)
+				log_utils.log('AllDebrid: FAILED TO UNRESTRICT MAGNET "%s" ' % magnet_url, __name__, log_utils.LOGWARNING)
 			return file_url
 		except:
-			if failed_reason != 'Unknown': log_utils.log('AllDebrid: Error RESOLVE MAGNET %s : (%s)' % (magnet_url, failed_reason))
+			if failed_reason != 'Unknown': log_utils.log('AllDebrid: FAILED TO RESOLVE MAGNET "%s" : (%s)' % (magnet_url, failed_reason), __name__, log_utils.LOGWARNING)
 			else: log_utils.error('AllDebrid: Error RESOLVE MAGNET %s : ' % magnet_url)
 			if transfer_id: self.delete_transfer(transfer_id)
 			return None

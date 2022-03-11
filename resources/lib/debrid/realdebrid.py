@@ -352,16 +352,17 @@ class RealDebrid:
 		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter
 		# from resources.lib.cloud_scrapers.cloud_utils import cloud_check_title # alias and title checking no longer used
 		try:
-			reason, torrent_id, file_url, match = '', None, None, False
+			failed_reason, torrent_id, file_url, match = 'Unknown', None, None, False
 			extensions = supported_video_extensions()
 			extras_filtering_list = extras_filter()
 			info_hash = info_hash.lower()
 			torrent_files = self._get(check_cache_url + '/' + info_hash)
 			# log_utils.log('torrent_files = %s' % torrent_files)
+			if not torrent_files: return log_utils.log('Real-Debrid: Error RESOLVE MAGNET "%s" : (Server Failed to respond)' % magnet_url, __name__, log_utils.LOGWARNING)
 			if not info_hash in torrent_files: return None
 			torrent_id = self.add_magnet(magnet_url) # add_magent() returns id
 			torrent_files = torrent_files[info_hash]['rd']
-			if not torrent_files: reason = 'magnet is no longer cached'
+			if not torrent_files: failed_reason = 'magnet is no longer cached'
 			compare_title = re.sub(r'[^A-Za-z0-9-]+', '.', title.replace('\'', '').replace('&', 'and').replace('%', '.percent')).lower()
 			#######################################
 			# sort torrent_files so vid only at top
@@ -374,8 +375,10 @@ class RealDebrid:
 				# remove cached items that do not contain the episode needed - see "self.name_check" below
 				season_m2ts_check = self.m2ts_check(torrent_files)
 				if season_m2ts_check:
-					torrent_files, reason = [], 'Can not resolve .m2ts season disk episode'
-				else: torrent_files = [item for item in torrent_files if self.name_check(item, season, episode, seas_ep_filter)]
+					torrent_files, failed_reason = [], 'Can not resolve .m2ts season disk episode'
+				else:
+					torrent_files = [item for item in torrent_files if self.name_check(item, season, episode, seas_ep_filter)]
+					if not torrent_files: failed_reason = 'no matching season/episode found'
 				###########################################################################################
 			else:
 				m2ts_check = self.m2ts_check(torrent_files)
@@ -401,7 +404,7 @@ class RealDebrid:
 					######################################
 					# check here if no "links" in result
 					if not torrent_info['links']:
-						reason = 'No RD created links found'
+						failed_reason = 'No RD created links found'
 						continue
 					######################################
 					if 'error' in torrent_info: continue
@@ -417,7 +420,7 @@ class RealDebrid:
 								# log_utils.log('value = %s' % str(value))
 								append(value[1])
 								break
-							else: reason = 'no matching season/episode found'
+							else: failed_reason = 'no matching season/episode found'
 						if len(correct_files) == 0: continue
 						for i in correct_files:
 							compare_link = seas_ep_filter(season, episode, i['path'], split=True)
@@ -447,16 +450,16 @@ class RealDebrid:
 				rd_link = torrent_info['links'][index]
 				file_url = self.unrestrict_link(rd_link)
 				if file_url.endswith('rar'):
-					file_url, reason = None, 'RD returned unsupported .rar file --> %s' % file__url
+					file_url, failed_reason = None, 'RD returned unsupported .rar file --> %s' % file__url
 				if not any(file_url.lower().endswith(x) for x in extensions):
-					file_url, reason = None, 'RD returned unsupported file extension --> %s' % file_url
+					file_url, failed_reason = None, 'RD returned unsupported file extension --> %s' % file_url
 				if not self.store_to_cloud: self.delete_torrent(torrent_id)
 			if not file_url:
-				log_utils.log('Real-Debrid: FAILED TO RESOLVE MAGNET : "%s" : %s' % (magnet_url, reason), __name__, log_utils.LOGWARNING)
+				log_utils.log('Real-Debrid: FAILED TO RESOLVE MAGNET "%s" : (%s)' % (magnet_url, failed_reason), __name__, log_utils.LOGWARNING)
 				self.delete_torrent(torrent_id)
 			return file_url
 		except:
-			log_utils.error('Real-Debrid: Error RESOLVE MAGNET %s : ' % magnet_url)
+			log_utils.error('Real-Debrid: Error RESOLVE MAGNET "%s" ' % magnet_url)
 			if torrent_id: self.delete_torrent(torrent_id)
 			return None
 

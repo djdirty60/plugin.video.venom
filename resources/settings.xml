@@ -210,6 +210,7 @@
 		<setting id="remove.duplicates" type="bool" label="32035" default="true" />
 		<setting id="remove.duplicates.logging" type="bool" label="32159" subsetting="true" default="true" visible="eq(-1,true)" />
 		<setting id="remove.dolby.vision" type="bool" label="32388" default="false" />
+		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=removeDolbyVision)" visible="eq(-1,true)" />
 		<setting id="remove.hdr" type="bool" label="32389" default="false" />
 		<setting id="remove.hevc" type="bool" label="32363" default="false" />
 		<setting id="remove.cam.sources" type="bool" label="32160" default="false" />
@@ -239,10 +240,7 @@
 		<setting type="action" label="32153" action="RunPlugin(plugin://plugin.video.venom/?action=tools_traktAcctMyAccounts)" visible="!eq(-1,)" />
 		<setting id="trakt.token" type="text" label="" visible="false" default="" />
 		<setting id="trakt.refresh" type="text" label="" visible="false" default="" />
-
-
 		<setting id="trakt.service.syncInterval" type="slider" label="Trakt service sync interval (in minutes)" default="15" range="5,60" option="int" visible="!eq(-4,)" />
-
 		<setting id="trakt.server.notifications" type="bool" label="33051" default="true" visible="!eq(-5,)" />
 		<setting id="trakt.general.notifications" type="bool" label="33052" default="true" visible="!eq(-6,)" />
 		<setting id="trakt.directProgress.scrape" type="bool" label="35492" default="false" visible="!eq(-7,)" />

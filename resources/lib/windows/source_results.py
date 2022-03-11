@@ -13,30 +13,24 @@ from resources.lib.windows.base import BaseDialog
 
 class SourceResultsXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(SourceResultsXML, self).__init__(self, args)
+		BaseDialog.__init__(self, args)
 		self.window_id = 2000
 		self.results = kwargs.get('results')
 		self.uncached = kwargs.get('uncached')
 		self.total_results = str(len(self.results))
 		self.meta = kwargs.get('meta')
-		self.info = None
-		self.cm = None
 		self.make_items()
 		self.set_properties()
 		self.dnlds_enabled = True if getSetting('downloads') == 'true' and (getSetting('movie.download.path') != '' or getSetting('tv.download.path') != '') else False
 
 	def onInit(self):
-		super(SourceResultsXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
 
 	def run(self):
 		self.doModal()
-		try: del self.info
-		except: pass
-		try: del self.cm
-		except: pass
+		self.clearProperties()
 		return self.selected
 
 	def onAction(self, action):
@@ -50,7 +44,12 @@ class SourceResultsXML(BaseDialog):
 			if action_id in self.selection_actions:
 				focus_id = self.getFocusId()
 				if focus_id == 2001:
-					return self.load_uncachedTorrents()
+					position = self.get_position(self.window_id)
+					self.load_uncachedTorrents()
+					self.setFocusId(self.window_id)
+					self.getControl(self.window_id).selectItem(position)
+					self.selected = (None, '')
+					return
 				chosen_source = self.item_list[self.get_position(self.window_id)]
 				source = chosen_source.getProperty('venom.source')
 				if 'UNCACHED' in source:
@@ -183,6 +182,7 @@ class SourceResultsXML(BaseDialog):
 		if self.meta is None: return
 		try:
 			self.setProperty('venom.season', str(self.meta.get('season', '')))
+			if 'tvshowtitle' in self.meta and 'season' in self.meta and 'episode' in self.meta: self.setProperty('venom.seas_ep', 'S%02dE%02d' % (int(self.meta['season']), int(self.meta['episode'])))
 			if self.meta.get('season_poster'):	self.setProperty('venom.poster', self.meta.get('season_poster', ''))
 			else: self.setProperty('venom.poster', self.meta.get('poster', ''))
 			self.setProperty('venom.clearlogo', self.meta.get('clearlogo', ''))

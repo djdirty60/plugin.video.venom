@@ -34,13 +34,14 @@ show_expiry = timedelta(hours=48)
 video_extensions = supported_video_extensions()
 
 class Sources:
-	def __init__(self, all_providers=False, custom_query=False):
+	def __init__(self, all_providers=False, custom_query=False, filterless_scrape=False):
 		self.sources = []
 		self.scraper_sources = []
 		self.uncached_chosen = False
 		self.isPrescrape = False
 		self.all_providers = all_providers
 		self.custom_query = custom_query
+		self.filterless_scrape = filterless_scrape
 		self.time = datetime.now()
 		self.getConstants()
 		self.enable_playnext = getSetting('enable.playnext') == 'true'
@@ -393,30 +394,27 @@ class Sources:
 		self.sources.extend(self.scraper_sources)
 		self.tvshowtitle = tvshowtitle
 		self.year = year
+		homeWindow.clearProperty('fs_filterless_search')
 		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
 
 	def getSources_dialog(self, title, year, imdb, tvdb, season, episode, tvshowtitle, premiered, timeout=90):
 		try:
 			content = 'movie' if tvshowtitle is None else 'episode'
+			if self.filterless_scrape: homeWindow.setProperty('fs_filterless_search', 'true')
 			if self.custom_query == 'true':
 				try:
 					custom_title = control.dialog.input('[COLOR %s][B]%s[/B][/COLOR]' % (self.highlight_color, getLS(32038)), defaultt=tvshowtitle if tvshowtitle else title)
 					if content == 'movie':
-						if custom_title:
-							title = custom_title ; self.meta.update({'title': title})
+						if custom_title: title = custom_title ; self.meta.update({'title': title})
 						custom_year = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, getLS(32457), getLS(32488)), type=control.numeric_input, defaultt=str(year))
-						if custom_year:
-							year = str(custom_year) ; self.meta.update({'year': year})
+						if custom_year: year = str(custom_year) ; self.meta.update({'year': year})
 					else:
-						if custom_title:
-							tvshowtitle = custom_title ; self.meta.update({'tvshowtitle': tvshowtitle})
+						if custom_title: tvshowtitle = custom_title ; self.meta.update({'tvshowtitle': tvshowtitle})
 						custom_season = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, getLS(32055), getLS(32488)), type=control.numeric_input, defaultt=str(season))
-						if custom_season:
-							season = str(custom_season) ; self.meta.update({'season': season})
+						if custom_season: season = str(custom_season) ; self.meta.update({'season': season})
 						custom_episode = control.dialog.input('[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, getLS(32325), getLS(32488)), type=control.numeric_input, defaultt=str(episode))
-						if custom_episode:
-							episode = str(custom_episode) ; self.meta.update({'episode': episode})
+						if custom_episode: episode = str(custom_episode) ; self.meta.update({'episode': episode})
 					p_label = '[COLOR %s]%s (%s)[/COLOR]' % (self.highlight_color, title, year) if tvshowtitle is None else '[COLOR %s]%s (S%02dE%02d)[/COLOR]' % (self.highlight_color, tvshowtitle, int(season), int(episode))
 					homeWindow.clearProperty(self.labelProperty)
 					homeWindow.setProperty(self.labelProperty, p_label)
@@ -431,45 +429,37 @@ class Sources:
 					log_utils.log('Custom query scrape ran using: %s' % p_label, level=log_utils.LOGDEBUG)
 				except:
 					log_utils.error()
-					pass
 			progressDialog = control.progressDialog if getSetting('progress.dialog') == '0' else control.progressDialogBG
 			header = homeWindow.getProperty(self.labelProperty) + ': Scraping...'
 			progressDialog.create(header, '')
 			self.prepareSources()
 			sourceDict = self.sourceDict
 			progressDialog.update(0, getLS(32600)) # preparing sources
-			if content == 'movie': sourceDict = [(i[0], i[1], i[1].hasMovies) for i in sourceDict]
-			else: sourceDict = [(i[0], i[1], i[1].hasEpisodes) for i in sourceDict]
-			sourceDict = [(i[0], i[1]) for i in sourceDict if i[2]]
+			if content == 'movie': sourceDict = [(i[0], i[1]) for i in sourceDict if i[1].hasMovies]
+			else: sourceDict = [(i[0], i[1]) for i in sourceDict if i[1].hasEpisodes]
 			if getSetting('cf.disable') == 'true': sourceDict = [(i[0], i[1]) for i in sourceDict if not any(x in i[0] for x in self.sourcecfDict)]
 			if getSetting('scrapers.prioritize') == 'true': 
 				sourceDict = [(i[0], i[1], i[1].priority) for i in sourceDict]
 				sourceDict = sorted(sourceDict, key=lambda i: i[2]) # sorted by scraper priority
-			aliases = []
-			try:
-				meta = self.meta
-				aliases = meta.get('aliases', [])
-			except: pass
-			threads = []
-			append = threads.append
+			try: aliases = self.meta.get('aliases', [])
+			except: aliases = []
+			threads = [] ; threads_append = threads.append
+
 			if content == 'movie':
-				trakt_aliases = self.getAliasTitles(imdb, content)
+				trakt_aliases = self.getAliasTitles(imdb, content) # cached for 7 days in trakt module called
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
 				data = {'title': title, 'aliases': aliases, 'year': year, 'imdb': imdb}
-				for i in sourceDict:
-					append(Thread(target=self.getMovieSource, args=(imdb, data, i[0], i[1]), name=i[0].upper()))
+				for i in sourceDict: threads_append(Thread(target=self.getMovieSource, args=(imdb, data, i[0], i[1]), name=i[0].upper()))
 			else:
 				scraperDict = [(i[0], i[1], '') for i in sourceDict] if ((not self.dev_mode) or (not self.dev_disable_single)) else []
 				if self.season_isAiring == 'false':
-					if (not self.dev_mode) or (not self.dev_disable_season_packs):
-						scraperDict.extend([(i[0], i[1], 'season') for i in sourceDict if i[1].pack_capable])
-					if (not self.dev_mode) or (not self.dev_disable_show_packs):
-						scraperDict.extend([(i[0], i[1], 'show') for i in sourceDict if i[1].pack_capable])
-				trakt_aliases = self.getAliasTitles(imdb, content)
+					if (not self.dev_mode) or (not self.dev_disable_season_packs): scraperDict.extend([(i[0], i[1], 'season') for i in sourceDict if i[1].pack_capable])
+					if (not self.dev_mode) or (not self.dev_disable_show_packs): scraperDict.extend([(i[0], i[1], 'show') for i in sourceDict if i[1].pack_capable])
+				trakt_aliases = self.getAliasTitles(imdb, content) # cached for 7 days in trakt module called
 				try: aliases.extend([i for i in trakt_aliases if not i in aliases]) # combine TMDb and Trakt aliases
 				except: pass
-				try: country_codes = meta.get('country_codes', [])
+				try: country_codes = self.meta.get('country_codes', [])
 				except: country_codes = []
 				for i in country_codes:
 					if i in ('CA', 'US', 'UK', 'GB'):
@@ -482,7 +472,7 @@ class Sources:
 					name, pack = i[0].upper(), i[2]
 					if pack == 'season': name = '%s (season pack)' % name
 					elif pack == 'show': name = '%s (show pack)' % name
-					append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
+					threads_append(Thread(target=self.getEpisodeSource, args=(imdb, season, episode, data, i[0], i[1], pack), name=name))
 			[i.start() for i in threads]
 			sdc = control.getColor(getSetting('scraper.dialog.color'))
 			string1 = getLS(32404) % (self.highlight_color, sdc, '%s') # msgid "[COLOR %s]Time elapsed:[/COLOR]  [COLOR %s]%s seconds[/COLOR]"
@@ -502,8 +492,8 @@ class Sources:
 			pre_emp_res = getSetting('preemptive.res') or '0'
 			source_4k = source_1080 = source_720 = source_sd = total = 0
 			total_format = '[COLOR %s][B]%s[/B][/COLOR]'
-			pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % \
-				(self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s')
+			pdiag_format = '[COLOR %s]4K:[/COLOR]  %s  |  [COLOR %s]1080p:[/COLOR]  %s  |  [COLOR %s]720p:[/COLOR]  %s  |  [COLOR %s]SD:[/COLOR]  %s' % (
+				self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s', self.highlight_color, '%s')
 			control.hide()
 		except:
 			log_utils.error()
@@ -573,6 +563,7 @@ class Sources:
 		self.sources.extend(self.scraper_sources)
 		self.tvshowtitle = tvshowtitle
 		self.year = year
+		homeWindow.clearProperty('fs_filterless_search')
 		if len(self.sources) > 0: self.sourcesFilter()
 		return self.sources
 
@@ -813,13 +804,14 @@ class Sources:
 		from copy import deepcopy
 		deepcopy_sources = deepcopy(self.sources)
 		deepcopy_sources = [i for i in deepcopy_sources if 'magnet:' in i['url']]
+		if deepcopy_sources: hashList = [i['hash'] for i in deepcopy_sources]
 		threads = [] ; self.filter = []
 		valid_hosters = set([i['source'] for i in self.sources if 'magnet:' not in i['url']])
 
 		def checkStatus(function, debrid_name, valid_hoster):
 			try:
 				cached = None
-				if deepcopy_sources: cached = function(deepcopy_sources)
+				if deepcopy_sources: cached = function(deepcopy_sources, hashList)
 				if cached: self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in cached] # this makes a new instance so no need for deepcopy beyond the one time done now
 				if valid_hoster:
 					self.filter += [dict(list(i.items()) + [('debrid', debrid_name)]) for i in self.sources if i['source'] in valid_hoster and 'magnet:' not in i['url']]
@@ -911,8 +903,7 @@ class Sources:
 					b = sublist['url'].lower()
 					if 'magnet:' in a:
 						if i['hash'].lower() in b:
-							# if len(sublist['name']) > len(i['name']):
-							if len(sublist['name']) > len(i['name']) or sublist['provider'] == 'torrentio': # keep matching hash with longer name, possible more file info or "torrentio".
+							if sublist['provider'] == 'torrentio' or (len(sublist['name']) > len(i['name']) and i['provider'] != 'torrentio'): # favor "torrentio" or keep matching hash with longer name for possible more info
 								larger = True
 								break
 							remove(sublist)
@@ -924,9 +915,9 @@ class Sources:
 						break
 				except:
 					log_utils.error('Error filter_dupes: ')
-			if not larger: append(i) # sublist['name'] len() was larger so do not append
+			if not larger: append(i) # sublist['name'] len() was larger, or "torrentio" so do not append
 		header = homeWindow.getProperty(self.labelProperty)
-		if not self.enable_playnext:
+		if self.mediatype == 'movie' or (self.mediatype == 'episode' and not self.enable_playnext):
 			control.notification(title=header, message='Removed %s duplicate sources from list' % (len(self.sources) - len(filter)))
 		log_utils.log('Removed %s duplicate sources for (%s) from list' % (len(self.sources) - len(filter), homeWindow.getProperty(self.labelProperty)), level=log_utils.LOGDEBUG)
 		return filter
@@ -1171,12 +1162,9 @@ class Sources:
 		self.sourcecfDict = premium_hosters.sourcecfDict
 
 	def calc_pack_size(self):
-		seasoncount = None ; counts = None
+		seasoncount, counts = None, None
 		try:
-			meta = self.meta
-			if meta:
-				seasoncount = meta.get('seasoncount', None)
-				counts = meta.get('counts', None)
+			if self.meta: seasoncount, counts = self.meta.get('seasoncount', None), self.meta.get('counts', None)
 		except:
 			log_utils.error()
 		if not seasoncount or not counts: # check metacache, 2nd fallback
@@ -1185,14 +1173,8 @@ class Sources:
 				tvdb_key = getSetting('tvdb.api.key')
 				user = str(imdb_user) + str(tvdb_key)
 				meta_lang = control.apiLanguage()['tvdb']
-				if meta:
-					imdb = meta.get('imdb', '')
-					tmdb = meta.get('tmdb', '')
-					tvdb = meta.get('tvdb', '')
-				else:
-					imdb = homeWindow.getProperty(self.imdbProperty)
-					tmdb = homeWindow.getProperty(self.tmdbProperty)
-					tvdb = homeWindow.getProperty(self.tvdbProperty)
+				if self.meta: imdb, tmdb, tvdb = self.meta.get('imdb', ''), self.meta.get('tmdb', ''), self.meta.get('tvdb', '')
+				else: imdb, tmdb, tvdb = homeWindow.getProperty(self.imdbProperty), homeWindow.getProperty(self.tmdbProperty), homeWindow.getProperty(self.tvdbProperty)
 				ids = [{'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb}]
 				meta2 = metacache.fetch(ids, meta_lang, user)[0]
 				if not seasoncount: seasoncount = meta2.get('seasoncount', None)
@@ -1201,7 +1183,7 @@ class Sources:
 				log_utils.error()
 		if not seasoncount or not counts: # make request, 3rd fallback
 			try:
-				if meta: season = meta.get('season')
+				if self.meta: season = self.meta.get('season')
 				else: season = homeWindow.getProperty(self.seasonProperty)
 				from resources.lib.indexers import tmdb as tmdb_indexer
 				counts = tmdb_indexer.TVshows().get_counts(tmdb)
@@ -1240,11 +1222,10 @@ class Sources:
 				continue
 		return self.sources
 
-	def ad_cache_chk_list(self, torrent_List):
+	def ad_cache_chk_list(self, torrent_List, hashList):
 		if len(torrent_List) == 0: return
 		try:
 			from resources.lib.debrid.alldebrid import AllDebrid as debrid_function
-			hashList = [i['hash'] for i in torrent_List]
 			cached = debrid_function().check_cache(hashList)
 			if not cached: return None
 			cached = cached['magnets']
@@ -1264,11 +1245,10 @@ class Sources:
 		except:
 			log_utils.error()
 
-	def pm_cache_chk_list(self, torrent_List):
+	def pm_cache_chk_list(self, torrent_List, hashList):
 		if len(torrent_List) == 0: return
 		try:
 			from resources.lib.debrid.premiumize import Premiumize as debrid_function
-			hashList = [i['hash'] for i in torrent_List]
 			cached = debrid_function().check_cache_list(hashList)
 			if not cached: return None
 			count = 0
@@ -1284,7 +1264,7 @@ class Sources:
 		except:
 			log_utils.error()
 
-	def rd_cache_chk_list(self, torrent_List):
+	def rd_cache_chk_list(self, torrent_List, hashList):
 		if len(torrent_List) == 0: return
 		def base32_to_hex(hash):
 			from base64 import b32decode
@@ -1293,8 +1273,8 @@ class Sources:
 			return hex
 		try:
 			from resources.lib.debrid.realdebrid import RealDebrid as debrid_function
-			# hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List] # RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert)
-			hashList = [i['hash'] for i in torrent_List] #eztv scraper now converts and is only site that returns base32 hashes
+# RD can not handle BASE32 encoded hashes, hex 40 only (AD and PM convert). EZTV scraper now converts and is only site that returns base32 hashes
+			# hashList = [i['hash'] if len(i['hash']) == 40 else base32_to_hex(i['hash']) for i in torrent_List] 
 			cached = debrid_function().check_cache(hashList)
 			if not cached: return None
 			for i in torrent_List:

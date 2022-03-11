@@ -50,11 +50,13 @@
 		</control>
 
 		<control type="group" id="1">
+			<description>List Header</description>
 			<left>25</left>
 			<top>0</top>
 			<height>80</height>
 			<width min="0" max="1920">auto</width>
 			<control type="textbox">
+				<description>Remove column Label</description>
 				<visible>!Player.HasVideo</visible>
 				<left>0</left>
 				<top>110</top>
@@ -68,6 +70,7 @@
 				<label>[COLOR $INFO[Window().Property(venom.highlight.color)]]Remove[/COLOR]</label>
 			</control>
 			<control type="textbox">
+				<description>Total Items Label</description>
 				<visible>!Player.HasVideo</visible>
 				<left>160</left>
 				<top>110</top>

@@ -9,7 +9,7 @@ from resources.lib.windows.base import BaseDialog
 
 class TraktLikedListManagerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(TraktLikedListManagerXML, self).__init__(self, args)
+		BaseDialog.__init__(self, args)
 		self.window_id = 2050
 		self.results = kwargs.get('results')
 		self.total_results = str(len(self.results))
@@ -18,13 +18,13 @@ class TraktLikedListManagerXML(BaseDialog):
 		self.set_properties()
 
 	def onInit(self):
-		super(TraktLikedListManagerXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
 
 	def run(self):
 		self.doModal()
+		self.clearProperties()
 		return self.selected_items
 
 	# def onClick(self, controlID):

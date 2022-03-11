@@ -14,7 +14,7 @@ monitor = xbmc.Monitor()
 
 class TraktHiddenManagerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(TraktHiddenManagerXML, self).__init__(self, args)
+		BaseDialog.__init__(self, args)
 		self.window_id = 2040
 		self.results = kwargs.get('results')
 		self.total_results = str(len(self.results))
@@ -26,13 +26,13 @@ class TraktHiddenManagerXML(BaseDialog):
 		self.hasVideo = False
 
 	def onInit(self):
-		super(TraktHiddenManagerXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
 
 	def run(self):
 		self.doModal()
+		self.clearProperties()
 		return (self.chosen_hide, self.chosen_unhide)
 
 	# def onClick(self, controlID):

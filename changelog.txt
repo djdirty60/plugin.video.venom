@@ -1,4 +1,14 @@
 
+[B][COLOR red]Update - v6.5.3 - March 11, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Fixed window size issue in "Trakt Management Tools-Liked List Manager" xml that prevented bottom item being fully visible.[/I]
+[COLOR yellow]--[/COLOR][I] Added "FLAC" audio identification and icon for source select xml.[/I]
+[COLOR yellow]--[/COLOR][I] Using "View Uncached Torrents" will now return focus back to the listItem you left the source select list on.[/I]
+[COLOR yellow]--[/COLOR][I] Added help file for when user enables the filter to remove Dolby Vision sources while still electing to keep HDR sources.  The help file explains how some source are hybrid "Dolby vision and HDR" and could be kept.[/I]
+[COLOR yellow]--[/COLOR][I] Added episode info ex. "S01E01" to the source select info bar above the poster.[/I]
+[COLOR yellow]--[/COLOR][I] Added 'Filterless' rescrape options to the "Rescrape Options" Menu of choices.  This will disable FenomScrapers "undesirables" and "single foreign audio" filters on the fly but not Venom's filters at this time.[/I]
+[COLOR yellow]--[/COLOR][I] Improved PM error logging for failed to resolve source.[/I]
+
+
 [B][COLOR red]Update - v6.5.2 - March 05, 2022[/COLOR][/B]
 [COLOR yellow]--[/COLOR][I] Saved search terms are now sorted in alphabetic order before loading list.[/I]
 [COLOR yellow]--[/COLOR][I] Fixed failing RD resolve condition.[/I]

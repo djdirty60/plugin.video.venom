@@ -34,6 +34,7 @@ cache_check_url = '%s/cache/check' % BaseUrl
 list_services_path_url = '%s/services/list' % BaseUrl
 pm_icon = control.joinPath(control.artPath(), 'premiumize.png')
 addonFanart = control.addonFanart()
+invalid_extensions = ('.bmp', '.gif', '.jpg', '.nfo', '.part', '.png', '.rar', '.sample.', '.srt', '.txt', '.zip')
 
 
 class Premiumize:
@@ -185,23 +186,27 @@ class Premiumize:
 	def resolve_magnet(self, magnet_url, info_hash, season, episode, ep_title):
 		from resources.lib.modules.source_utils import seas_ep_filter, extras_filter
 		try:
-			file_url = None
-			correct_files = []
+			failed_reason, file_url, correct_files = 'Unknown', None, []
 			append = correct_files.append
 			extensions = supported_video_extensions()
 			extras_filtering_list = extras_filter()
 			data = {'src': magnet_url}
 			response = self._post(transfer_directdl_url, data)
-			if not response: return log_utils.log('Premiumize.me Error RESOLVE MAGNET %s : Server Failed to respond' % magnet_url)
+			if not response: return log_utils.log('Premiumize.me: Error RESOLVE MAGNET "%s" : (Server Failed to respond)' % magnet_url, __name__, log_utils.LOGWARNING)
 			if not 'status' in response or response['status'] != 'success': raise Exception()
-			valid_results = [i for i in response.get('content') if any(i.get('path').lower().endswith(x) for x in extensions) and not i.get('link', '') == '']
-			if len(valid_results) == 0: return
+			# valid_results = [i for i in response.get('content') if any(i.get('path').lower().endswith(x) for x in extensions) and not i.get('link', '') == '']
+			valid_results = [i for i in response.get('content') if not any(i.get('path').lower().endswith(x) for x in invalid_extensions) and not i.get('link', '') == '']
+			if not valid_results: failed_reason = 'No valid video extension found'
 			if season:
 				episode_title = re.sub(r'[^A-Za-z0-9-]+', '.', ep_title.replace('\'', '')).lower()
 				for item in valid_results:
+					if '.m2ts' in str(item.get('path')):
+						failed_reason = 'Can not resolve .m2ts season disk episode'
+						continue
 					if seas_ep_filter(season, episode, item['path'].split('/')[-1]):
 						# log_utils.log('item[path].split(/)[-1]=%s' %  item['path'].split('/')[-1])
 						append(item)
+					else: failed_reason = 'no matching season/episode found'
 					if len(correct_files) == 0: continue
 					for i in correct_files:
 						compare_link = seas_ep_filter(season, episode, i['path'], split=True)
@@ -209,15 +214,14 @@ class Premiumize:
 						if not any(x in compare_link for x in extras_filtering_list):
 							file_url = i['link']
 							break
-			else:
-				file_url = max(valid_results, key=lambda x: int(x.get('size'))).get('link', None)
+			else: file_url = max(valid_results, key=lambda x: int(x.get('size'))).get('link', None)
 			if file_url:
 				if self.store_to_cloud: self.create_transfer(magnet_url)
 				return self.add_headers_to_url(file_url)
 			else:
-				log_utils.log('Premiumize.me: FAILED TO RESOLVE MAGNET %s : ' % magnet_url, __name__, log_utils.LOGWARNING)
+				log_utils.log('Premiumize.me: FAILED TO RESOLVE MAGNET "%s" : (%s)' % (magnet_url, failed_reason), __name__, log_utils.LOGWARNING)
 		except:
-			log_utils.error('Premiumize.me Error RESOLVE MAGNET %s : ' % magnet_url)
+			log_utils.error('Premiumize.me: Error RESOLVE MAGNET "%s" ' % magnet_url)
 			return None
 
 	def display_magnet_pack(self, magnet_url, info_hash):
@@ -338,7 +342,7 @@ class Premiumize:
 	def create_transfer(self, src,  folder_id=0):
 		try:
 			data = {'src': src, 'folder_id': folder_id}
-			log_utils.log('Premiumize.me: Sending MAGNET URL %s to the Premiumize.me cloud' % src, __name__, log_utils.LOGDEBUG)
+			log_utils.log('Premiumize.me: Sending MAGNET to cloud: "%s" ' % src, __name__, log_utils.LOGDEBUG)
 			return self._post(transfer_create_url, data)
 		except:
 			log_utils.error()

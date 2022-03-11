@@ -10,7 +10,7 @@ from resources.lib.windows.base import BaseDialog
 
 class TraktWatchlistManagerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(TraktWatchlistManagerXML, self).__init__(self, args)
+		BaseDialog.__init__(self, args)
 		self.window_id = 2050
 		self.results = kwargs.get('results')
 		self.total_results = str(len(self.results))
@@ -19,13 +19,13 @@ class TraktWatchlistManagerXML(BaseDialog):
 		self.set_properties()
 
 	def onInit(self):
-		super(TraktWatchlistManagerXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
 
 	def run(self):
 		self.doModal()
+		self.clearProperties()
 		return self.selected_items
 
 	# def onClick(self, controlID):

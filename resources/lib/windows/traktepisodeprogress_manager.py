@@ -15,7 +15,7 @@ monitor = xbmc.Monitor()
 
 class TraktEpisodeProgressManagerXML(BaseDialog):
 	def __init__(self, *args, **kwargs):
-		super(TraktEpisodeProgressManagerXML, self).__init__(self, args)
+		BaseDialog.__init__(self, args)
 		self.window_id = 2060
 		self.results = kwargs.get('results')
 		self.total_results = str(len(self.results))
@@ -25,13 +25,13 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 		self.hasVideo = False
 
 	def onInit(self):
-		super(TraktEpisodeProgressManagerXML, self).onInit()
 		win = self.getControl(self.window_id)
 		win.addItems(self.item_list)
 		self.setFocusId(self.window_id)
 
 	def run(self):
 		self.doModal()
+		self.clearProperties()
 		return self.selected_items
 
 	# def onClick(self, controlID):
