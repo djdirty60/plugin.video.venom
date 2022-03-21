@@ -9,7 +9,8 @@ import re
 from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache, fanarttv_cache, traktsync
-from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
+from resources.lib.indexers.tmdb import TVshows as tmdb_indexer
+from resources.lib.indexers.fanarttv import FanartTv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
@@ -20,6 +21,7 @@ from resources.lib.modules import views
 getLS = control.lang
 getSetting = control.setting
 
+
 class TVshows:
 	def __init__(self, notifications=True):
 		self.list = []
@@ -29,6 +31,7 @@ class TVshows:
 		self.notifications = notifications
 		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
 		self.prefer_tmdbArt = getSetting('prefer.tmdbArt') == 'true'
+		self.unairedcolor = control.getColor(getSetting('unaired.identify'))
 		self.highlight_color = control.getHighlightColor()
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
@@ -143,9 +146,9 @@ class TVshows:
 			try: u = urlparse(url).netloc.lower()
 			except: pass
 			if u in self.tmdb_link and '/list/' in url:
-				self.list = cache.get(tmdb_indexer.TVshows().tmdb_collections_list, 0, url)
+				self.list = cache.get(tmdb_indexer().tmdb_collections_list, 0, url)
 			elif u in self.tmdb_link and not '/list/' in url:
-				self.list = tmdb_indexer.TVshows().tmdb_list(url) # caching handled in list indexer
+				self.list = tmdb_indexer().tmdb_list(url) # caching handled in list indexer
 			if self.list is None: self.list = []
 			if create_directory: self.tvshowDirectory(self.list)
 			return self.list
@@ -412,14 +415,14 @@ class TVshows:
 		return self.list
 
 	def networks(self):
-		networks = tmdb_indexer.TVshows().get_networks()
+		networks = tmdb_indexer().get_networks()
 		for i in networks:
 			self.list.append({'content': 'studios', 'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
 		self.addDirectory(self.list)
 		return self.list
 
 	def originals(self):
-		originals = tmdb_indexer.TVshows().get_originals()
+		originals = tmdb_indexer().get_originals()
 		for i in originals:
 			self.list.append({'content': 'studios', 'name': i[0], 'url': self.tmdb_networks_link % ('%s', i[1]), 'image': i[2], 'icon': i[2], 'action': 'tmdbTvshows'})
 		self.addDirectory(self.list)
@@ -464,7 +467,7 @@ class TVshows:
 		u = urlparse(url).netloc.lower()
 		try:
 			control.hide()
-			if u in self.tmdb_link: items = tmdb_indexer.userlists(url)
+			if u in self.tmdb_link: items = tmdb_indexer().userlists(url)
 			elif u in self.trakt_link:
 				if url in self.traktlikedlists_link:
 					items = self.traktLlikedlists()
@@ -507,7 +510,7 @@ class TVshows:
 			if self.tmdb_session_id == '': raise Exception()
 			self.list = []
 			url = self.tmdb_link + '/3/account/{account_id}/lists?api_key=%s&language=en-US&session_id=%s&page=1' % ('%s', self.tmdb_session_id)
-			lists = cache.get(tmdb_indexer.userlists, 0, url)
+			lists = cache.get(tmdb_indexer().userlists, 0, url)
 			for i in range(len(lists)): lists[i].update({'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbTvshows'})
 			userlists += lists
 		except: pass
@@ -897,7 +900,7 @@ class TVshows:
 				if not tvdb: tvdb = str(trakt_ids.get('tvdb', '')) if trakt_ids.get('tvdb') else ''
 			if not tmdb and (imdb or tvdb):
 				try:
-					result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
+					result = cache.get(tmdb_indexer().IdLookup, 96, imdb, tvdb)
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not imdb or not tmdb or not tvdb:
@@ -914,7 +917,7 @@ class TVshows:
 				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (self.list[i]['title'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-			showSeasons = tmdb_indexer.TVshows().get_showSeasons_meta(tmdb)
+			showSeasons = tmdb_indexer().get_showSeasons_meta(tmdb)
 			if not showSeasons or '404:NOT FOUND' in showSeasons: return # trakt search turns up alot of junk with wrong tmdb_id's
 			values = {}
 			values.update(showSeasons)
@@ -938,7 +941,7 @@ class TVshows:
 					from resources.lib.modules import log_utils
 					log_utils.error()
 			if self.enable_fanarttv:
-				extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+				extended_art = fanarttv_cache.get(FanartTv().get_tvshow_art, 336, tvdb)
 				if extended_art: values.update(extended_art)
 			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)
@@ -967,8 +970,13 @@ class TVshows:
 		for i in items:
 			try:
 				imdb, tmdb, tvdb, year, trailer = i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('trailer', '')
-				title = i.get('tvshowtitle') or i.get('title')
+				title = label = i.get('tvshowtitle') or i.get('title')
 				systitle = quote_plus(title)
+				try:
+					premiered = i['premiered']
+					if (not premiered and i['status'] in ('Rumored', 'Planned', 'In Production', 'Post Production', 'Upcoming')) or (int(re.sub('[^0-9]', '', premiered)) > int(re.sub('[^0-9]', '', str(self.today_date)))):
+						label = '[COLOR %s]%s [I][Coming Soon][/I][/COLOR]' % (self.unairedcolor, label)
+				except: pass
 				try: indicators = getSeasonIndicators(imdb, tvdb)
 				except: indicators = None
 				meta = dict((k, v) for k, v in iter(i.items()) if v is not None and v != '')
@@ -1020,7 +1028,7 @@ class TVshows:
 ####################################
 				if trailer: meta.update({'trailer': trailer}) # removed temp so it's not passed to CM items, only skin
 				else: meta.update({'trailer': '%s?action=play_Trailer&type=%s&name=%s&year=%s&imdb=%s' % (sysaddon, 'show', systitle, year, imdb)})
-				item = control.item(label=title, offscreen=True)
+				item = control.item(label=label, offscreen=True)
 				if 'castandart' in i: item.setCast(i['castandart'])
 				item.setArt(art)
 				try: 

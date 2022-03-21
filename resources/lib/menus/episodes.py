@@ -9,7 +9,8 @@ import re
 from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, fanarttv_cache, traktsync
-from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
+from resources.lib.indexers.tmdb import TVshows as tmdb_indexer
+from resources.lib.indexers.fanarttv import FanartTv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
@@ -37,7 +38,6 @@ class Episodes:
 		self.highlight_color = control.getHighlightColor()
 		self.date_time = datetime.now()
 		self.today_date = (self.date_time).strftime('%Y-%m-%d')
-
 		self.trakt_user = getSetting('trakt.username').strip()
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 		self.trakt_link = 'https://api.trakt.tv'
@@ -144,7 +144,7 @@ class Episodes:
 				direct = getSetting('trakt.directProgress.scrape') == 'true'
 				if trakt.getProgressActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct, True):
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct, True)
-				else: self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct, True)
+				else: self.list = cache.get(self.trakt_progress_list, 12, url, self.trakt_user, self.lang, direct, True)
 				try:
 					if not self.list: raise Exception()
 					for i in range(len(self.list)):
@@ -180,7 +180,7 @@ class Episodes:
 				direct = getSetting('trakt.directProgress.scrape') == 'true'
 				if trakt.getProgressActivity() > cache.timeout(self.trakt_progress_list, url, self.trakt_user, self.lang, direct):
 					self.list = cache.get(self.trakt_progress_list, 0, url, self.trakt_user, self.lang, direct)
-				else: self.list = cache.get(self.trakt_progress_list, 24, url, self.trakt_user, self.lang, direct)
+				else: self.list = cache.get(self.trakt_progress_list, 12, url, self.trakt_user, self.lang, direct)
 				self.sort(type='progress')
 				if self.list is None: self.list = []
 				# place new season ep1's at top of list for 1 week
@@ -281,13 +281,13 @@ class Episodes:
 	def tmdb_list(self, tvshowtitle, imdb, tmdb, tvdb, meta, season):
 		if not tmdb and (imdb or tvdb):
 			try:
-				result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
+				result = cache.get(tmdb_indexer().IdLookup, 96, imdb, tvdb)
 				tmdb = str(result.get('id')) if result.get('id') else ''
 			except:
 				if getSetting('debug.level') != '1': return
 				from resources.lib.modules import log_utils
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
-		seasonEpisodes = tmdb_indexer.TVshows().get_seasonEpisodes_meta(tmdb, season)
+		seasonEpisodes = tmdb_indexer().get_seasonEpisodes_meta(tmdb, season)
 		if not seasonEpisodes: return
 		if not isinstance(meta, dict): showSeasons = jsloads(meta)
 		else: showSeasons = meta
@@ -382,7 +382,7 @@ class Episodes:
 				try:
 					airs = item['show']['airs']
 					values['airday'] = airs.get('day', '')
-					values['airtime'] = airs.get('time', '')
+					values['airtime'] = airs.get('time', '')[:5] # Trakt rarely, but does, include seconds in it's airtime.
 					values['airzone'] = airs.get('timezone', '')
 				except: pass
 				items.append(values)
@@ -400,13 +400,13 @@ class Episodes:
 			imdb, tmdb, tvdb = i.get('imdb'), i.get('tmdb'), i.get('tvdb')
 			if not tmdb and (imdb or tvdb):
 				try:
-					result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
+					result = cache.get(tmdb_indexer().IdLookup, 96, imdb, tvdb)
 					values['tmdb'] = str(result.get('id', '')) if result.get('id') else ''
 				except:
 					from resources.lib.modules import log_utils
 					return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (i['tvshowtitle'], imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 			try:
-				showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
+				showSeasons = cache.get(tmdb_indexer().get_showSeasons_meta, 96, tmdb)
 				if not showSeasons: return
 				key = i['snum'] - 1 if showSeasons['seasons'][0]['season_number'] != 0 else i['snum']
 				try: next_episode_num = i['enum'] + 1 if showSeasons['seasons'][key]['episode_count'] > i['enum'] else 1
@@ -414,7 +414,7 @@ class Episodes:
 				next_season_num = i['snum'] if next_episode_num == i['enum'] + 1 else i['snum'] + 1
 				if next_season_num > showSeasons['total_seasons']: return
 				if not self.showspecials and next_season_num == 0: return
-				seasonEpisodes = cache.get(tmdb_indexer.TVshows().get_seasonEpisodes_meta, 96, tmdb, next_season_num)
+				seasonEpisodes = cache.get(tmdb_indexer().get_seasonEpisodes_meta, 96, tmdb, next_season_num)
 				if not seasonEpisodes: return
 				seasonEpisodes = dict((k,v) for k, v in iter(seasonEpisodes.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				try: episode_meta = [x for x in seasonEpisodes.get('episodes') if x.get('episode') == next_episode_num][0] # to pull just the episode meta we need
@@ -424,17 +424,24 @@ class Episodes:
 				values.update(seasonEpisodes)
 				values.update(episode_meta)
 				for k in ('seasons', 'episodes', 'snum', 'enum'): values.pop(k, None) # pop() keys from showSeasons and seasonEpisodes that are not needed anymore
+				try:
+					if values.get('premiered') and i.get('airtime'): combined = '%sT%s' % (values['premiered'], values['airtime'])
+					else: raise Exception()
+					air_datetime_list = tools.convert_time(stringTime=combined, zoneFrom=i.get('airzone', ''), zoneTo='local', formatInput='%Y-%m-%dT%H:%M', formatOutput='%Y-%m-%dT%H:%M').split('T')
+					air_date, air_time = air_datetime_list[0], air_datetime_list[1]
+				except:
+					air_date, air_time = values.get('premiered', '') if values.get('premiered') else '', i.get('airtime', '') if i.get('airtime') else ''
 				values['unaired'] = ''
 				if upcoming:
 					values['traktUpcomingProgress'] = True
 					try:
 						if values['status'].lower() == 'ended': return
-						elif not values['premiered']: values['unaired'] = 'true'
-						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))): values['unaired'] = 'true'
-						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) == int(re.sub(r'[^0-9]', '', str(self.today_date))):
-							if values['airtime']:
+						elif not air_date: values['unaired'] = 'true'
+						elif int(re.sub(r'[^0-9]', '', air_date)) > int(re.sub(r'[^0-9]', '', str(self.today_date))): values['unaired'] = 'true'
+						elif int(re.sub(r'[^0-9]', '', air_date)) == int(re.sub(r'[^0-9]', '', str(self.today_date))):
+							if air_time:
 								time_now = (self.date_time).strftime('%X')
-								if int(re.sub(r'[^0-9]', '', str(values['airtime']))) > int(re.sub(r'[^0-9]', '', str(time_now))[:4]): values['unaired'] = 'true'
+								if int(re.sub(r'[^0-9]', '', air_time)) > int(re.sub(r'[^0-9]', '', str(time_now))[:4]): values['unaired'] = 'true'
 								else: return
 							else: pass
 						else: return
@@ -444,16 +451,16 @@ class Episodes:
 				else:
 					try:
 						if values['status'].lower() == 'ended': pass
-						elif not values['premiered']:
+						elif not air_date:
 							values['unaired'] = 'true'
 							if not progress_showunaired: return
-						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
+						elif int(re.sub(r'[^0-9]', '', air_date)) > int(re.sub(r'[^0-9]', '', str(self.today_date))):
 							values['unaired'] = 'true'
 							if not progress_showunaired: return
-						elif int(re.sub(r'[^0-9]', '', str(values['premiered']))) == int(re.sub(r'[^0-9]', '', str(self.today_date))):
-							if values['airtime']:
+						elif int(re.sub(r'[^0-9]', '', air_date)) == int(re.sub(r'[^0-9]', '', str(self.today_date))):
+							if air_time:
 								time_now = (self.date_time).strftime('%X')
-								if int(re.sub(r'[^0-9]', '', str(values['airtime']))) > int(re.sub(r'[^0-9]', '', str(time_now))[:4]):
+								if int(re.sub(r'[^0-9]', '', air_time)) > int(re.sub(r'[^0-9]', '', str(time_now))[:4]):
 									values['unaired'] = 'true'
 									if not progress_showunaired: return
 							else: pass
@@ -464,7 +471,7 @@ class Episodes:
 				values['traktProgress'] = True # for direct progress scraping and multi episode watch counts indicators
 				values['extended'] = True # used to bypass calling "super_info()", super_info() no longer used as of 4-12-21 so this could be removed.
 				if self.enable_fanarttv:
-					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+					extended_art = fanarttv_cache.get(FanartTv().get_tvshow_art, 336, tvdb)
 					if extended_art: values.update(extended_art)
 				self.list.append(values)
 			except:
@@ -478,11 +485,10 @@ class Episodes:
 		[i.join() for i in threads]
 		return self.list
 
-	def trakt_list(self, url, user, count=False):
+	def trakt_list(self, url, user):
 		itemlist = []
 		try:
-			for i in re.findall(r'date\[(\d+)\]', url):
-				url = url.replace('date[%s]' % i, (self.date_time - timedelta(days=int(i))).strftime('%Y-%m-%d'))
+			for i in re.findall(r'date\[(\d+)\]', url): url = url.replace('date[%s]' % i, (self.date_time - timedelta(days=int(i))).strftime('%Y-%m-%d'))
 			q = dict(parse_qsl(urlsplit(url).query))
 			q.update({'extended': 'full'})
 			q = (urlencode(q)).replace('%2C', ',')
@@ -567,7 +573,7 @@ class Episodes:
 			values = i
 			tmdb, tvdb = i['tmdb'], i['tvdb']
 			try:
-				seasonEpisodes = cache.get(tmdb_indexer.TVshows().get_seasonEpisodes_meta, 96, tmdb, i['season'])
+				seasonEpisodes = cache.get(tmdb_indexer().get_seasonEpisodes_meta, 96, tmdb, i['season'])
 				if not seasonEpisodes: return
 				try: episode_meta = [x for x in seasonEpisodes.get('episodes') if x.get('episode') == i['episode']][0] # to pull just the episode meta we need
 				except: return
@@ -578,11 +584,11 @@ class Episodes:
 				values.update(episode_meta)
 				for k in ('episodes',): values.pop(k, None) # pop() keys from seasonEpisodes that are not needed anymore
 				try: # used for fanart fetch since not available in seasonEpisodes request
-					art = cache.get(tmdb_indexer.TVshows().get_art, 96, tmdb)
+					art = cache.get(tmdb_indexer().get_art, 96, tmdb)
 					values.update(art)
 				except: pass
 				if self.enable_fanarttv:
-					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+					extended_art = fanarttv_cache.get(FanartTv().get_tvshow_art, 336, tvdb)
 					if extended_art: values.update(extended_art)
 				values['extended'] = True # used to bypass calling "super_info()", super_info() no longer used as of 4-12-21 so this could be removed.
 				if not direct: values['action'] = 'episodes'
@@ -598,7 +604,7 @@ class Episodes:
 		[i.join() for i in threads]
 		return self.list
 
-	def tvmaze_list(self, url, limit, count=False):
+	def tvmaze_list(self, url, limit):
 		try:
 			result = client.request(url, error=True)
 			result = jsloads(result)
@@ -662,7 +668,7 @@ class Episodes:
 							tmdb = str(trakt_ids.get('tmdb', '')) if trakt_ids.get('tmdb') else ''
 					if not values['poster'] or not values['thumb']:
 						try:
-							art = cache.get(tmdb_indexer.TVshows().get_art, 96, tmdb)
+							art = cache.get(tmdb_indexer().get_art, 96, tmdb)
 							if not values['poster']: values['poster'] = art['poster3'] or ''
 							if not values['thumb']: values['thumb'] = art['fanart3'] or ''
 						except: pass
@@ -670,7 +676,7 @@ class Episodes:
 					values['fanart'] = values['thumb']
 					values['season_poster'] = values['poster']
 					if self.enable_fanarttv:
-						extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+						extended_art = fanarttv_cache.get(FanartTv().get_tvshow_art, 336, tvdb)
 						if extended_art: values.update(extended_art)
 				values['imdb'] = imdb
 				values['tmdb'] = tmdb

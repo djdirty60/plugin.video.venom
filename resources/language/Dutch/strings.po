@@ -955,10 +955,26 @@ msgid "Rescrape Item [COLOR %s][B]Filterless(FS)[/B][/COLOR] with [COLOR %s][B]A
 msgstr "Rescrape item [COLOR %s][B]Filterless(FS)[/B][/COLOR] met [COLOR %s][B]Alle providers[/B][/COLOR] - Bron selecteren"
 
 msgctxt "#32233"
-msgid ""
-msgstr ""
+msgid "TMDb image resolutions"
+msgstr "TMDb-beeldresoluties"
 
 msgctxt "#32234"
+msgid "Low"
+msgstr "Laag"
+
+msgctxt "#32235"
+msgid "Medium"
+msgstr "Medium"
+
+msgctxt "#32236"
+msgid "High"
+msgstr "Hoog"
+
+msgctxt "#32237"
+msgid "Original"
+msgstr "Origineel"
+
+msgctxt "#32238"
 msgid ""
 msgstr ""
 
@@ -1338,12 +1354,12 @@ msgid "Certification prefix"
 msgstr "Certificering voorvoegsel"
 
 msgctxt "#32393"
-msgid ""
-msgstr ""
+msgid "Using default available %s subtitle from stream"
+msgstr "Standaard beschikbare %s ondertiteling van stream gebruiken"
 
 msgctxt "#32394"
-msgid ""
-msgstr ""
+msgid "Preferred %s subtitle available in stream and has been set"
+msgstr "Voorkeur %s ondertitel beschikbaar in stream en is ingesteld"
 
 msgctxt "#32395"
 msgid ""

@@ -8,7 +8,8 @@ from json import dumps as jsdumps, loads as jsloads
 import re
 from urllib.parse import quote_plus
 from resources.lib.database import cache
-from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
+from resources.lib.indexers.tmdb import TVshows as tmdb_indexer
+from resources.lib.indexers.fanarttv import FanartTv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import control
 from resources.lib.modules.playcount import getSeasonIndicators, getSeasonOverlay, getSeasonCount
@@ -38,9 +39,9 @@ class Seasons:
 		self.list = []
 		if idx:
 			self.list = cache.get(self.tmdb_list, 720, tvshowtitle, imdb, tmdb, tvdb, art)
-			status = self.list[0]['status'].lower()
-			if not any(value in status for value in ('ended', 'canceled')):
-				self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, art)
+			if self.list:
+				if not self.list[0]['status'].lower() in ('ended', 'canceled'):
+					self.list = cache.get(self.tmdb_list, 96, tvshowtitle, imdb, tmdb, tvdb, art)
 			if self.list is None: self.list = []
 			if create_directory: self.seasonDirectory(self.list)
 			return self.list
@@ -59,7 +60,7 @@ class Seasons:
 			if not tvdb: tvdb = str(trakt_ids.get('tvdb', '')) if trakt_ids.get('tvdb') else ''
 		if not tmdb and (imdb or tvdb):
 			try:
-				result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
+				result = cache.get(tmdb_indexer().IdLookup, 96, imdb, tvdb)
 				tmdb = str(result.get('id')) if result else ''
 			except:
 				if getSetting('debug.level') != '1': return
@@ -67,7 +68,7 @@ class Seasons:
 				return log_utils.log('tvshowtitle: (%s) missing tmdb_id: ids={imdb: %s, tmdb: %s, tvdb: %s}' % (tvshowtitle, imdb, tmdb, tvdb), __name__, log_utils.LOGDEBUG) # log TMDb shows that they do not have
 #################################
 		list = []
-		showSeasons = tmdb_indexer.TVshows().get_showSeasons_meta(tmdb)
+		showSeasons = tmdb_indexer().get_showSeasons_meta(tmdb)
 		if not showSeasons: return
 		if not showSeasons.get('imdb'): showSeasons['imdb'] = imdb # use value passed from tvshows super_info() due to extensive ID lookups
 		if not showSeasons.get('tvdb'): showSeasons['tvdb'] = tvdb
@@ -101,7 +102,7 @@ class Seasons:
 				if not values['poster'] and art: values['poster'] = art['poster'] if 'poster' in art else ''
 				values['season_poster'] = values['poster']
 				values['season'] = str(int(item['season_number']))
-				if self.enable_fanarttv: values['season_poster2'] = fanarttv.get_season_poster(tvdb, values['season'])
+				if self.enable_fanarttv: values['season_poster2'] = FanartTv().get_season_poster(tvdb, values['season'])
 				if art:
 					values['fanart'] = art['fanart']
 					values['icon'] = art['icon']
@@ -126,8 +127,6 @@ class Seasons:
 		is_widget = 'plugin' not in control.infoLabel('Container.PluginName')
 		settingFanart = getSetting('fanart') == 'true'
 		addonPoster, addonFanart, addonBanner = control.addonPoster(), control.addonFanart(), control.addonBanner()
-		# try: indicators = getSeasonIndicators(items[0]['imdb'], items[0]['tvdb'])
-		# except: indicators = None
 		if trakt.getTraktIndicatorsInfo():
 			watchedMenu, unwatchedMenu = getLS(32068), getLS(32069)
 		else:
@@ -139,14 +138,12 @@ class Seasons:
 		try: multi = [i['tvshowtitle'] for i in items]
 		except: multi = []
 		multi = True if len([x for y,x in enumerate(multi) if x not in multi[:y]]) > 1 else False
-
-		imdb, tmdb, tvdb = items[0]['imdb'], items[0]['tmdb'], items[0]['tvdb']
-		try: indicators = getSeasonIndicators(imdb, tvdb)
-		except: indicators = None
-
+		if items:
+			imdb, tmdb, tvdb = items[0]['imdb'], items[0]['tmdb'], items[0]['tvdb']
+			try: indicators = getSeasonIndicators(imdb, tvdb)
+			except: indicators = None
 		for i in items:
 			try:
-				# title, imdb, tmdb, tvdb, year, season = i.get('tvshowtitle'), i.get('imdb', ''), i.get('tmdb', ''), i.get('tvdb', ''), i.get('year', ''), i.get('season')
 				title, year, season = i.get('tvshowtitle'), i.get('year', ''), i.get('season')
 				label = '%s %s' % (labelMenu, season)
 				try:
@@ -211,10 +208,7 @@ class Seasons:
 							else:
 								item.setProperties({'WatchedEpisodes': '0', 'UnWatchedEpisodes': '0'})
 								item.setProperties({'TotalSeasons': str(meta.get('total_seasons', '')), 'TotalEpisodes': '0'})
-				except:
-					from resources.lib.modules import log_utils
-					log_utils.error()
-					pass
+				except: pass
 
 				if is_widget: item.setProperty('isVenom_widget', 'true')
 				try: # Year is the shows year, not the seasons year. Extract year from premier date for InfoLabels to have "season_year".

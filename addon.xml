@@ -1,4 +1,4 @@
-<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.5.3">
+<addon id="plugin.video.venom" name="[COLOR red]Venom[/COLOR]" provider-name="Venom" version="6.5.4">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
 		<import addon="context.venom" />
@@ -32,14 +32,14 @@
 			<screenshot>resources/screenshots/screenshot003.jpg</screenshot>
 		</assets>
 		<news>
-[B][COLOR red]Update - v6.5.3 - March 11, 2022[/COLOR][/B]
-[COLOR yellow]--[/COLOR][I] Fixed window size issue in "Trakt Management Tools-Liked List Manager" xml that prevented bottom item being fully visible.[/I]
-[COLOR yellow]--[/COLOR][I] Added "FLAC" audio identification and icon for source select xml.[/I]
-[COLOR yellow]--[/COLOR][I] Using "View Uncached Torrents" will now return focus back to the listItem you left the source select list on.[/I]
-[COLOR yellow]--[/COLOR][I] Added help file for when user enables the filter to remove Dolby Vision sources while still electing to keep HDR sources.  The help file explains how some source are hybrid "Dolby vision and HDR" and could be kept.[/I]
-[COLOR yellow]--[/COLOR][I] Added episode info ex. "S01E01" to the source select info bar above the poster.[/I]
-[COLOR yellow]--[/COLOR][I] Added 'Filterless' rescrape options to the "Rescrape Options" Menu of choices.  This will disable FenomScrapers "undesirables" and "single foreign audio" filters on the fly but not Venom's filters at this time.[/I]
-[COLOR yellow]--[/COLOR][I] Improved PM error logging for failed to resolve source.[/I]
+[B][COLOR red]Update - v6.5.4 - March 21, 2022[/COLOR][/B]
+[COLOR yellow]--[/COLOR][I] Added Setting under General category to select [B]"TMDb image resolutions"[/B], options are "low, medium, high, and original".[/I]
+[COLOR yellow]--[/COLOR][I] Fixed [B]"Select All"[/B] button in many [B]"Trakt Management Tools"[/B] menus.  The option was not returning the array of selected items so it did nothing.[/I]
+[COLOR yellow]--[/COLOR][I] Subtitle handling improvements, thank you host505.[/I]
+[COLOR yellow]--[/COLOR][I] Fixed issue where a new TVShow with no aired episodes would throw an error if the setting to show unaired episodes was disabled.[/I]
+[COLOR yellow]--[/COLOR][I] Trakt Progress and Upcoming Progress will now convert airdate and airtime info based on user time zone.  This now allows aired episodes to more accurately transition from Upcoming Progress to Progress as the episode becomes official aired for users time zone.[/I]
+[COLOR yellow]--[/COLOR][I] Increased fanarttv cache duration from 1 week to 2 as it seems updates are not as frequent as perceived. The database will slowly rebuild from scratch on this update so expect initial load times to appear slower than normal but subsequent load times will drastically decrease.[/I]
+[COLOR yellow]--[/COLOR][I] Added [B]"Hawaii Five-0": "2010"[/B] to dict of known reboot shows to better filter out source links without the original shows year.[/I]
 		</news>
 	</extension>
 </addon>

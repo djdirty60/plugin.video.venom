@@ -57,6 +57,7 @@ class TraktLikedListManagerXML(BaseDialog):
 				elif focus_id == 2053: # Select All Button
 					for item in self.item_list:
 						item.setProperty('venom.isSelected', 'true')
+						self.selected_items.append({'list_owner': item.getProperty('venom.list_owner'), 'list_name': item.getProperty('venom.list_name'), 'trakt_id': item.getProperty('venom.trakt_id')})
 			elif action in self.closing_actions:
 				self.selected_items = None
 				self.close()

@@ -16,6 +16,8 @@ from resources.lib.modules import playcount
 from resources.lib.modules import trakt
 
 LOGINFO = 1
+getLS = control.lang
+getSetting = control.setting
 homeWindow = control.homeWindow
 playerWindow = control.playerWindow
 
@@ -34,8 +36,8 @@ class Player(xbmc.Player):
 		self.media_length = 0
 		self.current_time = 0
 		self.meta = {}
-		self.enable_playnext = control.setting('enable.playnext') == 'true'
-		self.playnext_time = int(control.setting('playnext.time')) or 60
+		self.enable_playnext = getSetting('enable.playnext') == 'true'
+		self.playnext_time = int(getSetting('playnext.time')) or 60
 		self.traktCredentials = trakt.getTraktCredentialsInfo()
 
 	def play_source(self, title, year, season, episode, imdb, tmdb, tvdb, url, meta, debridPackCall=False):
@@ -51,10 +53,10 @@ class Player(xbmc.Player):
 			self.imdb, self.tmdb, self.tvdb = imdb or '', tmdb or '', tvdb or ''
 			self.ids = {'imdb': self.imdb, 'tmdb': self.tmdb, 'tvdb': self.tvdb}
 ## - compare meta received to database and use largest(eventually switch to a request to fetch missing db meta for item)
-			self.imdb_user = control.setting('imdb.user').replace('ur', '')
-			self.tmdb_key = control.setting('tmdb.api.key')
+			self.imdb_user = getSetting('imdb.user').replace('ur', '')
+			self.tmdb_key = getSetting('tmdb.api.key')
 			if not self.tmdb_key: self.tmdb_key = '3320855e65a9758297fec4f7c9717698'
-			self.tvdb_key = control.setting('tvdb.api.key')
+			self.tvdb_key = getSetting('tvdb.api.key')
 			if self.media_type == 'episode': self.user = str(self.imdb_user) + str(self.tvdb_key)
 			else: self.user = str(self.tmdb_key)
 			self.lang = control.apiLanguage()['tvdb']
@@ -316,7 +318,7 @@ class Player(xbmc.Player):
 			control.sleep(200)
 			self.seekTime(float(self.offset))
 			self.playback_resumed = True
-		if control.setting('subtitles') == 'true':
+		if getSetting('subtitles') == 'true':
 			Subtitles().get(self.name, self.imdb, self.season, self.episode)
 		xbmc.log('[ plugin.video.venom ] onAVStarted callback', LOGINFO)
 		log_utils.log('[ plugin.video.venom ] onAVStarted callback', level=log_utils.LOGDEBUG)
@@ -342,12 +344,12 @@ class Player(xbmc.Player):
 				self.onPlayBackStopped_ran = True
 				self.playbackStopped_triggered = False
 				Bookmarks().reset(self.current_time, self.media_length, self.name, self.year)
-				if self.traktCredentials and (control.setting('trakt.scrobble') == 'true'):
+				if self.traktCredentials and (getSetting('trakt.scrobble') == 'true'):
 					Bookmarks().set_scrobble(self.current_time, self.media_length, self.media_type, self.imdb, self.tmdb, self.tvdb, self.season, self.episode)
 				watcher = self.getWatchedPercent()
 				seekable = (int(self.current_time) > 180 and (watcher < 85))
 				if watcher >= 85: self.libForPlayback() # only write playcount to local lib
-				if control.setting('crefresh') == 'true' and seekable: control.refresh() #not all skins refresh after playback stopped
+				if getSetting('crefresh') == 'true' and seekable: control.refresh() #not all skins refresh after playback stopped
 				control.playlist.clear()
 				# control.trigger_widget_refresh() # skinshortcuts handles widget refresh
 				xbmc.log('[ plugin.video.venom ] onPlayBackStopped callback', LOGINFO)
@@ -379,8 +381,8 @@ class Player(xbmc.Player):
 class PlayNext(xbmc.Player):
 	def __init__(self):
 		super(PlayNext, self).__init__()
-		self.enable_playnext = control.setting('enable.playnext') == 'true'
-		self.stillwatching_count = int(control.setting('stillwatching.count'))
+		self.enable_playnext = getSetting('enable.playnext') == 'true'
+		self.stillwatching_count = int(getSetting('stillwatching.count'))
 		self.playing_file = None
 
 	def display_xml(self):
@@ -480,8 +482,7 @@ class Subtitles:
 			import re, base64
 			import xmlrpc.client as xmlrpc_client
 		except:
-			log_utils.error()
-			return
+			return log_utils.error()
 		try:
 			langDict = {'Afrikaans': 'afr', 'Albanian': 'alb', 'Arabic': 'ara', 'Armenian': 'arm', 'Basque': 'baq', 'Bengali': 'ben',
 			'Bosnian': 'bos', 'Breton': 'bre', 'Bulgarian': 'bul', 'Burmese': 'bur', 'Catalan': 'cat', 'Chinese': 'chi', 'Croatian': 'hrv',
@@ -496,21 +497,35 @@ class Subtitles:
 			codePageDict = {'ara': 'cp1256', 'ar': 'cp1256', 'ell': 'cp1253', 'el': 'cp1253', 'heb': 'cp1255',
 									'he': 'cp1255', 'tur': 'cp1254', 'tr': 'cp1254', 'rus': 'cp1251', 'ru': 'cp1251'}
 			quality = ['bluray', 'hdrip', 'brrip', 'bdrip', 'dvdrip', 'webrip', 'hdtv']
-			langs = []
-			try:
-				try: langs = langDict[control.setting('subtitles.lang.1')].split(',')
-				except: langs.append(langDict[control.setting('subtitles.lang.1')])
-			except: pass
-			try:
-				try: langs = langs + langDict[control.setting('subtitles.lang.2')].split(',')
-				except: langs.append(langDict[control.setting('subtitles.lang.2')])
-			except: pass
+
+			langs = langDict[getSetting('subtitles.lang.1')].split(',')
+			langs = langs + langDict[getSetting('subtitles.lang.2')].split(',')
+
 			try: subLang = xbmc.Player().getSubtitles()
 			except: subLang = ''
+			if subLang == 'gre': subLang = 'ell'
+			if subLang == langs[0]: 
+				if getSetting('subtitles.notification') == 'true':
+					if Player().isPlayback():
+						control.sleep(1000)
+						control.notification(message=getLS(32393) % subLang.upper(), time=5000)
+				return log_utils.log(getLS(32393) % subLang.upper(), level=log_utils.LOGDEBUG)
+			try:
+				subLangs = xbmc.Player().getAvailableSubtitleStreams()
+				if 'gre' in subLangs: subLangs[subLangs.index('gre')] = 'ell'
+				subLang = [i for i in subLangs if i == langs[0]][0]
+			except:
+				subLangs = subLang = ''
+			if subLangs and subLang == langs[0]:
+				control.sleep(1000)
+				xbmc.Player().setSubtitleStream(subLangs.index(subLang))
+				if getSetting('subtitles.notification') == 'true':
+					if Player().isPlayback():
+						control.sleep(1000)
+						control.notification(message=getLS(32394) % subLang.upper(), time=5000)
+				return log_utils.log(getLS(32394) % subLang.upper(), level=log_utils.LOGDEBUG)
 
-			if subLang == langs[0]: raise Exception()
 			server = xmlrpc_client.Server('https://api.opensubtitles.org/xml-rpc', verbose=0)
-			# token = server.LogIn('', '', 'en', 'XBMC_Subtitles_v1')
 			token = server.LogIn('', '', 'en', 'XBMC_Subtitles_Unofficial_v5.2.14') # service.subtitles.opensubtitles_by_opensubtitles
 			if 'token' not in token:
 				return log_utils.log('OpenSubtitles Login failed: token=%s' % token, level=log_utils.LOGWARNING)
@@ -548,22 +563,23 @@ class Subtitles:
 			subtitle = control.joinPath(subtitle, 'TemporarySubs.%s.srt' % lang)
 			log_utils.log('subtitle file = %s' % subtitle, level=log_utils.LOGDEBUG)
 
-			codepage = codePageDict.get(lang, '')
-			if codepage and control.setting('subtitles.utf') == 'true':
-				try:
-					content_encoded = codecs.decode(content, codepage) # check for kodi 19?
-					content = codecs.encode(content_encoded, 'utf-8') # check for kodi 19?
-				except: pass
+			if getSetting('subtitles.utf') == 'true':
+				codepage = codePageDict.get(lang, '')
+				if codepage and not filter[0].get('SubEncoding', '').lower() == 'utf-8':
+					try:
+						content_encoded = codecs.decode(content, codepage)
+						content = codecs.encode(content_encoded, 'utf-8')
+					except: pass
 
 			file = control.openFile(subtitle, 'w')
 			file.write(content)
 			file.close()
 			xbmc.sleep(1000)
 			xbmc.Player().setSubtitles(subtitle)
-			if control.setting('subtitles.notification') == 'true':
+			if getSetting('subtitles.notification') == 'true':
 				if Player().isPlayback():
 					control.sleep(500)
-					control.notification(title=filename, message=control.lang(32191) % lang.upper())
+					control.notification(title=filename, message=getLS(32191) % lang.upper())
 		except:
 			log_utils.error()
 
@@ -572,8 +588,8 @@ class Bookmarks:
 	def get(self, name, imdb=None, tmdb=None, tvdb=None, season=None, episode=None, year='0', runtime=None, ck=False):
 		offset = '0'
 		scrobbble = 'Local Bookmark'
-		if control.setting('bookmarks') != 'true': return offset
-		if control.setting('trakt.scrobble') == 'true' and control.setting('resume.source') == '1':
+		if getSetting('bookmarks') != 'true': return offset
+		if getSetting('trakt.scrobble') == 'true' and getSetting('resume.source') == '1':
 			scrobbble = 'Trakt Scrobble'
 			try:
 				if not runtime or runtime == 'None': return offset # TMDB sometimes return None as string. duration pulled from kodi library if missing from meta
@@ -604,9 +620,9 @@ class Bookmarks:
 		minutes, seconds = divmod(float(offset), 60)
 		hours, minutes = divmod(minutes, 60)
 		label = '%02d:%02d:%02d' % (hours, minutes, seconds)
-		label = control.lang(32502) % label
-		if control.setting('bookmarks.auto') == 'false':
-			select = control.yesnocustomDialog(label, scrobbble, '', str(name), 'Cancel Playback', control.lang(32503), control.lang(32501))
+		label = getLS(32502) % label
+		if getSetting('bookmarks.auto') == 'false':
+			select = control.yesnocustomDialog(label, scrobbble, '', str(name), 'Cancel Playback', getLS(32503), getLS(32501))
 			if select == 1: offset = '0'
 			elif select == -1 or select == 2: offset = '-1'
 		return offset
@@ -615,7 +631,7 @@ class Bookmarks:
 		try:
 			from resources.lib.database import cache
 			cache.clear_local_bookmarks() # clear all venom bookmarks from kodi database
-			if control.setting('bookmarks') != 'true' or media_length == 0 or current_time == 0: return
+			if getSetting('bookmarks') != 'true' or media_length == 0 or current_time == 0: return
 			timeInSeconds = str(current_time)
 			seekable = (int(current_time) > 180 and (current_time / media_length) < .85)
 			idFile = md5()
@@ -635,7 +651,7 @@ class Bookmarks:
 				minutes, seconds = divmod(float(timeInSeconds), 60)
 				hours, minutes = divmod(minutes, 60)
 				label = ('%02d:%02d:%02d' % (hours, minutes, seconds))
-				message = control.lang(32660)
+				message = getLS(32660)
 				control.notification(title=name, message=message + '(' + label + ')')
 			dbcur.connection.commit()
 			try: dbcur.close ; dbcon.close()

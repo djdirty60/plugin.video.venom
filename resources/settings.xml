@@ -19,6 +19,7 @@
 		<setting type="action" label="32137" action="RunPlugin(plugin://plugin.video.venom/?action=tools_ShowHelp&amp;name=enableFanartTV)" visible="eq(-1,true)" />
 		<setting type="action" label="32620" subsetting="true" action="RunPlugin(plugin://plugin.video.venom/?action=cache_clearMetaAndCache)" visible="eq(-2,true)" />
 		<setting id="prefer.tmdbArt" type="bool" label="32079" subsetting="true" default="true" visible="eq(-3,true)" />
+		<setting id="tmdb.imageResolutions" type="enum" label="32233" lvalues="32234|32235|32236|32237" default="1" />
 		<setting id="hidecinema" type="bool" label="32571" default="false" />
 		<setting id="hidecinema.rollback" type="slider" label="40063"  subsetting="true" default="6" range="1,12" option="int" visible="eq(-1,true)" />
 		<setting id="movie.unaired.identify" type="select" label="35526" lvalues="32589|32590|32591|32592|32593|32594|32595|32596|32597|32666|32667|32668|32669|32670|32671|32598" default="8" />

@@ -42,7 +42,7 @@ def get(function, duration, *args):
 		else:
 			args = str(args)
 			if '404:NOT FOUND' in fresh_result:
-				cache_insert(key, args, None) # cache_insert() "404:NOT FOUND" cases only as None type
+				cache_insert(key, args, None) # cache_insert() "404:NOT FOUND" cases only as None type to avoid repeated requests
 				return None
 			else: cache_insert(key, args, fresh_result)
 			return literal_eval(fresh_result)

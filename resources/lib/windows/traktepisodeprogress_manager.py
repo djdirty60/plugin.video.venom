@@ -66,6 +66,8 @@ class TraktEpisodeProgressManagerXML(BaseDialog):
 				elif focus_id == 2063: # Select All Button
 					for item in self.item_list:
 						item.setProperty('venom.isSelected', 'true')
+						self.selected_items.append({'imdb': item.getProperty('venom.imdb'), 'tvdb': item.getProperty('venom.tvdb'),
+							'season': item.getProperty('venom.season'), 'episode': item.getProperty('venom.episode')})
 				elif focus_id == 2045: # Stop Trailer Playback Button
 					self.execute_code('PlayerControl(Stop)')
 					sleep(500)

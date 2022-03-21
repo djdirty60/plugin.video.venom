@@ -955,10 +955,26 @@ msgid "Rescrape Item [COLOR %s][B]Filterless(FS)[/B][/COLOR] with [COLOR %s][B]A
 msgstr "Scrape Item [COLOR %s][B]Filterless(FS)[/B][/COLOR] mit [COLOR %s][B]All Providers[/B][/COLOR] – Source Select"
 
 msgctxt "#32233"
-msgid ""
-msgstr ""
+msgid "TMDb image resolutions"
+msgstr "TMDb-Bildauflösungen"
 
 msgctxt "#32234"
+msgid "Low"
+msgstr "Niedrig"
+
+msgctxt "#32235"
+msgid "Medium"
+msgstr "Mittel"
+
+msgctxt "#32236"
+msgid "High"
+msgstr "Hoch"
+
+msgctxt "#32237"
+msgid "Original"
+msgstr "Original"
+
+msgctxt "#32238"
 msgid ""
 msgstr ""
 
@@ -1338,12 +1354,12 @@ msgid "Certification prefix"
 msgstr "Zertifizierungspräfix"
 
 msgctxt "#32393"
-msgid ""
-msgstr ""
+msgid "Using default available %s subtitle from stream"
+msgstr "Verwenden des standardmäßig verfügbaren %s Untertitels aus dem Stream"
 
 msgctxt "#32394"
-msgid ""
-msgstr ""
+msgid "Preferred %s subtitle available in stream and has been set"
+msgstr "Bevorzugter %s Untertitel im Stream verfügbar und wurde festgelegt"
 
 msgctxt "#32395"
 msgid ""

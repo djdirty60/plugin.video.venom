@@ -955,10 +955,26 @@ msgid "Rescrape Item [COLOR %s][B]Filterless(FS)[/B][/COLOR] with [COLOR %s][B]A
 msgstr ""
 
 msgctxt "#32233"
-msgid ""
+msgid "TMDb image resolutions"
 msgstr ""
 
 msgctxt "#32234"
+msgid "Low"
+msgstr ""
+
+msgctxt "#32235"
+msgid "Medium"
+msgstr ""
+
+msgctxt "#32236"
+msgid "High"
+msgstr ""
+
+msgctxt "#32237"
+msgid "Original"
+msgstr ""
+
+msgctxt "#32238"
 msgid ""
 msgstr ""
 
@@ -1338,11 +1354,11 @@ msgid "Certification prefix"
 msgstr ""
 
 msgctxt "#32393"
-msgid ""
+msgid "Using default available %s subtitle from stream"
 msgstr ""
 
 msgctxt "#32394"
-msgid ""
+msgid "Preferred %s subtitle available in stream and has been set"
 msgstr ""
 
 msgctxt "#32395"

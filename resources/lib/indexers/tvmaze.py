@@ -8,7 +8,8 @@ import requests
 from threading import Thread
 from urllib.parse import quote_plus
 from resources.lib.database import cache, metacache, fanarttv_cache
-from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
+from resources.lib.indexers.tmdb import TVshows as tmdb_indexer
+from resources.lib.indexers.fanarttv import FanartTv
 from resources.lib.modules import client
 from resources.lib.modules.control import notification, sleep, apiLanguage, setting as getSetting
 from resources.lib.modules import log_utils
@@ -316,7 +317,7 @@ class tvshows:
 #### -- Missing id's lookup -- ####
 				if not tmdb and (imdb or tvdb):
 					try:
-						result = cache.get(tmdb_indexer.TVshows().IdLookup, 96, imdb, tvdb)
+						result = cache.get(tmdb_indexer().IdLookup, 96, imdb, tvdb)
 						tmdb = str(result.get('id', '')) if result.get('id') else ''
 					except: tmdb = ''
 				if not imdb or not tmdb or not tvdb:
@@ -335,7 +336,7 @@ class tvshows:
 				# self.list = metacache.fetch(self.list, self.lang, self.user)
 				# if self.list['metacache'] is True: raise Exception()
 
-				showSeasons = cache.get(tmdb_indexer.TVshows().get_showSeasons_meta, 96, tmdb)
+				showSeasons = cache.get(tmdb_indexer().get_showSeasons_meta, 96, tmdb)
 				if not showSeasons: return
 				showSeasons = dict((k, v) for k, v in iter(showSeasons.items()) if v is not None and v != '') # removes empty keys so .update() doesn't over-write good meta
 				values.update(showSeasons)
@@ -344,7 +345,7 @@ class tvshows:
 				if not values.get('tvdb'): values['tvdb'] = tvdb
 				for k in ('seasons',): values.pop(k, None) # pop() keys from showSeasons that are not needed anymore
 				if self.enable_fanarttv:
-					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+					extended_art = fanarttv_cache.get(FanartTv().get_tvshow_art, 336, tvdb)
 					if extended_art: values.update(extended_art)
 				meta = {'imdb': imdb, 'tmdb': tmdb, 'tvdb': tvdb, 'lang': self.lang, 'user': self.user, 'item': values} # DO NOT move this after "values = dict()" below or it becomes the same object and "del meta['item']['next']" removes it from both
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '')

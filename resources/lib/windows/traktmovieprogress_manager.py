@@ -57,6 +57,7 @@ class TraktMovieProgressManagerXML(BaseDialog):
 				elif focus_id == 2053: # Select All Button
 					for item in self.item_list:
 						item.setProperty('venom.isSelected', 'true')
+						self.selected_items.append(item.getProperty('venom.imdb'))
 				elif focus_id == 2045: # Stop Trailer Playback Button
 					self.execute_code('PlayerControl(Stop)')
 					sleep(500)

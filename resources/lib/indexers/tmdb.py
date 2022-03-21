@@ -10,110 +10,128 @@ from requests.adapters import HTTPAdapter
 from threading import Thread
 from urllib3.util.retry import Retry
 from resources.lib.database import cache, metacache, fanarttv_cache
-from resources.lib.indexers import fanarttv
+from resources.lib.indexers.fanarttv import FanartTv
 from resources.lib.modules.control import setting as getSetting, notification, sleep, apiLanguage, mpaCountry, trailer as control_trailer, yesnoDialog
 
-API_key = getSetting('tmdb.api.key')
-if not API_key: API_key = '3320855e65a9758297fec4f7c9717698'
 base_link = 'https://api.themoviedb.org/3/'
-tmdb_networks = base_link + 'discover/tv?api_key=%s&sort_by=popularity.desc&with_networks=%s&page=1' % (API_key, '%s')
-poster_path = 'https://image.tmdb.org/t/p/w342'
-fanart_path = 'https://image.tmdb.org/t/p/w1280'
-still_path = 'https://image.tmdb.org/t/p/w500'
-profile_path = 'https://image.tmdb.org/t/p/w185'
-session = requests.Session()
-retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
-session.mount('https://', HTTPAdapter(max_retries=retries))
-
-def get_request(url):
-	try:
-		try: response = session.get(url)
-		except requests.exceptions.SSLError:
-			response = session.get(url, verify=False)
-	except requests.exceptions.ConnectionError:
-		notification(message=32024)
-		from resources.lib.modules import log_utils
-		log_utils.error()
-		return None
-	try:
-		if response.status_code in (200, 201): return response.json()
-		elif response.status_code == 404:
-			if getSetting('debug.level') == '1':
-				from resources.lib.modules import log_utils
-				log_utils.log('TMDb get_request() failed: (404:NOT FOUND) - URL: %s' % url, level=log_utils.LOGDEBUG)
-			return '404:NOT FOUND'
-		elif 'Retry-After' in response.headers: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
-			throttleTime = response.headers['Retry-After']
-			notification(message='TMDb Throttling Applied, Sleeping for %s seconds' % throttleTime)
-			sleep((int(throttleTime) + 1) * 1000)
-			return get_request(url)
-		else:
-			if getSetting('debug.level') == '1':
-				from resources.lib.modules import log_utils
-				log_utils.log('TMDb get_request() failed: URL: %s\n                       msg : TMDB Response: %s' % (url, response.text), __name__, log_utils.LOGDEBUG)
-			return None
-	except:
-		from resources.lib.modules import log_utils
-		log_utils.error()
-		return None
-
-def userlists(url):
-	try:
-		result = get_request(url % API_key)
-		if result is None: return
-		if '404:NOT FOUND' in result: return result
-		items = result['results']
-		next = '' ; list = []
-	except: return
-	try: # This is actually wrong but may not be used so look into 
-		page = int(result['page'])
-		total = int(result['total_pages'])
-		if page >= total: raise Exception()
-		if 'page=' not in url: raise Exception()
-		next = '%s&page=%s' % (url.split('&page=', 1)[0], page+1)
-	except: next = ''
-	for item in items:
-		media_type = item.get('list_type')
-		name = item.get('name')
-		list_id =  item.get('id')
-		url = 'https://api.themoviedb.org/4/list/%s?api_key=%s&sort_by=%s&page=1' % (list_id, API_key, tmdb_sort())
-		item = {'media_type': media_type, 'name': name, 'list_id': list_id, 'url': url, 'context': url, 'next': next}
-		list.append(item)
-	return list
-
-def popular_people():
-	url = '%s%s' % (base_link, 'person/popular?api_key=%s&language=en-US&page=1' % API_key)
-	item = get_request(url)
-	return item
-
-def tmdb_sort():
-	sort = int(getSetting('sort.movies.type'))
-	tmdb_sort = 'original_order'
-	if sort == 1: tmdb_sort = 'title'
-	if sort in (2, 3): tmdb_sort = 'vote_average'
-	if sort in (4, 5, 6): tmdb_sort = 'release_date' # primary_release_date
-	tmdb_sort_order = '.asc' if int(getSetting('sort.movies.order')) == 0 else '.desc'
-	sort_string = tmdb_sort + tmdb_sort_order
-	return sort_string
+image_path = 'https://image.tmdb.org/t/p/%s'
 
 
-class Movies:
+class TMDb:
 	def __init__(self):
-		self.list = []
-		self.meta = []
-		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
+		self.API_key = getSetting('tmdb.api.key')
+		if not self.API_key: self.API_key = '3320855e65a9758297fec4f7c9717698'
+		self.session = requests.Session()
+		retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
+		self.session.mount('https://', HTTPAdapter(max_retries=retries))
+		self.set_resolutions()
 		self.lang = apiLanguage()['tmdb']
 		self.mpa_country = mpaCountry()
-		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', API_key, self.lang)
+		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
+
+	def __del__(self):
+		self.session.close()
+
+	def get_request(self, url):
+		try:
+			try: response = self.session.get(url)
+			except requests.exceptions.SSLError:
+				response = self.session.get(url, verify=False)
+		except requests.exceptions.ConnectionError:
+			notification(message=32024)
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			return None
+		try:
+			if response.status_code in (200, 201): return response.json()
+			elif response.status_code == 404:
+				if getSetting('debug.level') == '1':
+					from resources.lib.modules import log_utils
+					log_utils.log('TMDb get_request() failed: (404:NOT FOUND) - URL: %s' % url, level=log_utils.LOGDEBUG)
+				return '404:NOT FOUND'
+			elif 'Retry-After' in response.headers: # API REQUESTS ARE BEING THROTTLED, INTRODUCE WAIT TIME (TMDb removed rate-limit on 12-6-20)
+				throttleTime = response.headers['Retry-After']
+				notification(message='TMDb Throttling Applied, Sleeping for %s seconds' % throttleTime)
+				sleep((int(throttleTime) + 1) * 1000)
+				return self.get_request(url)
+			else:
+				if getSetting('debug.level') == '1':
+					from resources.lib.modules import log_utils
+					log_utils.log('TMDb get_request() failed: URL: %s\n                       msg : TMDB Response: %s' % (url, response.text), __name__, log_utils.LOGDEBUG)
+				return None
+		except:
+			from resources.lib.modules import log_utils
+			log_utils.error()
+			return None
+
+	def userlists(self, url):
+		try:
+			result = self.get_request(url % self.API_key)
+			if result is None: return
+			if '404:NOT FOUND' in result: return result
+			items = result['results']
+			next = '' ; list = []
+		except: return
+		try: # This is actually wrong but may not be used so look into 
+			page = int(result['page'])
+			total = int(result['total_pages'])
+			if page >= total: raise Exception()
+			if 'page=' not in url: raise Exception()
+			next = '%s&page=%s' % (url.split('&page=', 1)[0], page+1)
+		except: next = ''
+		for item in items:
+			media_type = item.get('list_type')
+			name = item.get('name')
+			list_id =  item.get('id')
+			url = 'https://api.themoviedb.org/4/list/%s?api_key=%s&sort_by=%s&page=1' % (list_id, self.API_key, self.tmdb_sort())
+			item = {'media_type': media_type, 'name': name, 'list_id': list_id, 'url': url, 'context': url, 'next': next}
+			list.append(item)
+		return list
+
+	def popular_people(self):
+		url = '%s%s' % (base_link, 'person/popular?api_key=%s&language=en-US&page=1' % self.API_key)
+		item = self.get_request(url)
+		return item
+
+	def tmdb_sort(self):
+		sort = int(getSetting('sort.movies.type'))
+		tmdbSort = 'original_order'
+		if sort == 1: tmdbSort = 'title'
+		if sort in (2, 3): tmdbSort = 'vote_average'
+		if sort in (4, 5, 6): tmdbSort = 'release_date' # primary_release_date
+		tmdb_sort_order = '.asc' if int(getSetting('sort.movies.order')) == 0 else '.desc'
+		sort_string = tmdbSort + tmdb_sort_order
+		return sort_string
+
+# poster_path = 'w342', fanart_path = 'w1280', still_path = 'w500', profile_path = 'w185'
+	def set_resolutions(self):
+		paths = (
+				{'poster': 'w185', 'fanart': 'w300', 'still': 'w185', 'profile': 'w185'},
+				{'poster': 'w342', 'fanart': 'w780', 'still': 'w300', 'profile': 'w342'},
+				{'poster': 'w780', 'fanart': 'w1280', 'still': 'original', 'profile': 'h632'},
+				{'poster': 'original', 'fanart': 'original', 'still': 'original', 'profile': 'original'})
+		resolutions = paths[int(getSetting('tmdb.imageResolutions', '2'))]
+		self.poster_path = image_path % resolutions['poster']
+		self.fanart_path = image_path % resolutions['fanart']
+		self.still_path = image_path % resolutions['still']
+		self.profile_path = image_path % resolutions['profile']
+
+
+class Movies(TMDb):
+	def __init__(self):
+		TMDb.__init__(self)
+		self.list = []
+		self.meta = []
+		self.movie_link = base_link + 'movie/%s?api_key=%s&language=%s&append_to_response=credits,release_dates,videos,alternative_titles' % ('%s', self.API_key, self.lang)
 		###  other "append_to_response" options external_ids,images,translations
-		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', API_key)
-		self.external_ids = base_link + 'movie/%s/external_ids?api_key=%s' % ('%s', API_key)
-		# self.user = str(self.imdb_user) + str(API_key)
-		self.user = str(API_key)
+		self.art_link = base_link + 'movie/%s/images?api_key=%s' % ('%s', self.API_key)
+		self.external_ids = base_link + 'movie/%s/external_ids?api_key=%s' % ('%s', self.API_key)
+		# self.user = str(self.imdb_user) + str(self.API_key)
+		self.user = str(self.API_key)
 
 	def tmdb_list(self, url):
 		try:
-			result = cache.get(get_request, 96, url % API_key)
+			result = cache.get(self.get_request, 96, url % self.API_key)
 			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			items = result['results']
@@ -149,7 +167,7 @@ class Movies:
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if self.enable_fanarttv:
-					extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+					extended_art = fanarttv_cache.get(FanartTv().get_movie_art, 336, imdb, tmdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -177,7 +195,7 @@ class Movies:
 
 	def tmdb_collections_list(self, url):
 		try:
-			result = cache.get(get_request, 168, url)
+			result = cache.get(self.get_request, 168, url)
 			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			if '/collection/' in url: items = result['parts']
@@ -216,7 +234,7 @@ class Movies:
 				values.update(movie_meta)
 				imdb = values['imdb']
 				if self.enable_fanarttv:
-					extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+					extended_art = fanarttv_cache.get(FanartTv().get_movie_art, 336, imdb, tmdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -241,7 +259,7 @@ class Movies:
 
 	def tmdb_collections_search(self, url):
 		try:
-			result = cache.get(get_request, 168, url)
+			result = cache.get(self.get_request, 168, url)
 			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			items = result['results']
@@ -259,11 +277,11 @@ class Movies:
 				values = {}
 				values['next'] = next 
 				values['media_type'] = 'collection'
-				values['fanart'] = '%s%s' % (fanart_path, item['backdrop_path']) if item.get('backdrop_path') else ''
+				values['fanart'] = '%s%s' % (self.fanart_path, item['backdrop_path']) if item.get('backdrop_path') else ''
 				values['tmdb'] = str(item.get('id', '')) if item.get('id') else ''
 				values['name'] = item.get('name')
 				values['plot'] = item.get('overview', '') if item.get('overview') else ''
-				values['poster'] = '%s%s' % (poster_path, item['poster_path']) if item.get('poster_path') else ''
+				values['poster'] = '%s%s' % (self.poster_path, item['poster_path']) if item.get('poster_path') else ''
 				self.list.append(values)
 			except:
 				from resources.lib.modules import log_utils
@@ -274,9 +292,9 @@ class Movies:
 		if not tmdb and not imdb: return
 		try:
 			result = None
-			if tmdb: result = get_request(self.movie_link % tmdb)
+			if tmdb: result = self.get_request(self.movie_link % tmdb)
 			if not result or ('404:NOT FOUND' in result):
-				if imdb: result = get_request(self.movie_link % imdb)
+				if imdb: result = self.get_request(self.movie_link % imdb)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -296,7 +314,7 @@ class Movies:
 		try:
 			meta['mediatype'] = 'movie'
 # adult - not used
-			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
+			meta['fanart'] = '%s%s' % (self.fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
 			meta['belongs_to_collection'] = result.get('belongs_to_collection', '')
 # budget - not used
 			meta['genre'] = ' / '.join([x['name'] for x in result.get('genres', {})]) or 'NA'
@@ -309,7 +327,7 @@ class Movies:
 			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
 			if self.lang != 'en' and meta['plot'] in ('', None, 'None'): meta['plot'] = self.get_en_overview(tmdb)
 			# meta['?'] = result.get('popularity', '')
-			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
+			meta['poster'] = '%s%s' % (self.poster_path, result['poster_path']) if result.get('poster_path') else ''
 			# production_companies = result.get('production_companies', {})
 			# try: meta['studio'] = [x['name'] for x in production_companies if x['logo_path']][0] # Silvo seems to use "studio" icons in place of "thumb" for movies in list view
 			# except:
@@ -335,7 +353,7 @@ class Movies:
 			except: meta['writer'] = ''
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (self.profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			meta['mpaa'] = ''
@@ -367,16 +385,16 @@ class Movies:
 	def get_art(self, tmdb):
 		if not tmdb: return
 		url = self.art_link % tmdb
-		art3 = get_request(url)
+		art3 = self.get_request(url)
 		if art3 is None: return
 		if '404:NOT FOUND' in art3: return art3
 		try:
 			poster3 = self.parse_art(art3['posters'])
-			poster3 = '%s%s' % (poster_path, poster3) if poster3 else ''
+			poster3 = '%s%s' % (self.poster_path, poster3) if poster3 else ''
 		except: poster3 = ''
 		try:
 			fanart3 = self.parse_art(art3['backdrops'])
-			fanart3 = '%s%s' % (fanart_path, fanart3) if fanart3 else ''
+			fanart3 = '%s%s' % (self.fanart_path, fanart3) if fanart3 else ''
 		except: fanart3 = ''
 		extended_art = {'extended': True, 'poster3': poster3, 'fanart3': fanart3}
 		return extended_art
@@ -399,8 +417,8 @@ class Movies:
 		if not tmdb: return None
 		overview = None
 		try:
-			url = '%s%s' % (base_link, 'movie/%s?api_key=%s&language=en,en-US' % (tmdb, API_key))
-			result = get_request(url)
+			url = '%s%s' % (base_link, 'movie/%s?api_key=%s&language=en,en-US' % (tmdb, self.API_key))
+			result = self.get_request(url)
 			overview = result.get('overview')
 			if overview: overview = 'Translation Not Available:\n' + overview
 		except:
@@ -412,8 +430,8 @@ class Movies:
 		if not tmdb: return None
 		result = None
 		try:
-			url = base_link + 'movie/%s/credits?api_key=%s' % (tmdb, API_key)
-			result = get_request(url)
+			url = base_link + 'movie/%s/credits?api_key=%s' % (tmdb, self.API_key)
+			result = self.get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -423,9 +441,9 @@ class Movies:
 		if not tmdb and not imdb: return
 		try:
 			result = None
-			if tmdb: result = get_request(self.external_ids % tmdb)
+			if tmdb: result = self.get_request(self.external_ids % tmdb)
 			if not result or ('404:NOT FOUND' in result):
-				if imdb: result = get_request(self.external_ids % imdb)
+				if imdb: result = self.get_request(self.external_ids % imdb)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -437,8 +455,8 @@ class Movies:
 			result = None
 			find_url = base_link + 'find/%s?api_key=%s&external_source=%s'
 			if imdb and imdb.startswith('tt'): # trakt has some bad data with url's in ids
-				url = find_url % (imdb, API_key, 'imdb_id')
-				result = get_request(url)
+				url = find_url % (imdb, self.API_key, 'imdb_id')
+				result = self.get_request(url)
 				if result is None: return
 				if '404:NOT FOUND' in result: return result
 				try: result = result['movie_results'][0]
@@ -449,16 +467,14 @@ class Movies:
 		return result
 
 
-class TVshows:
+class TVshows(TMDb):
 	def __init__(self):
+		TMDb.__init__(self)
 		self.list = []
 		self.meta = []
-		self.enable_fanarttv = getSetting('enable.fanarttv') == 'true'
-		self.lang = apiLanguage()['tmdb']
-		self.mpa_country = mpaCountry()
-		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', API_key, self.lang)
+		self.show_link = base_link + 'tv/%s?api_key=%s&language=%s&append_to_response=credits,content_ratings,external_ids,alternative_titles,videos' % ('%s', self.API_key, self.lang)
 		# 'append_to_response=translations, aggregate_credits' (DO NOT USE, response data way to massive and bogs the response time)
-		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', API_key)
+		self.art_link = base_link + 'tv/%s/images?api_key=%s' % ('%s', self.API_key)
 		self.tvdb_key = getSetting('tvdb.api.key')
 		self.imdb_user = getSetting('imdb.user').replace('ur', '')
 		self.user = str(self.imdb_user) + str(self.tvdb_key)
@@ -468,7 +484,7 @@ class TVshows:
 	def tmdb_list(self, url):
 		if not url: return
 		try:
-			result = cache.get(get_request, 96, url % API_key)
+			result = cache.get(self.get_request, 96, url % self.API_key)
 			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			items = result['results']
@@ -503,7 +519,7 @@ class TVshows:
 				imdb = values['imdb']
 				tvdb = values['tvdb']
 				if self.enable_fanarttv:
-					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+					extended_art = fanarttv_cache.get(FanartTv().get_tvshow_art, 336, tvdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -532,7 +548,7 @@ class TVshows:
 	def tmdb_collections_list(self, url):
 		if not url: return
 		try:
-			result = get_request(url)
+			result = self.get_request(url)
 			if result is None: return
 			if '404:NOT FOUND' in result: return result
 			if '/collection/' in url: items = result['parts']
@@ -570,7 +586,7 @@ class TVshows:
 				imdb = values['imdb']
 				tvdb = values['tvdb']
 				if self.enable_fanarttv:
-					extended_art = fanarttv_cache.get(fanarttv.get_tvshow_art, 168, tvdb)
+					extended_art = fanarttv_cache.get(FanartTv().get_tvshow_art, 336, tvdb)
 					if extended_art: values.update(extended_art)
 				values = dict((k,v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 				self.list[i].update(values)
@@ -598,7 +614,7 @@ class TVshows:
 		try:
 			result = None
 			url = self.show_link % tmdb
-			result = get_request(url)
+			result = self.get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -617,7 +633,7 @@ class TVshows:
 			return None
 		try:
 			meta['mediatype'] = 'tvshow'
-			meta['fanart'] = '%s%s' % (fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
+			meta['fanart'] = '%s%s' % (self.fanart_path, result['backdrop_path']) if result.get('backdrop_path') else ''
 			try: meta['duration'] = min(result['episode_run_time']) * 60
 			except: meta['duration'] = ''
 			meta['premiered'] = str(result.get('first_air_date', '')) if result.get('first_air_date') else ''
@@ -644,7 +660,7 @@ class TVshows:
 			meta['plot'] = result.get('overview', '') if result.get('overview') else ''
 			if self.lang != 'en' and meta['plot'] in ('', None, 'None'): meta['plot'] = self.get_en_overview(tmdb)
 			# meta['?'] = result.get('popularity', '')
-			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
+			meta['poster'] = '%s%s' % (self.poster_path, result['poster_path']) if result.get('poster_path') else ''
 			meta['tvshow_poster'] = meta['poster'] # check that this new dict key is used throughout
 			try: meta['country_codes'] = [i['iso_3166_1'] for i in result['production_countries']]
 			except: meta['country_codes'] = ''
@@ -669,7 +685,7 @@ class TVshows:
 			except: meta['writer'] = ''
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (self.profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			mpaa = []
@@ -701,8 +717,8 @@ class TVshows:
 		if not tmdb: return None
 		try:
 			result = None
-			url = '%s%s' % (base_link, 'tv/%s/season/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, API_key, self.lang))
-			result = get_request(url)
+			url = '%s%s' % (base_link, 'tv/%s/season/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, self.API_key, self.lang))
+			result = self.get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -747,7 +763,7 @@ class TVshows:
 				episode_meta['plot'] = episode.get('overview', '') if episode.get('overview') else ''
 				if self.lang != 'en' and episode_meta['plot'] in ('', None, 'None'): episode_meta['plot'] = self.get_en_overview(tmdb, episode_meta['season'], episode_meta['episode'], 'episode')
 				episode_meta['code'] = episode['production_code']
-				episode_meta['thumb'] = '%s%s' % (still_path, episode['still_path']) if episode.get('still_path') else ''
+				episode_meta['thumb'] = '%s%s' % (self.still_path, episode['still_path']) if episode.get('still_path') else ''
 				episode_meta['rating'] = episode['vote_average']
 				episode_meta['votes'] = episode['vote_count']
 				episodes.append(episode_meta)
@@ -761,12 +777,12 @@ class TVshows:
 			# meta['tvseasontitle'] = result['name'] # seasontitle ?
 			meta['plot'] = result.get('overview', '') if result.get('overview') else '' # Kodi season level Information seems no longer available in 19
 			meta['tmdb'] = tmdb
-			meta['poster'] = '%s%s' % (poster_path, result['poster_path']) if result.get('poster_path') else ''
+			meta['poster'] = '%s%s' % (self.poster_path, result['poster_path']) if result.get('poster_path') else ''
 			meta['season_poster'] = meta['poster']
 			meta['season'] = result.get('season_number')
 			meta['castandart'] = []
 			for person in result['credits']['cast']:
-				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (profile_path, person['profile_path']) if person.get('profile_path') else '')})
+				try: meta['castandart'].append({'name': person['name'], 'role': person['character'], 'thumbnail': ('%s%s' % (self.profile_path, person['profile_path']) if person.get('profile_path') else '')})
 				except: pass
 				if len(meta['castandart']) == 150: break
 			# meta['banner'] = '' # not available from TMDb
@@ -780,8 +796,8 @@ class TVshows:
 		if not tmdb and not season and not episode: return None
 		try:
 			result = None
-			url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, episode, API_key, self.lang))
-			result = get_request(url)
+			url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=%s&append_to_response=credits' % (tmdb, season, episode, self.API_key, self.lang))
+			result = self.get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -790,16 +806,16 @@ class TVshows:
 	def get_art(self, tmdb):
 		if not tmdb: return None
 		url = self.art_link % tmdb
-		art3 = get_request(url)
+		art3 = self.get_request(url)
 		if art3 is None: return
 		if '404:NOT FOUND' in art3: return art3
 		try:
 			poster3 = self.parse_art(art3['posters'])
-			poster3 = '%s%s' % (poster_path, poster3) if poster3 else ''
+			poster3 = '%s%s' % (self.poster_path, poster3) if poster3 else ''
 		except: poster3 = ''
 		try:
 			fanart3 = self.parse_art(art3['backdrops'])
-			fanart3 = '%s%s' % (fanart_path, fanart3) if fanart3 else ''
+			fanart3 = '%s%s' % (self.fanart_path, fanart3) if fanart3 else ''
 		except: fanart3 = ''
 		extended_art = {'extended': True, 'poster3': poster3, 'fanart3': fanart3}
 		return extended_art
@@ -823,10 +839,10 @@ class TVshows:
 		overview = None
 		try:
 			if level_type == 'show':
-				url = '%s%s' % (base_link, 'tv/%s?api_key=%s&language=en,en-US' % (tmdb, API_key))
+				url = '%s%s' % (base_link, 'tv/%s?api_key=%s&language=en,en-US' % (tmdb, self.API_key))
 			else:
-				url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=en,en-US' % (tmdb, season, episode, API_key))
-			result = get_request(url)
+				url = '%s%s' % (base_link, 'tv/%s/season/%s/episode/%s?api_key=%s&language=en,en-US' % (tmdb, season, episode, self.API_key))
+			result = self.get_request(url)
 			overview = result.get('overview')
 			if overview: overview = 'Translation Not Available:\n' + overview
 		except:
@@ -838,8 +854,8 @@ class TVshows:
 		if not tmdb: return None
 		result = None
 		try:
-			url = base_link + 'tv/%s/credits?api_key=%s' % (tmdb, API_key)
-			result = get_request(url)
+			url = base_link + 'tv/%s/credits?api_key=%s' % (tmdb, self.API_key)
+			result = self.get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -849,8 +865,8 @@ class TVshows:
 		if not tmdb: return None
 		try:
 			result = None
-			url = base_link + 'tv/%s/external_ids?api_key=%s' % (tmdb, API_key)
-			result = get_request(url)
+			url = base_link + 'tv/%s/external_ids?api_key=%s' % (tmdb, self.API_key)
+			result = self.get_request(url)
 		except:
 			from resources.lib.modules import log_utils
 			log_utils.error()
@@ -862,12 +878,12 @@ class TVshows:
 			result = None
 			find_url = base_link + 'find/%s?api_key=%s&external_source=%s'
 			if imdb and imdb.startswith('tt'): # trakt has some bad data with url's in ids
-				url = find_url % (imdb, API_key, 'imdb_id')
-				try: result = get_request(url)['tv_results'][0]
+				url = find_url % (imdb, self.API_key, 'imdb_id')
+				try: result = self.get_request(url)['tv_results'][0]
 				except: pass
 			if tvdb and (not result or '404:NOT FOUND' in result):
-				url = find_url % (tvdb, API_key, 'tvdb_id')
-				result = get_request(url)
+				url = find_url % (tvdb, self.API_key, 'tvdb_id')
+				result = self.get_request(url)
 				if result is None: return
 				if '404:NOT FOUND' in result: return result
 				try: result = result['tv_results'][0]
@@ -1039,15 +1055,15 @@ class Auth:
 		try:
 			from resources.lib.modules.control import setSetting
 			if getSetting('tmdb.username') == '' or getSetting('tmdb.password') == '': return notification(message='TMDb Account info missing', icon='ERROR')
-			url = self.auth_base_link + '/token/new?api_key=%s' % API_key
+			url = self.auth_base_link + '/token/new?api_key=%s' % self.API_key
 			result = requests.get(url).json()
 			token = result.get('request_token')
-			url2 = self.auth_base_link + '/token/validate_with_login?api_key=%s' % API_key
+			url2 = self.auth_base_link + '/token/validate_with_login?api_key=%s' % self.API_key
 			post2 = {"username": "%s" % getSetting('tmdb.username'),
 							"password": "%s" % getSetting('tmdb.password'),
 							"request_token": "%s" % token}
 			result2 = requests.post(url2, data=post2).json()
-			url3 = self.auth_base_link + '/session/new?api_key=%s' % API_key
+			url3 = self.auth_base_link + '/session/new?api_key=%s' % self.API_key
 			post3 = {"request_token": "%s" % token}
 			result3 = requests.post(url3, data=post3).json()
 			if result3.get('success') is True:
@@ -1065,7 +1081,7 @@ class Auth:
 		try:
 			from resources.lib.modules.control import setSetting
 			if getSetting('tmdb.session_id') == '': return
-			url = self.auth_base_link + '/session?api_key=%s' % API_key
+			url = self.auth_base_link + '/session?api_key=%s' % self.API_key
 			post = {"session_id": "%s" % getSetting('tmdb.session_id')}
 			result = requests.delete(url, data=post).json()
 			if result.get('success') is True:

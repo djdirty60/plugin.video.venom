@@ -217,11 +217,10 @@ def aliases_check(title, aliases):
 def tvshow_reboots():
 	reboots = {
 		"Adam-12": "1990", "Battlestar Galactica": "2004", "Charlie's Angels": "2011", "Charmed": "2018", "Dynasty": "2017", "Fantasy Island": "2021",
-		"The Flash": "2014", "The Fugitive": "2000", "The Fugitive": "2020", "Ghostwriter": "2019", "Gossip Girl": "2021", "Ironside": "2013", "Kojak": "2005",
-		"Kung Fu": "2021", "Lost in Space": "2018", "MacGyver": "2016", "Magnum P.I.": "2018", "Nancy Drew": "2019", "The Odd Couple": "2015",
-		"One Day at a Time": "2017", "The Outer Limits": "1995", "Party of Five": "2020", "Perry Mason": "2020", "S.W.A.T.": "2017",
-		"The Twilight Zone": "1985", "The Twilight Zone": "2002", "The Twilight Zone": "2019", "The Untouchables": "1993", "V": "2009",
-		"The Wonder Years": "2021"}
+		"The Flash": "2014", "The Fugitive": "2000", "The Fugitive": "2020", "Ghostwriter": "2019", "Gossip Girl": "2021", "Hawaii Five-0": "2010",
+		"Ironside": "2013", "Kojak": "2005", "Kung Fu": "2021", "Lost in Space": "2018", "MacGyver": "2016", "Magnum P.I.": "2018", "Nancy Drew": "2019",
+		"The Odd Couple": "2015", "One Day at a Time": "2017", "The Outer Limits": "1995", "Party of Five": "2020", "Perry Mason": "2020", "S.W.A.T.": "2017",
+		"The Twilight Zone": "1985", "The Twilight Zone": "2002", "The Twilight Zone": "2019", "The Untouchables": "1993", "V": "2009", "The Wonder Years": "2021"}
 	return reboots
 
 def copy2clip(txt):

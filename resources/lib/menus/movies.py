@@ -9,7 +9,8 @@ import re
 from threading import Thread
 from urllib.parse import quote_plus, urlencode, parse_qsl, urlparse, urlsplit
 from resources.lib.database import cache, metacache, fanarttv_cache, traktsync
-from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
+from resources.lib.indexers.tmdb import Movies as tmdb_indexer
+from resources.lib.indexers.fanarttv import FanartTv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
@@ -163,10 +164,12 @@ class Movies:
 			try: u = urlparse(url).netloc.lower()
 			except: pass
 			if u in self.tmdb_link and '/list/' in url:
-				self.list = tmdb_indexer.Movies().tmdb_collections_list(url) # caching handled in list indexer
+				# self.list = tmdb_indexer.Movies().tmdb_collections_list(url) # caching handled in list indexer
+				self.list = tmdb_indexer().tmdb_collections_list(url) # caching handled in list indexer
 				self.sort()
 			elif u in self.tmdb_link and '/list/' not in url:
-				self.list = tmdb_indexer.Movies().tmdb_list(url) # caching handled in list indexer
+				# self.list = tmdb_indexer.Movies().tmdb_list(url) # caching handled in list indexer
+				self.list = tmdb_indexer().tmdb_list(url) # caching handled in list indexer
 			if self.list is None: self.list = []
 			if create_directory: self.movieDirectory(self.list)
 			return self.list
@@ -462,7 +465,8 @@ class Movies:
 		u = urlparse(url).netloc.lower()
 		try:
 			control.hide()
-			if u in self.tmdb_link: items = tmdb_indexer.userlists(url)
+			# if u in self.tmdb_link: items = tmdb_indexer.TMDb().userlists(url)
+			if u in self.tmdb_link: items = tmdb_indexer().userlists(url)
 			elif u in self.trakt_link:
 				if url in self.traktlikedlists_link:
 					items = self.traktLlikedlists()
@@ -505,7 +509,8 @@ class Movies:
 			if self.tmdb_session_id == '': raise Exception()
 			self.list = []
 			url = self.tmdb_link + '/3/account/{account_id}/lists?api_key=%s&language=en-US&session_id=%s&page=1' % ('%s', self.tmdb_session_id)
-			lists = cache.get(tmdb_indexer.userlists, 0, url)
+			# lists = cache.get(tmdb_indexer.TMDb().userlists, 0, url)
+			lists = cache.get(tmdb_indexer().userlists, 0, url)
 			for i in range(len(lists)): lists[i].update({'image': 'tmdb.png', 'icon': 'DefaultVideoPlaylists.png', 'action': 'tmdbmovies'})
 			userlists += lists
 		except: pass
@@ -892,7 +897,8 @@ class Movies:
 #### -- Missing id's lookup -- ####
 			if not tmdb and imdb:
 				try:
-					result = cache.get(tmdb_indexer.Movies().IdLookup, 96, imdb)
+					# result = cache.get(tmdb_indexer.Movies().IdLookup, 96, imdb)
+					result = cache.get(tmdb_indexer().IdLookup, 96, imdb)
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not tmdb and imdb:
@@ -908,7 +914,8 @@ class Movies:
 				except: pass
 #################################
 			if not tmdb: return
-			movie_meta = tmdb_indexer.Movies().get_movie_meta(tmdb)
+			# movie_meta = tmdb_indexer.Movies().get_movie_meta(tmdb)
+			movie_meta = tmdb_indexer().get_movie_meta(tmdb)
 			if not movie_meta or '404:NOT FOUND' in movie_meta: return # trakt search turns up alot of junk with wrong tmdb_id's
 			values = {}
 			values.update(movie_meta)
@@ -929,7 +936,7 @@ class Movies:
 					from resources.lib.modules import log_utils
 					log_utils.error()
 			if self.enable_fanarttv:
-				extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+				extended_art = fanarttv_cache.get(FanartTv().get_movie_art, 336, imdb, tmdb)
 				if extended_art: values.update(extended_art)
 			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)

@@ -955,10 +955,26 @@ msgid "Rescrape Item [COLOR %s][B]Filterless(FS)[/B][/COLOR] with [COLOR %s][B]A
 msgstr "Ponownie zeskrob element [COLOR %s][B]Bez filtrów(FS)[/B][/COLOR] za pomocą [COLOR %s][B]Wszyscy dostawcy[/B][/COLOR] - Wybór źródła"
 
 msgctxt "#32233"
-msgid ""
-msgstr ""
+msgid "TMDb image resolutions"
+msgstr "Rozdzielczości obrazu TMDb"
 
 msgctxt "#32234"
+msgid "Low"
+msgstr "Niski"
+
+msgctxt "#32235"
+msgid "Medium"
+msgstr "Średni"
+
+msgctxt "#32236"
+msgid "High"
+msgstr "Wysoka"
+
+msgctxt "#32237"
+msgid "Original"
+msgstr "Oryginalny"
+
+msgctxt "#32238"
 msgid ""
 msgstr ""
 
@@ -1338,12 +1354,12 @@ msgid "Certification prefix"
 msgstr "Prefiks certyfikacji"
 
 msgctxt "#32393"
-msgid ""
-msgstr ""
+msgid "Using default available %s subtitle from stream"
+msgstr "Używam domyślnych napisów %s ze strumienia"
 
 msgctxt "#32394"
-msgid ""
-msgstr ""
+msgid "Preferred %s subtitle available in stream and has been set"
+msgstr "Preferowane napisy %s dostępne w strumieniu i zostały ustawione"
 
 msgctxt "#32395"
 msgid ""

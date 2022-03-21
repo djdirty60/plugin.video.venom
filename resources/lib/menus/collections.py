@@ -9,7 +9,8 @@ import re
 from threading import Thread
 from urllib.parse import quote_plus, parse_qsl, urlparse
 from resources.lib.database import cache, metacache, fanarttv_cache
-from resources.lib.indexers import tmdb as tmdb_indexer, fanarttv
+from resources.lib.indexers.tmdb import Movies as tmdb_indexer
+from resources.lib.indexers.fanarttv import FanartTv
 from resources.lib.modules import cleangenre
 from resources.lib.modules import client
 from resources.lib.modules import control
@@ -380,11 +381,11 @@ class Collections:
 			try: u = urlparse(url).netloc.lower()
 			except: pass
 			if u in self.tmdb_link and any(value in url for value in ('/list/', '/collection/')):
-				self.list = tmdb_indexer.Movies().tmdb_collections_list(url) # caching handled in list indexer
+				self.list = tmdb_indexer().tmdb_collections_list(url) # caching handled in list indexer
 				if '/collection/' in url: self.sort() # TMDb "/collections/" does not support request sort
 
 			elif u in self.tmdbCollectionsSearch_link and '/search/collection' in url:
-				self.list = tmdb_indexer.Movies().tmdb_collections_search(url) # caching handled in list indexer
+				self.list = tmdb_indexer().tmdb_collections_search(url) # caching handled in list indexer
 				for i in self.list:
 					name = i['name']
 					action = 'collections&url=%s' % quote_plus(self.tmdbCollection_link % i['tmdb'])
@@ -562,7 +563,7 @@ class Collections:
 #### -- Missing id's lookup -- ####
 			if not tmdb and imdb:
 				try:
-					result = cache.get(tmdb_indexer.Movies().IdLookup, 96, imdb)
+					result = cache.get(tmdb_indexer().IdLookup, 96, imdb)
 					tmdb = str(result.get('id', '')) if result.get('id') else ''
 				except: tmdb = ''
 			if not tmdb and imdb:
@@ -578,7 +579,7 @@ class Collections:
 				except: pass
 #################################
 			if not tmdb: return
-			movie_meta = tmdb_indexer.Movies().get_movie_meta(tmdb)
+			movie_meta = tmdb_indexer().get_movie_meta(tmdb)
 			if not movie_meta or '404:NOT FOUND' in movie_meta: return
 			values = {}
 			values.update(movie_meta)
@@ -596,7 +597,7 @@ class Collections:
 					from resources.lib.modules import log_utils
 					log_utils.error()
 			if self.enable_fanarttv:
-				extended_art = fanarttv_cache.get(fanarttv.get_movie_art, 168, imdb, tmdb)
+				extended_art = fanarttv_cache.get(FanartTv().get_movie_art, 336, imdb, tmdb)
 				if extended_art: values.update(extended_art)
 			values = dict((k, v) for k, v in iter(values.items()) if v is not None and v != '') # remove empty keys so .update() doesn't over-write good meta with empty values.
 			self.list[i].update(values)
